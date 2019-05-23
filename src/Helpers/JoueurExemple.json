@@ -1,0 +1,35 @@
+{
+    "DB": [
+    {
+        "id": 327,
+        "nom": "Joff du Catrin",
+        "pseudo": "JOFF Shencko",
+        "fiabilite": 2,
+        "niveau": "nul",
+        "age": 32,
+        "naissance": "11/05/1998",
+        "zone": "St Cyp",
+        "ville": "Toulouse",
+        "telephone": "06 01 94 59 39",
+        "mail": "joff@gmail.com",
+        "reseau": [{"id": 1, "nom": "Patrick", "rate": 4, "photo": "red"}, {"id": 432, "nom": "Abou", "rate": 4, "photo": "black"}, {"id": 2, "nom": "Julia", "rate": 2, "photo": "green"}, {"id": 3, "nom": "Joseph", "rate": 5, "photo": "blue"}, {"id": 4, "nom": "Patrick", "rate": 4, "photo": "red"}, {"id": 5, "nom": "Julia", "rate": 2, "photo": "green"}, {"id": 6, "nom": "Joseph", "rate": 5, "photo": "blue"}],
+        "equipes": [{"key": "gray"}, {"key": "red"}, {"key": "blue"}, {"key": "green"}, {"key": "pink"}]
+    }
+    ,
+    {
+        "id": 432,
+        "nom": "Abou",
+        "pseudo": "Boubou",
+        "fiabilite": 4,
+        "niveau": "mediocre",
+        "age": 24,
+        "naissance": "11/05/1998",
+        "zone": "Esquirol",
+        "ville": "Toulouse",
+        "telephone": "06 01 94 59 39",
+        "mail": "bb@gmail.com",
+        "reseau": [{"id": 327, "nom": "Joff du Catrin", "rate": 2, "photo": "yellow"}, {"id": 1, "nom": "Patrick", "rate": 4, "photo": "red"}, {"id": 2, "nom": "Julia", "rate": 2, "photo": "green"}, {"id": 3, "nom": "Joseph", "rate": 5, "photo": "blue"}, {"id": 4, "nom": "Patrick", "rate": 4, "photo": "red"}, {"id": 5, "nom": "Julia", "rate": 2, "photo": "green"}, {"id": 6, "nom": "Joseph", "rate": 5, "photo": "blue"}],
+        "equipes": [{"key": "gray"}, {"key": "red"}, {"key": "blue"}, {"key": "green"}, {"key": "pink"}]
+    }
+    ]
+}
