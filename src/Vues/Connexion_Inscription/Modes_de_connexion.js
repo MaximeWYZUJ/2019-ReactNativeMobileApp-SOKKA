@@ -10,6 +10,7 @@ import LocalUser from '../../Data/LocalUser.json'
 import firebase from 'firebase'
 import '@firebase/firestore'
 import {SkypeIndicator} from 'react-native-indicators';
+import { Constants, Location, Permissions,Notifications } from 'expo';
 
 /**
  * Classe qui va permettre d'afficher la page de choix du mode de connexion.
@@ -102,7 +103,14 @@ export default class Modes_de_connexion extends React.Component {
         firebase.auth().signInWithEmailAndPassword(this.state.mail, this.state.mdp)
         .then(async (user) => {
          
+
             console.log(firebase.auth().currentUser.uid)
+            
+            // Enregister le token de l'utilisateur
+            var token = await this.registerForPushNotifications()
+            var db = Database.initialisation()
+            db.collection("Login").doc(token).set({id : firebase.auth().currentUser.uid})
+            
             // Récupérations des données de la DB
             j = await Database.getDocumentData(firebase.auth().currentUser.uid, "Joueurs");
             jEquipes = await Database.getArrayDocumentData(j.equipes, 'Equipes');
@@ -125,6 +133,25 @@ export default class Modes_de_connexion extends React.Component {
           // The message contains the default Firebase string
           // representation of the error
         });
+    }
+
+    async registerForPushNotifications() {
+        const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+        console.log('in register')
+        if (status !== 'granted') {
+            console.log("1")
+          const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+          if (status !== 'granted') {
+            console.log("2")
+            return;
+          }
+        }
+        console.log("okook")
+        var token = await Notifications.getExpoPushTokenAsync();
+        console.log("after await token")
+        //this.subscription = Notifications.addListener(this.handleNotification);
+    
+        return (token)
     }
 
 

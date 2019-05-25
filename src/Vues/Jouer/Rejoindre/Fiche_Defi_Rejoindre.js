@@ -190,7 +190,10 @@ class Fiche_Defi_Rejoindre extends React.Component {
         defiRef.update({
             equipeDefiee : idEquipe,
             recherche : false,
-            joueursEquipeDefiee : [this.userData.id]
+            joueursEquipeDefiee : [this.userData.id],
+            confirmesEquipeDefiee : [this.userData.id],
+            participants : this.state.defi.participants.concat([this.userData.id]),
+            defis_valide : true     // !!!! POUR LE TEST ! !!
         })
         .catch(function(error) {
             // The document probably doesn't exist.
@@ -744,11 +747,27 @@ class Fiche_Defi_Rejoindre extends React.Component {
                             + "Tu seras informé dès que l’équipe " + this.state.equipeOrganisatrice.nom + " aura accepté ou refusé"
                         )
                     }}>
-                    <Equipe_Nom_Score
-                        nom = {item.nom}
-                        photo = {item.photo}
-                        score = {item.score}
-                        />
+                   <View>
+                        <Image
+                            source = {{uri : item.photo}}
+                            style = {styles.photoEquipe}
+                        /> 
+
+                        {/* View contenant le pseudo est le score*/}
+                        <View style = {{justifyContent : "center"}}>
+                            <Text>{item.nom}</Text>
+                            <StarRating
+                                disabled={true}
+                                maxStars={5}
+                                rating={item.score}
+                                starSize={hp('2.2%')}
+                                fullStarColor='#F8CE08'
+                                emptyStarColor='#B1ACAC'
+                            />
+
+                            
+                        </View> 
+                   </View>
                 </TouchableOpacity>
                 
             )

@@ -9,7 +9,8 @@ import Database from '../../../Data/Database'
 import TabFeuillePasse from './TabFeuillePasse'
 import { connect } from 'react-redux'
 
- 
+import LocalUser from '../../../Data/LocalUser.json'
+
 /**
  * Classe qui permet d'afficher la feuille de match d'une partie déja jouée.
  */
@@ -17,7 +18,7 @@ class Feuille_Partie_Passee extends React.Component {
 
     constructor(props) {
         super(props)
-        this.monId = "aPyjfKVxEU4OF3GtWgQrYksLToxW2"
+        this.monId = LocalUser.data.id
         this.state = {
             partie : this.props.navigation.getParam('partie', undefined),
             joueurs : this.props.navigation.getParam('joueurs', []),

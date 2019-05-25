@@ -8,6 +8,10 @@ import Information_Recapitulatif from '../Information_Recapitulatif'
 import ID from '../../../../Helpers/ID'
 import Database from '../../../../Data/Database'
 import { ScrollView } from 'react-native-gesture-handler';
+import LocalUser from '../../../../Data/LocalUser.json'
+
+
+
 
 export default class Recapitulatif_Partie extends React.Component {
 
@@ -16,11 +20,11 @@ export default class Recapitulatif_Partie extends React.Component {
         this.jour = this.props.navigation.getParam('jour', ' '),
         this.duree = this.props.navigation.getParam('duree', ' '),
         this.heure = this.props.navigation.getParam('heure', ' '),
-        this.ville = "Toulouse"
+        this.ville =  LocalUser.data.ville
         this.userData = {
-            pseudo : "Flongb",
-            id : 'aPyjfKVxEU4OF3GtWgQrYksLToxW2',
-            photo : 'https://firebasestorage.googleapis.com/v0/b/agoora-ccf6c.appspot.com/o/Photos_profil_Joueurs%2Ftest%2Fflongb.jpg?alt=media&token=eb04bd3f-1fc8-44c8-9cfd-76598fdc58c5'
+            pseudo : LocalUser.data.pseudo,
+            id : LocalUser.data.id,
+            photo : LocalUser.data.photo
         }
 
         this.nomsTerrain =  this.props.navigation.getParam('nomsTerrains', ' '),
@@ -28,7 +32,7 @@ export default class Recapitulatif_Partie extends React.Component {
         this.joueurs =  this.props.navigation.getParam('joueurs', ''),
         this.nbJoueursRecherche = this.props.navigation.getParam('nbrJoueurs', ''),
         this.messageChauffe =this.props.navigation.getParam('messageChauffe', ''),
-
+        console.log("JOUEURS : ", this.joueurs)
         this.joueurAnimation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
         this.goToFichePartie = this.goToFichePartie.bind(this)
 
@@ -101,7 +105,8 @@ export default class Recapitulatif_Partie extends React.Component {
                 this.props.navigation.push("FichePartieRejoindre",
                 {
                     download_All_Data_Partie : true,
-                    id : id
+                    id : id,
+                    retour_arriere_interdit : true
                 })
             }
                         
@@ -124,6 +129,10 @@ export default class Recapitulatif_Partie extends React.Component {
 
         var jour = this.jour.split('-')[0]
         var moi = this.jour.split('-')[1]
+        if(moi.length ==1) {
+            moi = '0'+moi
+        }
+        console.log("MOI : ", moi)
         var an = this.jour.split('-')[2]
         var heure = this.heure.split(':')[0]
         var minutes = this.heure.split(':')[1]

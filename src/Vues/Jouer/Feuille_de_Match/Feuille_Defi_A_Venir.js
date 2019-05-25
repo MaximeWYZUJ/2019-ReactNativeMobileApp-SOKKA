@@ -16,10 +16,12 @@ import { connect } from 'react-redux'
 import { StackActions, NavigationActions } from 'react-navigation';
 import LocalUser from '../../../Data/LocalUser.json'
 
+
+// Rememttre à Zéro le stack navigator pour empecher le retour en arriere
 const resetAction = StackActions.reset({
     index: 0, // <-- currect active route from actions array
     actions: [
-      NavigationActions.navigate({ routeName: 'CalendrierJoueur' }),
+      NavigationActions.navigate({ routeName: 'AccueilJouer' }),
     ],
   });
 
@@ -107,13 +109,9 @@ class Feuille_Defi_A_Venir extends React.Component {
     }
 
 
-    _renderCircleOfColor(color)  {
-        return(
-            <View>
-                <View style = {[{ backgroundColor : color}, styles.circle]}></View>
-            </View>
-        )
-    }
+
+
+    
 
 
     /**
@@ -160,9 +158,9 @@ class Feuille_Defi_A_Venir extends React.Component {
 
         // Si il fait partie de l'équipe defiee
         } else if(this.state.equipeDefiee != undefined && this.state.defi.joueursEquipeDefiee.includes(this.monId)) {
-            
+            console.log("okokoko in els if")
             // Recuprerer les données des joueurs et séparer les capitaines
-            for(var i = 0; i <this.state.defi.equipeDefiee.length; i++) {
+            for(var i = 0; i <this.state.defi.joueursEquipeDefiee.length; i++) {
                 var j = await Database.getDocumentData(this.state.defi.joueursEquipeDefiee[i], "Joueurs")
                 if(this.state.equipeDefiee != undefined && this.state.equipeDefiee.capitaines.includes(j.id)) {
                     capitaines.push(j)
@@ -635,6 +633,20 @@ class Feuille_Defi_A_Venir extends React.Component {
                 </TouchableOpacity>
             )
         }
+    }
+
+
+    /**
+     * Fonction qui permet d'afficher le cercle de couleur correspondant
+     * à la présence d'un joueur
+     * @param {String} color 
+     */
+    _renderCircleOfColor(color)  {
+        return(
+            <View>
+                <View style = {[{ backgroundColor : color}, styles.circle]}></View>
+            </View>
+        )
     }
 
     /**

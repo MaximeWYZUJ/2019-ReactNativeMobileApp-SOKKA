@@ -10,6 +10,7 @@ import Database from '../../../Data/Database'
 import actions from '../../../Store/Reducers/actions'
 import { connect } from 'react-redux'
 import Presences_Joueurs from '../../../Components/Defis/Feuilles_Match/Presences_Joueurs'
+import LocalUser from '../../../Data/LocalUser.json'
 
 
 /**
@@ -20,7 +21,7 @@ class Feuille_Partie_A_Venir extends React.Component {
     constructor(props) {
         super(props)
         this.partie = this.props.navigation.getParam('partie', undefined)
-        this.monId = "aPyjfKVxEU4OF3GtWgQrYksLToxW2"
+        this.monId = LocalUser.data.id
 
         var seconds = this.partie.jour.seconds
         this.ChangeThisTitle('Partie ' + this.buildDate(new Date(seconds * 1000)))
@@ -30,7 +31,6 @@ class Feuille_Partie_A_Venir extends React.Component {
             partie : this.props.navigation.getParam('partie', undefined)
         }
 
-        this.goBackToFiche = this.goBackToFiche.bind(this)
     }
 
     componentDidMount() {
@@ -100,12 +100,7 @@ class Feuille_Partie_A_Venir extends React.Component {
         return numJour  + '/' + mois + '/' + an
     }
 
-    goBackToFiche() {
-        this.props.navigation.push("FichePartieRejoindre", 
-            {
-                id : this.state.partie.id,
-            })
-    }
+    
 
 
     /**
@@ -157,7 +152,7 @@ class Feuille_Partie_A_Venir extends React.Component {
             confirme : j,
             attente : att,
             indisponibles : indispo,
-        }).then(this.goBackToFiche)
+        }).then()
         .catch(function(error) {
             // The document probably doesn't exist.
             console.error("Error updating document: ", error);
@@ -215,7 +210,7 @@ class Feuille_Partie_A_Venir extends React.Component {
             confirme : confirme,
             attente : attente,
             indisponibles : indispo,
-        }).then(this.goBackToFiche)
+        }).then()
         .catch(function(error) {
             // The document probably doesn't exist.
             console.error("Error updating document: ", error);
@@ -270,16 +265,28 @@ class Feuille_Partie_A_Venir extends React.Component {
      * cad ceux qui ne sont pas dans la liste des inscris
      */
     filtreJoueurInvites() {
+
+        // Initialiser les listes
         var joueurs = []
         var participants = this.state.joueurs
+        var organisateur = []
         var inscris = this.state.partie.inscris 
+
+        // Iterer sur les participants et filtrer les joueurs invités
         for(var i = 0; i <participants.length; i++) {
-            if(! inscris.includes(participants[i].id)) {
+            
+            // Séparer l'organisateur des autres joueurs
+            if(this.state.partie.organisateur == participants[i].id) {
+                organisateur.push(participants[i])
+            } else if(! inscris.includes(participants[i].id)) {
                 joueurs.push(participants[i])
             }
+            
         }
-        return joueurs
+        return organisateur.concat(joueurs)
     }
+
+    
 
     /**
      * Fonction qui renvoie la liste des joueurs qui se sont inscris cad
@@ -374,6 +381,7 @@ class Feuille_Partie_A_Venir extends React.Component {
                 <View style = {[styles.photoJoueur, {borderWidth : 2, borderColor : Colors.agooraBlueStronger}]}>
 
                 </View>
+
 
                 {/* View contenant le cercle de couleur */}
                 <View style = {styles.containerCircle}>

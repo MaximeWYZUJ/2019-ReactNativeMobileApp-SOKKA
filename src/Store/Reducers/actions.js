@@ -123,4 +123,9 @@ export default class actions {
      */
     static STORE_DATA_JOUEURS_DEFI = "STORE_DATA_JOUEURS_DEFI"
 
+
+    /**
+     * Pour sauvegarder le expo push token du télépone
+     */
+    static STORE_TOKEN = "STORE_TOKEN"
 }

@@ -40,7 +40,8 @@ export default class Barre_Recherche extends React.Component {
         let field = this.field
         let searchData = this.props.data.filter(function(data) {
             
-            return data[field].toLowerCase().startsWith(searchedText.toLowerCase()) ;
+            //return data[field].toLowerCase().startsWith(searchedText.toLowerCase()) ;
+            return data[field].toLowerCase().includes(searchedText.toLowerCase())
         });
         this.props.handleTextChange(searchData)
         //this.setState({searchedAdresses: searchedAdresses, departement : searchedText});

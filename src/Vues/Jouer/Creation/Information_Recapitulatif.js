@@ -66,7 +66,9 @@ export default class Information_Recapitulatif extends React.Component {
                         {/* InsNom et EquNom du terrain */}
                         <View style = {{width : wp('70%'), justifyContent:'center'}}>
                             <Text style = {styles.nomTerrains}>{this.props.nomsTerrain.InsNom}</Text>
-                            <Text style = {styles.nomTerrains}>{this.props.nomsTerrain.EquNom}</Text>
+                            <Text style = {styles.nomTerrains}>{this.props.nomsTerrain.N_Voie} {this.props.nomsTerrain.Voie}</Text>
+                            <Text style = {styles.nomTerrains}>{this.props.nomsTerrain.Ville}</Text>
+
                         </View>
                     </View>
                     

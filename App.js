@@ -15,7 +15,6 @@ import Fiche_Defi_Rejoindre from './src/Vues/Jouer/Rejoindre/Fiche_Defi_Rejoindr
 import firebase from 'firebase'
 import { AsyncStorage } from 'react-native';
 
-
 export default class App extends React.Component {
 
 
@@ -29,7 +28,7 @@ export default class App extends React.Component {
        'notif'
      )
 
-    });*/
+    });*/ 
   }
 
   async registerForPushNotifications() {
@@ -41,10 +40,10 @@ export default class App extends React.Component {
         return;
       }
     }
+    
+    console.log("Token :", await Notifications.getExpoPushTokenAsync());
 
-    console.log(await Notifications.getExpoPushTokenAsync());
-
-    this.subscription = Notifications.addListener(this.handleNotification);
+    //this.subscription = Notifications.addListener(this.handleNotification);
 
     this.setState({
       token,
@@ -88,7 +87,7 @@ export default class App extends React.Component {
 
   componentDidMount() {
     // Test
-	this.registerForPushNotifications()
+	//this.registerForPushNotifications()
 	//this.sendPushNotification()
 
   }
@@ -102,3 +101,5 @@ export default class App extends React.Component {
       );
   }
 }
+
+

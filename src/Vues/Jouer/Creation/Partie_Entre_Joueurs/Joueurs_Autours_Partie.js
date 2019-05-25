@@ -8,10 +8,9 @@ import AlphabetListView from 'react-native-alphabetlistview'
 import Joueur_item_Creation_Partie from '../../../../Components/ProfilJoueur/Joueur_item_Creation_Partie'
 import { connect } from 'react-redux'
 import DataBase from '../../../../Data/Database'
+import LocalUser from '../../../../Data/LocalUser.json'
 
     
-const ville = "Toulouse"
-const monId = "aPyjfKVxEU4OF3GtWgQrYksLToxW2"
 /**
  * Classe qui va permettre de choisir les joueurs présent dans la même ville que l'utilisateur
  * lors de la création d'une partie entre joueur.
@@ -21,6 +20,8 @@ class Joueurs_Autours_Partie extends React.Component {
 
     constructor(props, context) {
         super(props, context);
+        this.ville = LocalUser.data.ville
+        this.monId = LocalUser.data.id
         this.state = {
             joueurs : []
         }
@@ -39,14 +40,14 @@ class Joueurs_Autours_Partie extends React.Component {
         var db = DataBase.initialisation()
 
         var ref = db.collection("Joueurs");
-        var query = ref.where("ville", "==", ville).limit(20);
+        var query = ref.where("ville", "==", this.ville).limit(20);
         query.get().then(async (results) => {
             if(results.empty) {
               console.log("No documents found!");   
             } else {
               // go through all results
               for(var i = 0; i < results.docs.length ; i++) {
-                if(results.docs[i].data().id != monId) {
+                if(results.docs[i].data().id != this.monId) {
                     joueurArray.push(results.docs[i].data())
 
                 }

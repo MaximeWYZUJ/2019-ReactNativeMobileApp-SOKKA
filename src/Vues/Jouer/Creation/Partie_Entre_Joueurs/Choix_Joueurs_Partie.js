@@ -7,6 +7,8 @@ import { connect } from 'react-redux'
 import Colors from '../../../../Components/Colors'
 import TabChoixJoueursDefis from './TabChoixJoueursDefis'
 import Database from '../../../../Data/Database'
+import LocalUser from '../../../../Data/LocalUser.json'
+import actions from '../../../../Store/Reducers/actions';
 
 /**
  * Classe qui va permettre à l'utilisateur de choisir des joueurs lors 
@@ -16,10 +18,10 @@ class Choix_Joueurs_Partie extends React.Component {
 
     constructor(props) {
         super(props)
-        this.monId = "aPyjfKVxEU4OF3GtWgQrYksLToxW2"
+        this.monId = LocalUser.data.id
         this.userData = {
-            id : "aPyjfKVxEU4OF3GtWgQrYksLToxW2",
-            photo : "https://firebasestorage.googleapis.com/v0/b/agoora-ccf6c.appspot.com/o/Photos_profil_Joueurs%2Ftest%2Fflongb.jpg?alt=media&token=eb04bd3f-1fc8-44c8-9cfd-76598fdc58c5"
+            id : LocalUser.data.id,
+            photo : LocalUser.data.photo
         }
         this.state = {
             goToFichePartie : false
@@ -35,11 +37,14 @@ class Choix_Joueurs_Partie extends React.Component {
             [
               {text: 'Ok',  onPress: () => {
                
-                console.log( this.props.navigation.getParam('id_partie', 'ERREUR'))
+                // Remettre à zéro la liste des joueurs séléctionnés 
+                const action = { type: actions.RESET_JOUEURS_PARTIE, value: []}
+                this.props.dispatch(action)               
                 this.props.navigation.push("FichePartieRejoindre",
                 {
                     download_All_Data_Partie : true,
                     id :  this.props.navigation.getParam('id_partie', ''),
+                    retour_arriere_interdit : true
                 })
             }
                         
@@ -88,6 +93,9 @@ class Choix_Joueurs_Partie extends React.Component {
                 j = j.reverse()     // Pour mettre le créateur en premier
             }
             
+            // Remetre à zéro les joueurs séléctionés
+            const action = { type: actions.RESET_JOUEURS_PARTIE, value: []}
+            this.props.dispatch(action)     
             this.props.navigation.push("ChoixNbrJoueursPartie",
                 {
                                         
@@ -133,6 +141,11 @@ class Choix_Joueurs_Partie extends React.Component {
         for(var i = 0 ; i< this.props.joueursPartie.length ; i++) {
             array.push(this.props.joueursPartie[i].id)
             enAttente.push(this.props.joueursPartie[i].id)
+
+            // Si c'est pas le créateur qui invite des joueurs 
+            if(! this.props.navigation.getParam('invite',  false)) {
+                inscris.push(this.props.joueursPartie[i].id)
+            }
         }
 
         // Si c'est pas le créateur qui invite des joueurs 

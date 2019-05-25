@@ -1,5 +1,5 @@
 import React from 'react'
-import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity, Alert,FlatList,ScrollView} from 'react-native'
+import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity, Alert,FlatList,ScrollView,Button} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Type_Defis from './Type_Defis'
@@ -10,7 +10,7 @@ import Database from '../../Data/Database'
 import Item_Defi from '../../Components/Defis/Item_Defi'
 import Item_Partie from '../../Components/Defis/Item_Partie'
 import Color from '../../Components/Colors';
-
+import LocalUser from '../../Data/LocalUser.json'
 /**
  * Vue d'acceuil pour la création d'un défi ou d'un match
  */
@@ -18,6 +18,7 @@ class Accueil_Jouer extends React.Component {
 
     constructor(props) {
         super(props) ;
+        this.monId = LocalUser.data.id
         this.state= {
             isLoading : false,
             undefined : []
@@ -113,10 +114,13 @@ class Accueil_Jouer extends React.Component {
                         .orderBy("dateParse");
         query.get().then(async (results) => {
             console.log("in then")
+            console.log(results.docs.length)
             // go through all results
             for(var i = 0; i < results.docs.length ; i++) {
-                defisArray.push(results.docs[i].data())
-                console.log(results.docs[i].data().message_chauffe)
+                if( ! results.docs[i].data().participants.includes(this.monId)) {
+                    defisArray.push(results.docs[i].data())
+                
+                }
             }
 
             this.setState({allDefisPartie : defisArray})
@@ -146,6 +150,13 @@ class Accueil_Jouer extends React.Component {
         return liste
     }
 
+
+    /**
+     * Fonction qui va permettre de refresh la sugestion de défi
+     */
+    refresh() {
+        this.findAllDefiAndPartie()
+    }
 
     _renderItem = ({item}) => {       
         if(item.type == Type_Defis.partie_entre_joueurs){
@@ -259,11 +270,18 @@ class Accueil_Jouer extends React.Component {
                        </TouchableOpacity>*/}
                     </View>
                 
+                    <Button
+                        onPress={() => this.refresh()}
+                        title="Refresh"
+                        color= {Color.agOOraBlue}
+                    />
+
                     <View style ={{backgroundColor : Color.lightGray}}>
                         <Text style = {styles.txtSuggestion}>Suggestions</Text>
                         {this.displayListDefisAndParties()}
                     </View>
                 
+                    
 
                 </View>
             )

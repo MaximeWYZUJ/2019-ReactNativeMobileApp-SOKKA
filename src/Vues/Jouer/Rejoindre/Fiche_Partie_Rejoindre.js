@@ -13,6 +13,17 @@ import StarRating from 'react-native-star-rating'
 import { ScrollView } from 'react-native-gesture-handler';
 import Joueur_Pseudo_Score from '../../../Components/ProfilJoueur/Joueur_Pseudo_Score'
 import LocalUser from '../../../Data/LocalUser.json'
+import { StackActions, NavigationActions } from 'react-navigation';
+
+
+// Rememttre à Zéro le stack navigator pour empecher le retour en arriere
+const resetAction = StackActions.reset({
+    index: 0, // <-- currect active route from actions array
+    actions: [
+      NavigationActions.navigate({ routeName: 'AccueilJouer' }),
+    ],
+});
+
 
 
 /**
@@ -67,10 +78,26 @@ class Fiche_Partie_Rejoindre extends React.Component {
 
 
     static navigationOptions = ({ navigation }) => {
-        const {state} = navigation;
-        return {
-          title: `${state.params.title}`,
-        };
+        if(! navigation.getParam("retour_arriere_interdit",false)) {
+            const {state} = navigation;
+            return {
+            title: `${state.params.title}`,
+            };
+        } else {
+            const {state} = navigation;
+            return { title: `${state.params.title}`, 
+            headerLeft: (
+
+               <TouchableOpacity
+                onPress = {() =>navigation.dispatch(resetAction)} >
+                   <Image
+                    style = {{width : 20, height : 20, marginLeft :15}}
+                    source = {require('../../../../res/right-arrow-nav.png')}
+                   />
+               </TouchableOpacity>
+              ),
+                };
+        }
       };
       
     ChangeThisTitle = (titleText) => {
@@ -441,7 +468,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
         console.log("in render item buteurs")
         var joueur = this.findPlayerFromId(item.id)
         console.log(joueur.pseudo)
-        if(joueur != undefined) {
+        if(joueur != undefined && item.nbButs > 0) {
             return(
            
                 <View style = {styles.containerItemJoueur}>
@@ -677,8 +704,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
                                 />
 
                                 {/* Texte indiquant le nombre de joueurs recherchés*/}
-                                <Text style = {styles.textJoueursRecherche}>Recherchent</Text>
-                                <Text style = {styles.textJoueursRecherche}>{this.state.partie.nbJoueursRecherche} joueurs</Text>
+                                <Text style = {styles.textJoueursRecherche}>{this.state.partie.nbJoueursRecherche} joueur(s) Recherché(s)</Text>
                             
                                 {/*Bouton pour rejoindre la partie */}
                                 {this._renderBtnRejoindre()}

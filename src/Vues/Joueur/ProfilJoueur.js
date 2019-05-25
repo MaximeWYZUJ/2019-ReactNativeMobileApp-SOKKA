@@ -6,6 +6,9 @@ import Defis_Equipe from '../Equipe/Defis_Equipe'
 import RF from 'react-native-responsive-fontsize';
 import Database from '../../Data/Database'
 import LocalUser from '../../Data/LocalUser.json'
+import { Constants, Location, Permissions,Notifications } from 'expo';
+
+import Color from '../../Components/Colors';
 const latUser = 43.531486   // A suppr quand on aura les vrais coordonnées
 const longUser = 1.490306
 
@@ -13,10 +16,11 @@ class ProfilJoueur extends React.Component {
 
     constructor(props) {
         super(props)
-        this.monProfil= Database.isUser();
+        this.id = this.props.navigation.getParam('id', ' ')
+        this.monProfil= Database.isUser(this.id);
         this.equipes = this.props.navigation.getParam('equipes', '')
         this.joueur = this.props.navigation.getParam('joueur', ' ')
-        this.id = this.props.navigation.getParam('id', ' ')
+        this.goToFirstScreen  = this.goToFirstScreen.bind(this)
     }
 
     static navigationOptions = ({ navigation }) => {
@@ -41,6 +45,47 @@ class ProfilJoueur extends React.Component {
                 </TouchableOpacity>
             )
         }
+    }
+
+    goToFirstScreen() {
+        this.props.navigation.navigate("first", {deconexion : true})  
+    }
+
+    deco() {
+        this.deconexion()
+    }
+
+    async deconexion() {
+        console.log("in deconexion")
+        var token = await this.registerForPushNotifications()
+        console.log(token)
+        var db = Database.initialisation()
+        console.log("after init")
+        db.collection("Login").doc(token).delete().then(this.goToFirstScreen).catch(function(error) {
+            console.error("Error removing document: ", error);
+        });
+    }
+
+
+
+
+    async registerForPushNotifications() {
+        const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+        console.log('in register')
+        if (status !== 'granted') {
+            console.log("1")
+          const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+          if (status !== 'granted') {
+            console.log("2")
+            return;
+          }
+        }
+        console.log("okook")
+        var token = await Notifications.getExpoPushTokenAsync();
+        console.log("after await token")
+        //this.subscription = Notifications.addListener(this.handleNotification);
+    
+        return (token)
     }
 
     renderItemEquipe(id, data) {
@@ -80,6 +125,7 @@ class ProfilJoueur extends React.Component {
 
         return(liste)
     }
+
 
 
     // ===============================================================================
@@ -241,6 +287,19 @@ class ProfilJoueur extends React.Component {
         }
     }
 
+    renderBtnDeco() {
+        console.log("mon profil :", this.monProfil)
+        if(this.monProfil) {
+            return(
+                <Button
+                onPress={() => this.deco()}
+                title="Déconexion"
+                color= {Color.agOOraBlue}
+                />
+            )
+        }
+    }
+
     render() {
         return (
             <ScrollView style={styles.main_container}>
@@ -334,6 +393,7 @@ class ProfilJoueur extends React.Component {
                     </TouchableOpacity>
                     {this.displayDefis()}
                 </View>
+                {this.renderBtnDeco()}
             </ScrollView>
         )
     }

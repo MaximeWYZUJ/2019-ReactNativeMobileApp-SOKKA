@@ -7,8 +7,9 @@ import firebase from 'firebase'
 import '@firebase/firestore'
 import Terrains from '../Helpers/Toulouse'
 import {SkypeIndicator} from 'react-native-indicators';
-import { Constants, Location, Permissions } from 'expo';
+import { Constants, Location, Permissions,Notifications } from 'expo';
 import LocalUser from '../Data/LocalUser.json'
+import { AsyncStorage } from 'react-native';
 
 const erreur_gps_pas_active = "Location services are disabled"
 
@@ -23,20 +24,20 @@ class First_screen extends React.Component {
 
     constructor(props) {
         super(props)
-        if (LocalUser.exists) {
+       /* if (LocalUser.exists) {
             j = LocalUser.data;
             this.props.navigation.push("ProfilJoueur", {id: j.id, joueur: j, equipes: []});
-        } else {
+        } else {*/
             this.state = {
                 timePassed : false,
-                isLoading : false,
+                isLoading : true,
                 locationResult: null
             }
 
             this.agorraAnimation = new Animated.ValueXY({ x: 0, y:hp('53%') })
             this.connexionAnimation = new Animated.ValueXY({ x: wp('100%'), y:hp('28%') })
             this.InscriptionAnimation = new Animated.ValueXY({ x: wp('-100%'), y:hp('34%') })
-        }
+       // }
         this.agorraAnimation = new Animated.ValueXY({ x: 0, y:hp('53%') })
         this.connexionAnimation = new Animated.ValueXY({ x: wp('100%'), y:hp('28%') })
         this.InscriptionAnimation = new Animated.ValueXY({ x: wp('-100%'), y:hp('34%') })
@@ -88,7 +89,14 @@ class First_screen extends React.Component {
      */
     componentDidMount(){
 
+        // A SUPPR !! 
+        //this.storeJoueurTest()
 
+        // Cas où l'utilisateur vien de se déconnecter
+            this.checkIfUserISConnected()
+        
+        
+        //this.registerForPushNotifications()
         // Start counting when the page is loaded
         this.timeoutHandle = setTimeout(()=>{
            this.setState({
@@ -99,6 +107,12 @@ class First_screen extends React.Component {
            this._moveInscription()
 
         }, 1000);
+   }
+
+   async storeJoueurTest() {
+       var joueur = await Database.getDocumentData("aJKQrjthVlHTyqhzVT3B8dZKGCTP2", "Joueurs")
+       var db = Database.initialisation()
+       db.collection("Joueurs").doc("JKQrjthVlHTyqhzVT3B8dZKGCTP2").set(joueur)
    }
 
    _getLocationAsync = async () => {
@@ -123,6 +137,50 @@ class First_screen extends React.Component {
     }
 
 
+
+
+    /**
+     * Fonction qui va permettre de vérifier si un utilisateur est déja connecté sur 
+     * ce téléphone, si c'est le cas alors on vas directement sur son profil.
+     */
+    async checkIfUserISConnected() {
+        var token =  await this.registerForPushNotifications()
+        console.log("after get token")
+        console.log("TOKEN : ", token)
+
+        var doc = await Database.getDocumentData(token, "Login")
+        console.log(doc)
+        if(doc!= undefined) {
+            this.gotoProfilJoueur(doc.id)
+            //var joueur = await Database.getDocumentData(doc.id, "Joueurs")
+            console.log(joueur)
+
+
+        } else {
+            this.setState({isLoading : false})
+        }
+
+    }
+
+    async registerForPushNotifications() {
+        const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+        console.log('in register')
+        if (status !== 'granted') {
+            console.log("1")
+          const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+          if (status !== 'granted') {
+            console.log("2")
+            return;
+          }
+        }
+        console.log("okook")
+        var token = await Notifications.getExpoPushTokenAsync();
+        console.log("after await token")
+        //this.subscription = Notifications.addListener(this.handleNotification);
+    
+        return (token)
+      }
+    
    gotoMapTerrains() {
 
         this._getLocationAsync();
@@ -209,7 +267,7 @@ class First_screen extends React.Component {
 
     displayScreen() {
 
-        if(! this.state.isLoading) {
+        if(this.props.navigation.getParam("deconexion", false)) {
             return (
                 <View style = {styles.main_container}>
                     <ImageBackground source = {require('app/res/first_screen.jpg')}
@@ -267,32 +325,91 @@ class First_screen extends React.Component {
                 </View>
             )
         } else {
-            return(
-                <View style = {styles.main_container}>
-                    {/* Image de l'herbre */}
-                    <View style = {styles.View_grass}>
-                        <Image
-                            source = {require('app/res/grass.jpg')}
-                            style = {styles.grass}
-                        />
-                    </View>
+            if(! this.state.isLoading) {
+                return (
+                    <View style = {styles.main_container}>
+                        <ImageBackground source = {require('app/res/first_screen.jpg')}
+                            style = {styles.image_background}>
 
-                    {/* View contenant le text Agoora */}
-                    <View style = {styles.view_agoora}>
-                        <Text style = {styles.txt_agoora}>SOKKAk</Text>
-                    </View>
 
-                    {/* View contenant le texte */}
-                    <View style = {{marginTop :hp('30%')}}>
-                        <Text style = {{fontSize : RF(2.5)}}>Chargement</Text>
-                    </View>
+                            {/* Vue contenant le text en bas de l'écran */}
+                            <View style = {styles.View_txt_regle}>
+                                <Text>Règles de base</Text>
+                                <Text>10 Minutes ou 2 buts</Text>
+                                <Text>Le vainqueur engage</Text>
+                                <Text>Victoire : Seul le vainqueur reste</Text>
+                                <Text>Match nul : les deux équipes sortent</Text>
+                                <Text>Tacles interdit</Text>
+                                <Text>A toi de les suivre ou de t'adapter à la rencontre</Text>
 
-                    {/* Indicateur de chargement */}
-                    <SkypeIndicator
-                    color='#52C7FD'
-                    size = {hp('10%')} />
-                </View>
-            )
+                                {/* Image de l'herbre */}
+                                <Image
+                                    source = {require('app/res/grass.jpg')}
+                                    style = {styles.grass}
+                                />
+                            </View>
+
+
+                            {/*View contenant le txt Agoora */}
+                            <Animated.View style={[styles.animatedConnexion,this.agorraAnimation.getLayout()]}>
+                                    <Text style = {styles.txt}>SOKKA</Text>
+                            </Animated.View>
+
+                            {/* View contenant le boutton se connecter */}
+                            <Animated.View style={this.connexionAnimation.getLayout()}>
+                                    {/*onPress={() => this.gotoMapTerrains()}*/}
+                                    <TouchableOpacity
+                                        style = {styles.animatedConnexion}
+                                        onPress = {() => this.gotoInscription()}
+                                        >
+                                        <Text style = {styles.txt}>Inscription</Text>
+                                    </TouchableOpacity>
+                            </Animated.View>
+
+                            {/* View contenant le boutton s'inscrire */}
+                            <Animated.View style={this.InscriptionAnimation.getLayout()}>
+                                    <TouchableOpacity
+                                        style = {styles.animatedConnexion}
+                                        onPress={() => this.gotoConnexion()}
+                                        //onPress={() => this.gotoProfilJoueur("aPyjfKVxEU4OF3GtWgQrYksLToxW2")}
+                                        >
+                                        <Text style = {styles.txt}>Connexion</Text>
+
+                                    </TouchableOpacity>
+                            </Animated.View>
+
+                        </ImageBackground>
+
+                    </View>
+                )
+            } else {
+                return(
+                    <View style = {styles.main_container}>
+                        {/* Image de l'herbre */}
+                        <View style = {styles.View_grass}>
+                            <Image
+                                source = {require('app/res/grass.jpg')}
+                                style = {styles.grass}
+                            />
+                        </View>
+
+                        {/* View contenant le text Agoora */}
+                        <View style = {styles.view_agoora}>
+                            <Text style = {styles.txt_agoora}>SOKKAk</Text>
+                        </View>
+
+                        {/* View contenant le texte */}
+                        <View style = {{marginTop :hp('30%')}}>
+                            <Text style = {{fontSize : RF(2.5)}}>Chargement</Text>
+                        </View>
+
+                        {/* Indicateur de chargement */}
+                        <SkypeIndicator
+                        color='#52C7FD'
+                        size = {hp('10%')} />
+                    </View>
+                )
+            }
         }
 
     }

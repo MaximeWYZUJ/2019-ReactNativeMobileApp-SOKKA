@@ -40,6 +40,7 @@ function initialiserState() {
         joueursDefi : [],                       // Liste des id des joueurs participants à un défi passé,
         equipeUserDefi : undefined,             // Equipe de l'utilisateur pour un défi          
         dataJoueursDefi : [],                   // Données des joueurs convoqués pour un défi
+        token : "undefined",                    // Push Token du téléphone
     }
 }
 
@@ -131,7 +132,11 @@ function handleGlobalStetChange(state = initialiserState(Joueurs), action) {
                 ...state,
                 nomsTerrainSelectionne : {
                     InsNom :  action.value.InsNom,
-                    EquNom : action.value.EquNom
+                    EquNom : action.value.EquNom,
+                    N_Voie : action.N_Voie,
+                    Voie : action.Voie,
+                    CodePostal : action.CodePostal,
+                    Ville : action.Ville
                 }
             }
 
@@ -387,6 +392,14 @@ function handleGlobalStetChange(state = initialiserState(Joueurs), action) {
                 dataJoueursDefi : action.value
             }
             return nextState || state
+
+        case actions.STORE_TOKEN :
+            console.log("in store token")
+            nextState = {
+                ... state,
+                token : action.value
+            }
+            return nextState || state  
 		default : 
             return state
         

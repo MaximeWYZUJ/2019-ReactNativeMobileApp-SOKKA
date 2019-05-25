@@ -6,13 +6,14 @@ import RF from 'react-native-responsive-fontsize';
 import Barre_Recherche_Query from '../../../../Components/Recherche/Barre_Recherche_Query'
 import Joueur_item_Creation_Partie from '../../../../Components/ProfilJoueur/Joueur_item_Creation_Partie'
 import { connect } from 'react-redux'
+import LocalUser from '../../../../Data/LocalUser.json'
 
 
 class Rechercher_Joueurs extends React.Component {
 
     constructor(props) {
         super(props)
-        this.id  = "aPyjfKVxEU4OF3GtWgQrYksLToxW2" // A CHANGER !!!!
+        this.id  = LocalUser.data.id 
         this.state = {
             searchedText : 'm',
             joueurs : []

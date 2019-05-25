@@ -7,9 +7,9 @@ import  Database from '../../../../Data/Database'
 import Joueur_item_Creation_Partie from '../../../../Components/ProfilJoueur/Joueur_item_Creation_Partie'
 import { connect } from 'react-redux'
 import AlphabetListView from 'react-native-alphabetlistview'
+import LocalUser from '../../../../Data/LocalUser.json'
 
 // A SUPPR QUAND ACCES FICHIER LOCAL
-const reseau = ['aG5x3W4FacNv0btjIDBX4','aHCIHsJnf8BIf4otaGKoG','ahUi7QbQrh4Rr49FbiiWSs7ulzqU2','ab3yc5dSVXvWVECJBqAfFl0ZMudf1','an2NDNCnTLLxReLpb25ea']
 
 /**
  * Classe qui permet à l'utilisateur de choisir des joueurs de son réseau lors
@@ -19,8 +19,9 @@ class Joueurs_Reseau_Partie extends React.Component {
 
     constructor(props) {
         super(props)
-        this.reseau = reseau
+        this.reseau = LocalUser.data.reseau
         this.state = {
+            
             joueurs : [],
             joueursFiltres : []
         }
