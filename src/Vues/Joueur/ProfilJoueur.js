@@ -7,7 +7,9 @@ import RF from 'react-native-responsive-fontsize';
 import Database from '../../Data/Database'
 import LocalUser from '../../Data/LocalUser.json'
 import { Constants, Location, Permissions,Notifications } from 'expo';
-
+import Type_Defis from '../../Vues/Jouer/Type_Defis'
+import Item_Defi from '../../Components/Defis/Item_Defi'
+import Item_Partie from '../../Components/Defis/Item_Partie'
 import Color from '../../Components/Colors';
 const latUser = 43.531486   // A suppr quand on aura les vrais coordonnées
 const longUser = 1.490306
@@ -23,8 +25,19 @@ class ProfilJoueur extends React.Component {
         this.joueur = this.props.navigation.getParam('joueur', ' ')
         this.goToFirstScreen  = this.goToFirstScreen.bind(this)
 
-        
+        this.state = {
+            allDefis : []
+        }
     }
+
+
+
+    componentDidMount() {
+        this.getAllDefisAndPartie()
+    }
+
+
+
 
     static navigationOptions = ({ navigation }) => {
         if(! navigation.getParam("retour_arriere_interdit",false)) {
@@ -141,6 +154,88 @@ class ProfilJoueur extends React.Component {
     }
 
 
+    //================================================================================
+    //=================================== POUR LES DEFIS =============================
+    //================================================================================
+
+
+    /** Fonction qui va permettre de trouver tous les défis et parties à venir auxquels 
+     * participes l'utilisateur
+     */
+    getAllDefisAndPartie() {
+        var db = Database.initialisation()
+        var allDefis = []
+        var index = 1
+        var now = new Date()
+        console.log("DATE PARSE : ",  Date.parse(now) )
+        var ref = db.collection("Defis");
+        var query = ref.where("participants", "array-contains", this.id)
+                        .where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
+
+        // On regarde si l'utilisateur participe à un defi
+        query.get().then(async (results) => {
+            for(var i = 0; i < results.docs.length ; i++) {
+                
+                allDefis.push(results.docs[i].data())
+
+            }
+            this.setState({allDefis : allDefis})
+
+
+            // Itérer sur toutes les équipes dont il est capitaine
+            for(var i = 0 ; i < this.equipes.length ; i++) {
+                var equipe = this.equipes[i]
+                
+                // Vérifier si il est capitaine
+                if(equipe.capitaines.includes(this.id)) {
+
+                    // Regarder si cette équipe organise un défi
+                    var queryEqOrga = ref.where("equipeOrganisatrice", "==", equipe.id)
+                                        .where("dateParse", ">=",Date.parse(now))
+                    queryEqOrga.get().then(async (resultsDefiOrga) => {
+                        for(var i = 0; i < resultsDefiOrga.docs.length ; i++) {
+                            if(! this.allreaddyDownloadDefi(allDefis, resultsDefiOrga.docs[i].data())) {
+                                allDefis.push(resultsDefiOrga.docs[i].data())
+                            }
+                            
+                        }
+                    })
+
+                    // Regarder si cette équipe est defiée 
+                    var queryEqDefiee = ref.where("equipeDefiee", "==", equipe.id)
+                                        .where("dateParse", ">=",Date.parse(now))
+                    queryEqDefiee.get().then(async (resultsDefiDefiee) => {
+
+                        for(var i = 0; i < resultsDefiDefiee.docs.length ; i++) {
+                            if(! this.allreaddyDownloadDefi(allDefis, resultsDefiDefiee.docs[i].data())) { 
+                                allDefis.push(resultsDefiDefiee.docs[i].data())
+                            }
+                        }
+                    })
+
+                    this.setState({allDefis : allDefis})
+                }
+            }
+
+            
+        }).catch(function(error) {
+              console.log("Error getting documents partie:", error);
+        });   
+    }
+
+
+    /**
+     * Fonction qui renvoie true si le défi à déja été ajouté à la liste
+     * des défi ou partie téléchargés.
+     */
+    allreaddyDownloadDefi(liste, defi) {
+        for(var i = 0; i < liste.length; i++) {
+            if(liste[i].id == defi.id)  {
+                return true
+            }
+        }
+        return false
+    }
 
     // ===============================================================================
     // ===================== METHODES POUR LE RESEAU =================================
@@ -274,7 +369,7 @@ class ProfilJoueur extends React.Component {
 
     displayDefis(){
 
-        if(this.joueur.defis === undefined ) {
+        if(this.state.allDefis == undefined ) {
             return (
                 <View>
                     <Text>Pas encore de défis</Text>
@@ -283,22 +378,50 @@ class ProfilJoueur extends React.Component {
         }else {
             return(
                 <FlatList style = {{marginLeft : wp('2%')}}
-                        data={this.joueur.defis}
+                        data={this.state.allDefis}
                         numColumns={1}
                         keyExtractor={(item) => item.id}
-                        renderItem={({item}) =>
-                           <Defis_Equipe
-                                format = {item.format}
-                                photo1 = {item.photo1}
-                                photo2 = {item.photo2}
-                                nom1 = {item.nom1}
-                                nom2 = {item.nom2}
-                                date = {item.date}
-                            />
-                        }
+                        renderItem={this._renderItemDefi}
                 />
             )
         }
+    }
+
+    _renderItemDefi =({item}) => {   
+        if(item.type == Type_Defis.partie_entre_joueurs){
+          
+            return(
+                <Item_Partie
+                    id = {item.id}
+                    format = {item.format}
+                    jour = {new Date(item.jour.seconds *1000)} 
+                    duree = {item.duree}
+                    joueurs = {this.buildJoueurs(item)}
+                    nbJoueursRecherche =  {item.nbJoueursRecherche}
+                    terrain=  {item.terrain}
+                    latitudeUser = {this.state.latitude}
+                    longitudeUser = {this.state.longitude}
+                    message_chauffe  = {item.message_chauffe}
+                />
+            )
+        } else if(item.type == Type_Defis.defis_2_equipes) {
+            return(
+                <Item_Defi
+                    format = {item.format}
+                    jour = {new Date(item.jour.seconds * 1000)}
+                    duree ={item.duree}
+                    equipeOrganisatrice = {item.equipeOrganisatrice}
+                    equipeDefiee = {item.equipeDefiee}
+                    terrain = {item.terrain}
+                    allDataDefi = {item}
+                        
+                />
+            )
+        } else {
+            return(
+                <Text>oooo</Text>
+            )
+        }  
     }
 
     renderBtnDeco() {

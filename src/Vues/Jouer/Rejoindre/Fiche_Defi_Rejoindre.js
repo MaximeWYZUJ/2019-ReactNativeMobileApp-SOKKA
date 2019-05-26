@@ -643,17 +643,34 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
 
     _renderTxtMillieu(){
-        if(this.state.defi.equipeDefiee == undefined) {
-            return(
-                <Text style = {styles.textRechercheEquipe}>Cherche une équipe à défier</Text>
-            )
-        } else {
-            return(
-                <Image
-                    source = {require('../../../../res/vs.png')}
-                    style = {styles.vs}
-                    />
-            )
+        if(new Date(this.state.defi.jour.seconds * 1000) < new Date) {
+            if(this.state.defi.scoreConfirme) {
+                return(
+                    <Text style = {styles.txtBut}>{this.state.defi.butsEquipeOrganisatrice} - {this.state.defi.butsEquipeDefiee}</Text>
+                )
+            } else if(this.state.defi.scoreRenseigne) {
+                return(
+                    <Text style = {styles.txtButNonConfirme}>{this.state.defi.butsEquipeOrganisatrice} - {this.state.defi.butsEquipeDefiee}</Text>
+                )
+            } else {
+                return (
+                    <Text style = {styles.txtBut}>{"score non \n renseigné"}</Text>
+                )
+            }
+                
+        } else  {
+            if(this.state.defi.equipeDefiee == undefined) {
+                return(
+                    <Text style = {styles.textRechercheEquipe}>Cherche une équipe à défier</Text>
+                )
+            } else {
+                return(
+                    <Image
+                        source = {require('../../../../res/vs.png')}
+                        style = {styles.vs}
+                        />
+                )
+            }
         }
     }
 
@@ -1060,7 +1077,19 @@ const styles = {
         alignSelf : "center",
         borderWidth : 1,
         borderRadius : 5
-    }
+    },
+    txtBut : {
+        fontSize : RF(2.6),
+        fontWeight : "bold",
+        alignSelf :"center"
+    },
+
+    txtButNonConfirme : {
+        fontSize : RF(2.6),
+        fontStyle : "italic",
+        alignSelf :"center"
+    },
+
 }
 
   

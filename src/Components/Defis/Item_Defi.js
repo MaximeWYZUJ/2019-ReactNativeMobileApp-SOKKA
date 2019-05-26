@@ -150,6 +150,33 @@ class Item_Defi extends React.Component {
         }     
     }
 
+
+    _renderTxtMillieu(){
+        if(new Date(this.props.allDataDefi.jour.seconds * 1000) < new Date) {
+            if(this.props.allDataDefi.scoreConfirme) {
+                return(
+                    <Text style = {styles.txtBut}>{this.props.allDataDefi.butsEquipeOrganisatrice} - {this.props.allDataDefi.butsEquipeDefiee}</Text>
+                )
+            } else if(this.props.allDataDefi.scoreRenseigne) {
+                return(
+                    <Text style = {styles.txtButNonConfirme}>{this.props.allDataDefi.butsEquipeOrganisatrice} - {this.props.allDataDefi.butsEquipeDefiee}</Text>
+                )
+            
+            }
+                
+        } else  {
+            if(this.props.allDataDefi.equipeDefiee != undefined) {
+                
+                return(
+                    <Image
+                        source = {require('../../../res/vs.png')}
+                        style = {styles.vs}
+                        />
+                )
+            }
+        }
+    }
+
     /**
      * Permet d'afficher la seconde équipe 
      */
@@ -206,10 +233,7 @@ class Item_Defi extends React.Component {
                 {/* View contenant les équipes */}
                 <View style = {{flexDirection : 'row', justifyContent: 'space-between', marginTop : hp('2%')}}>
                     {this.renderEquipe1(this.state.equipe1)}
-                    <Image
-                        source = {require('../../../res/vs.png')}
-                        style = {{width : wp('6%'), height : wp('6%')}}
-                    />
+                    {this._renderTxtMillieu()}
                     {this.renderEquipe2(this.state.equipe2)}
                 </View>
 
@@ -258,6 +282,23 @@ const styles = {
         width : wp('3.1%')
     },
 
+    txtBut : {
+        fontSize : RF(2.6),
+        fontWeight : "bold",
+        alignSelf :"center"
+    },
+
+    txtButNonConfirme : {
+        fontSize : RF(2.6),
+        fontStyle : "italic",
+        alignSelf :"center"
+    },
+
+    vs : {
+        height : wp('7%'),
+        width : wp('8.12%'),
+        alignSelf : "center"
+    },
 
 }
 

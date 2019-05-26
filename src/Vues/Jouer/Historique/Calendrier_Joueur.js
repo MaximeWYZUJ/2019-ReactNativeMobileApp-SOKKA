@@ -57,6 +57,7 @@ export default class Calendrier_Joueur extends React.Component {
 
         // On regarde si l'utilisateur participe à un defi
         query.get().then(async (results) => {
+            console.log("CALENDRIER :",results.docs.length )
             for(var i = 0; i < results.docs.length ; i++) {
                 var dateDefi = new Date(  results.docs[i].data().jour.seconds*1000)
 
@@ -70,6 +71,14 @@ export default class Calendrier_Joueur extends React.Component {
                 allDefis.push(results.docs[i].data())
                 //defisArray.push(results.docs[i].data())
             }
+            this.setState({
+                defisaVenir : defisaVenir,
+                defisPasses : defisPasses,
+                allDefis : allDefis,
+                isLoading : false,
+                index : index
+            })
+
 
             // Query pour trouver les équipes dont l'user est capitaine
             var refEquipe = db.collection("Equipes");

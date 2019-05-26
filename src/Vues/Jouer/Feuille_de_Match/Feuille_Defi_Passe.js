@@ -32,7 +32,9 @@ class Feuille_Defi_Passe extends React.Component {
             equipeDefiee :  this.props.navigation.getParam('equipeDefiee', undefined),
             nbButEquOrga : this.props.navigation.getParam('defi', undefined).butsEquipeOrganisatrice,
             nbButEquDefiee : this.props.navigation.getParam('defi', undefined).butsEquipeDefiee,
-            scoreRenseigne : this.props.navigation.getParam('defi', undefined).scoreRenseigne
+            scoreRenseigne : this.props.navigation.getParam('defi', undefined).scoreRenseigne,
+            displayBtnBut : ! this.props.navigation.getParam('defi', undefined).scoreRenseigne,
+            scoreConfirme : this.props.navigation.getParam('defi', undefined).scoreConfirme
         }
 
         this.equipe1Animation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
@@ -80,8 +82,10 @@ class Feuille_Defi_Passe extends React.Component {
             defi["buteurs"] = this.props.buteurs
             defi["confirmesEquipeOrga"] = this.props.joueursPresents
             defi["scoreRenseigne"] = this.state.scoreRenseigne
-            defi["butsEquipeDefiee"] = this.state.nbButEquDefiee
-            defi["butsEquipeOrganisatrice"] = this.state.butsEquipeOrganisatrice
+            defi["butsEquipeDefiee"] = this.state.nbButEquDefiee,
+            defi["butsEquipeOrganisatrice"] = this.state.nbButEquOrga
+            defi["scoreRenseigneParOrga"] =  this.state.scoreRenseigne,
+            defi["scoreConfirme"] = this.state.scoreConfirme
 
             this.props.navigation.push("FicheDefiRejoindre", 
                 {
@@ -99,7 +103,31 @@ class Feuille_Defi_Passe extends React.Component {
                 }
             )
         } else {
-            
+            var defi = this.state.defi
+            defi["votes"] = this.props.votes
+            defi["buteurs"] = this.props.buteurs
+            defi["confirmesEquipeDefiee"] = this.props.joueursPresents
+            defi["scoreRenseigne"] = this.state.scoreRenseigne
+            defi["butsEquipeDefiee"] = this.state.nbButEquDefiee,
+            defi["butsEquipeOrganisatrice"] = this.state.nbButEquOrga
+            defi["scoreRenseigneParDefiee"] =  this.state.scoreRenseigne,
+            defi["scoreConfirme"] = this.state.scoreConfirme
+             
+            this.props.navigation.push("FicheDefiRejoindre", 
+                {
+                    retour_arriere_interdit : true,
+                    equipeDefiee : this.state.equipeDefiee,
+                    equipeOrganisatrice : this.state.equipeOrganisatrice,
+                    defi : defi
+                    /*defi : {
+                        ...defi,
+                        confirmesEquipeDefiee : defi.confirmesEquipeDefiee.concat(this.findCapitaines()),
+                        attenteEquipeDefiee : joueursEquipe.concat(this.buildListOfJoueurWithoutCapitaines()),
+                        joueursEquipeDefiee : this.state.joueursSelectionnes.concat(joueursEquipe),
+                        participants : defi.participants.concat(this.state.joueursSelectionnes)
+                    }*/
+                }
+            )
         }
     }
 
@@ -121,7 +149,10 @@ class Feuille_Defi_Passe extends React.Component {
                 confirmesEquipeOrga : this.props.joueursPresents,
                 scoreRenseigne : this.state.scoreRenseigne  ,
                 butsEquipeDefiee : this.state.nbButEquDefiee,
-                butsEquipeOrganisatrice : this.state.nbButEquOrga
+                butsEquipeOrganisatrice : this.state.nbButEquOrga,
+                scoreRenseigneParOrga : this.state.scoreRenseigne,
+                scoreRenseigneParDefiee: ! this.state.scoreRenseigne,
+                scoreConfirme : this.state.scoreConfirme
              })
              .then(this.goBackToFiche)
              .catch(function(error) {
@@ -135,7 +166,11 @@ class Feuille_Defi_Passe extends React.Component {
                 confirmesEquipeDefiee : this.props.joueursPresents,
                 scoreRenseigne : this.state.scoreRenseigne ,
                 butsEquipeDefiee : this.state.nbButEquDefiee,
-                butsEquipeOrganisatrice : this.state.nbButEquOrga
+                butsEquipeOrganisatrice : this.state.nbButEquOrga,
+                scoreRenseigneParDefiee: this.state.scoreRenseigne,
+                scoreRenseigneParOrga : !this.state.scoreRenseigne,
+                scoreConfirme : this.state.scoreConfirme
+
              })
              .then(this.goBackToFiche).catch(function(error) {
                  // The document probably doesn't exist.
@@ -181,7 +216,7 @@ class Feuille_Defi_Passe extends React.Component {
         return numJour  + '/' + mois + '/' + an
     }
 
-     /**
+    /**
      * Permet d'afficher l'équipe défiée
      */
     _renderEquipeDefie(){
@@ -191,12 +226,17 @@ class Feuille_Defi_Passe extends React.Component {
                 <Animated.View
                     style = {[this.equipe2Animation.getLayout(), {alignSelf : "flex-end"}]}>
 
+                    <View style = {{ alignItems : "flex-end"}}>
+                        {this.chooseBtnButToRender(this.state.equipeDefiee.id)}
+                    </View>
+
                     <Equipe_Nom_Score
                         photo = {this.state.equipeDefiee.photo}
                         score = {this.state.equipeDefiee.score}
                         nom = {this.state.equipeDefiee.nom}
                         direction = {"row-revrse"}
                     />
+
                 </Animated.View>
             )
         } else {
@@ -210,6 +250,12 @@ class Feuille_Defi_Passe extends React.Component {
             )
         }
     }
+
+    
+
+    //======================================================================================
+    //========================== FONCTIONS RELATIFS AU SCORE ===============================
+    //======================================================================================
 
     /**
      * Fonction qui permet d'ajouter un but à un joueur et sauvagarder la new value
@@ -226,11 +272,10 @@ class Feuille_Defi_Passe extends React.Component {
             var nb = this.state.nbButEquDefiee
             this.setState({nbButEquDefiee : nb+1})
         }
-        if(!this.state.scoreRenseigne) this.setState({scoreRenseigne : true})
-        
+        if(!this.state.scoreRenseigne) this.setState({scoreRenseigne : true})   
     }
 
-      /**
+    /**
      * Fonction qui permet d'ajouter un but à une equipe 
      * @param {String} id 
      */
@@ -244,32 +289,139 @@ class Feuille_Defi_Passe extends React.Component {
         }
        
     }
+
+    /**
+     * Fonction qui permet à un utilisateur de modifier le score
+     * du défi
+     */
+    modifierLeSocre() {
+        Alert.alert(
+            '',
+            'Tu souhaites modifier le score renseigné ?',
+            [
+                {text: 'Oui', onPress: () => this.setState({displayBtnBut : true})},
+                {
+                  text: 'Non',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                },
+            ],
+        )
+    }
+
+    /**
+     * Fonction qui permet au cap qui n'a pas renseigné le score de le
+     * confirmer
+     */
+    confirmeLeScore() {
+
+        // Si le score est renseigné par l'équipe organisatrice
+        if(this.state.defi.scoreRenseigneParOrga) {
+            if(this.state.equipeDefiee != undefined && this.state.equipeDefiee.capitaines.includes(this.monId)) {
+                this.setState({scoreConfirme : true})
+            }
+        } else {
+            if(this.state.equipeOrganisatrice.capitaines.includes(this.monId)) {
+                this.setState({scoreConfirme : true})
+            }
+        }
+    }
+
+
+
+    /**
+     * Fonction qui permet d'afficher le bouton de confirmation du score
+     */
+    renderBtnConfirmerScore() {
+        if(this.state.defi.scoreRenseigne ) {
+            if( ! this.state.scoreConfirme) {
+                return(
+                    <TouchableOpacity 
+                        style ={styles.btnConfirmerScore}
+                        onPress = {() => this.confirmeLeScore()}
+                    >
+                        <Text>Confirmer</Text>
+                        <Text>Le score</Text>
+                    </TouchableOpacity>
+                )
+            }
+        }
+    }
     
+
+    /**
+     * Fonction qui permet d'afficher le bouton de modification du score
+     */
+    renderBtnModifierScore() {
+        if(this.state.defi.scoreRenseigne ) {
+            if(! this.state.scoreConfirme) {
+                return(
+                    <TouchableOpacity style ={styles.btnConfirmerScore} 
+                        onPress = {() =>this.modifierLeSocre()}>
+                        <Text>Modifier</Text>
+                        <Text>Le score</Text>
+                    </TouchableOpacity>
+                )
+            }
+        }
+    }
+
+    
+
+
+    /**
+     * Fonction qui permet d'afficher soit le bouton de confirmation ou soit
+     * le bouton de modification du score en fonction de l'id de l'équipe
+     * concernée passé en param
+     */
+    chooseBtnButToRender(idEquipe) {
+        console.log("in choose bnt but to render")
+        if(idEquipe == this.state.equipeOrganisatrice.id) {
+            if(this.state.defi.scoreRenseigneParOrga) {
+                console.log("in if render btn but")
+                return(<View>{this.renderBtnModifierScore()}</View>)
+            } else {
+                return(<View>{this.renderBtnConfirmerScore()}</View>)
+            }
+        } else {
+            if(this.state.defi.scoreRenseigneParDefiee) {
+                return(<View>{this.renderBtnModifierScore()}</View>)
+            } else {
+                return(<View>{this.renderBtnConfirmerScore()}</View>)
+            }
+        }
+    }
+    
+
+
+
     /**
      * Fonction qui permet d'afficher les boutons pour renseigner le nbr de buts
      */
     _renderBtnBut(equipe) {
 
-        return(
-                
-            <View style = {{flexDirection : "row", alignItems:'center', justifyContent:'center', marginLeft : wp('3%'), marginRight : wp('3%')}}>
-                
-                {/* Btn plus */}
-                <TouchableOpacity 
-                    style = {styles.containerBouton}
-                    onPress = {()=> this.ajouterUnBut(equipe.id)}>
-                    <Text style = {styles.txtBtn}>+</Text>
-                </TouchableOpacity>
+        if(this.state.displayBtnBut) {
+            return(
+                    
+                <View style = {{flexDirection : "row", alignItems:'center', justifyContent:'center', marginLeft : wp('3%'), marginRight : wp('3%')}}>
+                    
+                    {/* Btn plus */}
+                    <TouchableOpacity 
+                        style = {styles.containerBouton}
+                        onPress = {()=> this.ajouterUnBut(equipe.id)}>
+                        <Text style = {styles.txtBtn}>+</Text>
+                    </TouchableOpacity>
 
-                {/*Btn moins*/}
-                <TouchableOpacity 
-                onPress = {() => this.enleverUnBut(equipe.id)}
-                style = {styles.containerBouton}>
-                    <Text style = {styles.txtBtn}>-</Text>
-                </TouchableOpacity>
-            </View>
-            
-        )
+                    {/*Btn moins*/}
+                    <TouchableOpacity 
+                    onPress = {() => this.enleverUnBut(equipe.id)}
+                    style = {styles.containerBouton}>
+                        <Text style = {styles.txtBtn}>-</Text>
+                    </TouchableOpacity>
+                </View>
+                
+            )
+        }
     }
 
 
@@ -291,14 +443,8 @@ class Feuille_Defi_Passe extends React.Component {
             return(
 
 
-                <View style = {{flexDirection : 'row'}}>
-                    <Text style = {styles.txtBut}>{this.state.nbButEquOrga}</Text>
-                    
-                    <Text style = {styles.txtBut}> - </Text>
+                <Text style = {styles.txtBut}>{this.state.nbButEquOrga} - {this.state.nbButEquDefiee}</Text>
 
-                    <Text style = {styles.txtBut}>{this.state.nbButEquDefiee}</Text>
-
-                </View>
             )
         } else {
             return(
@@ -306,6 +452,35 @@ class Feuille_Defi_Passe extends React.Component {
             )
         }
     }
+
+    renderScore() {
+        if(this.state.displayBtnBut) {
+            return(
+                <View style = {{flexDirection : "row", justifyContent: 'space-between'}}>
+                        {this._renderBtnBut(this.state.equipeOrganisatrice)}
+                            {this.renderTxtBut()}
+                        {this._renderBtnBut(this.state.equipeDefiee)}
+
+                </View>
+            )
+        } else if(! this.state.scoreConfirme) {
+            return(
+                <View style = {{justifyContent : "space-around"}}>
+                    {this.renderTxtBut()}
+                </View>
+            )
+        } else {
+            return(
+                <View style = {{justifyContent : "space-around"}}>
+                    {this.renderTxtBut()}
+                    <Text style = {{alignSelf : "center"}}>Score confirmé</Text>
+                </View>
+            )
+        }
+    }
+
+
+    // =====================================================================
 
     render() {
         return(
@@ -338,17 +513,10 @@ class Feuille_Defi_Passe extends React.Component {
                             nom = {this.state.equipeOrganisatrice.nom}
                             
                         />
+                        {this.chooseBtnButToRender(this.state.equipeOrganisatrice.id)}
                     </Animated.View>
 
-                    <View style = {{flexDirection : "row", justifyContent: 'space-between'}}>
-                        {this._renderBtnBut(this.state.equipeOrganisatrice)}
-                        
-                        {this.renderTxtBut()}
-                        {this._renderBtnBut(this.state.equipeDefiee)}
-
-
-
-                    </View>
+                    {this.renderScore()}
 
                     
                     {this._renderEquipeDefie()}
@@ -400,7 +568,13 @@ const styles = {
 
     txtBut : {
         fontSize : RF(2.6),
-        fontWeight : "bold"
+        fontWeight : "bold",
+        alignSelf :"center"
+    },
+
+    btnConfirmerScore : {
+        borderWidth : 1,
+        width : wp('25%')
     }
 }
 

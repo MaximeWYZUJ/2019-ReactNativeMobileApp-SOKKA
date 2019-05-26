@@ -136,6 +136,7 @@ class Feuille_Partie_A_Venir extends React.Component {
         }
 
        
+
      
         // Mettre à jour le state.
         var partie = this.state.partie
@@ -157,6 +158,8 @@ class Feuille_Partie_A_Venir extends React.Component {
             // The document probably doesn't exist.
             console.error("Error updating document: ", error);
         });
+
+
     }
 
 
@@ -258,6 +261,9 @@ class Feuille_Partie_A_Venir extends React.Component {
         )
 
     }
+
+
+    
 
 
     /**

@@ -1,0 +1,11 @@
+
+=========  CONVOCATION_RELANCE_DEFI =========
+{
+    time :      Moment d'emission de la notification
+    dateParse : Moment parsé
+    type :      Type de la notification
+    emeteur :   id de l'éméteur
+    recepteur : id du recpeteur
+    defi :      id du défi concerné
+    equipe :    id de l'équipe concernée
+}

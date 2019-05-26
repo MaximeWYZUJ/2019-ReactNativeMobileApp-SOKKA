@@ -15,7 +15,7 @@ import actions from '../../../Store/Reducers/actions'
 import { connect } from 'react-redux'
 import { StackActions, NavigationActions } from 'react-navigation';
 import LocalUser from '../../../Data/LocalUser.json'
-
+import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
 
 // Rememttre à Zéro le stack navigator pour empecher le retour en arriere
 const resetAction = StackActions.reset({
@@ -345,7 +345,7 @@ class Feuille_Defi_A_Venir extends React.Component {
     handleConfirmerOui() {
         Alert.alert(
             '',
-            "Tu souhaite confirmer ta présence pour cette partie ? ",
+            "Tu souhaite confirmer ta présence pour ce defi ? ",
             [
                 {text: 'Oui', onPress: () => this.confirmerJoueurPresence()},
                 {
@@ -585,8 +585,15 @@ class Feuille_Defi_A_Venir extends React.Component {
                 console.error("Error updating document: ", error);
             });
         }
+
+        console.log("before store notif")
+        this.storeNotifConfirmerInDB()
+        console.log("after store notif")
+        
          
     }
+
+
 
     /**
      * Fonction qui va permettre d'aficher l'alerte permettant à l'utilisateur
@@ -598,7 +605,7 @@ class Feuille_Defi_A_Venir extends React.Component {
             '',
             'Tu souhaites relancer les joueurs en attente ?',
             [
-                {text: 'Oui', onPress: () => console.log(equipe.id)},
+                {text: 'Oui', onPress: () =>this.storeNotifRelanceInDB()},
                 {
                   text: 'Non',
                   onPress: () => console.log('Cancel Pressed'),
@@ -635,6 +642,104 @@ class Feuille_Defi_A_Venir extends React.Component {
         }
     }
 
+    //================================================================================
+    //========================  FONCTION POUR LES NOTIFICATIONS ======================
+    //================================================================================
+
+    /**
+     * On va stocker une notification qui correspond a la confirmation 
+     * de la présence du joueur
+     */
+    storeNotifConfirmerInDB() {
+        console.log("in store notif")
+        var db = Database.initialisation() 
+        console.log("initialisation")
+        // Trouver l'équipe dont l'utilisateur est membre 
+        if(this.state.defi.joueursEquipeOrga.includes(this.monId)) {
+            console.log("in first if")
+            // Envoyer à chaque capitaines de l'équipe
+            for(var i = 0 ; i < this.state.equipeOrganisatrice.capitaines.length ; i++) {
+                console.log("in for")
+                if(this.state.equipeOrganisatrice.capitaines[i] != this.monId) {
+                    console.log("okookokooo")
+                    db.collection("Notifs").add(
+                        {
+                            dateParse : Date.parse(new Date()),
+                            defi : this.state.defi.id,
+                            emetteur :  LocalUser.data.id,
+                            recepteur : this.state.equipeOrganisatrice.capitaines[i] ,
+                            time : new Date(),
+                            type : Types_Notification.CONFIRMER_PRESENCE_DEFI,
+                            equipe : this.state.equipeOrganisatrice.id,
+                        }
+                    ) 
+                }  
+            }
+        } else  {
+            // Envoyer à chaque capitaines de l'équipe
+            for(var i = 0 ; i < this.state.equipeDefiee.capitaines.length ; i++) {
+                if(this.state.equipeDefiee.capitaines[i] != this.monId) {
+                    db.collection("Notifs").add(
+                        {
+                            dateParse : Date.parse(new Date()),
+                            defi : this.state.defi.id,
+                            emetteur :  LocalUser.data.id,
+                            recepteur : this.state.equipeDefiee.capitaines[i] ,
+                            time : new Date(),
+                            type : Types_Notification.CONFIRMER_PRESENCE_DEFI,
+                            equipe : this.state.equipeDefiee.id,
+                        }
+                    ) .then(function() {console.log("ok notif")})
+                }  
+            }
+        }
+        
+    }
+
+    /**
+     * Fonction qui va sauvegarder une notification par joueur convoque
+     */
+    storeNotifRelanceInDB() {
+
+        var db = Database.initialisation() 
+
+        // Si je suis de l'equipe orga
+        if(this.state.equipeOrganisatrice.capitaines.includes(this.monId)) {
+            for(var i = 0 ; i < this.state.defi.attenteEquipeOrga.length; i++) {
+                if(this.state.defi.attenteEquipeOrga[i] != this.monId) {
+                    db.collection("Notifs").add(
+                        {
+                            dateParse : Date.parse(new Date()),
+                            defi : this.state.defi.id,
+                            emetteur : this.monId,
+                            recepteur : this.state.defi.attenteEquipeOrga[i],
+                            time : new Date(),
+                            type : Types_Notification.CONVOCATION_RELANCE_DEFI,
+                            equipe : this.state.equipeOrganisatrice.id
+                        }
+                    )
+                }
+            }
+        } else if(this.state.equipeDefiee != undefined && this.state.equipeDefiee.capitaines.includes(this.monId)) {
+            for(var i = 0 ; i < this.state.defi.attenteEquipeDefiee.length; i++) {
+                if(this.state.defi.attenteEquipeDefiee[i] != this.monId) {
+                    db.collection("Notifs").add(
+                        {
+                            dateParse : Date.parse(new Date()),
+                            defi : this.state.defi.id,
+                            emetteur : this.monId,
+                            recepteur : this.state.defi.attenteEquipeDefiee[i],
+                            time : new Date(),
+                            type : Types_Notification.CONVOCATION_RELANCE_DEFI,
+                            equipe : this.state.equipeDefiee.id
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    //=========================================================================================
 
     /**
      * Fonction qui permet d'afficher le cercle de couleur correspondant

@@ -105,7 +105,8 @@ export default class Creation_Equipe_Photo extends React.Component {
             score : 5,
             telephone : LocalUser.data.telephone,
             ville : this.props.navigation.getParam("ville", " "),
-            defis : []
+            defis : [],
+            nbJoueurs : this.props.navigation.getParam("joueurs", []).length +1
         }).then(this.updateJoueur).catch(function(error){
             console.log(error)
         })

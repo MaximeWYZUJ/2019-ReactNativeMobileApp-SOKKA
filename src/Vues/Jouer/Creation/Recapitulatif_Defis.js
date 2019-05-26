@@ -10,6 +10,9 @@ import Database from '../../../Data/Database'
 
 import Information_Recapitulatif from './Information_Recapitulatif'
 import ID from '../../../Helpers/ID'
+import LocalUser from '../../../Data/LocalUser.json'
+import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
+
 
 /**
  * Classe qui va permettre d'afficher le récapitulatif d'un défis crée par 
@@ -43,7 +46,7 @@ export default class Recapitulatif_Defis extends React.Component {
         }
         this.equipe1Animation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
         this.equipe2Animation = new Animated.ValueXY({ x: wp('100%'), y:0 })
-
+        this.goToFicheDefi = this.goToFicheDefi.bind(this)
     }
 
     static navigationOptions = ({ navigation }) => {
@@ -82,6 +85,25 @@ export default class Recapitulatif_Defis extends React.Component {
     }
 
     
+    goToFicheDefi(msg, id) {
+        Alert.alert(
+            '',
+            msg,
+            [
+              {text: 'Ok',  onPress: () => {
+               
+                this.storeNotificationsInDB(id)
+                this.storeNotificationDefiEquipe(id)
+                this.props.navigation.push("AccueilJouer")
+            }
+                        
+              },
+             
+            ],
+            {cancelable: false},
+        ); 
+        
+    }
     
     /**
      * Fonction qui va permettre de construire une liste d'id des joueurs 
@@ -157,20 +179,74 @@ export default class Recapitulatif_Defis extends React.Component {
             votes : [],
             scoreRenseigne : false,
             butsEquipeOrganisatrice : 0,
-            butsEquipeDefiee : 0
+            butsEquipeDefiee : 0,
+            scoreConfirme :  false,
+            scoreRenseigneParOrga : false,
+            scoreRenseigneParDefiee : false
+            
 
         })
-        .then(function() {
-            console.log("Document successfully written!");
-            Alert.alert(
-                'Ton défi a bien été crée',
-                msg
-            )
-        })
+        .then(this.goToFicheDefi(msg, id))
         .catch(function(error) {
             console.error("Error writing document: ", error);
         });
 
+    }
+
+    /**
+     * On va stocker une notification pour chaque joueur convoqué
+     */
+    storeNotificationsInDB(id) {
+        var joueurs = this.props.navigation.getParam('joueursSelectionnes', [])
+        var db = Database.initialisation() 
+        
+        for(var i = 0 ; i < joueurs.length; i ++) {
+            if(joueurs[i] != LocalUser.data.id) {
+                db.collection("Notifs").add(
+                    {
+                        dateParse : Date.parse(new Date()),
+                        defi : id,
+                        emetteur :  LocalUser.data.id,
+                        recepteur : joueurs[i],
+                        time : new Date(),
+                        type : Types_Notification.CONVOCATION_RELANCE_DEFI,
+                        equipe : this.allDataEquipe.id,
+                    }
+                )
+            }
+        }
+
+    }
+
+    /**
+     * Fonction qui sauvegarde dans la db une notification a envoyer à l'équipe
+     * défiée si il y'en a une 
+     */
+    async storeNotificationDefiEquipe(id) {
+        console.log("in store notif defi EQUIPE")
+        if(this.equipeAdverse != undefined) {
+
+            // Récupérer les données de l'équipe adversse 
+            var equipe = await Database.getDocumentData(this.equipeAdverse, "Equipes")
+            console.log("ID EQUIPE : ", equipe.id)
+            for(var i = 0; i < equipe.capitaines.length; i++) {
+                db.collection("Notifs").add(
+                    {
+                        dateParse : Date.parse(new Date()),
+                        defi : id,
+                        emetteur : LocalUser.data.id,
+                        equipeEmettrice :  this.allDataEquipe.id,
+                        equipeReceptrice : this.equipeAdverse,
+                        recepteur : equipe.capitaines[i],
+                        time : new Date(),
+                        type : Types_Notification.ACCEPTER_DEFIS_CONTRE_EQUIPE,
+                    }
+                )
+            }
+            
+        }
+       
+        
     }
 
     /**
@@ -209,6 +285,7 @@ export default class Recapitulatif_Defis extends React.Component {
 
 
 
+
     calculHeureFin(){
     
 
@@ -237,6 +314,12 @@ export default class Recapitulatif_Defis extends React.Component {
             )
         }
     }
+
+
+    
+
+
+    //==============================================================================
 
     renderEquipeAdverse(){
         if(this.contreQui == 'rechercher_une_equipe') {

@@ -12,8 +12,8 @@ import '@firebase/firestore'
 import FileUploader from  'react-firebase-file-uploader';
 import {SkypeIndicator} from 'react-native-indicators';
 import LocalUser from '../../Data/LocalUser.json';
+import Notification from '../../Helpers/Notifications/Notification'
 
-  
 /**
  * Classe qui permet à l'utilisateur de choisir ou non sa photo de profil et 
  * de terminer l'inscription.
@@ -35,7 +35,7 @@ export default class Inscription_Photo extends React.Component {
         const naissance = navigation.getParam('naissance', ' ');
         const age = navigation.getParam('age','');
         const zone = navigation.getParam('zone', '');
-
+        this.goToProfil = this.goToProfil.bind(this)
         this.state = {
             nom : nom,
             prenom : prenom,
@@ -50,7 +50,8 @@ export default class Inscription_Photo extends React.Component {
             ville : ville,
             naissance : naissance,
             age : age,
-            zone : zone
+            zone : zone,
+            id : "erreur"
         }
     }
 
@@ -90,6 +91,12 @@ export default class Inscription_Photo extends React.Component {
     //**************************** SAUVEGARDE DES DONNEES ***************************
     //*******************************************************************************
 
+    async goToProfil() {
+        console.log("in go to profil")
+        this.props.navigation.navigate("first")
+
+
+    }
 
     /**
      * Fonction qui permet d'enregistrer l'utilisateur dans 
@@ -114,13 +121,17 @@ export default class Inscription_Photo extends React.Component {
         if(image_changed){
             this.uploadImageFinal(this.state.photo.uri, this.state.pseudo)
                 .then(() => {
-                    //Alert.alert("Success");
-                    this.uploadUser(image_changed)
 
-                    this.props.navigation.push("ConfimationInscription", {
-                        pseudo : pseudo,
-                        photo : this.state.photo.uri
-                    })
+                    this.uploadUser(image_changed).then(this.goToProfil)
+
+                    //Alert.alert("Success");
+
+                    //Notification.storeTokenInLogin(LocalUser.data.id)
+                    //this.props.navigation.navigate("ProfilJoueur", {id: LocalUser.data.id, joueur : LocalUser.data, equipes : []})
+
+                    
+            
+
                     
                 })
                 .catch((error) => {
@@ -157,35 +168,46 @@ export default class Inscription_Photo extends React.Component {
                 /* Une fois qu'on a l'url on peut enregistrer les données de
                  l'utilisateurdans firebase. */
                 ref.getDownloadURL().then(function(url) {
-                    user = {
-                        id: id,
-                        age: oldState.age,
-                        aiment: [],
-                        equipes: [],
-                        equipesFav: [],
-                        fiabilite: 0,
-                        mail: oldState.mail,
-                        naissance: firebase.firestore.Timestamp.fromMillis(Date.parse(oldState.naissance)),
-                        nom: oldState.prenom+" "+oldState.nom,
-                        photo: url,
-                        //position: ???,
-                        position: null,
-                        pseudo: oldState.pseudo,
-                        queryPseudo: NormalizeString.normalize(oldState.pseudo),
-                        reseau: [],
-                        score: 0,
-                        telephone: "XX.XX.XX.XX.XX",
-                        terrains: [],
-                        ville: oldState.ville,
-                        zone: oldState.zone
-                    }
                     
-                    // Stockage en local
-                    LocalUser.exists = true;
-                    LocalUser.data = user;
+                    Notification.storeTokenInLogin(id).then(function() {
+                        user = {
+                            id: id,
+                            age: oldState.age,
+                            aiment: [],
+                            equipes: [],
+                            equipesFav: [],
+                            fiabilite: 0,
+                            mail: oldState.mail,
+                            naissance: firebase.firestore.Timestamp.fromMillis(Date.parse(oldState.naissance)),
+                            nom: oldState.prenom+" "+oldState.nom,
+                            nomQuery : NormalizeString.decompose(oldState.prenom+" "+oldState.nom),
+                            prenomQuery : NormalizeString.decompose(oldState.prenom),
+                            photo: url,
+                            //position: ???,
+                            position: null,
+                            pseudo: oldState.pseudo,
+                            queryPseudo: NormalizeString.normalize(oldState.pseudo),
+                            reseau: [],
+                            score: 0,
+                            telephone: "XX.XX.XX.XX.XX",
+                            terrains: [],
+                            ville: oldState.ville,
+                            zone: oldState.zone
+                        }
+                        
+                        console.log("before store localUser")
+                        // Stockage en local
+                        LocalUser.exists = true;
+                        LocalUser.data = user;
+    
+                        // Stockage dans la DB
+                        Database.addDocToCollection(user, id, 'Joueurs')
 
-                    // Stockage dans la DB
-                    Database.addDocToCollection(user, id, 'Joueurs')
+
+                    })
+
+                    
+
 
                 }, function(error){
                     console.log(error);

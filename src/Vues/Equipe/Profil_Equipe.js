@@ -6,9 +6,12 @@ import RF from "react-native-responsive-fontsize"
 import Defis_Equipe from './Defis_Equipe'
 import Database from 'app/src/Data/Database'
 import LocalUser from 'app/src/Data/LocalUser.json'
+import Type_Defis from '../../Vues/Jouer/Type_Defis'
 import firebase from 'firebase'
 //import '@firebase/firestore'
 
+import Item_Defi from '../../Components/Defis/Item_Defi'
+import Item_Partie from '../../Components/Defis/Item_Partie'
 
 /* A changer quand on aura accès aux données. */
 const nbEtoile = 5;
@@ -59,12 +62,57 @@ export default class Profil_Equipe extends React.Component {
             uriEtoile :'erreur',
             joueurs :'erreur',
             defis : 'erreur',
-            id : ''             // Utile pour accéder aux joueurs qui likent
+            id : ''  ,           // Utile pour accéder aux joueurs qui likent 
+            allDefis : []
         }
     }
 
     componentDidMount(){
         this.getEquipeWithId(this.props.navigation.getParam('equipeId', null))
+    }
+
+
+    //================================================================================
+    //=================================== POUR LES DEFIS =============================
+    //================================================================================
+
+
+    /** Fonction qui va permettre de trouver tous les défis et parties à venir auxquels 
+     * participes l'équipe
+     */
+    getAllDefisAndPartie() {
+        var db = Database.initialisation()
+        var allDefis = []
+        var now = new Date()
+        console.log("GET ALL defi", this.state.id)
+        var ref = db.collection("Defis");
+        var query = ref.where("equipeOrganisatrice", "==", this.state.id)
+                        .where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
+
+        // On regarde si l'equipe organise  un defi
+        query.get().then(async (results) => {
+            for(var i = 0; i < results.docs.length ; i++) {
+                allDefis.push(results.docs[i].data())
+            }
+
+            
+
+            // Regarder si cette équipe est defiée 
+            var queryEqDefiee = ref.where("equipeDefiee", "==", this.state.id)
+                                        .where("dateParse", ">=",Date.parse(now))
+                queryEqDefiee.get().then(async (resultsDefiDefiee) => {
+
+                    for(var i = 0; i < resultsDefiDefiee.docs.length ; i++) {
+                        if(! this.allreaddyDownloadDefi(allDefis, resultsDefiDefiee.docs[i].data())) { 
+                                allDefis.push(resultsDefiDefiee.docs[i].data())
+                        }
+                    }
+                })
+
+                this.setState({allDefis : allDefis})
+            }).catch(function(error) {
+              console.log("Error getting documents partie:", error);
+        });   
     }
 
 
@@ -121,6 +169,7 @@ export default class Profil_Equipe extends React.Component {
 
             this.getDefis(doc.defis);
             this.getInfosJoueursEquipe(doc.joueurs, doc);
+            this.getAllDefisAndPartie(id)
 
             title = doc.nom;
             this.props.navigation.setParams({ title });
@@ -370,7 +419,8 @@ export default class Profil_Equipe extends React.Component {
     }
 
     displayDefis(){
-        if(this.state.defis.length == 0) {
+
+        if(this.state.allDefis == undefined ) {
             return (
                 <View>
                     <Text>Pas encore de défis</Text>
@@ -379,24 +429,52 @@ export default class Profil_Equipe extends React.Component {
         }else {
             return(
                 <FlatList style = {{marginLeft : wp('2%')}}
-                        data={this.state.defis}
+                        data={this.state.allDefis}
                         numColumns={1}
                         keyExtractor={(item) => item.id}
-                        renderItem={({item}) =>
-                           <Defis_Equipe
-                                format = {item.format}
-                                photo1 = {item.photo1}
-                                photo2 = {item.photo2}
-                                nom1 = {item.nom1}
-                                nom2 = {item.nom2}
-                                date = {item.date}
-                            />
-                        }
+                        renderItem={this._renderItemDefi}
                 />
             )
         }
     }
 
+    _renderItemDefi =({item}) => {   
+        if(item.type == Type_Defis.partie_entre_joueurs){
+          
+            return(
+                <Item_Partie
+                    id = {item.id}
+                    format = {item.format}
+                    jour = {new Date(item.jour.seconds *1000)} 
+                    duree = {item.duree}
+                    joueurs = {this.buildJoueurs(item)}
+                    nbJoueursRecherche =  {item.nbJoueursRecherche}
+                    terrain=  {item.terrain}
+                    latitudeUser = {this.state.latitude}
+                    longitudeUser = {this.state.longitude}
+                    message_chauffe  = {item.message_chauffe}
+                />
+            )
+        } else if(item.type == Type_Defis.defis_2_equipes) {
+            return(
+                <Item_Defi
+                    format = {item.format}
+                    jour = {new Date(item.jour.seconds * 1000)}
+                    duree ={item.duree}
+                    equipeOrganisatrice = {item.equipeOrganisatrice}
+                    equipeDefiee = {item.equipeDefiee}
+                    terrain = {item.terrain}
+                    allDataDefi = {item}
+                        
+                />
+            )
+        } else {
+            return(
+                <Text>oooo</Text>
+            )
+        }  
+    }
+      
 
     /**
      * Fonction qui nous permet d'afficher la vue du profil de l'équipe
