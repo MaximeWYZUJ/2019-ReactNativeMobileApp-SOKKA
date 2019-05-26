@@ -35,11 +35,10 @@ export default class Creation_Equipe_Citation extends React.Component {
                         onPress = {()=> this.props.navigation.push(
                             "CreationEquipePhoto", 
                             {
-                                nom : this.state.nom,
-                                nom : this.props.nom,
-                                ville : this.props.ville,
-                                departement : this.props.departement,
-                                joueurs : this.props.joueurs, 
+                                nom : this.props.navigation.getParam('nom', undefined),
+                                ville :  this.props.navigation.getParam('ville', undefined),
+                                departement :  this.props.navigation.getParam('departement', undefined),
+                                joueurs : this.props.navigation.getParam('joueurs', []),
                                 citation : this.state.citation
                             }
                         )}

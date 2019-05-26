@@ -123,11 +123,14 @@ export default class Creation_Equipe_Zone extends React.Component {
         
         return (
             <TouchableOpacity
-                onPress = {() => this.setState({ville : txt, searchedVilles : [] })}>
+                onPress = {() => this.setState({ville : txt, searchedVilles : [] })}
+                style = {{backgroundColor : Colors.grayItem,  marginTop : hp('1%'), marginBottom : hp('1'),paddingVertical : hp('1%')}}
+                >
             
                 <View style = {{flexDirection : 'row'}}>
-                        <Text style = {{fontWeight : 'bold', fontSize :RF(2.3)}}>{this.state.ville}</Text>
-                        <Text style = {{fontSize :RF(2.3)}}>{txt.substr(this.state.ville.length)}</Text>
+                        <Text>{adress.Code_postal} - </Text>
+                        <Text style = {{fontWeight : 'bold', fontSize :RF(2.6)}}>{this.state.ville}</Text>
+                        <Text style = {{fontSize :RF(2.6)}}>{txt.substr(this.state.ville.length)}</Text>
                 </View>
             
                </TouchableOpacity>
@@ -149,7 +152,12 @@ export default class Creation_Equipe_Zone extends React.Component {
                 <View style = {styles.bandeau}>
                     <Text style= {{ alignSelf : "center", marginLeft : wp('22%'), marginRight : wp('13%'), fontSize : RF(3.1)}}>Lieu de l'équipe</Text>
                     <TouchableOpacity
-                        onPress = {()=> this.props.navigation.push("CreationEquipeAjoutJoueurs", {nom : this.state.nom, departement : this.state.departement, ville : this.state.ville})}
+                        onPress = {()=> this.props.navigation.push("CreationEquipeAjoutJoueurs", 
+                            {   nom : this.props.navigation.getParam("nom",undefined), 
+                                departement : this.state.departement, 
+                                ville : this.state.ville
+                            }
+                        )}
                     >
                         <Text style = {{fontSize : RF(3.1), color : Colors.agOOraBlue}}>Suivant</Text>
                     </TouchableOpacity>

@@ -16,21 +16,35 @@ class ProfilJoueur extends React.Component {
 
     constructor(props) {
         super(props)
+        console.log("in constructor")
         this.id = this.props.navigation.getParam('id', ' ')
         this.monProfil= Database.isUser(this.id);
-        this.equipes = this.props.navigation.getParam('equipes', '')
+        this.equipes = this.props.navigation.getParam('equipes', [])
         this.joueur = this.props.navigation.getParam('joueur', ' ')
         this.goToFirstScreen  = this.goToFirstScreen.bind(this)
+
+        
     }
 
     static navigationOptions = ({ navigation }) => {
-        return {
-            title: navigation.getParam('joueur', ' ').nom,
-            tabBarOnPress({jumpToIndex, scene}) {
-                jumpToIndex(scene.index);
-                console.log(scene.index)
+        if(! navigation.getParam("retour_arriere_interdit",false)) {
+            return {
+                title: navigation.getParam('joueur', ' ').nom,
+                tabBarOnPress({jumpToIndex, scene}) {
+                    jumpToIndex(scene.index);
+                    console.log(scene.index)
+                }
             }
+        } else {
+            const {state} = navigation;
+            return { title: `${state.params.title}`, 
+            headerLeft: (
+
+               <View></View>
+              ),
+                };
         }
+
     }
 
     _displayReglages() {
@@ -300,6 +314,18 @@ class ProfilJoueur extends React.Component {
         }
     }
 
+    renderBtnCreerEquipe() {
+        if(this.monProfil) {
+            return(
+                <Button
+                onPress={() => this.props.navigation.push("CreationEquipeNom")}
+                title="Créer une équipe"
+                color= {Color.agOOraBlue}
+                />
+            )
+        }
+    }
+
     render() {
         return (
             <ScrollView style={styles.main_container}>
@@ -394,6 +420,9 @@ class ProfilJoueur extends React.Component {
                     {this.displayDefis()}
                 </View>
                 {this.renderBtnDeco()}
+
+                {this.renderBtnCreerEquipe()}
+
             </ScrollView>
         )
     }

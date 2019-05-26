@@ -382,43 +382,65 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
         console.log("in go back to fiche")
         var defi  =this.props.navigation.getParam('defi', undefined)
         var joueursEquipe = this.props.navigation.getParam('joueursEquipe',[])
-        console.log({
-            ...defi,
-            confirmesEquipeDefiee : defi.confirmesEquipeDefiee.concat(this.findCapitaines()),
-            attenteEquipeDefiee : joueursEquipe.concat(this.buildListOfJoueurWithoutCapitaines()),
-            joueursEquipeDefiee : this.state.joueursSelectionnes.concat(joueursEquipe),
-            participants : defi.participants.concat(this.state.joueursSelectionnes)
-        })
+        
         if(this.equipe.id == defi.equipeDefiee) {
+
+            // Mettre  à jour les champs du défi
+            defi["confirmesEquipeDefiee"] = defi.confirmesEquipeDefiee.concat(this.findCapitaines()),
+            defi["attenteEquipeDefiee"] = defi.attenteEquipeDefiee.concat(this.buildListOfJoueurWithoutCapitaines())
+            defi["joueursEquipeDefiee"] = this.state.joueursSelectionnes.concat(joueursEquipe)
+            defi["participants"] = defi.participants.concat(this.state.joueursSelectionnes)
+            
+            // Se rendre sur la fiche du défi
             this.props.navigation.push("FeuilleDefiAVenir", 
                 {
                     retour_arriere_interdit : true,
                     equipeDefiee : this.props.navigation.getParam('equipeDefiee',undefined),
                     equipeOrganisatrice : this.props.navigation.getParam('equipeOrganisatrice',undefined),
-                    defi : {
+                    defi : defi
+                    /*defi : {
                         ...defi,
                         confirmesEquipeDefiee : defi.confirmesEquipeDefiee.concat(this.findCapitaines()),
                         attenteEquipeDefiee : joueursEquipe.concat(this.buildListOfJoueurWithoutCapitaines()),
                         joueursEquipeDefiee : this.state.joueursSelectionnes.concat(joueursEquipe),
                         participants : defi.participants.concat(this.state.joueursSelectionnes)
-                    }
+                    }*/
                 }
             )
-        } this.props.navigation.push("FeuilleDefiAVenir", 
-        {
-            retour_arriere_interdit : true,
-            equipeDefiee : this.props.navigation.getParam('equipeDefiee',undefined),
-            equipeOrganisatrice : this.props.navigation.getParam('equipeOrganisatrice',undefined),
-            defi : {
-                ...defi,
-                confirmesEquipeOrga : defi.confirmesEquipeOrga.concat(this.findCapitaines()),
-                attenteEquipeOrga : joueursEquipe.concat(this.buildListOfJoueurWithoutCapitaines()),
-                joueursEquipeOrga : this.state.joueursSelectionnes.concat(joueursEquipe),
-                participants : defi.participants.concat(this.state.joueursSelectionnes)
-            }
+        } else {
+
+            // Mettre  à jour les champs du défi
+            defi["confirmesEquipeOrga"] = defi.confirmesEquipeOrga.concat(this.findCapitaines()),
+            defi["attenteEquipeOrga"] =  defi.attenteEquipeOrga.concat(this.buildListOfJoueurWithoutCapitaines())
+            defi["joueursEquipeOrga"] = this.state.joueursSelectionnes.concat(joueursEquipe)
+            defi["participants"] = defi.participants.concat(this.state.joueursSelectionnes)
+
+            this.props.navigation.push("FeuilleDefiAVenir", 
+                {
+                    retour_arriere_interdit : true,
+                    equipeDefiee : this.props.navigation.getParam('equipeDefiee',undefined),
+                    equipeOrganisatrice : this.props.navigation.getParam('equipeOrganisatrice',undefined),
+                    defi : defi
+                    /*defi : {
+                        ...defi,
+                        confirmesEquipeOrga : defi.confirmesEquipeOrga.concat(this.findCapitaines()),
+                        attenteEquipeOrga : joueursEquipe.concat(this.buildListOfJoueurWithoutCapitaines()),
+                        joueursEquipeOrga : this.state.joueursSelectionnes.concat(joueursEquipe),
+                        participants : defi.participants.concat(this.state.joueursSelectionnes)
+                    }*/
+                }
+            )
         }
-    )
         
+    }
+
+
+    /**
+     * Fonction qui va renvoyer la liste des joueurs en attente
+     * pour le défi
+     */
+    findJoueurAttente() {
+
     }
 
 
@@ -438,7 +460,7 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                 var DefiRef = db.collection("Defis").doc(defi.id) 
                 DefiRef.update({
                     confirmesEquipeDefiee : defi.confirmesEquipeDefiee.concat(this.findCapitaines()),
-                    attenteEquipeDefiee : joueursEquipe.concat(this.buildListOfJoueurWithoutCapitaines()),
+                    attenteEquipeDefiee : defi.attenteEquipeDefiee.concat(this.buildListOfJoueurWithoutCapitaines()),
                     joueursEquipeDefiee : this.state.joueursSelectionnes.concat(joueursEquipe),
                     participants : defi.participants.concat(this.state.joueursSelectionnes)
                 }).then(this.goBackToFiche)
@@ -453,7 +475,7 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                 
                 DefiRef.update({
                     confirmesEquipeOrga : defi.confirmesEquipeOrga.concat(this.findCapitaines()),
-                    attenteEquipeOrga : joueursEquipe.concat(this.buildListOfJoueurWithoutCapitaines()),
+                    attenteEquipeOrga : defi.attenteEquipeOrga.concat(this.buildListOfJoueurWithoutCapitaines()),
                     joueursEquipeOrga : this.state.joueursSelectionnes.concat(joueursEquipe),
                     participants : defi.participants.concat(this.state.joueursSelectionnes)
                 }).then(this.goBackToFiche)
@@ -529,7 +551,13 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
         var nbAtteint = this.props.navigation.getParam("nbJoueurMinatteint", false)
         console.log("nb ATTEINT : ", nbAtteint)
         // PASSER EN PROPS USER DATA (Toutes les donnes de l'user)
-        if(nbAtteint || this.state.joueursSelectionnes.length >= parseInt(this.format.split("x")[0]) ) {
+
+        // Calculer le nbr de joueurs total pour le defi
+        var joueursEquipe = this.props.navigation.getParam("joueursEquipe", [])
+        var nbJoueurs = this.state.joueursSelectionnes.length +joueursEquipe.length
+        
+        console.log("NB JOUEURS : ", nbJoueurs)
+        if( this.state.joueursSelectionnes.length > 0 && (nbAtteint || nbJoueurs >= parseInt(this.format.split("x")[0])) ) {
             return( 
                 <TouchableOpacity
                     onPress ={() => {

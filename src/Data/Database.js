@@ -297,4 +297,36 @@ export default class Database {
         }
     }
 
+
+     /**
+     * Fonction qui va permettre d'uploader la photo de profil dans le storage
+     * firebase.
+     * 
+     * uri : uri de la photo de profil
+     * imageName : Nom à donner au fichier sur le storage
+     */
+    static uploadImageFinal = async (uri, imageName,isEquipe) => {
+        var dossier = "Photos_profil_Joueurs"
+        if(isEquipe) {
+            dossier = "Photos_Profil_Equipes"
+        }
+        const blob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+              resolve(xhr.response);
+            };
+            xhr.onerror = function() {
+              reject(new TypeError('Network request failed'));
+            };
+            xhr.responseType = 'blob';
+            xhr.open('GET', uri, true);
+            xhr.send(null);
+        });
+        var r = Math.random(500)
+        var ref = firebase.storage().ref().child(dossier +"/tests/" + imageName+r);
+        await ref.put(blob);
+        var url = await ref.getDownloadURL()
+        return url
+    }
+
 }

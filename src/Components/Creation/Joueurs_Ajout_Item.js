@@ -6,7 +6,7 @@ import Colors from '../Colors'
 import { CheckBox } from 'react-native-elements'
 import { connect } from 'react-redux'
 import StarRating from 'react-native-star-rating'
-
+import Joueur_Pseudo_Score from '../ProfilJoueur/Joueur_Pseudo_Score'
 
 class Joueurs_Ajout_Item extends React.PureComponent{
 
@@ -47,27 +47,16 @@ class Joueurs_Ajout_Item extends React.PureComponent{
         return(
             <View style = {styles.styleMain}>
 
+            
             {/* Photo, nom et note du joueur */}
             <View style = {{flexDirection : 'row'}}>
-
-                <Image 
-                    style={{ width: wp('12%'), height: wp('12%'), borderRadius :wp('6%'), alignSelf : 'center'}}
-                    source = {{uri : this.props.joueur.photo}}
+                <Joueur_Pseudo_Score
+                    pseudo = {this.props.joueur.pseudo}
+                    score = {this.props.joueur.score}
+                    photo = {this.props.joueur.photo}
                 />
 
-                {/* Nom et note du joueurs */}
-                <View style = {{marginLeft : wp('3%'), alignSelf : 'center'}}>
-                    <Text>{this.props.joueur.nom} {this.props.txtDistance} </Text>
-                    <StarRating
-                        disabled={true}
-                        maxStars={5}
-                        rating={this.props.joueur.note}
-                        starSize={wp('4%')}
-                        fullStarColor={Colors.fullStar}
-                        emptyStarColor={Colors.emptyStar}
-                        containerStyle={{width: wp('10%')}}
-                    />
-                </View>
+                
             </View>
             <CheckBox
                     right
@@ -94,15 +83,9 @@ class Joueurs_Ajout_Item extends React.PureComponent{
 const styles = {
     styleMain : {
         flexDirection : 'row',
-        backgroundColor : '#F7F7F7',
-        shadowColor: 'rgba(0,0,0, .4)', // IOS
-        shadowOffset: { height: 1, width: 1 }, // IOS
-        shadowOpacity: 1, // IOS
-        shadowRadius: 1, //IOS
-        elevation: 4,
+        
         marginBottom : hp('1%'),
         marginTop : hp('1%'),
-        borderRadius : 8,
         marginLeft : wp('2%'),
         marginRight : wp('2%'),
         justifyContent: 'space-between',

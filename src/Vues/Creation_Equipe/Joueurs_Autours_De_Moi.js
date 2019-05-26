@@ -3,13 +3,19 @@ import {View, Text,Image,TouchableOpacity, TextInput, ScrollView,FlatList} from 
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Colors from '../../Components/Colors'
 import Slider from "react-native-slider";
+import RF from 'react-native-responsive-fontsize';
+
 import Joueurs from '../../Helpers/JoueursForAjout'
 import Joueurs_Ajout_Item from '../../Components/Creation/Joueurs_Ajout_Item'
 import { connect } from 'react-redux'
+import AlphabetListView from 'react-native-alphabetlistview'
+import LocalUser from '../../Data/LocalUser.json'
+import DataBase from '../../Data/Database'
 
 const latUser = 43.531486   // A suppr quand on aura les vrais coordonnées
 const longUser = 1.490306
 const DISTANCE_MAX_FROM_USER = 50;
+
 
 /**
  * Classe qui va permettre à l'utilisateur de selectionner les joueurs qui 
@@ -17,146 +23,196 @@ const DISTANCE_MAX_FROM_USER = 50;
  * créer
  */
 class Joueurs_Autours_De_Moi_Final extends React.Component {
-
-    constructor(props) {
-        super(props) ;
-        //let maxDistance = this.state.distanceMax;
-        let joueurFiltres = Joueurs.filter(function(joueur) {
-            let lat_b = joueur.position[0];
-            let lon_b = joueur.position[1]
-            let rad_lata = (latUser * Math.PI)/180;
-            let rad_long = ((longUser- lon_b) * Math.PI)/180;
-            let rad_latb = (lat_b * Math.PI)/180;
-
-            let d = Math.acos(Math.sin(rad_lata)*Math.sin(rad_latb)+
-            Math.cos(rad_lata)*Math.cos(rad_latb)*Math.cos(rad_long))*6371
-            return d <= DISTANCE_MAX_FROM_USER ;
-        });
-
+    constructor(props, context) {
+        super(props, context);
+        this.ville = LocalUser.data.ville
+        this.monId = LocalUser.data.id
         this.state = {
-            allJoueurs : joueurFiltres,
-            distanceMax : 50,
-            valueSlider : 50,
+            joueurs : []
         }
     }
 
-    /**
-     * Fonction qui permet de filter les joueurs en fonction de leur distance
-     * par rapport à l'utilisateur.
-     * 
-    */
-   filtrerJoueurDistance() {
-    let maxDistance = this.state.distanceMax;
-    let joueurFiltres = Joueurs.filter(function(joueur) {
-        let lat_b = joueur.position[0];
-        let lon_b = joueur.position[1]
-        let rad_lata = (latUser * Math.PI)/180;
-        let rad_long = ((longUser- lon_b) * Math.PI)/180;
-        let rad_latb = (lat_b * Math.PI)/180;
-
-        let d = Math.acos(Math.sin(rad_lata)*Math.sin(rad_latb)+
-        Math.cos(rad_lata)*Math.cos(rad_latb)*Math.cos(rad_long))*6371
-        return d <= maxDistance;
-    });
-    this.setState({allJoueurs : joueurFiltres})
-    }
-
-
-
-    _calculDistance(lat_b,lon_b) {
-        let rad_lata = (latUser * Math.PI)/180;
-        let rad_long = ((longUser- lon_b) * Math.PI)/180;
-        let rad_latb = (lat_b * Math.PI)/180;
-
-        let d = Math.acos(Math.sin(rad_lata)*Math.sin(rad_latb)+
-        Math.cos(rad_lata)*Math.cos(rad_latb)*Math.cos(rad_long))*6371
-        return d;
+    componentDidMount() {
+        this.getJoueursFromDB()
     }
 
     /**
-     * Fonction qui permet de filtrer les joueurs en fonction de ce que tappe 
-     * l'utilisateur.
+     * Fonction qui va faire une query sur la base de donnée et renvoyer 20 joueurs (aléatoirement)
+     * qui sont dans la même ville que l'utilisateur. 
      */
-    searchedJoueurs = (searchedText) => {
-        let searchedJoueurs = this.state.allJoueurs.filter(function(joueur) {
-            return joueur.nom.toLowerCase().startsWith(searchedText.toLowerCase()) ;
-        });
-        this.setState({allJoueurs: searchedJoueurs});
+    getJoueursFromDB() {
+        var joueurArray = []
+        var db = DataBase.initialisation()
+
+        var ref = db.collection("Joueurs");
+        var query = ref.where("ville", "==", this.ville).limit(20);
+        query.get().then(async (results) => {
+            if(results.empty) {
+              console.log("No documents found!");   
+            } else {
+              // go through all results
+              for(var i = 0; i < results.docs.length ; i++) {
+                if(results.docs[i].data().id != this.monId) {
+                    joueurArray.push(results.docs[i].data())
+
+                }
+              }
+             
+              var j = this.buildJoueurs(joueurArray)
+              this.setState({joueurs : j})
+
+              
+
+            }
+
+        
+          }).catch(function(error) {
+              console.log("Error getting documents:", error);
+          });
     }
 
-    renderItem = ({item}) => {
-        var distance = this._calculDistance(item.position[0],item.position[1]);
-        var txtDistance = distance.toString().split('.')[0];
-        txtDistance = txtDistance +','+ distance.toString().split('.')[1][0]
-        return (
-        <Joueurs_Ajout_Item 
-            joueur = {item}
-            isShown = {this.props.joueursSelectionnes.includes(item.id)}
-            txtDistance = {' - ' + txtDistance + ' km'}
-        />)
+
+
+    isJoueurPresent(liste, joueur) {
+        for(var i = 0; i < liste.length ; i++) {
+            if(liste[i].id == joueur.id){
+                return true 
+            }
+        }
+        return false
     }
+
+    /**
+     * Fonction qui permet de trier les joueurs en fonction de l'ordre laphabethique
+     * de leur pseudo.
+     * @param {*} joueurs 
+     */
+    buildJoueurs(joueurs) {
+        let  data =  {
+            A: [],
+            B: [],
+            C: [],
+            D: [],
+            E: [],
+            F: [],
+            G: [],
+            H: [],
+            I: [],
+            J: [],
+            K: [],
+            L: [],
+            M: [],
+            N: [],
+            O: [],
+            P: [],
+            Q: [],
+            R: [],
+            S: [],
+            T: [],
+            U: [],
+            V: [],
+            W: [],
+            X: [],
+            Y: [],
+            Z: [],
+        }
+        for(var i = 0; i < joueurs.length ; i ++) {
+            joueur = joueurs[i]
+            let lettre = joueur.pseudo[0].toUpperCase()
+            let arrayj = data[lettre]
+            let j = {
+                pseudo : joueur.pseudo,
+                photo : joueur.photo,
+                score : joueur.score,
+                id : joueur.id
+            }
+            arrayj.push(j)
+            data[lettre] = arrayj
+        }
+        return data
+    }
+
+
+
+    _renderCell= ({item}) => {
+        return(
+            <Cell
+                item = {item}
+                isShown = {this.props.joueursSelectionnes.includes(item.id)}
+            />
+        )
+    }
+
 
     render(){
-       
+        return(
+            <View style = {{flex :1}}>
 
-        return (
-            <View>
-    
-                {/* View contenant la bare de recherche */}
-                <View style = {{flexDirection : 'row', marginTop : hp('2%'), marginLeft : wp('5%'), marginRight : wp('5%')}}>
-                    <Image style={styles.search_image}
-                        source = {require('app/res/search.png')} />
-                    <TextInput
-                        style={{flex: 1, borderWidth: 1, marginHorizontal: 15, borderRadius : 10, width : wp('10%')}}
-                        onChangeText={this.searchedJoueurs}
-
-                    />
-                    <TouchableOpacity onPress={() => this.setState({text: ''})}>
-                        <Image style={styles.search_image}
-                                source = {require('app/res/cross.png')}/>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Nombre de km et slider */}
-                <View style = {{marginTop : hp('2%')}}>
-                    <Text style = {{ alignSelf :"center"}}>{this.state.distanceMax.toString().split('.')[0]} km</Text>
-                    <Slider
-                        minimumValue={0}
-                        maximumValue={DISTANCE_MAX_FROM_USER}
-                        style = {{width : wp('65%'), alignSelf :"center"}}
-                        onValueChange={(value) => {
-                            this.setState({ distanceMax : value, })
-                            this.filtrerJoueurDistance()
-                        }}
-                        minimumTrackTintColor={Colors.agOOraBlue}
-                        maximumTrackTintColor= {Colors.agooraBlueStronger}
-                        thumbTintColor= {Colors.agooraBlueStronger} 
-                    />
-                </View>
-               
-               <ScrollView>
-                    <FlatList
-                        data = {this.state.allJoueurs}
-                        keyExtractor={(item) => item.id}
-                        extraData = {this.props.joueursSelectionnes}
-                        removeClippedSubviews = {true}
-                        renderItem={this.renderItem}
-                    />
-                </ScrollView>
-                <Text> </Text>
-
+                <AlphabetListView
+                    data={this.state.joueurs}
+                    cell={this._renderCell}
+                    cellHeight={30}
+                    sectionListItem={SectionItem}
+                    sectionHeader={SectionHeader}
+                    sectionHeaderHeight={22.5}
+                />
             </View>
         )
     }
 }
 
-const styles = {
-    search_image: {
-        width: wp('7%'),
-        height: wp('7%'),
-    },
+class SectionHeader extends React.Component {
 
+    render() {
+    // inline styles used for brevity, use a stylesheet when possible
+    var textStyle = {
+      color:'black',
+      fontWeight:'bold',
+      fontSize:RF(2.5),
+      marginLeft : wp('2.5%')
+    };
+
+    var viewStyle = {
+      backgroundColor: '#F7F7F7'
+    };
+  
+    return (
+        <View style={viewStyle}>
+        <Text style={textStyle}>{this.props.title}</Text>
+      </View>
+      
+    );
+  }
 }
+
+class SectionItem extends React.Component {
+  render() {
+    
+
+    return (
+        <Text style={{color:'black'}}>{this.props.title}</Text>
+    );
+  }
+}
+
+class Cell extends React.Component {
+  
+    render() {
+    return (
+        <View style = {{marginRight : wp('8%')}}>
+        <Joueurs_Ajout_Item 
+            joueur = {this.props.item}
+            isShown = {this.props.isShown}
+            txtDistance = {' '}
+        />
+
+            
+      </View>
+    );
+  }
+}
+
+    
 
 
 const mapStateToProps = (state) => {

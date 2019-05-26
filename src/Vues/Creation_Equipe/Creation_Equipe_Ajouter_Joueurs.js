@@ -36,9 +36,9 @@ class Creation_Equipe_Ajouter_Joueurs_Final extends React.Component {
                     onPress = {()=> this.props.navigation.push(
                         "CreationEquipeCitation",
                         {
-                            nom : this.props.nom,
-                            ville : this.props.ville,
-                            departement : this.props.departement,
+                            nom : this.props.navigation.getParam('nom', undefined),
+                            ville :  this.props.navigation.getParam('ville', undefined),
+                            departement :  this.props.navigation.getParam('departement', undefined),
                             joueurs : this.props.joueursSelectionnes,  
                         })}
                     >

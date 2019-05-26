@@ -10,7 +10,7 @@ const TabAjouterJoueursEquipe = createAppContainer( createMaterialTopTabNavigato
 
     "Autours de moi": { screen: props =>  <Joueurs_Autours_De_Moi{...props}/>},
     "Mon reseau": { screen: Joueurs_Reseau },
-    "Test": { screen: Joueurs_Reseau },
+    "Rechercher": { screen: Joueurs_Reseau },
 
   }, {
     tabBarComponent: TabBarTop,

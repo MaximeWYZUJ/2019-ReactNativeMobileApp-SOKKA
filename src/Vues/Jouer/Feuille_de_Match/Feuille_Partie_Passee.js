@@ -24,7 +24,7 @@ class Feuille_Partie_Passee extends React.Component {
             joueurs : this.props.navigation.getParam('joueurs', []),
         }
         this.joueurAnimation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
-
+        this.goToFichePartie = this.goToFichePartie.bind(this)
     }
 
 
@@ -34,6 +34,25 @@ class Feuille_Partie_Passee extends React.Component {
     }
 
 
+
+    /**
+     * Fonction qui permet de revenir sur la fiche de la partie en interdissant
+     * le retour en arrière
+     */
+    goToFichePartie() {
+            
+               
+        this.props.navigation.push("FichePartieRejoindre",
+            {
+                download_All_Data_Partie : true,
+                id : this.state.partie.id,
+                retour_arriere_interdit : true
+            }
+        )
+               
+        
+        
+    }
 
  
 
@@ -77,12 +96,8 @@ class Feuille_Partie_Passee extends React.Component {
            buteurs : this.props.buteurs,
            confirme : this.props.joueursPresents 
         })
-        .then(
-            Alert.alert(
-                '',
-                'Les modifications ont bien été enregistrées'
-            )
-        )
+        .then(this.goToFichePartie)
+        
         .catch(function(error) {
             // The document probably doesn't exist.
             console.error("Error updating document: ", error);

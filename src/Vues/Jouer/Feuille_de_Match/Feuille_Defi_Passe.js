@@ -38,8 +38,10 @@ class Feuille_Defi_Passe extends React.Component {
         this.equipe1Animation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
         this.equipe2Animation = new Animated.ValueXY({ x: wp('100%'), y:0 })
 
+        this.goBackToFiche = this.goBackToFiche.bind(this)
        
     }
+
 
     static navigationOptions = ({ navigation }) => {
         const {state} = navigation;
@@ -62,6 +64,48 @@ class Feuille_Defi_Passe extends React.Component {
 
     }
 
+
+
+    /**
+     * Fonction qui renvoie vers la fiche du défi avec les informations
+     * mises à jour
+     */
+    goBackToFiche() {
+
+        // Trouver si c'est l'équipe orga ou non 
+        if(this.state.equipeOrganisatrice.joueurs.includes(this.monId)) {
+
+            var defi = this.state.defi
+            defi["votes"] = this.props.votes
+            defi["buteurs"] = this.props.buteurs
+            defi["confirmesEquipeOrga"] = this.props.joueursPresents
+            defi["scoreRenseigne"] = this.state.scoreRenseigne
+            defi["butsEquipeDefiee"] = this.state.nbButEquDefiee
+            defi["butsEquipeOrganisatrice"] = this.state.butsEquipeOrganisatrice
+
+            this.props.navigation.push("FicheDefiRejoindre", 
+                {
+                    retour_arriere_interdit : true,
+                    equipeDefiee : this.state.equipeDefiee,
+                    equipeOrganisatrice : this.state.equipeOrganisatrice,
+                    defi : defi
+                    /*defi : {
+                        ...defi,
+                        confirmesEquipeDefiee : defi.confirmesEquipeDefiee.concat(this.findCapitaines()),
+                        attenteEquipeDefiee : joueursEquipe.concat(this.buildListOfJoueurWithoutCapitaines()),
+                        joueursEquipeDefiee : this.state.joueursSelectionnes.concat(joueursEquipe),
+                        participants : defi.participants.concat(this.state.joueursSelectionnes)
+                    }*/
+                }
+            )
+        } else {
+            
+        }
+    }
+
+
+
+
     /**
      * Fonction qui va mettre à jour le défi dans la base de données pas besoin de changer 
      *  les listes des joueurs en attente car vu le fait qu'un joueurs soit dans les confirmé suffit.
@@ -69,10 +113,7 @@ class Feuille_Defi_Passe extends React.Component {
     enregistrer() {
         var db = Database.initialisation()
         var defisRef = db.collection("Defis").doc(this.state.defi.id);
-        console.log("in enregistrer")
-        console.log("vote : ",this.props.votes)
-        console.log("present : ",this.props.joueursPresents)
-        console.log("buteur :", this.props.buteurs)
+        
         if(this.state.equipeOrganisatrice.joueurs.includes(this.monId)) {
             defisRef.update({
                 votes : this.props.votes,
@@ -82,12 +123,7 @@ class Feuille_Defi_Passe extends React.Component {
                 butsEquipeDefiee : this.state.nbButEquDefiee,
                 butsEquipeOrganisatrice : this.state.nbButEquOrga
              })
-             .then(
-                 Alert.alert(
-                     '',
-                     'Les modifications ont bien été enregistrées'
-                 )
-             )
+             .then(this.goBackToFiche)
              .catch(function(error) {
                  // The document probably doesn't exist.
                  console.error("Error updating document: ", error);
@@ -101,13 +137,7 @@ class Feuille_Defi_Passe extends React.Component {
                 butsEquipeDefiee : this.state.nbButEquDefiee,
                 butsEquipeOrganisatrice : this.state.nbButEquOrga
              })
-             .then(
-                 Alert.alert(
-                     '',
-                     'Les modifications ont bien été enregistrées'
-                 )
-             )
-             .catch(function(error) {
+             .then(this.goBackToFiche).catch(function(error) {
                  // The document probably doesn't exist.
                  console.error("Error updating document: ", error);
              });

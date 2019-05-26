@@ -15,6 +15,17 @@ import { connect } from 'react-redux'
 import actions from '../../../Store/Reducers/actions'
 import Joueur_Pseudo_Score from '../../../Components/ProfilJoueur/Joueur_Pseudo_Score';
 import LocalUser from '../../../Data/LocalUser.json'
+import { StackActions, NavigationActions } from 'react-navigation';
+
+
+// Rememttre à Zéro le stack navigator pour empecher le retour en arriere
+const resetAction = StackActions.reset({
+    index: 0, // <-- currect active route from actions array
+    actions: [
+      NavigationActions.navigate({ routeName: 'AccueilJouer' }),
+    ],
+});
+
 
 /**
  * Classe qui va permettre d'afficher les informations d'un défi et permettre à l'utilisateur
@@ -71,11 +82,35 @@ class Fiche_Defi_Rejoindre extends React.Component {
         this.setState({isLoading : false})
     }
 
+    /**
+     * Fonction qui va permettre de gérer la bare de navigation, si la props reçu 
+     * interdit le retour en arriere on affiche pas de bare, mais on va afficher 
+     * notre propre composant bare de navigation où la flèche retour mène là où on 
+     * veux
+     */
     static navigationOptions = ({ navigation }) => {
-        const {state} = navigation;
-        return {
-            title: `${state.params.title}`,
-        };
+
+        // Le retour en arriere est autorisé
+        if(! navigation.getParam("retour_arriere_interdit",false)) {
+            const {state} = navigation;
+            return { title: `${state.params.title}`, };
+        } else {
+            const {state} = navigation;
+            return { title: `${state.params.title}`, 
+            headerLeft: (
+
+               <TouchableOpacity
+                onPress = {() =>navigation.dispatch(resetAction)} >
+                   <Image
+                    style = {{width : 20, height : 20, marginLeft :15}}
+                    source = {require('../../../../res/right-arrow-nav.png')}
+                   />
+               </TouchableOpacity>
+              ),
+                };
+        }
+        
+        
     };
       
 
@@ -86,6 +121,8 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
 
   
+
+    
 
 
 
@@ -719,7 +756,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
         } else {
             return(
                 <View>
-                    <Text>Attente de validation par l'organisateur</Text>
+                    <Text>Attente de validation du défi</Text>
                 </View>
             )
         }

@@ -6,6 +6,10 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import Joueurs from '../../Helpers/JoueursForAjout'
 import { connect } from 'react-redux'
 import Joueurs_Ajout_Item from '../../Components/Creation/Joueurs_Ajout_Item'
+import LocalUser from '../../Data/LocalUser.json'
+import Database from '../../Data/Database'
+import {SkypeIndicator} from 'react-native-indicators';
+import Barre_Recherche from '../../Components/Recherche/Barre_Recherche'
 
 /**
  * Classe qui va permettre à l'utilisateur permettre de choisir les joueurs de son 
@@ -18,9 +22,12 @@ class Joueurs_Reseau_Final extends React.Component {
         super(props)
         this.state = {
             joueurs : [],
-            allJoueurs : Joueurs,
+            allJoueurs : [],
+            joueurFiltres : [],
             distanceMax : 50,
+            isLoading : true
         }
+        this.reseau = LocalUser.data.reseau
     }
 
     testAppartient(x,e) {
@@ -34,16 +41,34 @@ class Joueurs_Reseau_Final extends React.Component {
         return ok
     }
 
+    componentDidMount() {
+        this.downloadDataJoueur()
+    }
+
 
     /**
-     * Fonction qui permet de filtrer les joueurs en fonction de ce que tappe 
-     * l'utilisateur.
+     * Fonction qui permet de télécharger les données des joueurs du réseau 
+     * de l'utilisateur
      */
-    searchedJoueurs = (searchedText) => {
-        let searchedJoueurs = this.state.allJoueurs.filter(function(joueur) {
-            return joueur.nom.toLowerCase().startsWith(searchedText.toLowerCase()) ;
-        });
-        this.setState({allJoueurs: searchedJoueurs});
+    async downloadDataJoueur() {
+        var liste = []
+        for(var i = 0 ; i < this.reseau.length; i++) {
+            var joueur = await Database.getDocumentData(this.reseau[i], "Joueurs")
+            liste.push(joueur)
+        }
+
+        this.setState({allJoueurs : liste, joueurFiltres : liste, isLoading : false})
+    }
+
+    /**
+	 * Fonction qui va être passé en props du componant
+	 * BareRecherche et qui va permettre de filtrer les equipes 
+	 * en fonction de ce que tappe l'utilisateur
+	 */
+    recherche = (data)  => {
+		this.setState({
+            joueurFiltres : data,
+		})
     }
 
     renderItem = ({item}) => {
@@ -60,39 +85,43 @@ class Joueurs_Reseau_Final extends React.Component {
            // joueur = {item}
            // isShown = {this.testAppartient(joueursSelectionnes,item.id)}
         
+
        // />);
-        return(
-            <View>
-                 {/* View contenant la bare de recherche */}
-                 <View style = {{flexDirection : 'row', marginTop : hp('2%'), marginLeft : wp('5%'), marginRight : wp('5%')}}>
-                    <Image style={styles.search_image}
-                        source = {require('app/res/search.png')} />
-                    <TextInput
-                        style={{flex: 1, borderWidth: 1, marginHorizontal: 15, borderRadius : 10, width : wp('10%')}}
-                        onChangeText={this.searchedJoueurs}
+       if(! this.state.isLoading) {
 
-                    />
-                    <TouchableOpacity onPress={() => this.setState({text: ''})}>
-                        <Image style={styles.search_image}
-                                source = {require('app/res/cross.png')}/>
-                    </TouchableOpacity>
-                </View>
-                <ScrollView>
-                    <FlatList
-                        removeClippedSubviews = {true}
+            return(
+                <View>
+                    {/* View contenant la bare de recherche */}
+                    <Barre_Recherche
+                        handleTextChange ={this.recherche}
                         data = {this.state.allJoueurs}
-                        keyExtractor={(item) => item.id}
-                        extraData = {this.props.joueursSelectionnes}
-                        renderItem={this.renderItem}
-                    />
-               
-            
-               </ScrollView>
-               <Text> </Text>
+                        field = "pseudo"
+                     />
+                    <ScrollView>
+                        <FlatList
+                            removeClippedSubviews = {true}
+                            data = {this.state.joueurFiltres}
+                            keyExtractor={(item) => item.id}
+                            extraData = {this.props.joueursSelectionnes}
+                            renderItem={this.renderItem}
+                        />
+                
+                
+                </ScrollView>
+                <Text> </Text>
 
-            </View>
+                </View>
 
-        )
+            )
+        } else {
+            return(
+                <View style = {{marginTop : hp('15%')}}>
+                    <SkypeIndicator 
+                     color='#52C7FD'
+                     size = {hp('10%')} />
+                 </View>
+            )
+        }
     }
 }
 const styles = {

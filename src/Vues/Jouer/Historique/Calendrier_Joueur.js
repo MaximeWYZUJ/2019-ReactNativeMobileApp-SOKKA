@@ -11,6 +11,7 @@ import Type_Defis from '../Type_Defis'
 import Colors from '../../../Components/Colors'
 import LocalUser from '../../../Data/LocalUser.json'
 
+
 /**
  * Permet d'afficher l'historique d'un joueur
  */
@@ -37,6 +38,8 @@ export default class Calendrier_Joueur extends React.Component {
         this.getAllDefisAndPartie()
       
     }
+
+    
 
 
     /** Fonction qui va permettre de trouver tous les défis et parties auxquels 
@@ -221,10 +224,12 @@ export default class Calendrier_Joueur extends React.Component {
       };
       
 
-    render() {
-        if(! this.state.isLoading) {
-
-        
+    /**
+     * Fonction qui affiche la liste des défis et parties de l'utilisateur
+     * ou un message si il n'en a pas
+     */
+    renderListDefiPartie() {
+        if(this.state.allDefis != 0 ) {
             return(
                 <View style = {{backgroundColor : Colors.grayItem}} >
                     <Text style = {{fontSize : RF(2.5), alignSelf : "center", marginBottom : hp('2%'), marginTop : hp('2%')}}>Calendrier</Text>
@@ -244,7 +249,25 @@ export default class Calendrier_Joueur extends React.Component {
 
                     />
                 </View>
+            ) 
+        } else {
+            return(
+                <View>
+                    <Text>Pas encore de défi ou partie</Text>
+                </View>
             )
+        }
+    }
+
+    render() {
+        if(! this.state.isLoading) {
+
+            return(
+                <View>
+                    {this.renderListDefiPartie()}
+                </View>
+            )
+            
         } else{
             return(
                 <View>

@@ -210,6 +210,7 @@ function handleGlobalStetChange(state = initialiserState(Joueurs), action) {
          * On vas sauvegarder tous les participants à une partie 
          */
         case actions.STORE_PARTICIPANTS_PARTIE : 
+            console.log("==== ACTION : ", action.value)
             nextState = {
                 ...state,
                 JoueursParticipantsPartie : action.value

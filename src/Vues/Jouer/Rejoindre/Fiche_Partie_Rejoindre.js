@@ -652,6 +652,29 @@ class Fiche_Partie_Rejoindre extends React.Component {
 
     //==============================================================================
     
+    /**
+     * Fonction qui permet d'afficher le nbr de joueurs recherchés
+     */
+    renderTextNBJoueurRecherches() {
+        if(this.state.partie.nbJoueursRecherche == 0) {
+            return (
+                <Text style = {styles.textJoueursRecherche}>Complet</Text>
+            )
+        } else if(this.state.partie.nbJoueursRecherche == 1) {
+            return(
+                <View>
+                    <Text style = {styles.textJoueursRecherche}>1 joueur recherché</Text>
+                </View>
+            )
+        } else {
+            return(
+                <View>
+                    <Text style = {styles.textJoueursRecherche}> {this.state.partie.nbJoueursRecherche} joueurs recherchés</Text>
+                </View>
+            )
+        }
+    }
+
 
     displayRender() {
         if(this.state.isLoading) {
@@ -704,8 +727,8 @@ class Fiche_Partie_Rejoindre extends React.Component {
                                 />
 
                                 {/* Texte indiquant le nombre de joueurs recherchés*/}
-                                <Text style = {styles.textJoueursRecherche}>{this.state.partie.nbJoueursRecherche} joueur(s) Recherché(s)</Text>
-                            
+                                {this.renderTextNBJoueurRecherches()}
+                                                            
                                 {/*Bouton pour rejoindre la partie */}
                                 {this._renderBtnRejoindre()}
                             </View>

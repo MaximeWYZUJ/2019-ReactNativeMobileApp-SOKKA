@@ -57,7 +57,7 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
             } else {
                 
                 // Cas où on dépasse le nombre de joueurs recherchés,  this.props.nbJoueursRecherchesPartie = undefined lors de la creation d'une partie
-                if(this.props.joueursPartie.length +1  >= this.props.nbJoueursRecherchesPartie ) {
+                if(this.props.joueursPartie.length   >= this.props.nbJoueursRecherchesPartie ) {
                     console.log("in if")
                     Alert.alert(
                         '',
