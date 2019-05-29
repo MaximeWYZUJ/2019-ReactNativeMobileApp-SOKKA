@@ -110,7 +110,6 @@ export default class Modes_de_connexion extends React.Component {
             var token = await this.registerForPushNotifications()
             var db = Database.initialisation()
             db.collection("Login").doc(token).set({id : firebase.auth().currentUser.uid})
-            
             // Récupérations des données de la DB
             j = await Database.getDocumentData(firebase.auth().currentUser.uid, "Joueurs");
             jEquipes = await Database.getArrayDocumentData(j.equipes, 'Equipes');
@@ -119,12 +118,23 @@ export default class Modes_de_connexion extends React.Component {
             LocalUser.exists = true;
             LocalUser.data = j;
 
+            var tokenListe =  [] 
+            if (j.tokens != undefined) {
+                tokenListe = j.tokens
+            }
+            tokenListe.push(token)
+            console.log("TOKEN  : ", token)
+            console.log("LISTE  : ",tokenListe)
+            LocalUser.data.tokens = tokenListe
+            db.collection("Joueurs").doc(j.id).update({
+                tokens : tokenListe
+            })
             // Passage à la vue suivante
             this.props.navigation.navigate("ProfilJoueur", {id: j.id, joueur: j, equipes: jEquipes});
         })
         .catch((error) => {
           const { code, message } = error;
-          
+            console.log(error)
             this.setState({
                 txt : 'Adresse email ou mot de passe incorect',
                 isLoading : false

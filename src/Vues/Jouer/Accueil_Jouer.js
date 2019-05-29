@@ -11,6 +11,13 @@ import Item_Defi from '../../Components/Defis/Item_Defi'
 import Item_Partie from '../../Components/Defis/Item_Partie'
 import Color from '../../Components/Colors';
 import LocalUser from '../../Data/LocalUser.json'
+import villes from '../../Components/Creation/villes.json'
+import Notification from '../../Helpers/Notifications/Notification'
+import {BackHandler} from 'react-native';
+
+
+
+
 /**
  * Vue d'acceuil pour la création d'un défi ou d'un match
  */
@@ -25,6 +32,19 @@ class Accueil_Jouer extends React.Component {
         }
     }
 
+    
+
+   
+     
+    
+      handleBackPress = () => {
+        this.goBack(); // works best when the goBack is async
+        return true;
+      }
+
+      goBack() {
+          console.log("GO BACK !!!!!!!")
+      }
    
     static navigationOptions = ({ navigation }) => {
         return {
@@ -37,30 +57,42 @@ class Accueil_Jouer extends React.Component {
     }
 
     componentDidMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
+
         this.findAllDefiAndPartie()
     }
 
     
-   sendPushNotification() {
-
-        body = 'voici une notif pour l appli SOKKA !!',
-        title = 'Sokka'
-        console.log("in send push Notification v2")
+    sendPushNotification(token = "ExponentPushToken[lM7ee8LlQCJWz_6bP7scIp]", title = "this.state.title", body = "this.state.body") {
+        console.log('in send push !!')
         return fetch('https://exp.host/--/api/v2/push/send', {
-        body: JSON.stringify({
-            to: "ExponentPushToken[1V4azBEDbvUn6l_kx7Mooz]",
-            title: "test",
-            body: "voici une notif",
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
             data: { message: `${title} - ${body}` },
-        }),
-        headers: {
+          }),
+          headers: {
             'Content-Type': 'application/json',
-        },
-        method: 'POST',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
         });
+      
+      
     }
 
     
+    /**
+     * Fonction qui va afficher une alerte pour demander à l'utilisateur si 
+     * il souhaite activer ou non sa position
+     */
+    askForLocalisation() {
+        
+    }
 
     /**
      * Fonction qui va permettre de sauvegarder la postion de l'utilisateur dans le state 
@@ -83,17 +115,58 @@ class Accueil_Jouer extends React.Component {
                 this.props.navigation.push("ChoixFormatDefi",  {type : type})
         },
         (error) => {
+            
             console.log(error)
-            Alert.alert("Tu dois obligatoirement activer ton gps ! ")
+            Alert.alert(
+                '', 
+                "Nous ne parvenons pas à capter votre position, voulez vous utiliser  \n celle de  " + LocalUser.data.ville + " ?",
+                [
+                    {text: 'Oui', onPress: () => {
+                        var pos = this.findPositionVilleFromName(LocalUser.data.ville)
+                        const action = { type: actions.SAVE_COORDONNATES  , value: pos}
+                        this.props.dispatch(action)
+                        this.setState({isLoading : false})
+                        this.props.navigation.push("ChoixFormatDefi",  {type : type})
+
+                    } },
+                    {
+                      text: 'Non',
+                      onPress: () => console.log('Cancel Pressed'),
+                      style: 'cancel',
+                    },
+                ],
+                
+                )
             this.setState({isLoading : false})
            
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge : 3600000}
+        { enableHighAccuracy: true, timeout:    5000, maximumAge :300000}
         //{ enableHighAccuracy: true, timeout: 2000, maximumAge : 3600000}
 
         )
         
 
+
+    }
+
+    /**
+     * Fonction qui renvoie la position de la ville à partir de son nom
+     * @param {String} Name : Nom de la ville 
+     */
+    findPositionVilleFromName(name) {
+        for(var i  =  0 ; i < villes.length; i++) {
+            if(name.toLocaleLowerCase() == villes[i].Nom_commune.toLocaleLowerCase()) {
+                var position = villes[i].coordonnees_gps
+                var latitude = position.split(',')[0]
+                var longitude = position.split(', ')[1]
+                 var pos = {
+                    latitude : parseFloat(latitude),
+                    longitude : parseFloat(longitude)
+                }
+               return pos
+
+            }
+        }
     }
 
      /**

@@ -8,6 +8,9 @@ import Types_Notification from '../../Helpers/Notifications/Types_Notification'
 import Notif_Convocation_Defi from './Notif_Defi_Partie/Notif_Convocation_Defi'
 import Notif_Presence_Defi from './Notif_Defi_Partie/Notif_Presence_Defi'
 import Notif_Defis_Contre_Equipe from './Notif_Defi_Partie/Notif_Defis_Contre_Equipe'
+import Notif_Accepter_Releve_Defi from './Notif_Defi_Partie/Notif_Accepter_Releve_Defi'
+import Notif_Convocation_Partie from './Notif_Defi_Partie/Notif_Convocation_Partie'
+
 /**
  * class qui va permettre d'afficher le bon type de notification en fonction 
  * de la notification recue en props
@@ -39,19 +42,41 @@ export default class Notifications_Factory extends React.Component {
             
             // Un joueur à confirmé sa présence à un defi
             case Types_Notification.CONFIRMER_PRESENCE_DEFI : 
-                    return(
-                        <Notif_Presence_Defi
-                            notification = {this.props.notification}
-                        />
-                    )
+                return(
+                    <Notif_Presence_Defi
+                        notification = {this.props.notification}
+                    />
+                )
+            // Un joueur à annulé sa présence à un defi
+            case Types_Notification.ANNULER_PRESENCE_DEFI : 
+                return(
+                    <Notif_Presence_Defi
+                        notification = {this.props.notification}
+                    />
+                )
 
             // Une équipe à crée un défi contre une de mes équipes
             case Types_Notification.ACCEPTER_DEFIS_CONTRE_EQUIPE : 
-                        return(
-                            <Notif_Defis_Contre_Equipe
-                                notification = {this.props.notification}
-                            />
-                        )
+                return(
+                    <Notif_Defis_Contre_Equipe
+                        notification = {this.props.notification}
+                    />
+                )
+
+            // Une  équipe relève un défi qu'une de mes équipe à posté
+            case Types_Notification.ACCEPTER_DEFI_RELEVE : 
+                return(
+                    <Notif_Accepter_Releve_Defi
+                        notification = {this.props.notification}
+                    />
+                )
+
+            case Types_Notification.CONVOCATION_RELANCE_PARTIE :
+                    return(
+                        <Notif_Convocation_Partie
+                            notification = {this.props.notification}
+                        />
+                    )
             
             default : 
         }

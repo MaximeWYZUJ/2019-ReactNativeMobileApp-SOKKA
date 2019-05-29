@@ -151,7 +151,8 @@ class First_screen extends React.Component {
         var doc = await Database.getDocumentData(token, "Login")
         console.log(doc)
         if(doc!= undefined) {
-            this.gotoProfilJoueur(doc.id)
+            
+            this.gotoProfilJoueur(doc.id, token)
             //var joueur = await Database.getDocumentData(doc.id, "Joueurs")
             console.log(joueur)
 
@@ -236,7 +237,7 @@ class First_screen extends React.Component {
         })*/
    }
 
-   gotoProfilJoueur(id) {
+   gotoProfilJoueur(id, token) {
        Database.getDocumentData(id, 'Joueurs').then(async (docData) => {
             // Traitement de la collection Reseau
             arrayReseau = [];
@@ -255,7 +256,21 @@ class First_screen extends React.Component {
             LocalUser.exists = true;
             LocalUser.data = docData;
 
+            // Mettre a jour l'array tokens
+            var listeToken = []
+            if(docData.tokens != undefined) {
+                listeToken = docData.tokens
+            } 
+            if(! listeToken.includes(token)) {
+                listeToken.push(token)
+            
+                var db = Database.initialisation()
+                db.collection("Joueurs").doc(id).update({
+                    tokens : listeToken
+                })
+            }
             // Envoi
+            //this.setState({isLoading : false})
             this.props.navigation.navigate("ProfilJoueur", {id: docData.id, joueur : docData, equipes : arrayEquipes})
 
         }).catch(function(error) {
@@ -395,7 +410,7 @@ class First_screen extends React.Component {
 
                         {/* View contenant le text Agoora */}
                         <View style = {styles.view_agoora}>
-                            <Text style = {styles.txt_agoora}>SOKKAk</Text>
+                            <Text style = {styles.txt_agoora}>SOKKA</Text>
                         </View>
 
                         {/* View contenant le texte */}

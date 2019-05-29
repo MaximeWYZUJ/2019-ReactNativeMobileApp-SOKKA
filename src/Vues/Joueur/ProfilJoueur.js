@@ -91,6 +91,20 @@ class ProfilJoueur extends React.Component {
         db.collection("Login").doc(token).delete().then(this.goToFirstScreen).catch(function(error) {
             console.error("Error removing document: ", error);
         });
+
+        // Supprimer le token de la liste
+        var tokens = LocalUser.data.tokens 
+        var newTokens = []
+        for(var i =0; i < tokens.length; i ++) {
+            if(tokens[i].localeCompare(token) != 0) {
+                newTokens.push(tokens[i])
+            }
+        }
+        
+        console.log("TOKEN  : ", newTokens)
+        db.collection("Joueurs").doc(this.id).update({
+            tokens : newTokens
+        })
     }
 
 

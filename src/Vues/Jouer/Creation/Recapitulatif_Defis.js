@@ -13,6 +13,7 @@ import ID from '../../../Helpers/ID'
 import LocalUser from '../../../Data/LocalUser.json'
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
 
+import Notification from '../../../Helpers/Notifications/Notification'
 
 /**
  * Classe qui va permettre d'afficher le récapitulatif d'un défis crée par 
@@ -84,16 +85,76 @@ export default class Recapitulatif_Defis extends React.Component {
         
     }
 
+    async sendNotif(equipe, joueurs,date) {
+        console.log("JOUEURS : ", joueurs)
+        for(var i = 0 ; i < joueurs.length; i++) {
+
+            var j = await Database.getDocumentData(joueurs[i], "Joueurs")
+            console.log("Destinataire : ",j.tokens)
+            if(j.tokens != undefined) {
+                for(var k = 0; k< j.tokens.length; k++) {
+                    console.log("before notif ", j.tokens[k])
+                    var title = "Nouvelle notification"
+                    var corps = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.allDataEquipe.nom 
+                    corps = corps + " t'as convoqué / relancé pour un un défi le " + this.buildDate(date)
+                    this.sendPushNotification(j.tokens[k], title, corps) 
+                    //Notification.sendNotificationInvitationDefi(j.tokens[k],date,LocalUser.data,equipe)
+                }
+            }
+        }
+    }
+
+    /**
+     * Fonction qui va permettre de construire un String correspondant à la 
+     * date du défi pour le titre de la vue.
+     * @param {Date} date 
+     */
+    buildDate(date) {
+        var j = date.getDay()
+        var numJour = date.getDate()
+        var mois  =(date.getMonth() + 1).toString()
+        if(mois.length == 1) {
+            mois = '0' + mois 
+        }
+        var an  = date.getFullYear()
+        return numJour  + '/' + mois + '/' + an
+    }
+
     
-    goToFicheDefi(msg, id) {
+    
+    sendPushNotification(token , title,body ) {
+        console.log('in send push !!')
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+      
+      
+    }
+
+    
+     goToFicheDefi(msg, id,equipe,date,joueurs) {
         Alert.alert(
             '',
             msg,
             [
-              {text: 'Ok',  onPress: () => {
+              {text: 'Ok',  onPress:  () =>  {
                
                 this.storeNotificationsInDB(id)
                 this.storeNotificationDefiEquipe(id)
+                 this.sendNotif(equipe,joueurs,date)
                 this.props.navigation.push("AccueilJouer")
             }
                         
@@ -182,11 +243,12 @@ export default class Recapitulatif_Defis extends React.Component {
             butsEquipeDefiee : 0,
             scoreConfirme :  false,
             scoreRenseigneParOrga : false,
-            scoreRenseigneParDefiee : false
+            scoreRenseigneParDefiee : false,
+            defis_refuse : false
             
 
         })
-        .then(this.goToFicheDefi(msg, id))
+        .then(this.goToFicheDefi(msg, id,this.allDataEquipe,date,this.buildListOfJoueurWithoutCapitaines()))
         .catch(function(error) {
             console.error("Error writing document: ", error);
         });

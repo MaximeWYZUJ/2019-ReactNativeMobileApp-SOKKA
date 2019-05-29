@@ -5,7 +5,7 @@ import AccueilProfil from './Navigation'
 //import AccueilProfil from '../TabBar/TempProfil'
 import AccueilNotifs from '../TabBar/Notifications/AccueilNotifications'
 import AccueilJouer from './NavigationJouer'
-import AccueilRecherche from '../TabBar/Recherche/AccueilRecherche'
+import AccueilRecherche from './Rechercher/RechercherStackNavigator'
 
 
 const OngletsNavigator = createBottomTabNavigator({

@@ -16,6 +16,8 @@ import { connect } from 'react-redux'
 import { StackActions, NavigationActions } from 'react-navigation';
 import LocalUser from '../../../Data/LocalUser.json'
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
+import Notification from '../../../Helpers/Notifications/Notification'
+
 
 // Rememttre à Zéro le stack navigator pour empecher le retour en arriere
 const resetAction = StackActions.reset({
@@ -476,6 +478,7 @@ class Feuille_Defi_A_Venir extends React.Component {
             });
         }
          
+        this.storeNotifAnnulerInDB()
    
     }
 
@@ -650,18 +653,22 @@ class Feuille_Defi_A_Venir extends React.Component {
      * On va stocker une notification qui correspond a la confirmation 
      * de la présence du joueur
      */
-    storeNotifConfirmerInDB() {
-        console.log("in store notif")
+    async storeNotifConfirmerInDB() {
+
         var db = Database.initialisation() 
-        console.log("initialisation")
         // Trouver l'équipe dont l'utilisateur est membre 
         if(this.state.defi.joueursEquipeOrga.includes(this.monId)) {
-            console.log("in first if")
             // Envoyer à chaque capitaines de l'équipe
             for(var i = 0 ; i < this.state.equipeOrganisatrice.capitaines.length ; i++) {
-                console.log("in for")
+
                 if(this.state.equipeOrganisatrice.capitaines[i] != this.monId) {
-                    console.log("okookokooo")
+                    // Envoyer une push notif a chaque token dans l'array tokens
+                    var cap = await Database.getDocumentData(this.state.equipeOrganisatrice.capitaines[i], "Joueurs")
+                    if(cap.tokens != undefined) {
+                        for(var j = 0; j < cap.tokens.length; j++) {
+                        Notification.sendNotificationConfirmerPresenceDefi(cap.tokens[j],this.state.defi,LocalUser.data)
+                        }
+                    }
                     db.collection("Notifs").add(
                         {
                             dateParse : Date.parse(new Date()),
@@ -679,6 +686,16 @@ class Feuille_Defi_A_Venir extends React.Component {
             // Envoyer à chaque capitaines de l'équipe
             for(var i = 0 ; i < this.state.equipeDefiee.capitaines.length ; i++) {
                 if(this.state.equipeDefiee.capitaines[i] != this.monId) {
+                    
+                    // Envoyer une push notif a chaque token dans l'array tokens
+                    var cap = await Database.getDocumentData(this.state.equipeDefiee.capitaines[i], "Joueurs")
+                    if(cap.tokens != undefined) {
+                        for(var j = 0; j < cap.tokens.length; j++) {
+                        Notification.sendNotificationConfirmerPresenceDefi(cap.tokens[j],this.state.defi,LocalUser.data)
+                        }
+                    }
+                    
+                
                     db.collection("Notifs").add(
                         {
                             dateParse : Date.parse(new Date()),
@@ -695,6 +712,69 @@ class Feuille_Defi_A_Venir extends React.Component {
         }
         
     }
+
+
+    /**
+     * On va stocker une notification qui correspond a l'annulation 
+     * de la présence du joueur
+     */
+    async storeNotifAnnulerInDB() {
+
+        var db = Database.initialisation() 
+        // Trouver l'équipe dont l'utilisateur est membre 
+        if(this.state.defi.joueursEquipeOrga.includes(this.monId)) {
+            // Envoyer à chaque capitaines de l'équipe
+            for(var i = 0 ; i < this.state.equipeOrganisatrice.capitaines.length ; i++) {
+                if(this.state.equipeOrganisatrice.capitaines[i] != this.monId) {
+                    // Envoyer une push notif a chaque token dans l'array tokens
+                    var cap = await Database.getDocumentData(this.state.equipeOrganisatrice.capitaines[i], "Joueurs")
+                    if(cap.tokens != undefined) {
+                        for(var j = 0; j < cap.tokens.length; j++) {
+                        Notification.sendNotificationAnnulerPresenceDefi(cap.tokens[j],this.state.defi,LocalUser.data)
+                        }
+                    }
+
+                    db.collection("Notifs").add(
+                        {
+                            dateParse : Date.parse(new Date()),
+                            defi : this.state.defi.id,
+                            emetteur :  LocalUser.data.id,
+                            recepteur : this.state.equipeOrganisatrice.capitaines[i] ,
+                            time : new Date(),
+                            type : Types_Notification.ANNULER_PRESENCE_DEFI,
+                            equipe : this.state.equipeOrganisatrice.id,
+                        }
+                    ) 
+                }  
+            }
+        } else  {
+            // Envoyer à chaque capitaines de l'équipe
+            for(var i = 0 ; i < this.state.equipeDefiee.capitaines.length ; i++) {
+                if(this.state.equipeDefiee.capitaines[i] != this.monId) {
+                    // Envoyer une push notif a chaque token dans l'array tokens
+                    var cap = await Database.getDocumentData(this.state.equipeDefiee.capitaines[i], "Joueurs")
+                    if(cap.tokens != undefined) {
+                        for(var j = 0; j < cap.tokens.length; j++) {
+                        Notification.sendNotificationAnnulerPresenceDefi(cap.tokens[j],this.state.defi,LocalUser.data)
+                        }
+                    }
+                    db.collection("Notifs").add(
+                        {
+                            dateParse : Date.parse(new Date()),
+                            defi : this.state.defi.id,
+                            emetteur :  LocalUser.data.id,
+                            recepteur : this.state.equipeDefiee.capitaines[i] ,
+                            time : new Date(),
+                            type : Types_Notification.ANNULER_PRESENCE_DEFI,
+                            equipe : this.state.equipeDefiee.id,
+                        }
+                    ) .then(function() {console.log("ok notif")})
+                }  
+            }
+        }
+        
+    }
+
 
     /**
      * Fonction qui va sauvegarder une notification par joueur convoque
@@ -738,6 +818,8 @@ class Feuille_Defi_A_Venir extends React.Component {
             }
         }
     }
+
+   
 
     //=========================================================================================
 
@@ -886,12 +968,13 @@ class Feuille_Defi_A_Venir extends React.Component {
     render() {
 
         if(this.state.defi != undefined) {
-            if(this.state.equipeDefiee != undefined && this.state.equipeDefiee.joueurs.includes(this.monId)) {
+            if(this.state.defi.joueursEquipeDefiee.includes(this.monId)) {
                 var confirme = this.state.defi.confirmesEquipeDefiee
                 var indisponibles =  this.state.defi.indisponiblesEquipeDefiee
                 var attente =  this.state.defi.attenteEquipeDefiee
             } else {
                 var confirme = this.state.defi.confirmesEquipeOrga
+                console.log("CONFIRME  : " , confirme)
                 var indisponibles =  this.state.defi.indisponiblesEquipeOrga
                 var attente =  this.state.defi.attenteEquipeOrga 
             }

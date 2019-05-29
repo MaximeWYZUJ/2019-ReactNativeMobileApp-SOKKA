@@ -1,10 +1,13 @@
 
 import React from 'react'
 
-import {View, Text,Image ,TouchableOpacity, Animated, TextInput} from 'react-native'
+import {View, Text,Image ,TouchableOpacity, Animated, TextInput,ListView,ScrollView,Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import DatePicker from 'react-native-datepicker'
+import villes from '../../Components/Creation/villes.json'
+import Colors from '../../Components/Colors'
+var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
 
 export default class Inscription_Age_Zone extends React.Component {
@@ -24,7 +27,7 @@ export default class Inscription_Age_Zone extends React.Component {
         const pseudo = navigation.getParam('pseudo', ' ');
 
         this.state = {
-            ville : ' ',
+            ville : '',
             zone : ' ',
             today : auj.getFullYear() + '-' + (auj.getMonth() + 1) + '-' +  auj.getDate(),
             txtDateNaissance : 'Date de naissance',
@@ -33,7 +36,8 @@ export default class Inscription_Age_Zone extends React.Component {
             nom : nom,
             prenom : prenom,
             pseudo : pseudo,
-            age : 0
+            age : 0,
+            searchedVilles : []
         }
 
     }
@@ -53,10 +57,45 @@ export default class Inscription_Age_Zone extends React.Component {
         })
     }
 
+    /**
+     * Fonction qui permet de renvoyer une liste des villes qui
+     * commencent par searchedText
+     */
+    searchedVilles= (searchedText) => {
+        let searchedAdresses = villes.filter(function(ville) {
+            
+            return ville.Nom_commune.toLowerCase().startsWith(searchedText.toLowerCase()) ;
+        });
+        this.setState({searchedVilles: searchedAdresses,ville : searchedText});
+    };
+
+
     changeZone(texte) {
         this.setState({
             zone : texte
         })
+    }
+
+    /**
+     * Verifie que la villle choisie par l'utilisateur est bien 
+     * dans la db
+     */
+    isVilleOk() {
+        for(var i = 0; i < villes.length; i++) {
+            if(this.state.ville.toLowerCase() == villes[i].Nom_commune.toLowerCase()) {
+                return true
+            } 
+        }
+        return false
+    }
+
+
+    /**
+     * Pour mettre la première lettre en capitale
+     * @param {} string 
+     */
+    jsUcfirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
     calculAge()  {
@@ -66,117 +105,154 @@ export default class Inscription_Age_Zone extends React.Component {
     }
 
     callNextScreen() {
-        this.props.navigation.navigate("InscriptionPhoto", {
-            mail : this.state.mail,
-            mdp : this.state.mdp,
-            nom : this.state.nom,
-            prenom : this.state.prenom,
-            pseudo : this.state.pseudo,
-            ville : this.state.ville,
-            zone : this.state.zone,
-            naissance : this.state.today,
-            age : this.calculAge()
-        })
+        if(this.isVilleOk()) {
+            this.props.navigation.navigate("InscriptionPhoto", {
+                mail : this.state.mail,
+                mdp : this.state.mdp,
+                nom : this.state.nom,
+                prenom : this.state.prenom,
+                pseudo : this.state.pseudo,
+                ville : this.state.ville,
+                zone : this.state.zone,
+                naissance : this.state.today,
+                age : this.calculAge()
+            })
+        } else {
+            Alert.alert('Tu dois choisir une ville présente dans la base SoKKa')
+        }
     }
 
-    displayRender() {
+
+    /**
+     * Fonction qui permet de controler l'affichage des noms des villes
+     */
+    renderVille = (adress) => {
+        if(this.state.ville.length > 0) {
+            var txt = adress.Nom_commune.toLowerCase()
+            
+            return (
+                <TouchableOpacity
+                    onPress = {() => this.setState({ville :this.jsUcfirst(txt), searchedVilles : [] })}
+                    style = {{backgroundColor : Colors.grayItem,  marginTop : hp('1%'), marginBottom : hp('1'),paddingVertical : hp('1%')}}
+                    >
+                
+                    <View style = {{flexDirection : 'row'}}>
+                            <Text>{adress.Code_postal} - </Text>
+                            <Text style = {{fontWeight : 'bold', fontSize :RF(2.6)}}>{this.state.ville}</Text>
+                            <Text style = {{fontSize :RF(2.6)}}>{txt.substr(this.state.ville.length)}</Text>
+                    </View>
+                
+                </TouchableOpacity>
+            );
+        } else {
+            return(<View/>)
+        }
+    };
+
+
+    render() {
             return(
-                <View style = {styles.main_container}>
-                    {/* Image de l'herbre */}
-                    <View style = {styles.View_grass}>
-                        <Image 
-                            source = {require('app/res/grass.jpg')}
-                            style = {styles.grass}
-                        />
-                    </View>
-
-                    {/* View contenant le text Agoora */}
-                    <View style = {styles.view_agoora}>
-                        <Text style = {styles.txt_agoora}>AgOOra</Text>
-                    </View>
-
-                    {/* Txt input pour la ville */}
-                    
-                    <View style = {styles.view_champ}>
-                            <Animated.View style={[this.inputChamps.getLayout(), {borderBottomWidth : 1}]}>
-                                <TextInput 
-                                    placeholder = "Ville"
-                                    style = {styles.txt_input}
-                                    placeholderTextColor ='#CECECE'
-                                    onChangeText ={(text) => this.changeVille(text)} 
-
-
+                <View style = {{flex : 1}}>
+                    <ScrollView>
+                        <View style = {styles.main_container}>
+                            {/* Image de l'herbre */}
+                            <View style = {styles.View_grass}>
+                                <Image 
+                                    source = {require('app/res/grass.jpg')}
+                                    style = {styles.grass}
                                 />
-                            </Animated.View>
-                    </View>
+                            </View>
 
-                    {/* Txt input pour la zone */}
-                    
-                    <View style = {styles.view_champ}>
-                            <Animated.View style={[this.inputChamps.getLayout(), {borderBottomWidth : 1}]}>
-                                <TextInput 
-                                    placeholder = "Zone"
-                                    style = {styles.txt_input}
-                                    placeholderTextColor ='#CECECE'
-                                    onChangeText ={(text) => this.changeZone(text)} 
+                            {/* View contenant le text Agoora */}
+                            <View style = {styles.view_agoora}>
+                                <Text style = {styles.txt_agoora}>SoKKa</Text>
+                            </View>
+
+                            {/* Txt input pour la ville */}
+                            
+                            <View style = {{marginTop : hp('25%')}}>
+                                <View style = {styles.view_champ}>
+                                        <Animated.View style={[this.inputChamps.getLayout(), {borderBottomWidth : 1}]}>
+                                            <TextInput 
+                                                placeholder = "Ville"
+                                                style = {styles.txt_input}
+                                                placeholderTextColor ='#CECECE'
+                                                onChangeText ={(text) => this.searchedVilles(text)} 
+                                                value = {this.state.ville}
 
 
-                                />
-                            </Animated.View>
-                    </View>
-                    
-                    <View style = {{ width : wp('80%')}}>
-                        <Animated.View style={[this.inputChamps.getLayout(), {borderBottomWidth : 1, flexDirection : 'row',alignItems :'center'}]}>
+                                            />
 
-                            <Text style = {{color : '#CECECE'}}>{this.state.txtDateNaissance}</Text>
-                            <DatePicker
-                                style={{width: wp('45%'), alignItems : 'center'}}
-                                date= {this.state.today}
-                                mode="date"
-                                placeholder="select date"
-                                format="YYYY-MM-DD"
-                                minDate="1900-001-01"
-                                maxDate={this.state.today}
-                                confirmBtnText="Confirm"
-                                cancelBtnText="Cancel"
-                                customStyles={{
-                                dateInput: {
-                                    marginLeft: 0,
-                                    borderWidth : 0
-                                }
-                                }}
-                                onDateChange={(date) => {this.setState({today: date, txtDateNaissance : ''})}}
-                            />
-                            </Animated.View>
-                    </View>
-                    <View style = {{marginBottom : hp('5%')}}>
-                        <Text style = {{fontSize : RF(2.6)}}>
-                            Renseigne ces informations personnelles
-                        </Text>
-                    </View>
-                    <TouchableOpacity style = {styles.btn_Connexion}
-                                onPress = {()=> this.callNextScreen()}>
-                                <Text style = {styles.txt_btn}>Suivant</Text>
+                                            <ListView
+                                                    dataSource={ds.cloneWithRows(this.state.searchedVilles)}
+                                                    renderRow={this.renderVille}
+                                            />
+                                            
+                                        </Animated.View>
+                                </View>
 
-                    </TouchableOpacity>
+                                {/* Txt input pour la zone */}
+                                
+                                <View style = {styles.view_champ}>
+                                        <Animated.View style={[this.inputChamps.getLayout(), {borderBottomWidth : 1}]}>
+                                            <TextInput 
+                                                placeholder = "Zone"
+                                                style = {styles.txt_input}
+                                                placeholderTextColor ='#CECECE'
+                                                onChangeText ={(text) => this.changeZone(text)} 
+
+
+                                            />
+                                        </Animated.View>
+                                </View>
+                            </View>
+                            
+                            <View style = {{ width : wp('80%')}}>
+                                <Animated.View style={[this.inputChamps.getLayout(), {borderBottomWidth : 1, flexDirection : 'row',alignItems :'center'}]}>
+
+                                    <Text style = {{color : '#CECECE'}}>{this.state.txtDateNaissance}</Text>
+                                    <DatePicker
+                                        style={{width: wp('45%'), alignItems : 'center'}}
+                                        date= {this.state.today}
+                                        mode="date"
+                                        placeholder="select date"
+                                        format="YYYY-MM-DD"
+                                        minDate="1900-001-01"
+                                        maxDate={this.state.today}
+                                        confirmBtnText="Confirm"
+                                        cancelBtnText="Cancel"
+                                        customStyles={{
+                                        dateInput: {
+                                            marginLeft: 0,
+                                            borderWidth : 0
+                                        }
+                                        }}
+                                        onDateChange={(date) => {this.setState({today: date, txtDateNaissance : ''})}}
+                                    />
+                                    </Animated.View>
+                            </View>
+                            <View style = {{marginBottom : hp('5%')}}>
+                                <Text style = {{fontSize : RF(2.6)}}>
+                                    Renseigne ces informations personnelles
+                                </Text>
+                            </View>
+                            <TouchableOpacity style = {styles.btn_Connexion}
+                                        onPress = {()=> this.callNextScreen()}>
+                                        <Text style = {styles.txt_btn}>Suivant</Text>
+
+                            </TouchableOpacity>
+                        </View>
+                    </ScrollView>
                 </View>
-
 
             ) 
        
     }
-    render(){
-        return(
-            <View style = {styles.main_container}>
-                {this.displayRender()}
-            </View>
-        )
-    }
+   
 }
 
 const styles = {
     main_container: {
-        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -241,6 +317,7 @@ const styles = {
         shadowOffset: { height: 1, width: 1 }, // IOS
         shadowOpacity: 1, // IOS
         shadowRadius: 1, //IOS
-        elevation: 5, // Android
+        elevation: 5, // Android,
+        marginTop : hp('5%')
     },
 }

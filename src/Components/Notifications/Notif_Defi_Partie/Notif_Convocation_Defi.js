@@ -59,8 +59,6 @@ class Notif_Convocation_Defi extends React.Component {
      */
     async getData() {
 
-        console.log("in get data l")
-        console.log("before  equipe", this.props.notification.equipe)
 
         // Données de l'équipe concernée
         var equipe = await Database.getDocumentData(this.props.notification.equipe, "Equipes")
@@ -69,9 +67,7 @@ class Notif_Convocation_Defi extends React.Component {
         console.log("before  emetteur", this.props.notification.emetteur)
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 
-        console.log("after emeteur")
         // Données du défi 
-        console.log("id defi :" , this.props.notification.defi)
         var defi = await Database.getDocumentData(this.props.notification.defi, "Defis")
         this.setState({equipe :equipe , emetteur : emetteur, defi : defi,isLoading : false})
     }
@@ -479,7 +475,7 @@ class Notif_Convocation_Defi extends React.Component {
         } else {
             console.log("ELSE RENDER")
             return(
-                <View style = {{flexDirection : 'row'}}>
+                <View style = {{flexDirection : 'row',marginTop : hp('2%'), borderWidth : 1}}>
                     <View>
                         {this.renderPhotoEmetteur()}
                     </View>

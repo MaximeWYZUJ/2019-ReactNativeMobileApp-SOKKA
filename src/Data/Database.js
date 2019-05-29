@@ -14,6 +14,15 @@ export default class Database {
     };
 
     
+    static config2 = {
+        apiKey: "AIzaSyDtl0_2Zx18V5m3SwtJVAbXkMbsvMruFsI",
+        authDomain: "sokka-47c20.firebaseapp.com",
+        databaseURL: "https://sokka-47c20.firebaseio.com",
+        projectId: "sokka-47c20",
+        storageBucket: "sokka-47c20.appspot.com",
+        messagingSenderId: "952597067241",
+        appId: "1:952597067241:web:1f1b5c742caabbb0"
+      };
     
     static initialisation() {
         var config = {
@@ -24,6 +33,16 @@ export default class Database {
             storageBucket: "agoora-ccf6c.appspot.com",
             messagingSenderId: "486777683016"
         };
+
+        /*var config2 =  {
+            apiKey: "AIzaSyDtl0_2Zx18V5m3SwtJVAbXkMbsvMruFsI",
+            authDomain: "sokka-47c20.firebaseapp.com",
+            databaseURL: "https://sokka-47c20.firebaseio.com",
+            projectId: "sokka-47c20",
+            storageBucket: "sokka-47c20.appspot.com",
+            messagingSenderId: "952597067241",
+            appId: "1:952597067241:web:1f1b5c742caabbb0"
+          };*/
 
         if (!firebase.apps.length) {
             firebase.initializeApp(config);
@@ -153,8 +172,10 @@ export default class Database {
 
 
     static async getDocumentData(id, collection) {
+        console.log("in get doc data")
         var db = Database.initialisation();
         let docRef = db.collection(collection).doc(id);
+        console.log("before docRef.get()")
         let doc = await docRef.get();
         
         if (doc.exists) {

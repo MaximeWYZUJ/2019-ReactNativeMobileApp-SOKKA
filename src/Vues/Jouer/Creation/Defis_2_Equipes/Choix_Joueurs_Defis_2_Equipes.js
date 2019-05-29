@@ -549,14 +549,12 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
 
     buttonNext(){
         var nbAtteint = this.props.navigation.getParam("nbJoueurMinatteint", false)
-        console.log("nb ATTEINT : ", nbAtteint)
         // PASSER EN PROPS USER DATA (Toutes les donnes de l'user)
 
         // Calculer le nbr de joueurs total pour le defi
         var joueursEquipe = this.props.navigation.getParam("joueursEquipe", [])
         var nbJoueurs = this.state.joueursSelectionnes.length +joueursEquipe.length
         
-        console.log("NB JOUEURS : ", nbJoueurs)
         if( this.state.joueursSelectionnes.length > 0 && (nbAtteint || nbJoueurs >= parseInt(this.format.split("x")[0])) ) {
             return( 
                 <TouchableOpacity

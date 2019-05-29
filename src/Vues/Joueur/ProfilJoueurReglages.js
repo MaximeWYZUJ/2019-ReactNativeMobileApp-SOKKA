@@ -1,6 +1,7 @@
 import React from 'react'
 import {ScrollView, View, Text, StyleSheet, Image, Button, TextInput } from 'react-native'
 import Database from '../../Data/Database'
+import NormalizeString from '../../Helpers/NormalizeString';
 
 class ProfilJoueurReglages extends React.Component {
 
@@ -40,6 +41,7 @@ class ProfilJoueurReglages extends React.Component {
         }
         if (this.pseudo) {
             this.joueur.pseudo = this.pseudo
+            this.joueur.queryPseudo = NormalizeString.normalize(this.pseudo);
         }
         if (this.score) {
             this.joueur.score = parseInt(this.score)
@@ -62,7 +64,9 @@ class ProfilJoueurReglages extends React.Component {
             naissance : this.joueur.naissance,
             nom : this.joueur.nom,
             telephone : this.joueur.telephone,
-            zone : this.joueur.zone
+            zone : this.joueur.zone,
+            pseudo: this.joueur.pseudo,
+            queryPseudo: this.joueur.queryPseudo
         },
         {
             merge: true

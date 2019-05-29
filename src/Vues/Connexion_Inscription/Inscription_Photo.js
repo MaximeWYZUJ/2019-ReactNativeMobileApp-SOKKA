@@ -146,6 +146,7 @@ export default class Inscription_Photo extends React.Component {
      * image_change : bool : true si l'user renseigne une image 
      */
     async uploadUser(image_changed) {
+        console.log("in uploadUser")
         //var db  = Database.initialisation()
         //var urlPhoto = 'erreur'
         var fileName = this.state.pseudo
@@ -160,7 +161,7 @@ export default class Inscription_Photo extends React.Component {
         firebase.auth().createUserWithEmailAndPassword(this.state.mail, this.state.mdp)
         .then(function(data){
             var id = data.user.uid
-
+            console.log("id")
             /* Obtenir une ref à la photo. */
             if(image_changed) {
                 var ref = firebase.storage().ref().child("Photos_profil_Joueurs/test/" + fileName)

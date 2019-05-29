@@ -262,6 +262,26 @@ class Feuille_Partie_A_Venir extends React.Component {
 
     }
 
+    
+    
+    /**
+     * Fonction qui va permettre d'aficher l'alerte permettant à l'utilisateur
+     * de confirmer si il souhaite relancer les joueurs .
+     */
+    alerteRelancerJoueur() {
+        Alert.alert(
+            '',
+            'Tu souhaites relancer les joueurs en attente ?',
+            [
+                {text: 'Oui', onPress: () =>this.storeNotifRelanceInDB()},
+                {
+                  text: 'Non',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                },
+            ],
+        )
+    }
 
     
 

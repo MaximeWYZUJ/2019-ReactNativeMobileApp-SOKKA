@@ -102,6 +102,7 @@ export default class Creation_Equipe_Photo extends React.Component {
             nom : this.props.navigation.getParam("nom",""),
             photo : urlPhoto,
             queryName : NormalizeString.decompose(this.props.navigation.getParam("nom","")),
+            //queryPrenom : NormalizeString.decompose(this.props.navigation.getParam("prenom","")),
             score : 5,
             telephone : LocalUser.data.telephone,
             ville : this.props.navigation.getParam("ville", " "),

@@ -3,6 +3,7 @@ import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacit
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../Colors'
+import NormalizeString from '../../Helpers/NormalizeString';
 
 /**
  * Composant barre de recherche 
@@ -12,7 +13,11 @@ import Colors from '../Colors'
  * 
  *      data : Données sur lesquelles effectuer la recherche
  * 
- *      field : champs sur lequel filtrer les données 
+ *      field : champs sur lequel filtrer les données
+ * 
+ *      filterData : fonction qui permet de filtrer les données récoltées
+ * 
+ *      handleFilterButton : fonction appelée quand on appuie sur le bouton de display des filtres
  * 
  * Il faut obligatoirement que un des champs de data ai le même nom que le field 
  * et que l'objet associé soit un string
@@ -37,14 +42,18 @@ export default class Barre_Recherche extends React.Component {
      * searchedText
 	 */
 	searchedTerrains = (searchedText) => {
-        let field = this.field
-        let searchData = this.props.data.filter(function(data) {
+        if (searchedText === "") {
+            this.props.handleTextChange(this.props.filterData(this.DataDepart))
+        
+        } else {
+            let field = this.field
+            let searchData = this.props.data.filter(function(data) {
+                return data[field].includes(NormalizeString.normalize(searchedText)) // toLowerCase().startsWith(searchedText.toLowerCase()) ;
+            });
+            searchData = this.props.filterData(searchData);
             
-            //return data[field].toLowerCase().startsWith(searchedText.toLowerCase()) ;
-            return data[field].toLowerCase().includes(searchedText.toLowerCase())
-        });
-        this.props.handleTextChange(searchData)
-        //this.setState({searchedAdresses: searchedAdresses, departement : searchedText});
+            this.props.handleTextChange(searchData)
+        }
     };
 
     render(){
@@ -64,14 +73,20 @@ export default class Barre_Recherche extends React.Component {
                         />
 
                         {/* Icon de la loupe*/}
-                        <View style = {{backgroundColor : Colors.agooraBlueStronger, paddingVertical : hp('1%'), paddingHorizontal : wp('3%'), borderRightWidth : 1, borderBottomWidth : 1, borderTopWidth : 1}}>
+                        <TouchableOpacity
+                            style = {{backgroundColor : Colors.agooraBlueStronger, paddingVertical : hp('1%'), paddingHorizontal : wp('3%'), borderRightWidth : 1, borderBottomWidth : 1, borderTopWidth : 1}}
+                            onPress={() => this.searchedTerrains("")}
+                            >
                             <Image 
                                 style={{width : wp('5%'), height : wp('5%'), borderWidth : 1}}
                                 source = {require('app/res/search_glass.png')} />
-                        </View>
+                        </TouchableOpacity>
 
                     {/* Pour les filtres*/}
-                    <TouchableOpacity style = {{backgroundColor : 'white', flexDirection : 'row', marginLeft : wp('3%'),paddingVertical : hp('1%'), paddingHorizontal :wp('3%')}}>
+                    <TouchableOpacity
+                        style = {{backgroundColor : 'white', flexDirection : 'row', marginLeft : wp('3%'),paddingVertical : hp('1%'), paddingHorizontal :wp('3%')}}
+                        onPress={() => {this.props.handleFilterButton(); this.searchedTerrains("")}}
+                        >
                             <Image 
                                 style={{width : wp('7%'), height : wp('7%'), alignSelf : 'center'}}
                                 source = {require('app/res/controls.png')} />

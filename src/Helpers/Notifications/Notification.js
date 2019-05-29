@@ -68,5 +68,164 @@ export default class Notification {
               console.log("Error getting documents partie:", error);
         });   
     }
+
+
+    /**
+     * Pour envoyer une notification
+     * @param {*} destinataire 
+     * @param {*} titre 
+     * @param {*} corps 
+     */
+    static sendPushNotification(token = "ExponentPushToken[lM7ee8LlQCJWz_6bP7scIp]", title = "this.state.title", body = "this.state.body") {
+
+        console.log("in send push ", destinataire)
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+
+    static sendPushNotification2BIS(destinataire, titre, corps) {
+        console.log('in send push !!', destinataire)
+        console.log("titre", titre)
+        console.log("corps ", corps)
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: destinataire,
+            title: titre,
+            body: corps,
+            data: { message: `${title} - ${body}` },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+      
+      
+    }
+
+
+    
+    
+    static test(token = "ExponentPushToken[lM7ee8LlQCJWz_6bP7scIp]", title = "coucou", body = "this.state.body") {
+        console.log('in send push !!')
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+      
+      
+    }
+
+
+
+
+    // ==============================================================================
+    // ============================= LES NOTIFICATIONS A ENVOYER ===================
+    // ==============================================================================
+
+
+    /**
+     * Notification de relance ou invitation à un défi
+     * @param {string} destinataire  : token du destinataire
+     * @param {objet} defi  : Objet du defi
+     * @param {objet} emeteur  : Objet emeteur
+     * @param {objet} equipe  : Objet de l'équipe
+
+     */
+    static sendNotificationInvitationDefi(destinataire,date,emeteur,equipe) {
+        console.log("IN SEND NOTIF !!")
+        var corps = "Le capitaine " + emeteur.pseudo + " de l'équipe " + equipe.nom 
+        corps = corps + " t'as convoqué / relancé pour un un défi le "
+        corps = corps + this.buildDate(date)
+        
+        var titre  = "Nouvelle notification"
+
+        this.sendPushNotification()
+        //this.sendPushNotification(destinataire,titre,corps)
+    }
+
+
+    /**
+     * Notification de confirmation de présence au défi
+     * @param {string} destinataire  : token du destinataire
+     * @param {objet} defi  : Objet du defi
+     * @param {objet} emeteur  : Objet emeteur
+     */
+    static sendNotificationConfirmerPresenceDefi(destinataire,defi,emeteur) {
+        var corps = emeteur.pseudo + " a confirmé sa présence pour un défi le  "
+        corps = corps + this.buildDate(new Date(defi.jour.seconds * 1000))
+        
+        var titre  = "Nouvelle notification"
+        this.sendPushNotification(destinataire,titre,corps)
+    }
+
+
+
+    /**
+     * Notification d'annulation de présence au défi
+     * @param {string} destinataire  : token du destinataire
+     * @param {objet} defi  : Objet du defi
+     * @param {objet} emeteur  : Objet emeteur
+     */
+    static sendNotificationAnnulerPresenceDefi(destinataire,defi,emeteur) {
+        var corps = emeteur.pseudo + " est indisponible pour un défi le  "
+        corps = corps + this.buildDate(new Date(defi.jour.seconds * 1000))
+        
+        var titre  = "Nouvelle notification"
+
+        this.sendPushNotification(destinataire,titre,corps)
+    }
+
+
+
+
+    /**
+     * Fonction qui va permettre de construire un String correspondant à la 
+     * date du défi pour le titre de la vue.
+     * @param {Date} date 
+     */
+    static buildDate(date) {
+        var j = date.getDay()
+        var numJour = date.getDate()
+        var mois  =(date.getMonth() + 1).toString()
+        if(mois.length == 1) {
+            mois = '0' + mois 
+        }
+        var an  = date.getFullYear()
+        return numJour  + '/' + mois + '/' + an
+    }
+
+
 }
 

@@ -161,7 +161,7 @@ class Notif_Presence_Defi extends React.Component {
             )
         } else {
             return(
-                <View style = {{flexDirection : 'row'}}>
+                <View style = {{flexDirection : 'row', borderWidth : 1, marginTop : hp('2%')}}>
                     <View>
                         {this.renderPhotoEmetteur()}
                     </View>

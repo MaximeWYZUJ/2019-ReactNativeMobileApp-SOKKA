@@ -1,5 +1,4 @@
 
-
 import React from 'react'
 import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity,TextInput, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -10,14 +9,12 @@ import Database  from '../../../Data/Database'
 import LocalUser from '../../../Data/LocalUser.json'
 import { withNavigation } from 'react-navigation'
 
-
-
 /**
- * Quand une équipe crée un défis contre une équipe dont l'utilisateur
- * est capitaine  
-*/
-class Notif_Defis_Contre_Equipe extends React.Component {
-
+ * Classe qui permet d'afficher les notfications pour accèpter ou non une
+ * équipe qui à relevée un défi posté par une des équipes dont l'utilisateur
+ * est capitaine
+ */
+class Notif_Accepter_Releve_Defi extends React.Component {
 
     constructor(props) {
         super(props) 
@@ -34,6 +31,7 @@ class Notif_Defis_Contre_Equipe extends React.Component {
     componentDidMount() {
         this.getData()
     }
+
 
     /**
      * Fonction qui permet de récupérer les données relatives à la notification
@@ -54,6 +52,7 @@ class Notif_Defis_Contre_Equipe extends React.Component {
         this.setState({equipeEmettrice :equipeEmettrice , equipeReceptrice : equipeReceptrice, defi : defi, defis_valide : defi.defis_valide, defis_refuse  : defi.defis_refuse, isLoading : false})
     }
 
+     
     /**
      * Pour se rendre dans la fiche du defi
      */
@@ -67,14 +66,15 @@ class Notif_Defis_Contre_Equipe extends React.Component {
         this.props.navigation.navigate("FicheDefiRejoindre",
             {
                 defi : this.state.defi,
-                equipeOrganisatrice : this.state.equipeEmettrice,
-                equipeDefiee : this.state.equipeReceptrice
+                equipeOrganisatrice : this.state.equipeReceptrice,
+                equipeDefiee : this.state.equipeEmettrice
             } 
         )
         
     }
 
-    /**
+
+     /**
      * Fonction qui va être appelée au moment où l'utilisateur annule sa
      * présence. 
      */
@@ -145,9 +145,7 @@ class Notif_Defis_Contre_Equipe extends React.Component {
         }
     }
 
-    // A FINIR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! JEN ETAIS A CODER LES FONCTION DE REFUS OU D ACCEPTATION 
-    //DU DEFI
+
 
 
     renderPhotoEquipeEmetteur() {
@@ -207,7 +205,9 @@ class Notif_Defis_Contre_Equipe extends React.Component {
         }
     }
 
-    
+
+
+
     render() {
         if(this.state.isLoading) {
             return(
@@ -217,7 +217,7 @@ class Notif_Defis_Contre_Equipe extends React.Component {
             )
         } else {
             return(
-                <View style = {{flexDirection : 'row', borderWidth : 1,marginTop : hp('2%')}}>
+                <View style = {{flexDirection : 'row', borderWidth : 1, marginTop : hp('2%')}}>
                     <View>
                         {this.renderPhotoEquipeEmetteur()}
                     </View>
@@ -238,7 +238,6 @@ class Notif_Defis_Contre_Equipe extends React.Component {
         }
         
     }
-    
 }
 
 const styles = {
@@ -246,4 +245,5 @@ const styles = {
         fontWeight : "bold"
     }
 }
-export default withNavigation (Notif_Defis_Contre_Equipe)
+
+export default withNavigation (Notif_Accepter_Releve_Defi)

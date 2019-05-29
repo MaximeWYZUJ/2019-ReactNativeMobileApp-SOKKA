@@ -4,37 +4,37 @@
 export default class NormalizeString {
 
     static normalize(s) {
-        console.log(s);
 
-        s.replace("é", "e");
-        s.replace("è", "e");
-        s.replace("ê", "e");
-        s.replace("ë", "e");
-        s.replace("ï", "i");
-        s.replace("î", "i");
-        s.replace("à", "a");
-        s.replace("â", "a");
-        s.replace("ä", "a");
-        s.replace("û", "u");
-        s.replace("ù", "u");
-        s.replace("ü", "u");
-        s.replace("ô", "o");
-        s.replace("ö", "o");
+        s = s.replace("é", "e");
+        s = s.replace("è", "e");
+        s = s.replace("ê", "e");
+        s = s.replace("ë", "e");
+        s = s.replace("ï", "i");
+        s = s.replace("î", "i");
+        s = s.replace("à", "a");
+        s = s.replace("â", "a");
+        s = s.replace("ä", "a");
+        s = s.replace("û", "u");
+        s = s.replace("ù", "u");
+        s = s.replace("ü", "u");
+        s = s.replace("ô", "o");
+        s = s.replace("ö", "o");
         
-        s.replace("Ê", "E");
-        s.replace("Ê", "E");
-        s.replace("Ï", "I");
-        s.replace("Î", "I");
-        s.replace("Â", "A");
-        s.replace("Ä", "A");
-        s.replace("Û", "U");
-        s.replace("Ü", "U");
-        s.replace("Ô", "O");
-        s.replace("Ö", "O");
+        s = s.replace("Ê", "E");
+        s = s.replace("Ê", "E");
+        s = s.replace("Ï", "I");
+        s = s.replace("Î", "I");
+        s = s.replace("Â", "A");
+        s = s.replace("Ä", "A");
+        s = s.replace("Û", "U");
+        s = s.replace("Ü", "U");
+        s = s.replace("Ô", "O");
+        s = s.replace("Ö", "O");
 
         return s.toLowerCase();
     }
 
+    
     static decompose(s) {
 
         s = this.normalize(s);
@@ -61,6 +61,7 @@ export default class NormalizeString {
 
         return t;
     }
+
 
     // Renvoie un tableau des premiers substrings de s
     static decomposeFirsts(s) {

@@ -16,7 +16,7 @@ import actions from '../../../Store/Reducers/actions'
 import Joueur_Pseudo_Score from '../../../Components/ProfilJoueur/Joueur_Pseudo_Score';
 import LocalUser from '../../../Data/LocalUser.json'
 import { StackActions, NavigationActions } from 'react-navigation';
-
+import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
 
 // Rememttre à Zéro le stack navigator pour empecher le retour en arriere
 const resetAction = StackActions.reset({
@@ -223,14 +223,15 @@ class Fiche_Defi_Rejoindre extends React.Component {
         
         var db = Database.initialisation()
 
+        
         var defiRef = db.collection("Defis").doc(this.state.defi.id)
+        this.sendNotifDefisReleve(idEquipe)
         defiRef.update({
             equipeDefiee : idEquipe,
             recherche : false,
             joueursEquipeDefiee : [this.userData.id],
             confirmesEquipeDefiee : [this.userData.id],
             participants : this.state.defi.participants.concat([this.userData.id]),
-            defis_valide : true     // !!!! POUR LE TEST ! !!
         })
         .catch(function(error) {
             // The document probably doesn't exist.
@@ -239,6 +240,32 @@ class Fiche_Defi_Rejoindre extends React.Component {
     }
 
 
+    /**
+     * Fonction qui va permettre d'envoyer les notifications aux capitaines
+     * de l'équipe organisatrice
+     */
+    sendNotifDefisReleve(idEquipe) {
+
+        var db = Database.initialisation()
+        if(this.state.equipeOrganisatrice != undefined) {
+            for(var i = 0 ; i < this.state.equipeOrganisatrice.capitaines.length ; i++) {
+
+            
+                db.collection("Notifs").add(
+                    {
+                        dateParse : Date.parse(new Date()),
+                        defi : this.state.defi.id,
+                        emetteur :  LocalUser.data.id,
+                        recepteur : this.state.equipeOrganisatrice.capitaines[i] ,
+                        time : new Date(),
+                        equipeEmettrice : idEquipe ,
+                        type : Types_Notification.ACCEPTER_DEFI_RELEVE,
+                        equipeReceptrice : this.state.equipeOrganisatrice.id,
+                    }
+                )
+            } 
+        }
+    }
 
   
 
@@ -717,32 +744,26 @@ class Fiche_Defi_Rejoindre extends React.Component {
         if( this.state.equipeDefiee != undefined) cap2 =  this.state.equipeDefiee.capitaines.includes(this.userData.id)
 
         console.log("NON CAP1 et this.state.equipeDefiee == undefined",this.state.equipeDefiee == undefined && (!cap1) )
-        var participe =this.state.defi.participants.includes(this.userData.id)
+        var participe1 =this.state.defi.joueursEquipeOrga.includes(this.userData.id)
+        var participe2  = this.state.defi.joueursEquipeDefiee.includes(this.userData.id)
+        if(this.state.defi.defis_refuse) {
+            return(
+                <Text style = {{color : 'red'}}> Défi refusé</Text>
+            )
+        }
+
+
         // Si le défi est passé
         if(estPasse) {
             return(
                 <TouchableOpacity
                     style = {styles.btn_feuille_de_match} 
                     onPress = {() => this.goToFeuilleDefiPasse()} >
-                    <Text>Feuille de match</Text>
+                    <Text>Feuille de match3</Text>
                 </TouchableOpacity>
+            
             )
 
-        // Si c'est le capitaine de l'équipe organisatrice ou si il participe
-        }else if(cap1 || participe) {
-            return(
-                <TouchableOpacity
-                    style = {styles.btn_feuille_de_match}
-                    onPress = {() => this.props.navigation.push("FeuilleDefiAVenir",
-                        {
-                            equipeDefiee : this.state.equipeDefiee,
-                            equipeOrganisatrice : this.state.equipeOrganisatrice,
-                            defi : this.state.defi
-                        })}
-                    >
-                    <Text>Feuille de match</Text>
-                </TouchableOpacity>
-            )
         
         // Si il est capitaine de l'équipe defiee et le défi à été validé
         } else if(cap2 && this.state.defi.defis_valide) {
@@ -759,6 +780,31 @@ class Fiche_Defi_Rejoindre extends React.Component {
                 </TouchableOpacity>
             )
 
+
+        // Si c'est le capitaine de l'équipe organisatrice ou si il participe
+        }else if(cap1 || participe1) {
+            return(
+                <TouchableOpacity
+                    style = {styles.btn_feuille_de_match}
+                    onPress = {() => this.props.navigation.push("FeuilleDefiAVenir",
+                        {
+                            equipeDefiee : this.state.equipeDefiee,
+                            equipeOrganisatrice : this.state.equipeOrganisatrice,
+                            defi : this.state.defi
+                        })}
+                    >
+                    <Text>Feuille de match</Text>
+                </TouchableOpacity>
+            )
+        
+        // Si il joue avecl'équipe défiée mais que le défi a pas été validé
+        } else if(participe2 && ! this.state.defi.defis_valide) {
+            return(
+                <View>
+                    <Text>Attente de validation du défi</Text>
+                </View>
+            )
+        
         // Si pas encore d'équipe défiée
         } else if(this.state.equipeDefiee == undefined && (!cap1)) {
             return(
@@ -780,6 +826,33 @@ class Fiche_Defi_Rejoindre extends React.Component {
     }
 
 
+    /**
+     * Pour accepeter ou non une équipe qui relève le défi, pour le moment 
+     * juste du texte !
+     */
+    renderAcepterEquipe() {
+        console.log("in renderAZccepterZEquoe")
+        console.log(this.state.equipeDefiee != undefined &&  !this.state.defi.defis_valide)
+        if(this.state.equipeDefiee != undefined &&  !this.state.defi.defis_valide) {
+            return(
+                <View>
+                    <Text style = {{color : 'red'}}>L'équipe {this.state.equipeDefiee.nom} souhaite relever </Text>
+                    <Text style = {{color : 'red'}}>le défi posté</Text>
+
+                    <View style = {{flexDirection : 'row'}}>
+                        <TouchableOpacity>
+                            <Text style = {{color : 'red'}}>Oui</Text>
+                        </TouchableOpacity>
+                        <Text style = {{color : 'red'}}> / </Text>
+
+                        <TouchableOpacity>
+                            <Text style = {{color : 'red'}}>Non</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )
+        }
+    }
 
 
     /**
@@ -801,7 +874,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
                             + "Tu seras informé dès que l’équipe " + this.state.equipeOrganisatrice.nom + " aura accepté ou refusé"
                         )
                     }}>
-                   <View>
+                   <View style = {{flexDirection : "row"}}>
                         <Image
                             source = {{uri : item.photo}}
                             style = {styles.photoEquipe}
@@ -931,6 +1004,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
                     {this._renderEquipeDefie()}
 
+                    {this.renderAcepterEquipe()}
                     {this._renderBtn()}
 
                     </View>
