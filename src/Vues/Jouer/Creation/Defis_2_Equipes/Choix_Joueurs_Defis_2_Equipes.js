@@ -9,7 +9,7 @@ import { CheckBox } from 'react-native-elements'
 import Joueur_Item_Creation_Defis from '../../../../Components/ProfilJoueur/Joueur_Item_Creation_Defis'
 import Database from '../../../../Data/Database'
 import Item_Equipe_Creation_Defis from '../../../../Components/Profil_Equipe/Item_Equipe_Creation_Defis';
-
+import LocalUser from '../../../../Data/LocalUser.json'
 
 import { connect } from 'react-redux'
 
@@ -70,6 +70,23 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
             }
         }
         
+    }
+
+    
+    /**
+     * Fonction qui va permettre de construire un String correspondant à la 
+     * date du défi pour le titre de la vue.
+     * @param {Date} date 
+     */
+    buildDate(date) {
+        var j = date.getDay()
+        var numJour = date.getDate()
+        var mois  =(date.getMonth() + 1).toString()
+        if(mois.length == 1) {
+            mois = '0' + mois 
+        }
+        var an  = date.getFullYear()
+        return numJour  + '/' + mois + '/' + an
     }
 
 
@@ -349,6 +366,37 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
     }
 
 
+    //========================== NOTIFICATION ==========================
+
+        /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    sendPushNotification(token , title,body ) {
+        console.log('in send push !!')
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+      
+      
+    }
+
+    //===================================================================
 
 
 
@@ -383,6 +431,24 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
         var defi  =this.props.navigation.getParam('defi', undefined)
         var joueursEquipe = this.props.navigation.getParam('joueursEquipe',[])
         
+        // Envoyer les notif
+        var defi  = this.props.navigation.getParam("defi",undefined)
+        for(var i = 0; i < this.state.allJoueurs.length ; i++) {
+            if(this.state.joueursSelectionnes.includes(this.state.allJoueurs[i].id)) {
+                var tokens = this.state.allJoueurs[i].tokens
+                if(tokens != undefined) {
+                    for(var k = 0 ; k < tokens.length; k++) {
+
+                        var title = "Nouvelle notif"
+                        var corps = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.equipe.nom 
+                        corps = corps + " t'as convoqué / relancé pour un un défi le " + this.buildDate(new Date(this.defi.jour.seconds * 1000))
+                        this.sendPushNotification(tokens[k], title, corps)
+                    }
+                }
+            }
+        }
+
+        // Stocker les notif dans la db 
         if(this.equipe.id == defi.equipeDefiee) {
 
             // Mettre  à jour les champs du défi

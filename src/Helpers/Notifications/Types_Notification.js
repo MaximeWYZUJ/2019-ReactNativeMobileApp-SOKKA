@@ -50,4 +50,24 @@ export default class Types_Notification {
      */
     static CONVOCATION_RELANCE_PARTIE = "CONVOCATION_RELANCE_PARTIE"
 
+    /**
+     * Quand l'utilisateur confirme sa présence à une partie
+     */
+    static CONFIRMER_PRESENCE_PARTIE = "CONFIRMER_PRESENCE_PARTIE"
+
+
+    /**
+     * Quand l'utilisateur annule sa présence à une partie
+     */
+    static ANNULER_PRESENCE_PARTIE = "ANNULER_PRESENCE_PARTIE"
+
+
+
+    //=========================================================================
+    //============================ POUR LES EQUIPES  ==========================
+    //=========================================================================
+
+
+
+
 }

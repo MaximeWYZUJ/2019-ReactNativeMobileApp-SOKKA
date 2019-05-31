@@ -1,0 +1,11 @@
+
+// PUSH notification (pas composant notif)
+CONVOCATION_RELANCE_PARTIE
+    - Recapitulatif_Partie 
+    - Choix_Joueurs_Partie
+    - Feuille_Partie_A_Venir
+
+
+// Composant notif à faire
+- CONVOCATION_RELANCE_PARTIE (à vérifier !)
+- CONFIRMER_PRESENCE_PARTIE

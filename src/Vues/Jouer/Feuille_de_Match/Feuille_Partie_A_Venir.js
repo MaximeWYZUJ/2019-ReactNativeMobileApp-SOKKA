@@ -11,6 +11,7 @@ import actions from '../../../Store/Reducers/actions'
 import { connect } from 'react-redux'
 import Presences_Joueurs from '../../../Components/Defis/Feuilles_Match/Presences_Joueurs'
 import LocalUser from '../../../Data/LocalUser.json'
+import DatesHelpers from '../../../Helpers/DatesHelpers'
 
 
 /**
@@ -80,6 +81,68 @@ class Feuille_Partie_A_Venir extends React.Component {
     }
 
   
+
+    // ===========================================================================
+    // ========================== NOTIFICATIONS ==================================
+    // ===========================================================================
+    
+    
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    sendPushNotification(token , title,body ) {
+        console.log('in send push !!')
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+
+    /**
+     * Fonction qui va permettre d'envoyer des notifications à chaque 
+     * joueur convoqué
+     */
+    sendNotifToAllPlayer(date) {
+
+        var titre=  "Nouvelle Notif"
+        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le"
+        corps = corps + DatesHelpers.buildDate(date)
+
+        for(var i  = 0; i < this.state.partie.attente.length; i++) {
+            if(this.state.partie.attente[i].id != LocalUser.data.id) {
+                var tokens = this.state.partie.attente[i].tokens
+                for(var k =0; k < tokens.length; k ++) {
+                    this.sendPushNotification(tokens[k], titre, corps)
+                }
+            }
+        }
+
+    }
+
+    storeNotifRelanceInDB() {
+        this.sendNotifToAllPlayer(new Date(this.state.partie.jour.seconds * 1000))
+    }
+    // ======================================================
+
+
+
 
     /**
      * Fonction qui permet de construire un string représentant la date de 
@@ -348,7 +411,8 @@ class Feuille_Partie_A_Venir extends React.Component {
             id_partie :  this.state.partie.id,
             enAttente : this.state.partie.attente,
             inscris : this.state.partie.inscris,
-            invite : true                          // c'est le créateur qui invite
+            invite : true,                          // c'est le créateur qui invite
+            date : this.state.partie.date
         })
     }
 

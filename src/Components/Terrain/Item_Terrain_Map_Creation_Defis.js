@@ -53,14 +53,14 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
                     {/* View contenant les informations sur le terrain*/}
                     <View>
                         <Text style = {styles.InsNomStyle}>{this.props.InsNom}</Text>
-                        <Text style={styles.title}>{this.props.EquNom}</Text>
+                        <Text style={styles.title}>{this.props.N_Voie} {this.props.Voie} </Text>
 
                         {/* View contenant le txt de la distance et l'image*/}
                         <View style = {{flexDirection : 'row'}}>
                             <Image 
                                 style = {{width : wp('5%'), height : wp('5%'), marginRight : wp('2%')}}
                                 source = {require('../../../res/distance.png')}/>
-                            <Text style = {{}}>{this.props.distance}</Text>
+                            <Text style = {{}}>{this.props.distance} km</Text>
                         </View>
                     </View>
 
@@ -70,7 +70,7 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
                             title=' '
                             checkedColor = {Colors.agOOraBlue}
                             right
-                            containerStyle={{backgroundColor: 'white', borderWidth :0,marginTop : hp('1%'), alignSelf : 'center'}}                    
+                            containerStyle={{backgroundColor: 'white', borderWidth :0,marginTop : hp('0.1%'), alignSelf : 'center'}}                    
                             checked={isShown}
                             onPress={() => {
                                 this._chooseTerrain(this.props.id)
@@ -87,13 +87,14 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
 const styles = {
     slide : {
         width : wp('70%'),
-        height : hp('17%'),
+        //height : hp('12%'),
         borderRadius : 8,
         paddingTop : hp('0.5%'),
         paddingLeft : wp('1%'),
         paddinRight : wp('1%'),
         backgroundColor : 'white', 
-       // flexDirection : 'row' 
+       flexDirection : 'row' ,
+       marginBottom : hp('1%')
 
     },
 

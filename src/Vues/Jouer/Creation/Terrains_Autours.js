@@ -11,6 +11,7 @@ import { connect } from 'react-redux'
 import Barre_Recherche from '../../../Components/Recherche/Barre_Recherche'
 import { withNavigation } from 'react-navigation'
 import Carousel from 'react-native-snap-carousel';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 const { width, height } = Dimensions.get('window');
@@ -43,7 +44,7 @@ class Terrains_Autours extends React.Component {
 			typeDisplay : LISTE,
 			markers: [],		
 
-        }
+		}
 	}
 	
 	
@@ -66,6 +67,7 @@ class Terrains_Autours extends React.Component {
 					Ville : Terrains[i].Ville,
 					id : Terrains[i].id,
 					Payant :  Terrains[i].Payant,
+					queryName : Terrains[i].queryName
 				}
 				liste.push(t)
 			}
@@ -111,7 +113,21 @@ class Terrains_Autours extends React.Component {
 			return [null,[]]
 		}
 	}
+	
 
+	// !!!!! A CHANGER POUR INCLURE LES FILTRES !! !!!
+	/**
+	 * Pour filtrer
+	 */
+	filtrerData = (data) => {
+        
+            return data;
+        
+	}
+
+	handleFilterButton = () =>{
+		console.log("filter press")
+	}
 
 	/**
 	 * Fonction qui va permettre de trier les terrains en fonction de leur distance 
@@ -209,9 +225,11 @@ class Terrains_Autours extends React.Component {
 			<Item_Terrain_Map_Creation_Defis				
 				InsNom = {item.InsNom}
 				EquNom = {item.EquNom}
-				distance = {txtDistance}
+				Voie = {item.Voie}
+				N_Voie = {item.N_Voie}
 				id = {item.id}
 				isShown = {this.props.terrainSelectionne == item.id}
+				distance = {txtDistance}
 
 		/>)
 	}
@@ -225,25 +243,33 @@ class Terrains_Autours extends React.Component {
 		if(this.state.typeDisplay == LISTE ) {
 			return(
 				<View>
-					<Barre_Recherche
-						handleTextChange ={this.recherche}
-						data = {this.allTerrains}
-						field = "InsNom"
-					/>
-					<FlatList
-							data= {this.state.terrainFiltres}
-							keyExtractor={(item) => item.id}
-							renderItem={this._renderItem}
-							extraData = {this.props.terrainSelectionne}
-					/>
-					<TouchableOpacity 
-							style = {{padding : wp('4%'),position : "absolute",bottom : hp('20%'), right: wp('1%')}}
-							onPress={() => this.setState({typeDisplay : MAP})}
-							>
-							<Image
-								source = {require('../../../../res/map.png')}
-								style = {{width : wp('17%'), height : wp('17%')}}/>
-					</TouchableOpacity>
+				<ScrollView style = {{marginBottom : hp('1%')}}>
+					<View style = {{flex : 1}}>
+						<Barre_Recherche
+							handleTextChange ={this.recherche}
+							data = {this.allTerrains}
+							field = "queryName"
+							filtrerData = {this.filtrerData}
+							handleFilterButton={this.handleFilterButton}
+
+						/>
+						<FlatList
+								data= {this.state.terrainFiltres}
+								keyExtractor={(item) => item.id}
+								renderItem={this._renderItem}
+								extraData = {this.props.terrainSelectionne}
+						/>
+						
+					</View>
+				</ScrollView>
+				<TouchableOpacity 
+								style = {{position : "absolute",bottom : hp('1%'), right: wp('1%')}}
+								onPress={() => this.setState({typeDisplay : MAP})}
+								>
+								<Image
+									source = {require('../../../../res/map.png')}
+									style = {{width : wp('17%'), height : wp('17%')}}/>
+						</TouchableOpacity>
 				</View>
 			)
 		} else {
@@ -252,7 +278,9 @@ class Terrains_Autours extends React.Component {
 					<Barre_Recherche
 						handleTextChange ={this.recherche}
 						data = {this.allTerrains}
-						field = "InsNom"
+						field = "queryName"
+						filtrerData = {this.filtrerData}
+						handleFilterButton={this.handleFilterButton}
 					/>
 
 					<View style = {styles.container}>
@@ -293,7 +321,7 @@ class Terrains_Autours extends React.Component {
 						</MapView>
 
 						{/* Vue contenant le carousel*/}
-						<View style = {{position : "absolute", bottom : 0}}>
+						<View style = {{position : "absolute", bottom : hp('1%')}}>
 							<Carousel
 								ref={c => this._slider1Ref = c}
 								data={this.state.terrainFiltres}	
@@ -361,7 +389,7 @@ const mapStateToProps = (state) => {
 
 const styles = StyleSheet.create({
 	container: {
-		height : hp('60.5%'),
+		height : hp('54.5%'),
 	  //...StyleSheet.absoluteFillObject,
 	  justifyContent: 'flex-end',
 	  alignItems: 'center',

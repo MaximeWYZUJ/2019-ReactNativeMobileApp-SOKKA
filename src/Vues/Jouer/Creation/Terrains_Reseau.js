@@ -9,9 +9,9 @@ import Distance from '../../../Helpers/Distance'
 const DISTANCE_MAX = 20
 import { connect } from 'react-redux'
 import Barre_Recherche from '../../../Components/Recherche/Barre_Recherche'
+import LocalUser from '../../../Data/LocalUser.json'
 
-const reseau = [1,34,3,67,147,20,19,25,26,5]
-
+const reseau = LocalUser.terrains
 /**
  * Classe qui permet à l'utilisateur de séléctionner un terrains (de son réseau) sur 
  * lequel organiser un défi.
@@ -20,24 +20,32 @@ class Terrains_Reseau extends React.Component {
 
     constructor(props) {
         super(props)
+        console.log(reseau)
         this.state = {
-            terrains : this.buildTerrainsFromList(reseau)
+            terrains : this.buildTerrainsFromList(LocalUser.terrains)
         }
+        
     }
 
     buildTerrainsFromList(){
+        console.log("===RESEAU :", reseau)
+            
+        
         let liste = []
-        for(var i = 0 ; i < reseau.length; i++) {
-            var t = {
-                InsNom : Terrains[i].InsNom,
-                N_Voie : Terrains[i].N_Voie,
-                Voie : Terrains[i].Voie,
-                Ville : Terrains[i].Ville,
-                id : Terrains[i].id,
-                Payant :  Terrains[i].Payant,
+        if(reseau != undefined) {
+            for(var i = 0 ; i < reseau.length; i++) {
+                var t = {
+                    InsNom : Terrains[i].InsNom,
+                    N_Voie : Terrains[i].N_Voie,
+                    Voie : Terrains[i].Voie,
+                    Ville : Terrains[i].Ville,
+                    id : Terrains[i].id,
+                    Payant :  Terrains[i].Payant,
+                    queryName : Terrains[i].queryName
 
+                }
+                liste.push(t)
             }
-            liste.push(t)
         }
         return liste
     }
@@ -52,7 +60,22 @@ class Terrains_Reseau extends React.Component {
 		this.setState({
 			allTerrains : data
 		})
-	}
+    }
+    
+	// !!!!! A CHANGER POUR INCLURE LES FILTRES !! !!!
+	/**
+	 * Pour filtrer
+	 */
+	filtrerData = (data) => {
+        
+        return data;
+    
+    }
+
+    handleFilterButton = () =>{
+        console.log("filter press")
+    }
+
 
     _renderItem = ({item}) => {
        
@@ -76,7 +99,7 @@ class Terrains_Reseau extends React.Component {
                <Barre_Recherche
                     handleTextChange ={this.recherche}
                     data = {this.state.terrains}
-                    field = "InsNom"
+                    field = "queryName"
                 />
                <FlatList
                     data= {this.state.terrains}

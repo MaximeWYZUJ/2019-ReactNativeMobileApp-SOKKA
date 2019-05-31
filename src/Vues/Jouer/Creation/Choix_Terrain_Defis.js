@@ -43,6 +43,8 @@ class Choix_Terrain_Defis extends React.Component {
         }
     }
 
+
+
     terrainChoose = (idTerrain)  => {
 		this.setState({
 			terrainChoisi : idTerrain
@@ -117,7 +119,7 @@ class Choix_Terrain_Defis extends React.Component {
                     {this.buttonNext()}
                 </View>
 
-                <Text style = {{marginTop : hp('2%'), fontSize : RF(2.6), marginBottom : hp('1%')}}>Sur quel terrain souhaite tu jouer ?</Text>
+                <Text style = {{marginTop : hp('0.7%'), fontSize : RF(2.6), marginBottom : hp('0.7%')}}>Sur quel terrain souhaite tu jouer ?</Text>
                 <TabChoisirTerrainDefis
                     latitude = {this.latitude}
                     longitude = {this.longitude}/>

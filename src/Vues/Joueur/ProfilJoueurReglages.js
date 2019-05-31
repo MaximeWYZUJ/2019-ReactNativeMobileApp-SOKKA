@@ -73,7 +73,7 @@ class ProfilJoueurReglages extends React.Component {
 
         }).then(() => {
             console.log("Document successfully written!");
-            this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', '')})
+            this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', ''),retour_arriere_interdit : true})
         }).catch(function(error) {
             console.log("Error writing document: ", error);
         });

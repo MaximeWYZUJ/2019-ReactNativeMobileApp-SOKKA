@@ -42,13 +42,18 @@ export default class Photo_Joueur_Equipe extends React.Component {
 
 
     render() {
+        var borderW = 0
+        
+        var txt = " "
+        if(this.props.isCaptain) {
+            borderW = 3
+        }
         return (
             <View style = {styles.main_container}>
                 <TouchableOpacity
                 style = {styles.touchableOpacity}
                 onPress={() => this.gotoProfilJoueur(this.props.id)}>
-                    <Image source = {{uri : this.props.urlPhoto}} style= {styles.image} borderRadius={30}/>
-                    {this.displayCapitanat()}
+                    <Image source = {{uri : this.props.urlPhoto}} style= {[styles.image, {borderWidth : borderW}]} />
                 </TouchableOpacity>
             </View>
         )
@@ -68,11 +73,11 @@ const styles = {
 
     touchableOpacity : {
 
-        shadowColor: 'rgba(0,0,0, .4)', // IOS
-        shadowOffset: { height: 5, width: 5 }, // IOS
-        shadowOpacity: 5, // IOS
-        shadowRadius: 5, //IOS
-        elevation: 5, // Android
+       // shadowColor: 'rgba(0,0,0, .4)', // IOS
+        //shadowOffset: { height: 5, width: 5 }, // IOS
+        //shadowOpacity: 5, // IOS
+        //shadowRadius: 5, //IOS
+        //elevation: 5, // Android
     },
 
     image : {
@@ -80,6 +85,8 @@ const styles = {
         height : wp('17%'),
         resizeMode:  'cover',
         alignSelf: 'center',
+        borderColor : "black",
+        borderRadius : 30
 
     },
     c : {

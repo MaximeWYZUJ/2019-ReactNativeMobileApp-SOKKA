@@ -18,7 +18,6 @@ import LocalUser from '../../../Data/LocalUser.json'
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
 import Notification from '../../../Helpers/Notifications/Notification'
 
-
 // Rememttre à Zéro le stack navigator pour empecher le retour en arriere
 const resetAction = StackActions.reset({
     index: 0, // <-- currect active route from actions array
@@ -611,7 +610,7 @@ class Feuille_Defi_A_Venir extends React.Component {
                 {text: 'Oui', onPress: () =>this.storeNotifRelanceInDB()},
                 {
                   text: 'Non',
-                  onPress: () => console.log('Cancel Pressed'),
+                  onPress: () => console.log('Cancel Pressedm'),
                   style: 'cancel',
                 },
             ],
@@ -649,6 +648,36 @@ class Feuille_Defi_A_Venir extends React.Component {
     //========================  FONCTION POUR LES NOTIFICATIONS ======================
     //================================================================================
 
+
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    sendPushNotification(token , title,body ) {
+        console.log('in send push !!')
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+      
+      
+    }
+
     /**
      * On va stocker une notification qui correspond a la confirmation 
      * de la présence du joueur
@@ -666,7 +695,9 @@ class Feuille_Defi_A_Venir extends React.Component {
                     var cap = await Database.getDocumentData(this.state.equipeOrganisatrice.capitaines[i], "Joueurs")
                     if(cap.tokens != undefined) {
                         for(var j = 0; j < cap.tokens.length; j++) {
-                        Notification.sendNotificationConfirmerPresenceDefi(cap.tokens[j],this.state.defi,LocalUser.data)
+                            var titre = "Nouvelle notif"
+                            var corps = LocalUser.data.pseudo + " a confirmé sa présence pour un défi le " +  this.buildDate(new Date(this.state.defi.jour.seconds * 1000))
+                            this.sendPushNotification(cap.tokens[j],titre,corps)
                         }
                     }
                     db.collection("Notifs").add(
@@ -691,7 +722,9 @@ class Feuille_Defi_A_Venir extends React.Component {
                     var cap = await Database.getDocumentData(this.state.equipeDefiee.capitaines[i], "Joueurs")
                     if(cap.tokens != undefined) {
                         for(var j = 0; j < cap.tokens.length; j++) {
-                        Notification.sendNotificationConfirmerPresenceDefi(cap.tokens[j],this.state.defi,LocalUser.data)
+                            var titre = "Nouvelle notif"
+                            var corps = LocalUser.data.pseudo + " a confirmé sa présence pour un défi le " +  this.buildDate(new Date(this.state.defi.jour.seconds * 1000))
+                            this.sendPushNotification(cap.tokens[j],titre,corps)                        
                         }
                     }
                     
@@ -730,7 +763,9 @@ class Feuille_Defi_A_Venir extends React.Component {
                     var cap = await Database.getDocumentData(this.state.equipeOrganisatrice.capitaines[i], "Joueurs")
                     if(cap.tokens != undefined) {
                         for(var j = 0; j < cap.tokens.length; j++) {
-                        Notification.sendNotificationAnnulerPresenceDefi(cap.tokens[j],this.state.defi,LocalUser.data)
+                            var titre = "Nouvelle notif"
+                            var corps = LocalUser.data.pseudo + " est indisponible pour un défi le " +  this.buildDate(new Date(this.state.defi.jour.seconds * 1000))
+                            this.sendPushNotification(cap.tokens[j],titre,corps)
                         }
                     }
 
@@ -755,7 +790,9 @@ class Feuille_Defi_A_Venir extends React.Component {
                     var cap = await Database.getDocumentData(this.state.equipeDefiee.capitaines[i], "Joueurs")
                     if(cap.tokens != undefined) {
                         for(var j = 0; j < cap.tokens.length; j++) {
-                        Notification.sendNotificationAnnulerPresenceDefi(cap.tokens[j],this.state.defi,LocalUser.data)
+                            var titre = "Nouvelle notif"
+                            var corps = LocalUser.data.pseudo + " est indisponible pour un défi le " +  this.buildDate(new Date(this.state.defi.jour.seconds * 1000))
+                            this.sendPushNotification(cap.tokens[j],titre,corps)
                         }
                     }
                     db.collection("Notifs").add(
@@ -780,13 +817,34 @@ class Feuille_Defi_A_Venir extends React.Component {
      * Fonction qui va sauvegarder une notification par joueur convoque
      */
     storeNotifRelanceInDB() {
-
+        console.log("in store notif relancer")
         var db = Database.initialisation() 
 
         // Si je suis de l'equipe orga
-        if(this.state.equipeOrganisatrice.capitaines.includes(this.monId)) {
+        //if(this.state.equipeOrganisatrice.capitaines.includes(this.monId)) {
+        if(this.state.defi.joueursEquipeOrga.includes(this.monId)){
+            console.log("before send notif")
+
+            // Envoyer les notif
+            for(var i = 0 ; i < this.state.joueurs.length ; i++) {
+                console.log("in for ")
+                if(this.state.defi.attenteEquipeOrga.includes(this.state.joueurs[i].id)) {
+                    console.log("in if For Notif !!!!!!!")
+                    var tokens = this.state.joueurs[i].tokens
+                    if(tokens != undefined) {
+                        for(var k = 0 ; k < tokens.length; k++) {
+                            var title = "Nouvelle notif"
+                            var corps = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.state.equipeOrganisatrice.nom 
+                            corps = corps + " t'as convoqué / relancé pour un un défi le " +
+                            this.sendPushNotification(tokens[k], title, corps) 
+                        }
+                    }
+                }
+            }
+
+            // Enregistrer notif dans la db
             for(var i = 0 ; i < this.state.defi.attenteEquipeOrga.length; i++) {
-                if(this.state.defi.attenteEquipeOrga[i] != this.monId) {
+                if(this.state.defi.attenteEquipeOrga[i] != this.monId) { 
                     db.collection("Notifs").add(
                         {
                             dateParse : Date.parse(new Date()),
@@ -800,7 +858,24 @@ class Feuille_Defi_A_Venir extends React.Component {
                     )
                 }
             }
-        } else if(this.state.equipeDefiee != undefined && this.state.equipeDefiee.capitaines.includes(this.monId)) {
+        } else if(this.state.equipeDefiee != undefined && this.state.defi.joueursEquipeDefiee.includes(this.monId)) {
+            
+            for(var i = 0 ; i < this.state.joueurs.length ; i++) {
+                console.log("in for ")
+                if(this.state.defi.attenteEquipeDefiee.includes(this.state.joueurs[i].id)) {
+                    console.log("in if For Notif !!!!!!!")
+                    var tokens = this.state.joueurs[i].tokens
+                    if(tokens != undefined) {
+                        for(var k = 0 ; k < tokens.length; k++) {
+                            var title = "Nouvelle notif"
+                            var corps = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.state.equipeDefiee.nom 
+                            corps = corps + " t'as convoqué / relancé pour un un défi le " + this.buildDate(new Date(this.state.defi.jour.seconds * 1000))
+                            this.sendPushNotification(tokens[k], title, corps) 
+                        }
+                    }
+                }
+            }
+
             for(var i = 0 ; i < this.state.defi.attenteEquipeDefiee.length; i++) {
                 if(this.state.defi.attenteEquipeDefiee[i] != this.monId) {
                     db.collection("Notifs").add(

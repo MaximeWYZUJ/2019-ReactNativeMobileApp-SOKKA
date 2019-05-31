@@ -9,6 +9,7 @@ import TabChoixJoueursDefis from './TabChoixJoueursDefis'
 import Database from '../../../../Data/Database'
 import LocalUser from '../../../../Data/LocalUser.json'
 import actions from '../../../../Store/Reducers/actions';
+import DatesHelpers from '../../../../Helpers/DatesHelpers'
 
 /**
  * Classe qui va permettre à l'utilisateur de choisir des joueurs lors 
@@ -30,7 +31,65 @@ class Choix_Joueurs_Partie extends React.Component {
         this.goToFichePartie = this.goToFichePartie.bind(this)
     }
 
+    // ===========================================================================
+    // ========================== NOTIFICATIONS ==================================
+    // ===========================================================================
+    
+    
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    sendPushNotification(token , title,body ) {
+        console.log('in send push !!')
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+
+    /**
+     * Fonction qui va permettre d'envoyer des notifications à chaque 
+     * joueur convoqué
+     */
+    sendNotifToAllPlayer(date) {
+
+        var titre=  "Nouvelle Notif"
+        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le"
+        corps = corps + DatesHelpers.buildDate(date)
+
+        for(var i  = 0; i < this.props.joueursPartie.length; i++) {
+            if(this.props.joueursPartie[i].id != LocalUser.data.id) {
+                var tokens = this.props.joueursPartie[i].tokens
+                for(var k =0; k < tokens.length; k ++) {
+                    this.sendPushNotification(tokens[k], titre, corps)
+                }
+            }
+        }
+    }
+    // ======================================================
+
+
+
     goToFichePartie() {
+        d =this.props.navigation.getParam("date", new Date())
+        this.sendNotifToAllPlayer(new Date(d))
         Alert.alert(
             '',
             'Tu as bien rejoins cette partie, les joueurs avec qui tu seras vont recevoir une notification pour confirmer leur participation',

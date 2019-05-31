@@ -9,7 +9,7 @@ import ID from '../../../../Helpers/ID'
 import Database from '../../../../Data/Database'
 import { ScrollView } from 'react-native-gesture-handler';
 import LocalUser from '../../../../Data/LocalUser.json'
-
+import DatesHelpers from '../../../../Helpers/DatesHelpers'
 
 
 
@@ -57,6 +57,61 @@ export default class Recapitulatif_Partie extends React.Component {
          }, 1000);
     }
 
+
+    // ===========================================================================
+    // ========================== NOTIFICATIONS ==================================
+    // ===========================================================================
+    
+    
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    sendPushNotification(token , title,body ) {
+        console.log('in send push !!')
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+
+    /**
+     * Fonction qui va permettre d'envoyer des notifications à chaque 
+     * joueur convoqué
+     */
+    sendNotifToAllPlayer(date) {
+
+        var titre=  "Nouvelle Notif"
+        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le"
+        corps = corps + DatesHelpers.buildDate(date)
+
+        for(var i  = 0; i < this.joueurs.length; i++) {
+            if(this.joueurs[i].id != LocalUser.data.id) {
+                var tokens = this.joueurs[i].tokens
+                for(var k =0; k < tokens.length; k ++) {
+                    this.sendPushNotification(tokens[k], titre, corps)
+                }
+            }
+        }
+    }
+    // ======================================================
+
     /**
      * Fonction qui va permettre de construire une liste d'id des joueurs
      * @param {{id : String photo : String}} liste 
@@ -95,7 +150,8 @@ export default class Recapitulatif_Partie extends React.Component {
     }
 
 
-    goToFichePartie(id) {
+    goToFichePartie(id,date) {
+        this.sendNotifToAllPlayer(date)
         Alert.alert(
             'Ta partie a bien été crée et publiée',
             "Les joueurs peuvent s'inscrire",
@@ -117,6 +173,8 @@ export default class Recapitulatif_Partie extends React.Component {
         ); 
         
     }
+    
+
     
     
 
@@ -165,7 +223,7 @@ export default class Recapitulatif_Partie extends React.Component {
             votes : [],
             absents : []
         })
-        .then(this.goToFichePartie(id))
+        .then(this.goToFichePartie(id,date))
         .catch(function(error) {
             console.error("Error writing document: ", error);
         });

@@ -1,5 +1,5 @@
 import React from 'react'
-import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity, Alert,FlatList,ScrollView,Button} from 'react-native'
+import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity, Alert,FlatList,ScrollView,RefreshControl} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Type_Defis from './Type_Defis'
@@ -31,6 +31,8 @@ class Accueil_Jouer extends React.Component {
             undefined : []
         }
     }
+
+
 
     
 
@@ -149,6 +151,16 @@ class Accueil_Jouer extends React.Component {
 
     }
 
+     /** Fonction appelée au moment où l'utilisateur pull to refresh */
+     _onRefresh = async () => {
+        this.setState({refreshing: true});
+        console.log("REFRESHING ....")
+        this.findAllDefiAndPartie()
+
+        this.setState({refreshing : false})
+    }
+    
+
     /**
      * Fonction qui renvoie la position de la ville à partir de son nom
      * @param {String} Name : Nom de la ville 
@@ -224,13 +236,7 @@ class Accueil_Jouer extends React.Component {
     }
 
 
-    /**
-     * Fonction qui va permettre de refresh la sugestion de défi
-     */
-    refresh() {
-        this.findAllDefiAndPartie()
-    }
-
+   
     _renderItem = ({item}) => {       
         if(item.type == Type_Defis.partie_entre_joueurs){
           
@@ -283,7 +289,14 @@ class Accueil_Jouer extends React.Component {
             if(this.state.allDefisPartie.length != 0) {
 
                 return(
-                    <ScrollView style = {{paddingBottom : hp('20%')}}>
+                    <ScrollView style = {{paddingBottom : hp('20%')}}
+                    refreshControl={
+                        <RefreshControl
+                          refreshing={this.state.refreshing}
+                          onRefresh={this._onRefresh}
+                        />
+                      }
+                    >
                         <View style = {{ alignContent : "center", paddingBottom : 180, marginBottom : hp('60%')}}>
                             <FlatList
                                 data = {this.state.allDefisPartie}
@@ -311,6 +324,15 @@ class Accueil_Jouer extends React.Component {
     render() {
         if( !this.state.isLoading) {
             return(
+                <ScrollView
+                
+                refreshControl={
+                    <RefreshControl
+                      refreshing={this.state.refreshing}
+                      onRefresh={this._onRefresh}
+                    />
+                  }
+                >
                 <View style = {styles.mainContainer}>
                     <View style = {{borderBottomRightRadius : 20,  borderBottomLeftRadius : 20, backgroundColor : 'white',paddingBottom : hp('2%')}}>
                         <TouchableOpacity 
@@ -343,11 +365,6 @@ class Accueil_Jouer extends React.Component {
                        </TouchableOpacity>*/}
                     </View>
                 
-                    <Button
-                        onPress={() => this.refresh()}
-                        title="Refresh"
-                        color= {Color.agOOraBlue}
-                    />
 
                     <View style ={{backgroundColor : Color.lightGray}}>
                         <Text style = {styles.txtSuggestion}>Suggestions</Text>
@@ -357,6 +374,7 @@ class Accueil_Jouer extends React.Component {
                     
 
                 </View>
+                </ScrollView>
             )
         } else {
             return(
@@ -392,6 +410,7 @@ class Accueil_Jouer extends React.Component {
 const styles = {
     mainContainer : {
         marginTop : hp('2%'),
+        flex : 1,
         backgroundColor : Color.lightGray
     },
 

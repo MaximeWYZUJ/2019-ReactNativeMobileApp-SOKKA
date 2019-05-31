@@ -43,15 +43,20 @@ export default class Barre_Recherche extends React.Component {
 	 */
 	searchedTerrains = (searchedText) => {
         if (searchedText === "") {
-            this.props.handleTextChange(this.props.filterData(this.DataDepart))
-        
+            if(this.filterData != undefined) {
+                this.props.handleTextChange(this.props.filterData(this.DataDepart))
+            } else {
+                this.props.handleTextChange(this.DataDepart)
+
+            }
         } else {
             let field = this.field
             let searchData = this.props.data.filter(function(data) {
                 return data[field].includes(NormalizeString.normalize(searchedText)) // toLowerCase().startsWith(searchedText.toLowerCase()) ;
             });
-            searchData = this.props.filterData(searchData);
-            
+            if(this.props.filterData != undefined) {
+                searchData = this.props.filterData(searchData);
+            }
             this.props.handleTextChange(searchData)
         }
     };

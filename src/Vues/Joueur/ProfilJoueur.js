@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, Text, Image, ScrollView, Button, TouchableOpacity, View, FlatList } from 'react-native'
+import { StyleSheet, Text, Image, ScrollView, Button, TouchableOpacity, View, FlatList,RefreshControl } from 'react-native'
 import StarRating from 'react-native-star-rating'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Defis_Equipe from '../Equipe/Defis_Equipe'
@@ -26,7 +26,8 @@ class ProfilJoueur extends React.Component {
         this.goToFirstScreen  = this.goToFirstScreen.bind(this)
 
         this.state = {
-            allDefis : []
+            allDefis : [],
+            refreshing: false,
         }
     }
 
@@ -43,11 +44,15 @@ class ProfilJoueur extends React.Component {
         if(! navigation.getParam("retour_arriere_interdit",false)) {
             return {
                 title: navigation.getParam('joueur', ' ').nom,
+                
                 tabBarOnPress({jumpToIndex, scene}) {
                     jumpToIndex(scene.index);
                     console.log(scene.index)
-                }
+                },
+                
+                
             }
+            
         } else {
             const {state} = navigation;
             return { title: `${state.params.title}`, 
@@ -377,6 +382,22 @@ class ProfilJoueur extends React.Component {
         this.props.navigation.push("ProfilJoueurMesTerrainsFavScreen", {terrains : terrainsFav, titre : this.joueur.nom})
     }
 
+    async getDocumentJoueur() {
+        console.log("in get ocument !!!")
+        var j  = await Database.getDocumentData(this.id, "Joueurs")
+        console.log("PSEUDO : ", j.pseudo)
+        return j
+    }
+
+
+    /** Fonction appelée au moment où l'utilisateur pull to refresh */
+    _onRefresh = async () => {
+        this.setState({refreshing: true});
+        console.log("REFRECHING !!!")
+        this.joueur =  await this.getDocumentJoueur()
+        //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
+        this.setState({refreshing : false})
+    }
     
 
     // ==========================================================================
@@ -465,7 +486,13 @@ class ProfilJoueur extends React.Component {
 
     render() {
         return (
-            <ScrollView style={styles.main_container}>
+            <ScrollView style={styles.main_container}
+            refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this._onRefresh}
+                />
+              }>
 
                 {/* Caracteristiques du joueur */}
                 <View style={[styles.perso_container]}>
@@ -476,7 +503,7 @@ class ProfilJoueur extends React.Component {
                                 source = {{uri : this.joueur.photo} } />
                         </View>
                         <View style={styles.nom_container}>
-                            <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.zone}</Text>
+                            <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville}</Text>
                             <Text style={{margin: 5,  fontSize : RF(3.25)}}>AKA {this.joueur.pseudo}</Text>
                         </View>
                         {this._displayReglages()}
@@ -539,7 +566,7 @@ class ProfilJoueur extends React.Component {
                          horizontal={true}>
                         <View style={styles.favoris_categories}>
                             <Image style={styles.favoris_categorie_icone} source = {require('app/res/icon_joueurs.png')}/>
-                            <Button title="Joueurs" onPress={() => this.gotoReseau()}/>
+                            <Button title="Reseau" onPress={() => this.gotoReseau()}/>
                             <Image style={styles.favoris_categorie_icone} source = {require('app/res/icon_team.png')} />
                             <Button title="Equipes" onPress={() => this.gotoEquipesFav()}/>
                             <Image style={styles.favoris_categorie_icone} source = {require('app/res/icon_terrain.png')}/>
