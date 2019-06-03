@@ -49,6 +49,8 @@ class Rechercher_Joueurs extends React.Component {
                 photo = {item.photo}
                 score = {item.score}
                 isChecked = {this.isJoueurPresent(this.props.joueursPartie, item)}
+                tokens = {item.tokens}
+
 
             />
         )
@@ -82,6 +84,7 @@ class Rechercher_Joueurs extends React.Component {
                     nbOfChar = {3}
                     handleResults = {this.handleResults}
                     non_pris_en_compte = {this.id}
+                    handleFilterQuery = {null}
                 />
                 <ScrollView>
                     {this.renderList()}

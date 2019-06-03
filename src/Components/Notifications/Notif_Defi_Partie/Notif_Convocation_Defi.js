@@ -72,6 +72,69 @@ class Notif_Convocation_Defi extends React.Component {
         this.setState({equipe :equipe , emetteur : emetteur, defi : defi,isLoading : false})
     }
 
+    // ===========================================================================
+    // ========================== NOTIFICATIONS ==================================
+    // ===========================================================================
+    
+    
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    async sendPushNotification(token , title,body ) {
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+
+    /**
+     * Fonction qui va permettre d'envoyer des notifications à chaque 
+     * joueur convoqué
+     */
+    async sendNotifConfirmeToAllCapitaine(date) {
+
+        var titre=  "Nouvelle Notif"
+        var corps = LocalUser.data.pseudo + " a confirmé sa présence pour un défi le "
+        corps = corps +  DatesHelpers.buildDate(date)
+        for(var i  = 0; i < this.state.equipe.capitaines.length; i++) {
+            if(this.state.equipe.capitaines[i] != LocalUser.data.id) {
+                var cap = await Database.getDocumentData(this.state.equipe.capitaines[i], "Joueurs")
+
+                var tokens = cap.tokens
+                if(tokens != undefined) {
+                    for(var k =0; k < tokens.length; k ++) {
+                        await this.sendPushNotification(tokens[k], titre, corps)
+                    }
+                }
+            }
+        }
+
+    }
+
+    storeNotifRelanceInDB() {
+        this.sendNotifToAllPlayer(new Date(this.state.partie.jour.seconds * 1000))
+    }
+    // ======================================================
+
+
+
     //===================================================================================
     //============ FONCTIONS POUR LA CONFIRMATION DE LA PARTICIPATION A UN DEFI =========
     //===================================================================================
@@ -244,8 +307,9 @@ class Notif_Convocation_Defi extends React.Component {
      * Fonction qui va permettre d'ajouter un joueur à la liste des joueurs ayant 
      * confirmés. Ainsi que  d'enregistrer le def mise à jour dans la DB.
      */
-    confirmerJoueurPresence() {
+    async confirmerJoueurPresence() {
 
+        await this.sendNotifConfirmeToAllCapitaine(new Date(this.state.defi.jour.seconds *1000))
         // Trouver l'équipe dont l'utilisateur est membre 
         if(this.state.defi.joueursEquipeOrga.includes(this.monId)) {
 

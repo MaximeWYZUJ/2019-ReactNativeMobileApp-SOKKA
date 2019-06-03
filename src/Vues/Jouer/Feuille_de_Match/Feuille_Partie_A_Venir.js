@@ -39,7 +39,6 @@ class Feuille_Partie_A_Venir extends React.Component {
         var j= []
         for(var i = 0; i< this.state.partie.nbJoueursRecherche; i++) {
             j.push(i)
-            console.log(i)
         }
         this.setState({joueursRecherche : j})
 
@@ -93,8 +92,7 @@ class Feuille_Partie_A_Venir extends React.Component {
      * @param {String} title 
      * @param {String} body 
      */
-    sendPushNotification(token , title,body ) {
-        console.log('in send push !!')
+    async sendPushNotification(token , title,body ) {
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: token,
@@ -119,17 +117,18 @@ class Feuille_Partie_A_Venir extends React.Component {
      * Fonction qui va permettre d'envoyer des notifications à chaque 
      * joueur convoqué
      */
-    sendNotifToAllPlayer(date) {
-
+    async sendNotifToAllPlayer(date) {
         var titre=  "Nouvelle Notif"
-        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le"
+        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le "
         corps = corps + DatesHelpers.buildDate(date)
-
         for(var i  = 0; i < this.state.partie.attente.length; i++) {
-            if(this.state.partie.attente[i].id != LocalUser.data.id) {
-                var tokens = this.state.partie.attente[i].tokens
-                for(var k =0; k < tokens.length; k ++) {
-                    this.sendPushNotification(tokens[k], titre, corps)
+            if(this.state.partie.attente[i] != LocalUser.data.id) {
+                var id = this.state.partie.attente[i]
+                var tokens = this.findJoueurWithId(id).tokens
+                if(tokens != undefined) {
+                    for(var k =0; k < tokens.length; k ++) {
+                        await this.sendPushNotification(tokens[k], titre, corps)
+                    }
                 }
             }
         }
@@ -150,11 +149,8 @@ class Feuille_Partie_A_Venir extends React.Component {
      * @param {Date} date 
      */
     buildDate(date) {
-        console.log(date)
         var j = date.getDay()
-        console.log('j : ',j)
         var numJour = date.getDate()
-        console.log('numJour : ',numJour)
         var mois  =(date.getMonth() + 1).toString()
         if(mois.length == 1) {
             mois = '0' + mois 
@@ -165,6 +161,15 @@ class Feuille_Partie_A_Venir extends React.Component {
 
     
 
+    /**
+     * Renvoie un objet joueur correspondant à l'id passé en paramettre
+     */
+    findJoueurWithId(id) {
+        for(var  i = 0; i < this.state.joueurs.length ; i++ ){
+            if(id == this.state.joueurs[i].id) return this.state.joueurs[i]
+
+        }
+    }
 
     /**
      * Fonction qui va permettre d'ajouter un joueur à la liste des joueurs ayant 
@@ -390,7 +395,7 @@ class Feuille_Partie_A_Venir extends React.Component {
                 joueurs.push(participants[i])
             }
         }
-        console.log(joueurs)
+       
         return joueurs
         
     }
@@ -412,7 +417,7 @@ class Feuille_Partie_A_Venir extends React.Component {
             enAttente : this.state.partie.attente,
             inscris : this.state.partie.inscris,
             invite : true,                          // c'est le créateur qui invite
-            date : this.state.partie.date
+            date : this.state.partie.jour
         })
     }
 
@@ -539,7 +544,9 @@ class Feuille_Partie_A_Venir extends React.Component {
         if(this.state.partie != undefined) {
             if(this.monId == this.state.partie.organisateur) {
                 return(
-                    <TouchableOpacity style = {styles.btnRelancer}>
+                    <TouchableOpacity 
+                        style = {styles.btnRelancer}
+                        onPress = {() => this.alerteRelancerJoueur()}>
                             <Text>Relancer</Text>
                     </TouchableOpacity>
                 )

@@ -203,6 +203,10 @@ export default class Recapitulatif_Defis extends React.Component {
         if(moi.length ==1) {
             moi = '0'+moi
         }
+        if(jour.length ==1) {
+            jour = '0'+jour
+        }
+        
         var an = this.day.split('-')[2]
         var heure = this.hours.split(':')[0]
         var minutes = this.hours.split(':')[1]

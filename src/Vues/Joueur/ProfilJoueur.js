@@ -402,6 +402,13 @@ class ProfilJoueur extends React.Component {
 
     // ==========================================================================
 
+    /**
+     * TODO !!!!!!!!!!!!!!!!
+     * @param {*} item 
+     */
+    buildJoueurs(item) {
+        return []
+    }
     displayDefis(){
 
         if(this.state.allDefis == undefined ) {

@@ -1,9 +1,10 @@
 import React from 'react'
-import { View, Text, FlatList } from 'react-native'
+import { View, Text, FlatList ,ScrollView,RefreshControl} from 'react-native'
 import Notifications from '../../Helpers/Notifications/Notification'
 import LocalUser from '../../Data/LocalUser.json'
 import Notifications_Factory from '../../Components/Notifications/Notifications_Factory'
 import Database from '../../Data/Database'
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 export default class AccueilNotifications extends React.Component {
 
@@ -21,8 +22,19 @@ export default class AccueilNotifications extends React.Component {
 
     }
 
-    changeState(notifs) {
+    changeState(notif){
+        
     }
+
+     /** Fonction appelée au moment où l'utilisateur pull to refresh */
+    _onRefresh = async () => {
+        this.setState({refreshing: true});
+        console.log("REFRECHING !!!")
+        await this.getNotifications()
+        //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
+        this.setState({refreshing : false})
+    }
+
 
     async getNotifications() {
         //var notifs =  await Notifications.getListNotifsInApp(LocalUser.data.id)
@@ -63,14 +75,30 @@ export default class AccueilNotifications extends React.Component {
     render() {
         console.log(" in acceul notif", this.state.notifications)
         return (
-            <View style = {{marginTop : 25}}>
-                <Text>Accueil Notifications</Text>
-                <FlatList
-                    data = {this.state.notifications}
-                    renderItem = {this._renderNotif}
-                />
-            </View>
+            <ScrollView style={styles.main_container}
+                refreshControl={
+                    <RefreshControl
+                    refreshing={this.state.refreshing}
+                    onRefresh={this._onRefresh}
+                    />
+                }
+            >
+                <View style = {{marginTop : 25}}>
+                    <Text>Accueil Notifications</Text>
+                    <FlatList
+                        data = {this.state.notifications}
+                        renderItem = {this._renderNotif}
+                    />
+                </View>
+            </ScrollView>
         )
     }
+
+}
+const styles = {
+    main_container: {
+        flex: 1,
+        marginTop: hp('1%')
+    },
 
 }

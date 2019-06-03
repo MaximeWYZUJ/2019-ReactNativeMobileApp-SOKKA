@@ -71,6 +71,7 @@ export default class Notifications_Factory extends React.Component {
                     />
                 )
 
+            // Un joueur t'as convoqué / relancer pour une partie
             case Types_Notification.CONVOCATION_RELANCE_PARTIE :
                     return(
                         <Notif_Convocation_Partie

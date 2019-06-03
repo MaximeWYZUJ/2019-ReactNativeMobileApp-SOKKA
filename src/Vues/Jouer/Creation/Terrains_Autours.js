@@ -19,7 +19,7 @@ const ASPECT_RATIO = width / hp('48%');
 const LATITUDE_DELTA = 0.0522;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 const DEFAULT_PADDING = { top: 350, right: 200, bottom: 350, left: 200 };
-const DISTANCE_MAX = 500
+const DISTANCE_MAX = 1500
 const LISTE = 'liste'
 const MAP = 'map'
 

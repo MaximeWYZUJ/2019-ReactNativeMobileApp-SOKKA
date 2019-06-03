@@ -8,7 +8,7 @@ import Simple_Loading from '../../Loading/Simple_Loading'
 import Database  from '../../../Data/Database'
 import LocalUser from '../../../Data/LocalUser.json'
 import { withNavigation } from 'react-navigation'
-
+import DatesHelpers  from '../../../Helpers/DatesHelpers'
 /**
  * Classe qui permet d'afficher une notification de convocation ou relance
  * à une partie
@@ -30,23 +30,144 @@ class Notif_Convocation_Partie extends React.Component {
         this.getData()
     }
 
+
+
+
     /**
      * Fonction qui permet de récupérer les données relatives à la notification
      */
     async getData() {
 
-       
+       console.log("IN COMPO NOTIF ", this.props.notification)
         // Données de l'émeteur 
         console.log("before  emetteur", this.props.notification.emetteur)
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 
         // Données du défi 
         var partie = await Database.getDocumentData(this.props.notification.partie, "Defis")
-        this.setState({emetteur : emetteur, defi : defi,isLoading : false})
+        console.log(partie)
+        this.setState({emetteur : emetteur, partie : partie,isLoading : false})
     }
 
 
+    /**
+     * Pour se rendre dans la fiche de la partie
+     */
+    goToFichePartie() {
+        this.setState({isLoading : true})
+        this.props.navigation.push("FichePartieRejoindre", 
+            {
+                id : this.state.partie.id,
+                /*jour : this.buildDate(),
+                duree : this.props.duree,
+                terrain : this.findTerrain(),
+                nbJoueursRecherche : this.state.partie.nbJoueursRecherche,
+                message_chauffe : this.props.message_chauffe,
+                joueurs  : this.props.joueurs,
+                joueursWithData : this.state.joueurs     // Les 3 premiers joueurs du défi (on a deja leur données donc pas besoin de les rechercher)*/
+            })
+    }
 
+
+    //===================================================================================
+    //============ FONCTIONS POUR LA CONFIRMATION DE LA PARTICIPATION A UN DEFI =========
+    //===================================================================================
+
+
+    /**
+     * Fonction qui va être appelée au moment où l'utilisateur annule sa
+     * présence. 
+     */
+    handleConfirmerNon() {
+        console.log("in handle confirmer non")
+        Alert.alert(
+            '',
+            "Tu souhaite annuler ta présence pour ce défi ? ",
+            [
+                {text: 'Oui', onPress: () => this.annulerJoueurPresence()},
+                {
+                  text: 'Non',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                },
+            ],
+        )
+
+    }
+
+    /**
+     * Fonction qui va être appelée au moment où l'utilisateur confirme sa
+     * présence. 
+     */
+    handleConfirmerOui() {
+        Alert.alert(
+            '',
+            "Tu souhaite confirmer ta présence pour ce Defi ? ",
+            [
+                {text: 'Oui', onPress: () => this.confirmerJoueurPresence()},
+                {
+                  text: 'Non',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                },
+            ],
+        )
+
+    }
+
+    /**
+     * Fonction qui va permettre d'ajouter un joueur à la liste des joueurs ayant 
+     * confirmés. Ainsi que  d'enregistrer la partie mise à jour dans la DB.
+     */
+    confirmerJoueurPresence()  {
+
+        // Ajouter l'id de l'utilisateur dans la liste des confirme (Creation d'un new array pour le re render)
+        var j = []
+        for(var i = 0 ; i < this.state.partie.confirme.length; i++) {
+            j.push(this.state.partie.confirme[i])
+            
+        }
+        if(! j.includes(this.monId)){
+            j.push(this.monId) 
+        }
+
+        // Suppr l'user des joueurs en attente (on crée des new objet pour que le state se maj)
+        var att  = []
+        for(var i = 0 ; i < this.state.partie.attente.length ; i++) {
+            if(this.state.partie.attente[i] != this.monId) {
+                att.push(this.state.partie.attente[i])
+            }
+        }
+
+        // Suppr l'user  des joueurs indispos
+        var indispo  = []
+        for(var i = 0 ; i < this.state.partie.indisponibles.length ; i++) {
+            if(this.state.partie.indisponibles[i] != this.monId) {
+                indispo.push(this.state.partie.indisponibles[i])
+            } 
+        }
+
+       
+
+
+
+        // Enregistrer dans la db
+        var db = Database.initialisation()
+        var partieRef = db.collection("Defis").doc(this.state.partie.id)
+        partieRef.update({
+            confirme : j,
+            attente : att,
+            indisponibles : indispo,
+        }).then()
+        .catch(function(error) {
+            // The document probably doesn't exist.
+            console.error("Error updating document: ", error);
+        });
+
+
+    }
+
+    //==============================================================================
     renderNomEmetteur() {
         if(this.state.emetteur != undefined) {
             return this.state.emetteur.pseudo
@@ -78,10 +199,30 @@ class Notif_Convocation_Partie extends React.Component {
 
     renderDatePartie() {
         if(this.state.partie != undefined) {
-            return this.buildDate(new Date(this.state.partie.jour.seconds * 1000))
+            return DatesHelpers.buildDate(new Date(this.state.partie.jour.seconds * 1000))
         } else {
             return '??'
         }
+    }
+
+    renderBtnConfirmer() {
+        return(
+            <View style = {{flexDirection : "row"}}>
+                <Text>Confirmer : </Text>
+                <TouchableOpacity
+                    onPress = { () => this.handleConfirmerOui()}>
+                    <Text style = {styles.txtBtn}>Oui</Text>
+                </TouchableOpacity>
+
+                <Text>/</Text>
+
+                <TouchableOpacity
+                    onPress = {() => this.handleConfirmerNon()}>
+                    <Text style = {styles.txtBtn}>Non</Text>
+                </TouchableOpacity>
+            </View>
+        )
+
     }
 
     render() {
@@ -95,26 +236,24 @@ class Notif_Convocation_Partie extends React.Component {
         } else {
             console.log("ELSE RENDER")
             return(
-                <View style = {{flexDirection : 'row',marginTop : hp('2%'), borderWidth : 1}}>
+                <View style = {{flexDirection : 'row',marginTop : hp('2.5%'), borderWidth : 0}}>
                     <View>
                         {this.renderPhotoEmetteur()}
                     </View>
                     <View>
-                        <Text>Le capitaine {this.renderNomEmetteur()} de l'équipe  </Text>
-                        <Text>{this.renderNomEquipe()}  t'as convoqué / relancé pour</Text>
+                        <Text>{this.renderNomEmetteur()}  t'as convoqué / relancé pour </Text>
 
-                        {/* Date et btn consulter*/}
+                        {/* Date et btn consulter */}
                         <View style = {{flexDirection : "row"}}>
                             <Text>une partie le {this.renderDatePartie()} </Text>
                             
                             <TouchableOpacity
-                                onPress = {() => this.goToFicheDefi()}
+                                onPress = {() => this.goToFichePartie()}
                                 >
                                 <Text style = {styles.txtBtn}>Consulter</Text>
                             </TouchableOpacity>
                         </View>
                         
-
                         {this.renderBtnConfirmer()}
                     </View>
                 </View>
@@ -124,6 +263,10 @@ class Notif_Convocation_Partie extends React.Component {
     }
 }
 
-
+const styles = {
+    txtBtn : {
+        fontWeight : "bold"
+    }
+}
 
 export default withNavigation (Notif_Convocation_Partie)

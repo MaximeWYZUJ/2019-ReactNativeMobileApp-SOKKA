@@ -42,7 +42,7 @@ class Choix_Joueurs_Partie extends React.Component {
      * @param {String} title 
      * @param {String} body 
      */
-    sendPushNotification(token , title,body ) {
+    async sendPushNotification(token , title,body ) {
         console.log('in send push !!')
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
@@ -68,17 +68,23 @@ class Choix_Joueurs_Partie extends React.Component {
      * Fonction qui va permettre d'envoyer des notifications à chaque 
      * joueur convoqué
      */
-    sendNotifToAllPlayer(date) {
+    async sendNotifToAllPlayer(date) {
+
+        console.log("DATE : ",date)
 
         var titre=  "Nouvelle Notif"
-        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le"
+        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le "
         corps = corps + DatesHelpers.buildDate(date)
 
         for(var i  = 0; i < this.props.joueursPartie.length; i++) {
             if(this.props.joueursPartie[i].id != LocalUser.data.id) {
                 var tokens = this.props.joueursPartie[i].tokens
-                for(var k =0; k < tokens.length; k ++) {
-                    this.sendPushNotification(tokens[k], titre, corps)
+                console.log("TOKENS !!, ", this.props.joueursPartie[i].pseudo + ' -> ' + tokens)
+
+                if(tokens != undefined) {
+                    for(var k =0; k < tokens.length; k ++) {
+                        await this.sendPushNotification(tokens[k], titre, corps)
+                    }
                 }
             }
         }
@@ -87,16 +93,18 @@ class Choix_Joueurs_Partie extends React.Component {
 
 
 
+
+
     goToFichePartie() {
         d =this.props.navigation.getParam("date", new Date())
-        this.sendNotifToAllPlayer(new Date(d))
         Alert.alert(
             '',
             'Tu as bien rejoins cette partie, les joueurs avec qui tu seras vont recevoir une notification pour confirmer leur participation',
             [
-              {text: 'Ok',  onPress: () => {
+              {text: 'Ok',  onPress: async () => {
                
-                // Remettre à zéro la liste des joueurs séléctionnés 
+                await this.sendNotifToAllPlayer(new Date(d.seconds * 1000))
+                // Remettre à zéro la liste des joueurs séléctionnés  
                 const action = { type: actions.RESET_JOUEURS_PARTIE, value: []}
                 this.props.dispatch(action)               
                 this.props.navigation.push("FichePartieRejoindre",
@@ -145,7 +153,8 @@ class Choix_Joueurs_Partie extends React.Component {
             if(! this.checkIfUserPresent(j)) {
                 let user = {
                     id : this.userData.id,
-                    photo : this.userData.photo
+                    photo : this.userData.photo,
+                    tokens : this.userData.token
                 }
                 
                 j.push(user)
@@ -194,7 +203,6 @@ class Choix_Joueurs_Partie extends React.Component {
         var inscris = this.props.navigation.getParam('inscris',  [])
 
         var db = Database.initialisation()
-        console.log("after init")
         console.log(this.props.joueursPartie.length)
         // Mettre à jour les participants
         for(var i = 0 ; i< this.props.joueursPartie.length ; i++) {
@@ -219,7 +227,6 @@ class Choix_Joueurs_Partie extends React.Component {
         var defisRef = db.collection("Defis").doc(id);
         
         
-        console.log("beforeUpdate")
         defisRef.update({
             participants: array,
             nbJoueursRecherche : this.props.nbJoueursRecherchesPartie - joueursEnPlus ,

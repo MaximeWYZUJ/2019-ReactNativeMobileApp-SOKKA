@@ -95,6 +95,7 @@ class Joueurs_Reseau_Partie extends React.Component {
             Y: [],
             Z: [],
         }
+        
         for(var i = 0; i < joueurs.length ; i ++) {
             joueur = joueurs[i]
             let lettre = joueur.pseudo[0].toUpperCase()
@@ -103,7 +104,8 @@ class Joueurs_Reseau_Partie extends React.Component {
                 pseudo : joueur.pseudo,
                 photo : joueur.photo,
                 score : joueur.score,
-                id : joueur.id
+                id : joueur.id,
+                tokens : joueur.tokens
             }
             arrayj.push(j)
             data[lettre] = arrayj
@@ -121,6 +123,7 @@ class Joueurs_Reseau_Partie extends React.Component {
                 photo = {item.photo}
                 score = {item.score}
                 isChecked = {this.isJoueurPresent(this.props.joueursPartie ,item)}
+                tokens = {item.tokens}
             />
         )
     }
@@ -228,6 +231,8 @@ class Cell extends React.Component {
                 photo = {this.props.item.photo}
                 score = {this.props.item.score}
                 isChecked = {this.props.isChecked}
+                tokens = {this.props.item.tokens}
+
 
             />
       </View>

@@ -46,11 +46,11 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
      * 
      * @param {String} idJoueur 
      */
-    _chooseJoueur(idJoueur, photoJoueur) {
+    _chooseJoueur(idJoueur, photoJoueur, tokens) {
 
             // Premier cas : On veut déselectionner un joueur : 
             if(this.checkIfUserIsPresent(this.props.joueursPartie, idJoueur)) {
-                const action = { type: actions.CHOISIR_JOUEUR_PARTIE, value:  {id : idJoueur, photo : photoJoueur}}
+                const action = { type: actions.CHOISIR_JOUEUR_PARTIE, value:  {id : idJoueur, photo : photoJoueur, tokens : tokens}}
                 this.props.dispatch(action)
             
             // Le joueurs n'est pas selectionné
@@ -69,7 +69,7 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
                     console.log("this.props.JoueursParticipantsPartie : ", this.props.JoueursParticipantsPartie )
                     if(! this.props.JoueursParticipantsPartie.includes(idJoueur)) {
                         console.log("in deuxieme if")
-                        const action = { type: actions.CHOISIR_JOUEUR_PARTIE, value:  {id : idJoueur, photo : photoJoueur}}
+                        const action = { type: actions.CHOISIR_JOUEUR_PARTIE, value:  {id : idJoueur, photo : photoJoueur, tokens : tokens}}
                         this.props.dispatch(action)
                         console.log("after dispatch")
                     } else if(this.props.joueursPartie.length  < this.props.nbJoueursRecherchesPartie ) {
@@ -145,7 +145,7 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
                         containerStyle={styles.checkBox}                    
                         checked={isChecked}
                         onPress = {() => {
-                            this._chooseJoueur(this.props.id, this.props.photo)
+                            this._chooseJoueur(this.props.id, this.props.photo, this.props.tokens)
                             var checked = this.state.isChecked
                             this.setState({isChecked: !checked})
                         }}

@@ -119,7 +119,8 @@ class Joueurs_Autours_Partie extends React.Component {
                 pseudo : joueur.pseudo,
                 photo : joueur.photo,
                 score : joueur.score,
-                id : joueur.id
+                id : joueur.id,
+                tokens : joueur.tokens
             }
             arrayj.push(j)
             data[lettre] = arrayj
@@ -200,6 +201,7 @@ class Cell extends React.Component {
                 photo = {this.props.item.photo}
                 score = {this.props.item.score}
                 isChecked = {this.props.isChecked}
+                tokens = {this.props.item.tokens}
 
             />
       </View>

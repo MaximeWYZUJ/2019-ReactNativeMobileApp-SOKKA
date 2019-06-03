@@ -10,9 +10,12 @@ import Database from '../../../../Data/Database'
 import { ScrollView } from 'react-native-gesture-handler';
 import LocalUser from '../../../../Data/LocalUser.json'
 import DatesHelpers from '../../../../Helpers/DatesHelpers'
+import Types_Notification from '../../../../Helpers/Notifications/Types_Notification'
 
-
-
+/**
+ * Classe présentant le récapitulatif d'une partie que l'utilisateur est en train
+ * de créer
+ */
 export default class Recapitulatif_Partie extends React.Component {
 
     constructor(props) {
@@ -32,7 +35,6 @@ export default class Recapitulatif_Partie extends React.Component {
         this.joueurs =  this.props.navigation.getParam('joueurs', ''),
         this.nbJoueursRecherche = this.props.navigation.getParam('nbrJoueurs', ''),
         this.messageChauffe =this.props.navigation.getParam('messageChauffe', ''),
-        console.log("JOUEURS : ", this.joueurs)
         this.joueurAnimation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
         this.goToFichePartie = this.goToFichePartie.bind(this)
 
@@ -69,8 +71,8 @@ export default class Recapitulatif_Partie extends React.Component {
      * @param {String} title 
      * @param {String} body 
      */
-    sendPushNotification(token , title,body ) {
-        console.log('in send push !!')
+    async sendPushNotification(token , title,body ) {
+
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: token,
@@ -95,21 +97,46 @@ export default class Recapitulatif_Partie extends React.Component {
      * Fonction qui va permettre d'envoyer des notifications à chaque 
      * joueur convoqué
      */
-    sendNotifToAllPlayer(date) {
-
+    async sendNotifToAllPlayer(date) {
         var titre=  "Nouvelle Notif"
-        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le"
+        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le "
         corps = corps + DatesHelpers.buildDate(date)
 
         for(var i  = 0; i < this.joueurs.length; i++) {
             if(this.joueurs[i].id != LocalUser.data.id) {
                 var tokens = this.joueurs[i].tokens
-                for(var k =0; k < tokens.length; k ++) {
-                    this.sendPushNotification(tokens[k], titre, corps)
+                if(tokens != undefined) {
+                    for(var k =0; k < tokens.length; k ++) {
+                        await this.sendPushNotification(tokens[k], titre, corps)
+                    }
                 }
             }
         }
     }
+
+
+    /**
+     * Fonction qui va sauvagarder dans la base de données les notifications
+     * pour la convocation à la partie
+     */
+    storeNotificationInDb(id) {
+        var db = Database.initialisation() 
+        for(var i  = 0; i < this.joueurs.length; i++) {
+            if(this.joueurs[i].id != LocalUser.data.id) {
+                db.collection("Notifs").add(
+                    {
+                        dateParse : Date.parse(new Date()),
+                        partie : id,
+                        emetteur :  LocalUser.data.id,
+                        recepteur : this.joueurs[i].id,
+                        time : new Date(),
+                        type : Types_Notification.CONVOCATION_RELANCE_PARTIE,
+                    }
+                )  
+            }
+        }
+    }
+
     // ======================================================
 
     /**
@@ -117,16 +144,13 @@ export default class Recapitulatif_Partie extends React.Component {
      * @param {{id : String photo : String}} liste 
      */
     buildListOfJoueur(liste) {
-        console.log("===================")
         var j = []
         for(var i = 0 ; i <liste.length ; i++) {
             if(! j.includes(liste[i].id)){
                 j.push(liste[i].id)
-                console.log(liste[i].id)
             }
            
         }
-        console.log("========================")
         return j
 
     }
@@ -141,7 +165,6 @@ export default class Recapitulatif_Partie extends React.Component {
         for(var i = 0 ; i <liste.length ; i++) {
             if((! j.includes(liste[i].id)) && liste[i].id != this.userData.id) {
                 j.push(liste[i].id)
-                console.log(liste[i].id)
             }
            
         }
@@ -151,13 +174,14 @@ export default class Recapitulatif_Partie extends React.Component {
 
 
     goToFichePartie(id,date) {
-        this.sendNotifToAllPlayer(date)
+        
         Alert.alert(
-            'Ta partie a bien été crée et publiée',
+            'Ta partie a bien été créée et publiée',
             "Les joueurs peuvent s'inscrire",
             [
               {text: 'Ok',  onPress: () => {
-               
+                this.storeNotificationInDb(id)
+                this.sendNotifToAllPlayer(date)
                 this.props.navigation.push("FichePartieRejoindre",
                 {
                     download_All_Data_Partie : true,
@@ -181,7 +205,6 @@ export default class Recapitulatif_Partie extends React.Component {
     
 
     savePartieInDB () {
-        console.log("in save partie")
         var id = ID.buildId()
         var db = Database.initialisation();
 
@@ -190,19 +213,23 @@ export default class Recapitulatif_Partie extends React.Component {
         if(moi.length ==1) {
             moi = '0'+moi
         }
+
+        if(jour.length ==1) {
+            jour = '0'+jour
+        }
         console.log("MOI : ", moi)
         var an = this.jour.split('-')[2]
         var heure = this.heure.split(':')[0]
         var minutes = this.heure.split(':')[1]
-        var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes
+        var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z'
         console.log(d)
         var date = new Date(d)
-        console.log("DATE PARSE == ", Date.parse(date))
+        console.log("DATE !!!", date)
         recherche = this.nbJoueursRecherche > 0
         db.collection("Defis").doc(id.toString()).set({
             id : id,
             type : this.props.navigation.getParam('type', ' '),
-            jour : date,
+            jour : new Date(d),
             duree : this.duree,
             format : this.format,
             organisateur : this.userData.id,
