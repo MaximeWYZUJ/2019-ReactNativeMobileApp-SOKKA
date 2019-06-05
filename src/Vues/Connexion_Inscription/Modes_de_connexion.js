@@ -103,13 +103,6 @@ export default class Modes_de_connexion extends React.Component {
         firebase.auth().signInWithEmailAndPassword(this.state.mail, this.state.mdp)
         .then(async (user) => {
          
-
-            console.log(firebase.auth().currentUser.uid)
-            
-            // Enregister le token de l'utilisateur
-            var token = await this.registerForPushNotifications()
-            var db = Database.initialisation()
-            db.collection("Login").doc(token).set({id : firebase.auth().currentUser.uid})
             // Récupérations des données de la DB
             j = await Database.getDocumentData(firebase.auth().currentUser.uid, "Joueurs");
             jEquipes = await Database.getArrayDocumentData(j.equipes, 'Equipes');
@@ -118,17 +111,9 @@ export default class Modes_de_connexion extends React.Component {
             LocalUser.exists = true;
             LocalUser.data = j;
 
-            var tokenListe =  [] 
-            if (j.tokens != undefined) {
-                tokenListe = j.tokens
-            }
-            tokenListe.push(token)
-            console.log("TOKEN  : ", token)
-            console.log("LISTE  : ",tokenListe)
-            LocalUser.data.tokens = tokenListe
-            db.collection("Joueurs").doc(j.id).update({
-                tokens : tokenListe
-            })
+            // Enregistrement du token
+            this.storeToken(j);
+
             // Passage à la vue suivante
             this.props.navigation.navigate("ProfilJoueur", {id: j.id, joueur: j, equipes: jEquipes});
         })
@@ -136,23 +121,41 @@ export default class Modes_de_connexion extends React.Component {
           const { code, message } = error;
             console.log(error)
             this.setState({
-                txt : 'Adresse email ou mot de passe incorect',
+                txt : 'Adresse email ou mot de passe incorrect',
                 isLoading : false
             })
-          // For details of error codes, see the docs
-          // The message contains the default Firebase string
-          // representation of the error
+            // For details of error codes, see the docs
+            // The message contains the default Firebase string
+            // representation of the error
         });
     }
+
+
+    async storeToken(j) {
+        this.registerForPushNotifications()
+        .then(async (token) => {
+            let db = Database.initialisation();
+            db.collection("Login").doc(token).set({id : j.id});
+
+            var tokenListe =  [] 
+            if (j.tokens != undefined) {
+                tokenListe = j.tokens
+            }
+            tokenListe.push(token)
+            LocalUser.data.tokens = tokenListe
+            db.collection("Joueurs").doc(j.id).update({
+                tokens : tokenListe
+            })
+        })
+    }
+
 
     async registerForPushNotifications() {
         const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
         console.log('in register')
         if (status !== 'granted') {
-            console.log("1")
           const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
           if (status !== 'granted') {
-            console.log("2")
             return;
           }
         }

@@ -9,6 +9,8 @@ import '@firebase/firestore'
 
 
 const erreurMdpDiff = "Les mots de passe sont différents";
+const erreurMdpTropCourt = "Le mot de passe doit faire au moins 6 caractères"
+const erreurFormat = "Format du mail non reconnu"
 
 
 /**
@@ -23,9 +25,12 @@ export default class Modes_incription extends React.Component {
             txt :'',
             mail : ' ',
             mailExist : ' ',
+            mailFormat: ' ',
             mdp : '',
             mdp_confimation : '',
-            inscriptionReussie : false 
+            inscriptionReussie : false,
+            nextDisabled: true,
+            checkMail: false
         }
         this.mailAnimation = new Animated.ValueXY({ x: wp('-100%'), y:hp('-5%') })
         this.facebookAnimation =  new Animated.ValueXY({ x: wp('100%'), y:hp('0%') })
@@ -71,28 +76,40 @@ export default class Modes_incription extends React.Component {
         })    
     }
 
-   /* Pour recuperer la confirmation du mot de passe */
-   passwordConfirmationTextInputChanged () {
-        if (!(this.state.mdp === this.state.mdp_confimation)) {
-            console.log("-------------------");
-            console.log(this.state.mdp);
-            console.log(this.state.mdp_confimation);
-            console.log("-------------------");
+    /* Verification du format du mail */
+    checkMail () {
+        let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ ;
+        if(reg.test(this.state.mail) === false)
+        {
             this.setState({
-                mailExist : erreurMdpDiff
+                checkMail: false,
+                mailFormat: erreurFormat
             })
-        } else {
-            console.log("mdp ok confirmation")
+        }
+        else {
             this.setState({
-                mailExist : ' '
+                checkMail: true,
+                mailFormat: ' '
             })
         }
     }
 
-    changeStateMailExist(bool) {
-        if(bool) {
+   /* Pour recuperer la confirmation du mot de passe */
+   passwordConfirmationTextInputChanged () {
+        if (!(this.state.mdp === this.state.mdp_confimation)) {
             this.setState({
-                mailExist : 'Cette adresse email est deja prise ...'
+                mailExist : erreurMdpDiff,
+                nextdisabled : true
+            })
+        } else if (this.state.mdp.length < 6) {
+            this.setState({
+                mailExist : erreurMdpTropCourt,
+                nextDisabled : true
+            })
+        } else {
+            this.setState({
+                mailExist : ' ',
+                nextDisabled : false
             })
         }
     }
@@ -117,11 +134,11 @@ export default class Modes_incription extends React.Component {
                 
                 if(code == "auth/wrong-password") {
                     this.setState({
-                        mailExist : 'Cette adresse email existe deja ..'
+                        mailExist : 'Cette adresse email existe deja...'
                     })
-                }else if(code == "auth/invalid-email"){
+                }else if(!this.state.checkMail || code == "auth/invalid-email"){
                     this.setState({
-                        mailExist : 'Adresse email incorecte ..'
+                        mailExist : 'Adresse email incorrecte...'
                     })
 
                 } else {
@@ -137,9 +154,9 @@ export default class Modes_incription extends React.Component {
                     })
                 }
 
-            // For details of error codes, see the docs
-            // The message contains the default Firebase string
-            // representation of the error
+                // For details of error codes, see the docs
+                // The message contains the default Firebase string
+                // representation of the error
             });
         }
     }
@@ -150,6 +167,7 @@ export default class Modes_incription extends React.Component {
         return (
             <View>
                 <Text>{this.state.mailExist}</Text>
+                <Text>{this.state.mailFormat}</Text>
             </View>
         )
     
@@ -188,7 +206,7 @@ export default class Modes_incription extends React.Component {
                             placeholderTextColor = '#CECECE'
                             keyboardType = 'email-address'
                             onChangeText ={(text) => this.mailTextInputChanged(text)} 
-
+                            onEndEditing ={() => this.checkMail()}
                         />
                         
                         
@@ -212,6 +230,7 @@ export default class Modes_incription extends React.Component {
                         {this.displayTxtInsc()}
 
                         <TouchableOpacity style = {styles.btn_Connexion}
+                            disabled={this.state.nextDisabled && this.state.checkMail}
                             onPress = {() => this.callNextStep()}>
                             <Text style = {styles.txt_btn}>Suivant</Text>
                         </TouchableOpacity>

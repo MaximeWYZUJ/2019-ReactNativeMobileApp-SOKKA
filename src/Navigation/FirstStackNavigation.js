@@ -65,7 +65,7 @@ const FirstStackNavigation = createStackNavigator({
     },
 
 
-    ConfimationInscription : {
+    ConfirmationInscription : {
         screen : Confimation_Inscription
     },
 
