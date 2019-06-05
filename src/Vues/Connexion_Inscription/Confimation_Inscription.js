@@ -47,7 +47,7 @@ export default class Confimation_Inscription extends React.Component {
 
                 {/* View contenant le text Agoora */}
                 <View style = {styles.view_agoora}>
-                    <Text style = {styles.txt_agoora}>AgOOra</Text>
+                    <Text style = {styles.txt_agoora}>SOKKA</Text>
                 </View>
 
                 {/* View contenant le texte */}

@@ -175,7 +175,7 @@ export default class Modes_de_connexion extends React.Component {
 
                     {/* View contenant le text Agoora */}
                     <View style = {styles.view_agoora}>
-                        <Text style = {styles.txt}>AgOOra</Text>
+                        <Text style = {styles.txt}>SOKKA</Text>
                     </View>
 
                     {/* Image de l'herbre */}
@@ -268,7 +268,7 @@ export default class Modes_de_connexion extends React.Component {
 
                     {/* View contenant le text Agoora */}
                     <View style = {styles.view_agoora}>
-                        <Text style = {styles.txt_agoora}>AgOOra</Text>
+                        <Text style = {styles.txt_agoora}>SOKKA</Text>
                     </View>
                 
                     {/* View contenant le texte */}

@@ -165,7 +165,7 @@ export default class Inscription_Age_Zone extends React.Component {
 
                             {/* View contenant le text Agoora */}
                             <View style = {styles.view_agoora}>
-                                <Text style = {styles.txt_agoora}>SoKKa</Text>
+                                <Text style = {styles.txt_agoora}>SOKKA</Text>
                             </View>
 
                             {/* Txt input pour la ville */}
