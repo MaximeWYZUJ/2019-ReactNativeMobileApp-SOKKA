@@ -24,34 +24,8 @@ export default class Confimation_Inscription extends React.Component {
     }
 
     callNextScreen() {
-        /*console.log(this.pseudo)
-        obj = {
-            age: this.age,
-            aiment: [],
-            equipes: [],
-            equipesFav: [],
-            fiabilite: 0,
-            mail: this.mail,
-            naissance: this.naissance,
-            nom: this.prenom+" "+this.nom,
-            photo: this.photo,
-            //position: ???,
-            position: null,
-            pseudo: this.pseudo,
-            queryPseudo: NormalizeString.normalize(this.pseudo),
-            reseau: [],
-            score: 0,
-            telephone: "XX.XX.XX.XX.XX",
-            terrains: [],
-            ville: this.ville,
-            zone: this.zone
-        }
-        Database.addDocToCollection(obj, 'Joueurs')
-        .then((docRef) => {
-            obj.id = docRef.id;*/
-            j = LocalUser.data;
-            this.props.navigation.push("ProfilJoueur", {id: j.id, joueur: j, equipes: []});
-        //})
+        j = LocalUser.data;
+        this.props.navigation.navigate("ProfilJoueur", {id: j.id, joueur: j, equipes: []});
     }
 
     render() {

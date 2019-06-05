@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, Text, Image, ScrollView, Button, TouchableOpacity, View, FlatList } from 'react-native'
+import { StyleSheet, Text, Image, ScrollView, Button, TouchableOpacity, View, FlatList, Alert } from 'react-native'
 import StarRating from 'react-native-star-rating'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Defis_Equipe from '../Equipe/Defis_Equipe'
@@ -444,7 +444,7 @@ class ProfilJoueur extends React.Component {
             return(
                 <Button
                 onPress={() => this.deco()}
-                title="Déconexion"
+                title="Déconnexion"
                 color= {Color.agOOraBlue}
                 />
             )
@@ -454,11 +454,12 @@ class ProfilJoueur extends React.Component {
     renderBtnCreerEquipe() {
         if(this.monProfil) {
             return(
-                <Button
-                onPress={() => this.props.navigation.push("CreationEquipeNom")}
-                title="Créer une équipe"
-                color= {Color.agOOraBlue}
-                />
+                <TouchableOpacity
+                    style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%')}}
+                    onPress={() => this.props.navigation.push("CreationEquipeNom")}
+                    >
+                    <Text style={styles.header}>+</Text>
+                </TouchableOpacity>
             )
         }
     }
@@ -476,7 +477,7 @@ class ProfilJoueur extends React.Component {
                                 source = {{uri : this.joueur.photo} } />
                         </View>
                         <View style={styles.nom_container}>
-                            <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.zone}</Text>
+                            <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville}</Text>
                             <Text style={{margin: 5,  fontSize : RF(3.25)}}>AKA {this.joueur.pseudo}</Text>
                         </View>
                         {this._displayReglages()}
@@ -484,7 +485,6 @@ class ProfilJoueur extends React.Component {
 
                     <View style={{flex: 1, flexDirection: 'row'}}>
                         <View style={styles.bot_infos_container}>
-                            <Text style={{}}>fiabilité, {this.joueur.fiabilite}</Text>
                             <StarRating
                                 disabled={true}
                                 maxStars={5}
@@ -510,11 +510,14 @@ class ProfilJoueur extends React.Component {
 
                 {/* Equipes dont il fait partie */}
                 <View style={[styles.equipes_container, styles.additional_style_container]}>
-                    <TouchableOpacity
-                        style={styles.header_container}
-                        onPress={() => this.props.navigation.push('ProfilJoueurMesEquipesScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil, equipes: this.equipes})}>
-                        <Text style={styles.header}>Equipes</Text>
-                    </TouchableOpacity>
+                    <View style={{flexDirection: 'row'}}>
+                        <TouchableOpacity
+                            style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}
+                            onPress={() => this.props.navigation.push('ProfilJoueurMesEquipesScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil, equipes: this.equipes})}>
+                            <Text style={styles.header}>Equipes</Text>
+                        </TouchableOpacity>
+                        {this.renderBtnCreerEquipe()}
+                    </View>
                     <View style={{flex: 3}}>
                         <FlatList
                             style={{flex: 1}}
@@ -557,8 +560,6 @@ class ProfilJoueur extends React.Component {
                     {this.displayDefis()}
                 </View>
                 {this.renderBtnDeco()}
-
-                {this.renderBtnCreerEquipe()}
 
             </ScrollView>
         )

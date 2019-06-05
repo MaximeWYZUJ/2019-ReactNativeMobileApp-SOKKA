@@ -3,10 +3,9 @@ import React from 'react'
 import {View, Text,Image,TouchableOpacity,Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
-import { ImagePicker } from 'expo';
+import { ImagePicker, Permissions } from 'expo';
 import Database from '../../Data/Database'
 import NormalizeString from '../../Helpers/NormalizeString.js';
-import Permissions from 'react-native-permissions'
 import * as firebase from 'firebase';
 import '@firebase/firestore'
 import FileUploader from  'react-firebase-file-uploader';
@@ -35,7 +34,7 @@ export default class Inscription_Photo extends React.Component {
         const naissance = navigation.getParam('naissance', ' ');
         const age = navigation.getParam('age','');
         const zone = navigation.getParam('zone', '');
-        this.goToProfil = this.goToProfil.bind(this)
+
         this.state = {
             nom : nom,
             prenom : prenom,
@@ -67,20 +66,21 @@ export default class Inscription_Photo extends React.Component {
 
         
         /* Obtenir les permissions. */
-        const { Permissions } = Expo;
-        const { status: cameraRollPermission } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+        const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
 
-        /* Ouvrir la galerie. */
-        let result = await Expo.ImagePicker.launchImageLibraryAsync({
-        });
-
-        /* Si l'utilisateur à choisis une image. */
-        if (!result.cancelled) {
-            this.setState({ 
-              photo: {uri : result.uri },
-              txt_btn : 'SUIVANT',
-              image_changed : true
+        if (status === "granted") {
+            /* Ouvrir la galerie. */
+            let result = await ImagePicker.launchImageLibraryAsync({
             });
+
+            /* Si l'utilisateur à choisis une image. */
+            if (!result.cancelled) {
+                this.setState({ 
+                photo: {uri : result.uri },
+                txt_btn : 'SUIVANT',
+                image_changed : true
+                });
+            }
         }
     };
 
@@ -90,13 +90,6 @@ export default class Inscription_Photo extends React.Component {
     //*******************************************************************************
     //**************************** SAUVEGARDE DES DONNEES ***************************
     //*******************************************************************************
-
-    async goToProfil() {
-        console.log("in go to profil")
-        this.props.navigation.navigate("first")
-
-
-    }
 
     /**
      * Fonction qui permet d'enregistrer l'utilisateur dans 
@@ -122,22 +115,19 @@ export default class Inscription_Photo extends React.Component {
             this.uploadImageFinal(this.state.photo.uri, this.state.pseudo)
                 .then(() => {
 
-                    this.uploadUser(image_changed).then(this.goToProfil)
-
-                    //Alert.alert("Success");
-
-                    //Notification.storeTokenInLogin(LocalUser.data.id)
-                    //this.props.navigation.navigate("ProfilJoueur", {id: LocalUser.data.id, joueur : LocalUser.data, equipes : []})
-
-                    
-            
-
-                    
+                    this.uploadUser(image_changed).then(() => {
+                        this.props.navigation.navigate('ConfirmationInscription', {pseudo: LocalUser.data.pseudo, photo: LocalUser.data.photo})
+                    });
                 })
                 .catch((error) => {
                     Alert.alert(error);
                     console.log("erreur !! ", error)
                 });
+
+        } else {
+            this.uploadUser(image_changed).then(() => {
+                this.props.navigation.navigate('ConfirmationInscription', {pseudo: LocalUser.data.pseudo, photo: LocalUser.data.photo});
+            });
         }
     }
 
@@ -200,50 +190,53 @@ export default class Inscription_Photo extends React.Component {
                         // Stockage en local
                         LocalUser.exists = true;
                         LocalUser.data = user;
+                        LocalUser.data.naissance = new Date(user.naissance.toDate());
     
                         // Stockage dans la DB
                         Database.addDocToCollection(user, id, 'Joueurs')
 
-
+                        return user;
                     })
-
-                    
-
 
                 }, function(error){
                     console.log(error);
                     return 'erreur'
                 });
             } else {
-                user = {
-                    id: id,
-                    age: oldState.age,
-                    aiment: [],
-                    equipes: [],
-                    equipesFav: [],
-                    fiabilite: 0,
-                    mail: oldState.mail,
-                    naissance: firebase.firestore.Timestamp.fromMillis(Date.parse(oldState.naissance)),
-                    nom: oldState.prenom+" "+oldState.nom,
-                    photo: null,
-                    //position: ???,
-                    position: null,
-                    pseudo: oldState.pseudo,
-                    queryPseudo: NormalizeString.normalize(oldState.pseudo),
-                    reseau: [],
-                    score: 0,
-                    telephone: "XX.XX.XX.XX.XX",
-                    terrains: [],
-                    ville: oldState.ville,
-                    zone: oldState.zone
-                }
+                Notification.storeTokenInLogin(id).then(function() {
+                    user = {
+                        id: id,
+                        age: oldState.age,
+                        aiment: [],
+                        equipes: [],
+                        equipesFav: [],
+                        fiabilite: 0,
+                        mail: oldState.mail,
+                        naissance: firebase.firestore.Timestamp.fromMillis(Date.parse(oldState.naissance)),
+                        nom: oldState.prenom+" "+oldState.nom,
+                        photo: null,
+                        //position: ???,
+                        position: null,
+                        pseudo: oldState.pseudo,
+                        queryPseudo: NormalizeString.normalize(oldState.pseudo),
+                        reseau: [],
+                        score: 0,
+                        telephone: "XX.XX.XX.XX.XX",
+                        terrains: [],
+                        ville: oldState.ville,
+                        zone: oldState.zone
+                    }
 
-                // Stockage en local
-                LocalUser.exists = true;
-                LocalUser.data = user;
+                    // Stockage en local
+                    LocalUser.exists = true;
+                    LocalUser.data = user;
+                    LocalUser.data.naissance = new Date(user.naissance.toDate());
 
-                // Stockage dans la DB
-                Database.addDocToCollection(user, id, 'Joueurs')
+                    // Stockage dans la DB
+                    Database.addDocToCollection(user, id, 'Joueurs')
+
+                    return user;
+                });
             }
         }).catch(function(error) {
               console.log(error)
@@ -321,9 +314,6 @@ export default class Inscription_Photo extends React.Component {
                             <Image
                                 style = {{width : wp('30%'), height : wp('30%'), alignSelf : 'center'}}
                                 source={this.state.photo}/>
-    
-                        
-                        
                         </TouchableOpacity>
     
                         <Text style = {styles.txt_bas}>Elle permettra aux autres joueurs</Text>
@@ -354,7 +344,7 @@ export default class Inscription_Photo extends React.Component {
 
                     {/* View contenant le text Agoora */}
                     <View style = {styles.view_agoora}>
-                        <Text style = {styles.txt_agoora}>AgOOra</Text>
+                        <Text style = {styles.txt_agoora}>SOKKA</Text>
                     </View>
                 
                     {/* View contenant le texte */}

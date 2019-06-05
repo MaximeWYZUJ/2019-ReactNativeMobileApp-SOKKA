@@ -1,17 +1,14 @@
 import React from 'react'
-import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity, Alert} from 'react-native'
+import {YellowBox, View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Database from '../Data/Database'
 import firebase from 'firebase'
 import '@firebase/firestore'
-import Terrains from '../Helpers/Toulouse'
 import {SkypeIndicator} from 'react-native-indicators';
-import { Constants, Location, Permissions,Notifications } from 'expo';
+import { Constants, Location, Permissions, Notifications } from 'expo';
 import LocalUser from '../Data/LocalUser.json'
-import { AsyncStorage } from 'react-native';
 
-const erreur_gps_pas_active = "Location services are disabled"
 
 /** Pour afficher 5sec faire deux fonction qui affiche qqchose et en fonction du state appeler une ou l'autre */
 /**
@@ -24,26 +21,19 @@ class First_screen extends React.Component {
 
     constructor(props) {
         super(props)
-       /* if (LocalUser.exists) {
-            j = LocalUser.data;
-            this.props.navigation.push("ProfilJoueur", {id: j.id, joueur: j, equipes: []});
-        } else {*/
-            this.state = {
-                timePassed : false,
-                isLoading : true,
-                locationResult: null
-            }
+        this.state = {
+            timePassed : false,
+            isLoading : false,
+            locationResult: null
+        }
 
-            this.agorraAnimation = new Animated.ValueXY({ x: 0, y:hp('53%') })
-            this.connexionAnimation = new Animated.ValueXY({ x: wp('100%'), y:hp('28%') })
-            this.InscriptionAnimation = new Animated.ValueXY({ x: wp('-100%'), y:hp('34%') })
-       // }
         this.agorraAnimation = new Animated.ValueXY({ x: 0, y:hp('53%') })
         this.connexionAnimation = new Animated.ValueXY({ x: wp('100%'), y:hp('28%') })
         this.InscriptionAnimation = new Animated.ValueXY({ x: wp('-100%'), y:hp('34%') })
-       //this._storeTerrains()
-       this.test = this.test.bind(this)
 
+        this.agorraAnimation = new Animated.ValueXY({ x: 0, y:hp('53%') })
+        this.connexionAnimation = new Animated.ValueXY({ x: wp('100%'), y:hp('28%') })
+        this.InscriptionAnimation = new Animated.ValueXY({ x: wp('-100%'), y:hp('34%') })
     }
 
 
@@ -77,26 +67,14 @@ class First_screen extends React.Component {
 
     }
 
-    test() {
-        this.props.showNotification({
-            title: 'You pressed it!',
-            message: 'The notification has been triggered',
-            onPress: () => Alert.alert('Alert', 'You clicked the notification!')
-          });
-    }
     /**
      * Fonction appelée à la fin du rendu
      */
     componentDidMount(){
 
-        // A SUPPR !! 
-        //this.storeJoueurTest()
-
         // Cas où l'utilisateur vien de se déconnecter
-            this.checkIfUserISConnected()
+        this.checkIfUserISConnected()
         
-        
-        //this.registerForPushNotifications()
         // Start counting when the page is loaded
         this.timeoutHandle = setTimeout(()=>{
            this.setState({
@@ -109,11 +87,6 @@ class First_screen extends React.Component {
         }, 1000);
    }
 
-   async storeJoueurTest() {
-       var joueur = await Database.getDocumentData("aJKQrjthVlHTyqhzVT3B8dZKGCTP2", "Joueurs")
-       var db = Database.initialisation()
-       db.collection("Joueurs").doc("JKQrjthVlHTyqhzVT3B8dZKGCTP2").set(joueur)
-   }
 
    _getLocationAsync = async () => {
         let { status } = await Permissions.askAsync(Permissions.LOCATION);
@@ -145,18 +118,13 @@ class First_screen extends React.Component {
      */
     async checkIfUserISConnected() {
         var token =  await this.registerForPushNotifications()
-        console.log("after get token")
-        console.log("TOKEN : ", token)
 
         var doc = await Database.getDocumentData(token, "Login")
-        console.log(doc)
+
         if(doc!= undefined) {
-            
-            this.gotoProfilJoueur(doc.id, token)
+            this.gotoProfilJoueur(doc.id);
+            this.storeToken(doc, token);
             //var joueur = await Database.getDocumentData(doc.id, "Joueurs")
-            console.log(joueur)
-
-
         } else {
             this.setState({isLoading : false})
         }
@@ -180,13 +148,30 @@ class First_screen extends React.Component {
         //this.subscription = Notifications.addListener(this.handleNotification);
     
         return (token)
-      }
+    }
+
+
+    async storeToken(docData, token) {
+        // Mettre a jour l'array tokens
+        var listeToken = []
+        if(docData.tokens != undefined) {
+            listeToken = docData.tokens
+        } 
+        if(! listeToken.includes(token)) {
+            listeToken.push(token)
+        
+            var db = Database.initialisation()
+            db.collection("Joueurs").doc(id).update({
+                tokens : listeToken
+            })
+        }
+    }
     
-   gotoMapTerrains() {
+
+    gotoMapTerrains() {
 
         this._getLocationAsync();
         this.setState({isLoading : true})
-
 
         navigator.geolocation.getCurrentPosition(
 
@@ -235,17 +220,10 @@ class First_screen extends React.Component {
             this.props.navigation.push("AccueilJouer", {latitude : 44.9902646, longitude : 1.5267866})
 
         })*/
-   }
+    }
 
-   gotoProfilJoueur(id, token) {
+    gotoProfilJoueur(id) {
        Database.getDocumentData(id, 'Joueurs').then(async (docData) => {
-            // Traitement de la collection Reseau
-            arrayReseau = [];
-            for (idReseau of docData.reseau) {
-                idReseauData = await Database.getDocumentData(idReseau, 'Joueurs');
-                arrayReseau.push(idReseauData);
-            }
-
             // Traitement de la collection Equipes
             arrayEquipes = await Database.getArrayDocumentData(docData.equipes, 'Equipes');
 
@@ -256,19 +234,6 @@ class First_screen extends React.Component {
             LocalUser.exists = true;
             LocalUser.data = docData;
 
-            // Mettre a jour l'array tokens
-            var listeToken = []
-            if(docData.tokens != undefined) {
-                listeToken = docData.tokens
-            } 
-            if(! listeToken.includes(token)) {
-                listeToken.push(token)
-            
-                var db = Database.initialisation()
-                db.collection("Joueurs").doc(id).update({
-                    tokens : listeToken
-                })
-            }
             // Envoi
             //this.setState({isLoading : false})
             this.props.navigation.navigate("ProfilJoueur", {id: docData.id, joueur : docData, equipes : arrayEquipes})
@@ -314,7 +279,6 @@ class First_screen extends React.Component {
 
                         {/* View contenant le boutton se connecter */}
                         <Animated.View style={this.connexionAnimation.getLayout()}>
-                                {/*onPress={() => this.gotoMapTerrains()}*/}
                                 <TouchableOpacity
                                     style = {styles.animatedConnexion}
                                     onPress = {() => this.gotoInscription()}
@@ -372,7 +336,6 @@ class First_screen extends React.Component {
 
                             {/* View contenant le boutton se connecter */}
                             <Animated.View style={this.connexionAnimation.getLayout()}>
-                                    {/*onPress={() => this.gotoMapTerrains()}*/}
                                     <TouchableOpacity
                                         style = {styles.animatedConnexion}
                                         onPress = {() => this.gotoInscription()}
