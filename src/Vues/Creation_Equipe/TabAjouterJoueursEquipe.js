@@ -5,6 +5,7 @@ import Joueurs_Reseau from './Joueurs_Reseau'
 //import Joueurs_Rechercher from './Joueurs_Rechercher'
 import { createAppContainer, createMaterialTopTabNavigator, TabBarTop} from 'react-navigation';
 //import { connect } from 'react-redux'
+import Colors from '../../Components/Colors'
 
 const TabAjouterJoueursEquipe = createAppContainer( createMaterialTopTabNavigator({
 
@@ -15,6 +16,17 @@ const TabAjouterJoueursEquipe = createAppContainer( createMaterialTopTabNavigato
   }, {
     tabBarComponent: TabBarTop,
     tabBarPosition: 'top',
+    tabBarOptions: {
+      labelStyle: {
+        fontSize: 12,
+      },
+      tabStyle: {
+        height: 42,
+      },
+      style: {
+        backgroundColor: Colors.agOOraBlue,
+      },
+    }
   }
   ));
 

@@ -31,7 +31,7 @@ class Creation_Equipe_Ajouter_Joueurs_Final extends React.Component {
             <View style = {{flex :1}}>
             <View style = {styles.bandeau}>
                 <Text> </Text>
-                <Text style= {{ alignSelf : "center", fontSize : RF(3.1)}}>Ajouter des joueurs</Text>
+                <Text style= {{ alignSelf : "center", fontSize : RF(2.6)}}>Ajouter des joueurs</Text>
                 <TouchableOpacity
                     onPress = {()=> this.props.navigation.push(
                         "CreationEquipeCitation",

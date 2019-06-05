@@ -43,7 +43,7 @@ export default class AccueilNotifications extends React.Component {
 
         var db = Database.initialisation()
         var  ref = db.collection("Notifs");
-        var query = ref.where("recepteur", "==", LocalUser.data.id).orderBy("dateParse");
+        var query = ref.where("recepteur", "==", LocalUser.data.id).orderBy("dateParse","desc");
         query.get().then(async (results) => {
            
             for(var i = 0; i < results.docs.length ; i++) {

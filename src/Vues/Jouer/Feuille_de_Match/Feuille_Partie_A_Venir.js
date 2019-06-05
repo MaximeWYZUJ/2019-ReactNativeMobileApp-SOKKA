@@ -12,7 +12,7 @@ import { connect } from 'react-redux'
 import Presences_Joueurs from '../../../Components/Defis/Feuilles_Match/Presences_Joueurs'
 import LocalUser from '../../../Data/LocalUser.json'
 import DatesHelpers from '../../../Helpers/DatesHelpers'
-
+import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
 
 /**
  * Vue qui permet d'afficher la feuille de match d'une partie à venir
@@ -135,10 +135,85 @@ class Feuille_Partie_A_Venir extends React.Component {
 
     }
 
+    /**
+     * Fonction qui va envoyer une notification à l'organisateur de la partie en
+     * indiquant que l'utilisateur confirme sa présence, elle va deplus sauvegarder
+     * la notification dans la base de données.
+     */
+    async sendNotifConfirmerToOrganisateur(date) {
+        var titre=  "Nouvelle Notif"
+        var corps = LocalUser.data.pseudo + " confirme sa présence pour une partie le "
+        corps = corps + DatesHelpers.buildDate(date)
+
+        // find Organisateur
+        var organisateur = this.findJoueurWithId(this.state.partie.organisateur)
+
+        if(organisateur.id != LocalUser.data.id)  {
+            var tokens = organisateur.tokens
+            if(tokens != undefined) {
+                for(var k =0; k < tokens.length; k ++) {
+                    await this.sendPushNotification(tokens[k], titre, corps)
+                }
+            }
+        }
+
+        // Store the notification in DB
+
+    }
+
+    /**
+     * Fonction qui va envoyer une notification à l'organisateur de la partie en
+     * indiquant que l'utilisateur est indisponible
+     */
+    async sendNotifIndispoToOrganisateur(date) {
+        var titre=  "Nouvelle Notif"
+        var corps = LocalUser.data.pseudo + " est indisponible pour une partie le "
+        corps = corps + DatesHelpers.buildDate(date)
+
+        // find Organisateur
+        var organisateur = this.findJoueurWithId(this.state.partie.organisateur)
+
+        if(organisateur.id != LocalUser.data.id)  {
+            var tokens = organisateur.tokens
+                if(tokens != undefined) {
+                    for(var k =0; k < tokens.length; k ++) {
+                        await this.sendPushNotification(tokens[k], titre, corps)
+                    }
+                }
+        }
+
+
+    }
+
+
+    /**
+     * Fonction qui permet d'envoyer les notifications au joueurs en attentes et les 
+     * sauvegarder dans la base de données.
+     */
     storeNotifRelanceInDB() {
         this.sendNotifToAllPlayer(new Date(this.state.partie.jour.seconds * 1000))
+        
+        
+        // Store the notifs
+        var db = Database.initialisation() 
+        for(var i  = 0; i < this.state.partie.attente.length; i++) {
+            if(this.state.partie.attente[i] != LocalUser.data.id) {
+                var id = this.state.partie.attente[i]
+                db.collection("Notifs").add(
+                    {
+                        dateParse : Date.parse(new Date()),
+                        partie : this.state.partie.id,
+                        emetteur :  LocalUser.data.id,
+                        recepteur : id,
+                        time : new Date(),
+                        type : Types_Notification.CONVOCATION_RELANCE_PARTIE,
+                    }
+                ) 
+            }
+        }
+
     }
-    // ======================================================
+    // =====================================================================================
 
 
 
@@ -173,9 +248,12 @@ class Feuille_Partie_A_Venir extends React.Component {
 
     /**
      * Fonction qui va permettre d'ajouter un joueur à la liste des joueurs ayant 
-     * confirmés. Ainsi que  d'enregistrer la partie mise à jour dans la DB.
+     * confirmés. Ainsi que  d'enregistrer la partie mise à jour dans la DB et d'envoyer la
+     * notification à l'organisateur.
      */
-    confirmerJoueurPresence()  {
+    async confirmerJoueurPresence()  {
+
+        await this.sendNotifConfirmerToOrganisateur(new Date(this.state.partie.jour.seconds * 1000))
 
         // Ajouter l'id de l'utilisateur dans la liste des confirme (Creation d'un new array pour le re render)
         var j = []
@@ -237,7 +315,9 @@ class Feuille_Partie_A_Venir extends React.Component {
      * indisponibles, mettre à jour les autres listes 
      * Ainsi que  d'enregistrer la partie mise à jour dans la DB.
      */
-    annulerJoueurPresence() {
+    async annulerJoueurPresence() {
+
+        await this.sendNotifIndispoToOrganisateur(new Date(this.state.partie.jour.seconds * 1000))
 
         // Ajouter l'utilisateur a la liste des joueurs indisponibles (new objet pour maj state)
         var indispo = []

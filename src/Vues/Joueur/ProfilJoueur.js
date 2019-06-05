@@ -395,6 +395,7 @@ class ProfilJoueur extends React.Component {
         this.setState({refreshing: true});
         console.log("REFRECHING !!!")
         this.joueur =  await this.getDocumentJoueur()
+        this.getAllDefisAndPartie()
         //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
         this.setState({refreshing : false})
     }
@@ -403,11 +404,18 @@ class ProfilJoueur extends React.Component {
     // ==========================================================================
 
     /**
-     * TODO !!!!!!!!!!!!!!!!
+     * Fonction qui permet de construire la liste des participants à une partie, elle 
+     * enlève de la liste les joueurs indisponibles
      * @param {*} item 
      */
     buildJoueurs(item) {
-        return []
+        var liste = []
+        for(var i = 0; i < item.participants.length ; i++) {
+            if(! item.indisponibles.includes(item.participants[i])) {
+                liste.push(item.participants[i])
+            }
+        }
+        return liste
     }
     displayDefis(){
 

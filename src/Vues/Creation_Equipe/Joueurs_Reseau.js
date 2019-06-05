@@ -45,6 +45,57 @@ class Joueurs_Reseau_Final extends React.Component {
         this.downloadDataJoueur()
     }
 
+    /**
+     * Fonction qui permet de trier les joueurs en fonction de l'ordre laphabethique
+     * de leur pseudo.
+     * @param {*} joueurs 
+     */
+    buildJoueurs(joueurs) {
+        let  data =  {
+            A: [],
+            B: [],
+            C: [],
+            D: [],
+            E: [],
+            F: [],
+            G: [],
+            H: [],
+            I: [],
+            J: [],
+            K: [],
+            L: [],
+            M: [],
+            N: [],
+            O: [],
+            P: [],
+            Q: [],
+            R: [],
+            S: [],
+            T: [],
+            U: [],
+            V: [],
+            W: [],
+            X: [],
+            Y: [],
+            Z: [],
+        }
+        for(var i = 0; i < joueurs.length ; i ++) {
+            joueur = joueurs[i]
+            let lettre = joueur.pseudo[0].toUpperCase()
+            let arrayj = data[lettre]
+            let j = {
+                pseudo : joueur.pseudo,
+                photo : joueur.photo,
+                score : joueur.score,
+                id : joueur.id
+            }
+            arrayj.push(j)
+            data[lettre] = arrayj
+        }
+        return data
+    }
+
+
 
     /**
      * Fonction qui permet de télécharger les données des joueurs du réseau 
@@ -79,6 +130,15 @@ class Joueurs_Reseau_Final extends React.Component {
             txtDistance = ' '
         />)
     }
+
+    _renderCell= ({item}) => {
+        return(
+            <Cell
+                item = {item}
+                isShown = {this.props.joueursSelectionnes.includes(item.id)}
+            />
+        )
+    }
     render() {
        // const joueursSelectionnes = this.props.joueursSelectionnes;
        // const renderItem = ({ item }) => ( <Joueurs_Ajout_Item 
@@ -97,15 +157,17 @@ class Joueurs_Reseau_Final extends React.Component {
                         data = {this.state.allJoueurs}
                         field = "pseudo"
                      />
-                    <ScrollView>
-                        <FlatList
-                            removeClippedSubviews = {true}
-                            data = {this.state.joueurFiltres}
-                            keyExtractor={(item) => item.id}
-                            extraData = {this.props.joueursSelectionnes}
-                            renderItem={this.renderItem}
-                        />
+                    <ScrollView style = {{marginBottom : hp('7%')}}>
+                            <FlatList
+                                style = {{flex : 1}}
+                                removeClippedSubviews = {true}
+                                data = {this.state.joueurFiltres}
+                                keyExtractor={(item) => item.id}
+                                extraData = {this.props.joueursSelectionnes}
+                                renderItem={this.renderItem}
+                            />
                 
+                        
                 
                 </ScrollView>
                 <Text> </Text>

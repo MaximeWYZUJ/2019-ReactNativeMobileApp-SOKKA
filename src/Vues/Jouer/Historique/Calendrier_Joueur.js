@@ -162,7 +162,7 @@ export default class Calendrier_Joueur extends React.Component {
     /**
      * Fonction qui permet de construire la liste des participants à une partie, elle 
      * enlève de la liste les joueurs indisponibles
-     * @param {*} participants 
+     * @param {*} partie 
      */
     buildJoueurs(partie) {
         var liste = []

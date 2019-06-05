@@ -104,15 +104,48 @@ class Notif_Convocation_Defi extends React.Component {
     }
 
 
-    /**
+     /**
      * Fonction qui va permettre d'envoyer des notifications à chaque 
-     * joueur convoqué
+     * capitaines indiquant que l'utilisateur confirme sa présence pour le défi
      */
     async sendNotifConfirmeToAllCapitaine(date) {
 
+        
+        console.log("IN SEND NOTIF TO ALL CAP !!!")
+        console.log( this.buildDate(new Date(date)))
         var titre=  "Nouvelle Notif"
         var corps = LocalUser.data.pseudo + " a confirmé sa présence pour un défi le "
-        corps = corps +  DatesHelpers.buildDate(date)
+        corps = corps +  this.buildDate(new Date(date))
+        console.log("capitaines : ",this.state.equipe.capitaines)
+        for(var i  = 0; i < this.state.equipe.capitaines.length; i++) {
+            if(this.state.equipe.capitaines[i] != LocalUser.data.id) {
+                var cap = await Database.getDocumentData(this.state.equipe.capitaines[i], "Joueurs")
+
+                var tokens = cap.tokens
+                console.log("TOKEN ", tokens)
+                if(tokens != undefined) {
+                    for(var k =0; k < tokens.length; k ++) {
+                        console.log("TOKENS :" ,tokens[k])
+                        await this.sendPushNotification(tokens[k], titre, corps)
+                    }
+                }
+            }
+        }
+
+    }
+
+
+     /**
+     * Fonction qui va permettre d'envoyer des notifications à chaque 
+     * capitaines indiquant que l'utilisateur est indisponible
+     */
+    async sendNotifIndispoToAllCapitaine(date) {
+
+        
+        var titre=  "Nouvelle Notif"
+        var corps = LocalUser.data.pseudo + " est indisponible pour un défi le "
+        corps = corps +  this.buildDate(new Date(date))
+        console.log("capitaines : ",this.state.equipe.capitaines)
         for(var i  = 0; i < this.state.equipe.capitaines.length; i++) {
             if(this.state.equipe.capitaines[i] != LocalUser.data.id) {
                 var cap = await Database.getDocumentData(this.state.equipe.capitaines[i], "Joueurs")
@@ -127,6 +160,7 @@ class Notif_Convocation_Defi extends React.Component {
         }
 
     }
+
 
     storeNotifRelanceInDB() {
         this.sendNotifToAllPlayer(new Date(this.state.partie.jour.seconds * 1000))
@@ -185,7 +219,8 @@ class Notif_Convocation_Defi extends React.Component {
      * Fonction qui va permettre d'ajouter un joueur à la liste des joueurs ayant 
      * annuler . Ainsi que  d'enregistrer le defi mis à jour dans la DB.
      */
-    annulerJoueurPresence() {
+    async annulerJoueurPresence() {
+        await this.sendNotifIndispoToAllCapitaine(new Date(this.state.defi.jour.seconds *1000))
 
         console.log("in anulee")
         // Trouver l'équipe dont l'utilisateur est membre 

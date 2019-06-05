@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableWithoutFeedback,TouchableOpacity, TextInput} from 'react-native'
+import {View, Text,Image, ImageBackground,  StyleSheet,TouchableWithoutFeedback,TouchableOpacity, TextInput} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
@@ -11,9 +11,10 @@ import Colors from '../../Components/Colors'
  */
 export default class Creation_Equipe_Nom extends React.Component {
 
-    static navigationOptions = { title: 'Nouvelle équipe'};
+   // static navigationOptions = { title: 'Nouvelle équipe'};
 
     constructor(props) {
+        console.log("CREATION EQUIPE NON : in CONSTRUCTOR")
         super(props) 
         this.state = {
             nom : ''
@@ -25,6 +26,7 @@ export default class Creation_Equipe_Nom extends React.Component {
     }
 
     render(){
+        console.log("IN RENDER !!")
         return(
             <View style = {styles.main_container}>
 
@@ -44,8 +46,8 @@ export default class Creation_Equipe_Nom extends React.Component {
                         source = {require('app/res/football_shoe.png')}
                         style = {{width : wp('35%'), height : wp('35%')}}/>
                 </View>
-              
-                {/* Champs pour écrire le nom de l'équipe */}
+
+                 {/* Champs pour écrire le nom de l'équipe */}
                 <View style = {{alignItems : 'center', alignContent : 'center'}}>
                     <TextInput
                         placeholder = "Nom de l'équipe"
