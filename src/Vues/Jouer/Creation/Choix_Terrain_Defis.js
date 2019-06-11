@@ -110,7 +110,20 @@ class Choix_Terrain_Defis extends React.Component {
                  {/* Bandeau superieur */}
                  <View style = {{flexDirection : 'row', backgroundColor : Colors.grayItem, justifyContent: 'space-between',paddingVertical : hp('2%'),paddingHorizontal : wp('3%')}}>
                     <TouchableOpacity
-                        onPress ={() => this.props.navigation.push("AccueilJouer")}>
+                        onPress ={() => Alert.alert(
+                                '',
+                                "Es-tu sûr de vouloir quitter ?",
+                                [
+                                    {
+                                        text: 'Oui',
+                                        onPress: () => this.props.navigation.push("AccueilJouer")},
+                                    {
+                                        text: 'Non',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                            )}>
                         <Text style = {styles.txtBoutton} >Annuler</Text>
                     </TouchableOpacity>
 
@@ -119,7 +132,7 @@ class Choix_Terrain_Defis extends React.Component {
                     {this.buttonNext()}
                 </View>
 
-                <Text style = {{marginTop : hp('0.7%'), fontSize : RF(2.6), marginBottom : hp('0.7%')}}>Sur quel terrain souhaite tu jouer ?</Text>
+                <Text style = {{marginTop : hp('0.7%'), fontSize : RF(2.6), marginBottom : hp('0.7%')}}>Sur quel terrain souhaites-tu jouer ?</Text>
                 <TabChoisirTerrainDefis
                     latitude = {this.latitude}
                     longitude = {this.longitude}/>

@@ -22,7 +22,7 @@ export default class Choix_Date_Defis extends React.Component {
             today : auj.getDate() + '-' + (auj.getMonth() + 1) + '-' +  auj.getFullYear() ,
 
             day : auj.getDate() + '-' + (auj.getMonth() + 1) + '-' +  auj.getFullYear(),
-            duree : 0,
+            duree : 1,
             hours  : auj.getHours() + ':' + auj.getMinutes() + ':00',
             hoursNow :  auj.getHours() + ':' + auj.getMinutes() + ':00',
             aToutComplete : false,
@@ -85,7 +85,21 @@ export default class Choix_Date_Defis extends React.Component {
                 {/* Bandeau superieur */}
                 <View style = {{flexDirection : 'row', backgroundColor : Colors.grayItem, justifyContent: 'space-between',paddingVertical : hp('2%'),paddingHorizontal : wp('3%')}}>
                     <TouchableOpacity
-                        onPress ={() => this.props.navigation.push("AccueilJouer")}>
+                        onPress ={
+                            () => Alert.alert(
+                                '',
+                                "Es-tu sûr de vouloir quitter ?",
+                                [
+                                    {
+                                        text: 'Oui',
+                                        onPress: () => this.props.navigation.push("AccueilJouer")},
+                                    {
+                                        text: 'Non',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                            )}>
                         <Text style = {styles.txtBoutton} >Annuler</Text>
                     </TouchableOpacity>
 
@@ -150,6 +164,7 @@ export default class Choix_Date_Defis extends React.Component {
                     <Slider
                         minimumValue={0}
                         maximumValue={3}
+                        value={this.state.duree}
                         step = {0.5}
                         style = {{width : wp('65%'), alignSelf :"center"}}
                         onValueChange={(value) => {

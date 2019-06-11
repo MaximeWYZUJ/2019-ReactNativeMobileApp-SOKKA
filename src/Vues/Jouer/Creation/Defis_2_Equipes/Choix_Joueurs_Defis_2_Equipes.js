@@ -686,7 +686,20 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                 {/* Bandeau superieur */}
                 <View style = {{backgroundColor : Colors.grayItem, flexDirection : 'row', justifyContent: 'space-between',paddingVertical : hp('2%'),paddingHorizontal : wp('3%'), marginBottom : hp('2%')}}>
                     <TouchableOpacity
-                        onPress ={() => this.props.navigation.push("AccueilJouer")}>
+                        onPress ={() => Alert.alert(
+                                '',
+                                "Es-tu sûr de vouloir quitter ?",
+                                [
+                                    {
+                                        text: 'Oui',
+                                        onPress: () => this.props.navigation.push("AccueilJouer")},
+                                    {
+                                        text: 'Non',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                            )}>
                         <Text style = {styles.txtBoutton} >Annuler</Text>
                     </TouchableOpacity>
 

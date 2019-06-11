@@ -238,7 +238,21 @@ class Choix_Equipe_Defis extends React.Component  {
                 {/* Bandeau superieur */}
                 <View style = {{backgroundColor : Colors.grayItem, flexDirection : 'row', justifyContent: 'space-between',paddingVertical : hp('2%'),paddingHorizontal : wp('3%')}}>
                     <TouchableOpacity
-                        onPress ={() => this.props.navigation.push("AccueilJouer")}>
+                        onPress ={
+                            () => Alert.alert(
+                                '',
+                                "Es-tu sûr de vouloir quitter ?",
+                                [
+                                    {
+                                        text: 'Oui',
+                                        onPress: () => this.props.navigation.push("AccueilJouer")},
+                                    {
+                                        text: 'Non',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                            )}>
                         <Text style = {styles.txtBoutton} >Annuler</Text>
                     </TouchableOpacity>
 
