@@ -76,7 +76,7 @@ export default class Notification {
      * @param {*} titre 
      * @param {*} corps 
      */
-    static sendPushNotification(token = "ExponentPushToken[lM7ee8LlQCJWz_6bP7scIp]", title = "this.state.title", body = "this.state.body") {
+    /*static async sendPushNotification(token = "ExponentPushToken[lM7ee8LlQCJWz_6bP7scIp]", title = "this.state.title", body = "this.state.body") {
 
         console.log("in send push ", destinataire)
         return fetch('https://exp.host/--/api/v2/push/send', {
@@ -95,10 +95,10 @@ export default class Notification {
         }).then(function(error) {
             console.log("THEN", error)
         });
-    }
+    }*/
 
 
-    static sendPushNotification2BIS(destinataire, titre, corps) {
+    static async sendPushNotification(destinataire, titre, corps) {
         console.log('in send push !!', destinataire)
         console.log("titre", titre)
         console.log("corps ", corps)
@@ -207,6 +207,22 @@ export default class Notification {
         this.sendPushNotification(destinataire,titre,corps)
     }
 
+
+
+    /**
+     * Fonction qui envoie une notification à l'organisateur d'une partie en indiquant que 
+     * l'utilisateur confirme sa présence.
+     * @param {String} destinataire token du destinataire
+     * @param {Objet} partie 
+     * @param {Objet} emeteur 
+     */
+    static async sendNotificationConfirmerPresencePartie(destinataire, partie, emeteur) {
+        var corps = emeteur.pseudo + " confirme sa présence pour une partie le  "
+        corps = corps + this.buildDate(new Date(partie.jour.seconds * 1000))
+        
+        var titre  = "Nouvelle notification"
+        await this.sendPushNotification(destinataire,titre,corps)
+    }
 
 
 

@@ -7,7 +7,8 @@ export default class DatesHelpers {
      * @param {Date} date 
      */
     static buildDate(date) {
-        var j = date.getDay()
+        console.log("************ " + date+ " *******" )
+        //var j = date.getDay()
         var numJour = date.getDate()
         var mois  =(date.getMonth() + 1).toString()
         if(mois.length == 1) {

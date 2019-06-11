@@ -21,7 +21,7 @@ export default class Database {
         projectId: "sokka-47c20",
         storageBucket: "sokka-47c20.appspot.com",
         messagingSenderId: "952597067241",
-        appId: "1:952597067241:web:1f1b5c742caabbb0"
+        //appId: "1:952597067241:web:1f1b5c742caabbb0"
       };
     
     static initialisation() {
@@ -42,7 +42,7 @@ export default class Database {
             storageBucket: "sokka-47c20.appspot.com",
             messagingSenderId: "952597067241",
             appId: "1:952597067241:web:1f1b5c742caabbb0"
-          };*/
+        };*/
 
         if (!firebase.apps.length) {
             firebase.initializeApp(config);

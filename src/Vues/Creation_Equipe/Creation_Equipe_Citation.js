@@ -58,7 +58,7 @@ export default class Creation_Equipe_Citation extends React.Component {
                 <View style = {{alignItems : 'center', alignContent : 'center'}}>
                     <Text>Décris en quelques mots ton équipe</Text>
                     <TextInput
-                        placeholder = "Nom de l'équipe"
+                        placeholder = "Phrase fétiche"
                         style = {styles.txt_input}
                         onChangeText = {(txt) => this.changeNom(txt)}
                     />

@@ -50,7 +50,7 @@ export default class AccueilNotifications extends React.Component {
                notifications.push(results.docs[i].data())
             }
 
-            console.log(notifications)
+
 
             this.setState({notifications : notifications})            
 

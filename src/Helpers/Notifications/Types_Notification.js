@@ -68,6 +68,14 @@ export default class Types_Notification {
     //=========================================================================
 
 
+    /**
+     * Quand l'utilisateur est invité à rejoindre une partie
+     */
+    static INVITATION_REJOINDRE_EQUIPE  = "INVITATION_REJOINDRE_EQUIPE"
 
 
+    /**
+     * Quand l'utilisateur refuse de rejoindre un équipe
+     */
+    static REFUSER_INVITATION_REJOINDRE_EQUIPE ="REFUSER_INVITATION_REJOINDRE_EQUIPE"
 }

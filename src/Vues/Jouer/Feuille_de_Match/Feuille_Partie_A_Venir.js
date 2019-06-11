@@ -158,6 +158,7 @@ class Feuille_Partie_A_Venir extends React.Component {
         }
 
         // Store the notification in DB
+        this.storeNotifConfirmerInDB()
 
     }
 
@@ -181,6 +182,8 @@ class Feuille_Partie_A_Venir extends React.Component {
                     }
                 }
         }
+
+        this.storeNotifAnnulerInDB()
 
 
     }
@@ -211,6 +214,56 @@ class Feuille_Partie_A_Venir extends React.Component {
                 ) 
             }
         }
+
+    }
+
+    /**
+     * Fonction qui permet de sauvegarder dans la base de données la notification indiquant que 
+     * l'utilisateur participe à la partie
+     */
+    storeNotifConfirmerInDB() {
+        
+        var organisateur = this.findJoueurWithId(this.state.partie.organisateur)
+
+        // Store the notifs
+        var db = Database.initialisation() 
+        db.collection("Notifs").add(
+            {
+                dateParse : Date.parse(new Date()),
+                partie : this.state.partie.id,
+                emetteur :  LocalUser.data.id,
+                recepteur : organisateur.id,
+                time : new Date(),
+                type : Types_Notification.CONFIRMER_PRESENCE_PARTIE,
+            }
+        ) 
+            
+        
+
+    }
+
+    /**
+     * Fonction qui permet de sauvegarder dans la base de données la notification indiquant que 
+     * l'utilisateur est indisponible pour la partie
+     */
+    storeNotifAnnulerInDB() {
+        
+        var organisateur = this.findJoueurWithId(this.state.partie.organisateur)
+
+        // Store the notifs
+        var db = Database.initialisation() 
+        db.collection("Notifs").add(
+            {
+                dateParse : Date.parse(new Date()),
+                partie : this.state.partie.id,
+                emetteur :  LocalUser.data.id,
+                recepteur : organisateur.id,
+                time : new Date(),
+                type : Types_Notification.ANNULER_PRESENCE_PARTIE,
+            }
+        ) 
+            
+        
 
     }
     // =====================================================================================

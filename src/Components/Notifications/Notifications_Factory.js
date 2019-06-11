@@ -10,6 +10,10 @@ import Notif_Presence_Defi from './Notif_Defi_Partie/Notif_Presence_Defi'
 import Notif_Defis_Contre_Equipe from './Notif_Defi_Partie/Notif_Defis_Contre_Equipe'
 import Notif_Accepter_Releve_Defi from './Notif_Defi_Partie/Notif_Accepter_Releve_Defi'
 import Notif_Convocation_Partie from './Notif_Defi_Partie/Notif_Convocation_Partie'
+import Notif_Presence_Partie from './Notif_Defi_Partie/Notif_Presence_Partie'
+import Notif_Invitation_Equipe from './Notif_Equipe/Notif_Invitation_Equipe'
+import Notif_Refu_Equipe from './Notif_Equipe/Notif_Refu_Equipe';
+
 
 /**
  * class qui va permettre d'afficher le bon type de notification en fonction 
@@ -73,12 +77,40 @@ export default class Notifications_Factory extends React.Component {
 
             // Un joueur t'as convoqué / relancer pour une partie
             case Types_Notification.CONVOCATION_RELANCE_PARTIE :
-                    return(
-                        <Notif_Convocation_Partie
-                            notification = {this.props.notification}
-                        />
-                    )
+                return(
+                    <Notif_Convocation_Partie
+                        notification = {this.props.notification}
+                    />
+                )
             
+            // Un joueur confirme sa présence pour une partie que l'utilisateur a organisée
+            case Types_Notification.CONFIRMER_PRESENCE_PARTIE :
+                return(
+                    <Notif_Presence_Partie
+                        notification = {this.props.notification}
+                    />
+                )
+            
+            // Un joueur annule sa présence pour une partie que l'utilisateur a organisée
+            case Types_Notification.ANNULER_PRESENCE_PARTIE :
+                return(
+                    <Notif_Presence_Partie
+                        notification = {this.props.notification}
+                    />
+                )
+             // Un joueur annule sa présence pour une partie que l'utilisateur a organisée
+             case Types_Notification.INVITATION_REJOINDRE_EQUIPE :
+             return(
+                 <Notif_Invitation_Equipe
+                     notification = {this.props.notification}
+                 />
+             )
+            case Types_Notification.REFUSER_INVITATION_REJOINDRE_EQUIPE : 
+                return(
+                    <Notif_Refu_Equipe
+                        notification = {this.props.notification}
+                        />
+                )
             default : 
         }
         

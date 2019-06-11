@@ -9,6 +9,8 @@ import LocalUser from '../../Data/LocalUser.json'
 import NormalizeString from '../../Helpers/NormalizeString'
 import * as firebase from 'firebase';
 import Simple_Loading from '../../Components/Loading/Simple_Loading'
+import Types_Notification from '../../Helpers/Notifications/Types_Notification'
+
 
 export default class Creation_Equipe_Photo extends React.Component {
 
@@ -108,7 +110,7 @@ export default class Creation_Equipe_Photo extends React.Component {
             ville : this.props.navigation.getParam("ville", " "),
             defis : [],
             nbJoueurs : this.props.navigation.getParam("joueurs", []).length +1
-        }).then(this.updateJoueur).catch(function(error){
+        }).then(this.updateJoueur()).catch(function(error){
             console.log(error)
         })
         
@@ -120,6 +122,7 @@ export default class Creation_Equipe_Photo extends React.Component {
      * équipes des joueurs.
      */
     async updateJoueur() {
+        await this.sendNotifInvitationEquipe(this.state.idEquipe)
         var joueurs = this.state.joueurs
         var db = Database.initialisation() 
         for(var i = 0; i < joueurs.length ; i++) {
@@ -150,6 +153,94 @@ export default class Creation_Equipe_Photo extends React.Component {
         this.props.navigation.push("ProfilJoueur", {id: LocalUser.data.id, joueur : LocalUser.data, equipes : eq, retour_arriere_interdit : true})
         
     }
+
+
+
+    
+    //===================================================================================
+    //========================== FONCTIONS POUR LES NOTIFICATIONS =======================
+    //===================================================================================
+
+
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    async sendPushNotification(token , title,body ) {
+        console.log("________ "+ body +  " _____")
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+
+    /**
+     * Fonction qui va permettre d'envoyer une notification à tous les joueurs invité à rejoindre 
+     * l'équipe.
+     */
+    async sendNotifInvitationEquipe(idEquipe) {
+  
+        var titre=  "Nouvelle Notif"
+        var corps = "Le capitaine " + LocalUser.data.pseudo + "De l'équipe "
+                    +  this.props.navigation.getParam("nom","") + " souhaite"
+                    + "t'intégrer dans son équipe"
+
+
+        var joueurs = this.props.navigation.getParam("joueurs", [])
+        for(var i = 0; i < joueurs.length; i++) {
+            await this.storeNotifInvitationInDB(idEquipe, joueurs[i])
+            var j = await Database.getDocumentData(joueurs[i], "Joueurs")
+            var tokens = j.tokens
+            console.log("tokens : ", tokens)
+            if(tokens != undefined) {
+                for(var k =0; k < tokens.length; k ++) {
+                    await this.sendPushNotification(tokens[k], titre, corps)
+                }
+            }
+        }
+        
+    }
+
+
+    /**
+     * Fonction qui va sauvegarder les notification d'invitation à rejoindre l'équipe
+     * dans la base de données.
+     */
+    async storeNotifInvitationInDB(equipeId, idRecepteur) {
+        var db = Database.initialisation() 
+        console.log()
+        db.collection("Notifs").add(
+            {
+                dateParse : Date.parse(new Date()),
+                equipe : equipeId,
+                emetteur :  LocalUser.data.id,
+                recepteur : idRecepteur,
+                time : new Date(),
+                type : Types_Notification.INVITATION_REJOINDRE_EQUIPE,
+            }
+        ).then(function() {console.log("NOTIF STORE")})
+        .catch(function(error) {console.log(error)})
+        
+    }
+
+
+    // ====================================================================================
    
 
     render(){

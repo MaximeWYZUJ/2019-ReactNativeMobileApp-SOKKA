@@ -9,6 +9,8 @@ import Database  from '../../../Data/Database'
 import LocalUser from '../../../Data/LocalUser.json'
 import { withNavigation } from 'react-navigation'
 import DatesHelpers  from '../../../Helpers/DatesHelpers'
+import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
+
 /**
  * Classe qui permet d'afficher une notification de convocation ou relance
  * à une partie
@@ -45,7 +47,6 @@ class Notif_Convocation_Partie extends React.Component {
 
         // Données du défi 
         var partie = await Database.getDocumentData(this.props.notification.partie, "Defis")
-        console.log(partie)
         this.setState({emetteur : emetteur, partie : partie,isLoading : false})
     }
 
@@ -54,7 +55,6 @@ class Notif_Convocation_Partie extends React.Component {
      * Pour se rendre dans la fiche de la partie
      */
     goToFichePartie() {
-        this.setState({isLoading : true})
         this.props.navigation.push("FichePartieRejoindre", 
             {
                 id : this.state.partie.id,
@@ -66,6 +66,83 @@ class Notif_Convocation_Partie extends React.Component {
                 joueurs  : this.props.joueurs,
                 joueursWithData : this.state.joueurs     // Les 3 premiers joueurs du défi (on a deja leur données donc pas besoin de les rechercher)*/
             })
+    }
+
+
+    //===================================================================================
+    //========================== FONCTIONS POUR LES NOTIFICATIONS =======================
+    //===================================================================================
+
+
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    async sendPushNotification(token , title,body ) {
+        console.log("________ "+ body +  " _____")
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+
+    /**
+     * Fonction qui va permettre d'envoyer une notification à l'organisateur en indiquant
+     * que l'utilisateur est indisponible pour cette partie.
+     */
+    async sendNotifIndispo(date) {
+  
+        this.storeNotifAnnulerInDB()
+        var titre=  "Nouvelle Notif"
+        var corps = LocalUser.data.pseudo + " est indisponible pour une partie le "
+        corps = corps +  DatesHelpers.buildDate(new Date(date))
+
+
+        var tokens = this.state.emetteur.tokens
+        if(tokens != undefined) {
+            for(var k =0; k < tokens.length; k ++) {
+                await this.sendPushNotification(tokens[k], titre, corps)
+            }
+        }
+    }
+
+
+    /**
+     * Fonction qui va permettre d'envoyer une notification à l'organisateur en indiquant
+     * que l'utilisateur confirme sa présence pour cette partie.
+     */
+    async sendNotifConfirmer(date) {
+        this.storeNotifConfirmerInDB()
+
+        console.log("in send notif confirme")
+        var titre=  "Nouvelle Notif"
+        var corps = LocalUser.data.pseudo + " est confirme sa présence pour une partie le "
+        corps = corps +  DatesHelpers.buildDate(new Date(date))
+
+        var tokens = this.state.emetteur.tokens
+        if(tokens != undefined) {
+            for(var k =0; k < tokens.length; k ++) {
+                console.log(tokens[k])
+                await this.sendPushNotification(tokens[k], titre, corps)
+            }
+        }
+
     }
 
 
@@ -119,7 +196,10 @@ class Notif_Convocation_Partie extends React.Component {
      * Fonction qui va permettre d'ajouter un joueur à la liste des joueurs ayant 
      * confirmés. Ainsi que  d'enregistrer la partie mise à jour dans la DB.
      */
-    confirmerJoueurPresence()  {
+    async confirmerJoueurPresence()  {
+
+        console.log("IN CONFIRM ER JOUEUR PRESENCE")
+        await this.sendNotifConfirmer(this.state.partie.jour.seconds*1000)
 
         // Ajouter l'id de l'utilisateur dans la liste des confirme (Creation d'un new array pour le re render)
         var j = []
@@ -147,9 +227,6 @@ class Notif_Convocation_Partie extends React.Component {
             } 
         }
 
-       
-
-
 
         // Enregistrer dans la db
         var db = Database.initialisation()
@@ -158,14 +235,129 @@ class Notif_Convocation_Partie extends React.Component {
             confirme : j,
             attente : att,
             indisponibles : indispo,
-        }).then()
+        }).then(
+            
+        )
         .catch(function(error) {
             // The document probably doesn't exist.
             console.error("Error updating document: ", error);
         });
 
+       
+
 
     }
+
+
+    /**
+     * Fonction qui permet de sauvegarder dans la base de données la notification indiquant que 
+     * l'utilisateur participe à la partie
+     */
+    storeNotifConfirmerInDB() {
+        
+        
+
+        // Store the notifs
+        var db = Database.initialisation() 
+        console.log()
+        db.collection("Notifs").add(
+            {
+                dateParse : Date.parse(new Date()),
+                partie : this.state.partie.id,
+                emetteur :  LocalUser.data.id,
+                recepteur : this.state.emetteur.id,
+                time : new Date(),
+                type : Types_Notification.CONFIRMER_PRESENCE_PARTIE,
+            }
+        ).then(function() {console.log("NOTIF STORE")})
+        .catch(function(error) {console.log(error)})
+        
+
+    }
+
+    /**
+     * Fonction qui permet de sauvegarder dans la base de données la notification indiquant que 
+     * l'utilisateu est indisponible pour la partie
+     */
+    storeNotifAnnulerInDB() {
+        
+
+        // Store the notifs
+        var db = Database.initialisation() 
+        console.log()
+        db.collection("Notifs").add(
+            {
+                dateParse : Date.parse(new Date()),
+                partie : this.state.partie.id,
+                emetteur :  LocalUser.data.id,
+                recepteur : this.state.emetteur.id,
+                time : new Date(),
+                type : Types_Notification.ANNULER_PRESENCE_PARTIE,
+            }
+        ).then(function() {console.log("NOTIF STORE")})
+        .catch(function(error) {console.log(error)})
+        
+
+    }
+
+      /**
+     * Fonction qui va permettre d'ajouter un joueur à la liste des joueurs 
+     * indisponibles, mettre à jour les autres listes 
+     * Ainsi que  d'enregistrer la partie mise à jour dans la DB.
+     */
+    async annulerJoueurPresence() {
+
+        await this.sendNotifIndispo(new Date(this.state.partie.jour.seconds * 1000))
+
+        // Ajouter l'utilisateur a la liste des joueurs indisponibles (new objet pour maj state)
+        var indispo = []
+        for(var i = 0 ; i < this.state.partie.indisponibles.length; i++) {
+            indispo.push(this.state.partie.indisponibles[i])
+        }
+        if(! indispo.includes(this.monId)) {
+            indispo.push(this.monId)
+        }
+
+        
+
+        // Le suppr des en attente
+        var attente = []
+        for(var i = 0; i <this.state.partie.attente.length; i++) {
+            if(this.state.partie.attente[i] != this.monId) {
+                attente.push(this.state.partie.attente[i])
+            }
+        }
+
+        // Le suppr des confirmés
+        var confirme = []
+        for(var i = 0; i <this.state.partie.confirme.length; i++) {
+            if(this.state.partie.confirme[i] != this.monId) {
+                confirme.push(this.state.partie.confirme[i])
+            }
+        }
+
+        // Mettre à jour le state.
+        var partie = this.state.partie
+        partie.confirme = confirme
+        partie.attente = attente
+        partie.indisponibles = indispo
+
+        this.setState({partie, partie})
+
+        // Enregistrer dans la db
+        var db = Database.initialisation()
+        var partieRef = db.collection("Defis").doc(this.state.partie.id)
+        partieRef.update({
+            confirme : confirme,
+            attente : attente,
+            indisponibles : indispo,
+        }).then()
+        .catch(function(error) {
+            // The document probably doesn't exist.
+            console.error("Error updating document: ", error);
+        });
+    }
+
 
     //==============================================================================
     renderNomEmetteur() {
@@ -225,6 +417,7 @@ class Notif_Convocation_Partie extends React.Component {
 
     }
 
+    
     render() {
         if(this.state.isLoading) {
             console.log("IS LOADING")
@@ -236,11 +429,11 @@ class Notif_Convocation_Partie extends React.Component {
         } else {
             console.log("ELSE RENDER")
             return(
-                <View style = {{flexDirection : 'row',marginTop : hp('2.5%'), borderWidth : 0}}>
+                <View style = {{flexDirection : 'row',marginTop : hp('2.5%'), borderWidth : 0, alignContent:"center"}}>
                     <View>
                         {this.renderPhotoEmetteur()}
                     </View>
-                    <View>
+                    <View style = {{marginTop : hp('0.5%')}}>
                         <Text>{this.renderNomEmetteur()}  t'as convoqué / relancé pour </Text>
 
                         {/* Date et btn consulter */}

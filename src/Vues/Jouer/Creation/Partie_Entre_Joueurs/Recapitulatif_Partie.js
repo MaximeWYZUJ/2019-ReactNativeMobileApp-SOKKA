@@ -224,7 +224,6 @@ export default class Recapitulatif_Partie extends React.Component {
         var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z'
         console.log(d)
         var date = new Date(d)
-        console.log("DATE !!!", date)
         recherche = this.nbJoueursRecherche > 0
         db.collection("Defis").doc(id.toString()).set({
             id : id,
