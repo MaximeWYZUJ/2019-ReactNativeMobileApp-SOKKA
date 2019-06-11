@@ -49,18 +49,19 @@ class ProfilJoueur extends React.Component {
                     jumpToIndex(scene.index);
                     console.log(scene.index)
                 },
-                
-                
             }
             
         } else {
             const {state} = navigation;
-            return { title: `${state.params.title}`, 
-            headerLeft: (
-
-               <View></View>
-              ),
-                };
+            return { 
+                title: navigation.getParam('joueur', ' ').nom,
+                
+                tabBarOnPress({jumpToIndex, scene}) {
+                    jumpToIndex(scene.index);
+                    console.log(scene.index)
+                },
+                headerLeft: (<View></View>),
+            };
         }
 
     }

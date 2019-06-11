@@ -1,7 +1,7 @@
 
 import React from 'react'
 
-import {View, Text,Image, Animated,TouchableOpacity,TextInput} from 'react-native'
+import {KeyboardAvoidingView, View, Text,Image, Animated,TouchableOpacity,TextInput} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import PasswordInputText from 'react-native-hide-show-password-input';
 import RF from 'react-native-responsive-fontsize';
@@ -189,8 +189,10 @@ export default class Modes_de_connexion extends React.Component {
 
                     {/* View contenant le boutton se connecter via l'adresse mail */}
                     <Animated.View style={[this.mailAnimation.getLayout(), {width : wp('88%')}]}>
-                        <View 
+                        <KeyboardAvoidingView 
                             style = {styles.animatedConnexion}
+                            behavior="padding"
+                            enabled
                             >
 
                             {/* Champs mail */}
@@ -225,7 +227,7 @@ export default class Modes_de_connexion extends React.Component {
                                 <Text style = {styles.txt_btn}>Connexion</Text>
 
                             </TouchableOpacity>
-                        </View>
+                        </KeyboardAvoidingView>
 
                         {this.displayTxtCo()}
 

@@ -292,7 +292,6 @@ class First_screen extends React.Component {
                                 <TouchableOpacity
                                     style = {styles.animatedConnexion}
                                     onPress={() => this.gotoConnexion()}
-                                    //onPress={() => this.gotoProfilJoueur("aPyjfKVxEU4OF3GtWgQrYksLToxW2")}
                                     >
                                     <Text style = {styles.txt}>Connexion</Text>
 
@@ -349,7 +348,6 @@ class First_screen extends React.Component {
                                     <TouchableOpacity
                                         style = {styles.animatedConnexion}
                                         onPress={() => this.gotoConnexion()}
-                                        //onPress={() => this.gotoProfilJoueur("aPyjfKVxEU4OF3GtWgQrYksLToxW2")}
                                         >
                                         <Text style = {styles.txt}>Connexion</Text>
 

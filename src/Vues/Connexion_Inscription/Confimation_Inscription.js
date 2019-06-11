@@ -24,6 +24,7 @@ export default class Confimation_Inscription extends React.Component {
     }
 
     callNextScreen() {
+        LocalUser.data.aiment = [];
         j = LocalUser.data;
         this.props.navigation.navigate("ProfilJoueur", {id: j.id, joueur: j, equipes: []});
     }

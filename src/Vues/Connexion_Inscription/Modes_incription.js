@@ -24,13 +24,15 @@ export default class Modes_incription extends React.Component {
         this.state = {
             txt :'',
             mail : ' ',
-            mailExist : ' ',
+            mailErrorMsg : ' ',
+            mdpErrorMsg : ' ',
             mailFormat: ' ',
             mdp : '',
             mdp_confimation : '',
             inscriptionReussie : false,
             nextDisabled: true,
-            checkMail: false
+            checkMail: false,
+            checkMdp: false
         }
         this.mailAnimation = new Animated.ValueXY({ x: wp('-100%'), y:hp('-5%') })
         this.facebookAnimation =  new Animated.ValueXY({ x: wp('100%'), y:hp('0%') })
@@ -98,18 +100,18 @@ export default class Modes_incription extends React.Component {
    passwordConfirmationTextInputChanged () {
         if (!(this.state.mdp === this.state.mdp_confimation)) {
             this.setState({
-                mailExist : erreurMdpDiff,
-                nextdisabled : true
+                mdpErrorMsg : erreurMdpDiff,
+                checkMdp : false
             })
         } else if (this.state.mdp.length < 6) {
             this.setState({
-                mailExist : erreurMdpTropCourt,
-                nextDisabled : true
+                mdpErrorMsg : erreurMdpTropCourt,
+                checkMdp : false
             })
         } else {
             this.setState({
-                mailExist : ' ',
-                nextDisabled : false
+                mdpErrorMsg : ' ',
+                checkMdp : true
             })
         }
     }
@@ -132,18 +134,18 @@ export default class Modes_incription extends React.Component {
             const { code, message } = error;
             
                 
-                if(code == "auth/wrong-password") {
+                if(code === "EMAIL_TAKEN") {
                     this.setState({
-                        mailExist : 'Cette adresse email existe deja...'
+                        mailErrorMsg : 'Cette adresse email existe deja...'
                     })
-                }else if(!this.state.checkMail || code == "auth/invalid-email"){
+                }else if(code === "INVALID_EMAIL"){
                     this.setState({
-                        mailExist : 'Adresse email incorrecte...'
+                        mailErrorMsg : 'Adresse email incorrecte...'
                     })
 
                 } else {
                     this.setState({
-                        mailExist : ' ',
+                        mailErrorMsg : ' ',
                         inscriptionReussie : true,
                     })
 
@@ -166,8 +168,9 @@ export default class Modes_incription extends React.Component {
     displayTxtInsc() {
         return (
             <View>
-                <Text>{this.state.mailExist}</Text>
+                <Text>{this.state.mailErrorMsg}</Text>
                 <Text>{this.state.mailFormat}</Text>
+                <Text>{this.state.mdpErrorMsg}</Text>
             </View>
         )
     
@@ -229,8 +232,8 @@ export default class Modes_incription extends React.Component {
 
                         {this.displayTxtInsc()}
 
-                        <TouchableOpacity style = {styles.btn_Connexion}
-                            disabled={this.state.nextDisabled && this.state.checkMail}
+                        <TouchableOpacity style = {this.state.checkMdp && this.state.checkMail ? styles.btn_Connexion : {...styles.btn_Connexion, backgroundColor: '#6a818c'}}
+                            disabled={!(this.state.checkMdp && this.state.checkMail)}
                             onPress = {() => this.callNextStep()}>
                             <Text style = {styles.txt_btn}>Suivant</Text>
                         </TouchableOpacity>
@@ -340,7 +343,7 @@ const styles = {
     },
 
     btn_Connexion : {
-        backgroundColor:'#52C3F7',
+        backgroundColor: '#52C3F7',
         width : wp('77%'),
         paddingTop : wp('4%'),
         paddingBottom : wp('4%'),

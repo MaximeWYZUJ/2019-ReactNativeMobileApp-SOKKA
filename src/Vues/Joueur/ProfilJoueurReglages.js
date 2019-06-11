@@ -1,7 +1,17 @@
 import React from 'react'
-import {ScrollView, View, Text, StyleSheet, Image, Button, TextInput } from 'react-native'
+import {KeyboardAvoidingView, TouchableOpacity, ScrollView, View, Text, StyleSheet, Image, Button, TextInput, ListView } from 'react-native'
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import RF from 'react-native-responsive-fontsize';
+import Colors from '../../Components/Colors'
+import DatePicker from 'react-native-datepicker'
+import villes from '../../Components/Creation/villes.json'
 import Database from '../../Data/Database'
 import NormalizeString from '../../Helpers/NormalizeString';
+import * as firebase from 'firebase';
+import '@firebase/firestore'
+
+
+var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
 class ProfilJoueurReglages extends React.Component {
 
@@ -10,14 +20,25 @@ class ProfilJoueurReglages extends React.Component {
         this.joueur = this.props.navigation.getParam('joueur', null)
         this.id = this.props.navigation.getParam('id', null)
 
+        var auj = new Date();
+        this.today = auj.getFullYear() + '-' + (auj.getMonth() + 1) + '-' + auj.getDate();
+        this.todayDisp = auj.getDate() + '-' + (auj.getMonth() + 1) + '-' + auj.getFullYear();
         this.naissance = ""
-        this.age = ""
         this.ville = ""
         this.zone = ""
         this.pseudo = ""
         this.score = ""
         this.telephone = ""
         this.mail = ""
+        this.searchedVilles = [];
+        this.age = this.joueur.age;
+        this.state = {
+            naissanceDisp: this.todayDisp,
+            naissance : "",
+            age : this.joueur.age,
+            searchedVilles: [],
+            ville: ""
+        }
     }
 
     static navigationOptions = ({ navigation }) => {
@@ -26,14 +47,93 @@ class ProfilJoueurReglages extends React.Component {
         }
     }
 
-    _validate() {
-        /*if (this.naissance) {     PARSER LA DATE POUR CHECK SI C'EST TJRS UN TIMESTAMP
-            this.joueur.naissance = this.naissance
-        }*/
-        if (this.age) {
-            this.joueur.age = parseInt(this.age)
+
+    calculAge(naissance) {
+        var today = new Date();
+        var naissanceDate = new Date(naissance)
+        var ageCalcul = today.getFullYear() - naissanceDate.getFullYear();
+        this.age = ageCalcul;
+        this.setState({age: ageCalcul})
+        return ageCalcul;
+    }
+
+
+    /**
+     * Fonction qui permet de renvoyer une liste des villes qui
+     * commencent par searchedText
+     */
+    searchedVillesFunction= (searchedText) => {
+        let searchedAdresses = villes.filter(function(ville) {
+            
+            return ville.Nom_commune.toLowerCase().startsWith(searchedText.toLowerCase()) ;
+        });
+        this.setState({
+            searchedVilles: searchedAdresses,
+            ville: searchedText
+        })
+    };
+
+
+    /**
+     * Pour mettre la première lettre en capitale
+     * @param {} string 
+     */
+    jsUcfirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+
+    /**
+     * Verifie que la villle choisie par l'utilisateur est bien 
+     * dans la db
+     */
+    isVilleOk(nomVille) {
+        for(var i = 0; i < villes.length; i++) {
+            if(nomVille.toLowerCase() == villes[i].Nom_commune.toLowerCase()) {
+                return true
+            } 
         }
-        if (this.ville) {
+        return false
+    }
+
+
+    /**
+     * Fonction qui permet de controler l'affichage des noms des villes
+     */
+    renderVille = (adress) => {
+        if(this.state.ville.length > 0) {
+            var txt = adress.Nom_commune.toLowerCase()
+            
+            return (
+                <TouchableOpacity
+                    onPress = {() => {this.ville = this.jsUcfirst(txt); this.setState({ville: this.jsUcfirst(txt), searchedVilles: []})}}
+                    style = {{backgroundColor : Colors.grayItem,  marginTop : hp('1%'), marginBottom : hp('1'),paddingVertical : hp('1%')}}
+                    >
+                
+                    <View style = {{flexDirection : 'row'}}>
+                            <Text>{adress.Code_postal} - </Text>
+                            <Text style = {{fontWeight : 'bold', fontSize :RF(2.6)}}>{this.state.ville}</Text>
+                            <Text style = {{fontSize :RF(2.6)}}>{txt.substr(this.state.ville.length)}</Text>
+                    </View>
+                
+                </TouchableOpacity>
+            );
+        } else {
+            return(<View/>)
+        }
+    };
+
+
+    _validate() {
+        console.log(this.ville);
+        if (this.naissance) {
+            var naissanceTimestamp = firebase.firestore.Timestamp.fromMillis(Date.parse(this.naissance));
+            this.joueur.naissance = naissanceTimestamp
+        }
+        if (this.age > 0) {
+            this.joueur.age = this.age
+        }
+        if (this.isVilleOk(this.ville)) {
             this.joueur.ville = this.ville
         }
         if (this.zone) {
@@ -52,13 +152,13 @@ class ProfilJoueurReglages extends React.Component {
         if (this.mail) {
             this.joueur.mail = this.mail
         }
-
+        console.log(this.joueur.ville)
         /* Initialisation de la base de données. */
         var db = Database.initialisation()
     
         /* Enregistrer l'utilisateur dans la base de données. */
         db.collection("Joueurs").doc(this.id).set({
-            age : this.joueur.age,
+            age : this.state.age,
             fiabilite : this.joueur.fiabilite,
             mail : this.joueur.mail,
             naissance : this.joueur.naissance,
@@ -66,7 +166,8 @@ class ProfilJoueurReglages extends React.Component {
             telephone : this.joueur.telephone,
             zone : this.joueur.zone,
             pseudo: this.joueur.pseudo,
-            queryPseudo: this.joueur.queryPseudo
+            queryPseudo: this.joueur.queryPseudo,
+            ville: this.joueur.ville
         },
         {
             merge: true
@@ -91,31 +192,51 @@ class ProfilJoueurReglages extends React.Component {
                 </View>
                 <View style={styles.infos_perso}>
                     <Image style={styles.photo} source={{uri : this.joueur.photo}}/>
-                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
-                        <View style={{flex: 5, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
-                            <Text>Date de naissance :  </Text>
-                            <TextInput
-                                style={{flex: 1, borderColor: '#C0C0C0'}}
-                                onChangeText={(t) => this.naissance=t}
-                                placeholder={this.joueur.naissance.toDateString()}
-                                />
-                        </View>
-                        <View style={{flex: 2, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center'}}>
-                            <Text>Age :  </Text>
-                            <TextInput
-                                style={{flex: 1, borderColor: '#C0C0C0'}}
-                                onChangeText={(t) => this.age=t}
-                                placeholder={this.joueur.age+""}
-                                />
-                        </View>
+                    <View style={styles.champ}>
+                        <Text>Date de naissance :  </Text>
+                        <DatePicker
+                            style={{width: wp('45%'), alignItems : 'center'}}
+                            date= {this.state.naissanceDisp}
+                            mode="date"
+                            placeholder="select date"
+                            format="DD-MM-YYYY"
+                            minDate="01-01-1900"
+                            maxDate={this.todayDisp}
+                            confirmBtnText="Confirm"
+                            cancelBtnText="Cancel"
+                            customStyles={{
+                            dateInput: {
+                                marginLeft: 0,
+                                borderWidth : 0
+                            }
+                            }}
+                            onDateChange={(date) => {
+                                s = date.split('-');
+                                s2 = s[2]+'-'+s[1]+'-'+s[0];
+                                this.setState({
+                                    naissanceDisp: date,
+                                    naissance: s2
+                                })
+                                this.naissance = s2; this.calculAge(s2)
+                            }}
+                        />
+                    </View>
+                    <View style={styles.champ}>
+                        <Text>Age :  {this.state.age} ans</Text>
                     </View>
                     <View style={styles.champ}>
                         <Text>Ville :  </Text>
-                        <TextInput
-                            style={{flex: 1, borderColor: '#C0C0C0'}}
-                            onChangeText={(t) => this.ville=t}
-                            placeholder={this.joueur.ville}
-                            />
+                        <TextInput 
+                            placeholder = {this.joueur.ville}
+                            style = {styles.txt_input}
+                            placeholderTextColor ='#CECECE'
+                            onChangeText ={(text) => this.searchedVillesFunction(text)} 
+                            value = {this.state.ville}
+                        />
+                        <ListView
+                            dataSource={ds.cloneWithRows(this.state.searchedVilles)}
+                            renderRow={this.renderVille}
+                        />
                     </View>
                     <View style={styles.champ}>
                         <Text>Zone de jeu :  </Text>
@@ -170,6 +291,10 @@ class ProfilJoueurReglages extends React.Component {
 
                 <View style={styles.validate}>
                     <Button title="Valider" onPress={() => this._validate()}/>
+                </View>
+
+                {/* Blank space pour pouvoir scroller assez et eviter d'etre masqué par le clavier */}
+                <View style={{height: hp('50%'), width: wp('100%')}}>
                 </View>
             </ScrollView>
         );
