@@ -443,7 +443,7 @@ class Terrains_Autours extends React.Component {
 					</View>
 				</ScrollView>
 				<TouchableOpacity 
-								style = {{position : "absolute",bottom : hp('1%'), right: wp('1%')}}
+								style = {{position : "absolute",bottom : hp('20%'), right: wp('1%')}}
 								onPress={() => this.setState({typeDisplay : MAP})}
 								>
 								<Image
