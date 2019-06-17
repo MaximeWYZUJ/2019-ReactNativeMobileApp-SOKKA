@@ -12,8 +12,8 @@ import Notif_Accepter_Releve_Defi from './Notif_Defi_Partie/Notif_Accepter_Relev
 import Notif_Convocation_Partie from './Notif_Defi_Partie/Notif_Convocation_Partie'
 import Notif_Presence_Partie from './Notif_Defi_Partie/Notif_Presence_Partie'
 import Notif_Invitation_Equipe from './Notif_Equipe/Notif_Invitation_Equipe'
-import Notif_Refu_Equipe from './Notif_Equipe/Notif_Refu_Equipe';
-
+import Notif_Refu_Accepte_Equipe from './Notif_Equipe/Notif_Refu_Accepte_Equipe';
+import Notif_Ajout_Reseau from './Notifs_Reseau/Notif_Ajout_Reseau';
 
 /**
  * class qui va permettre d'afficher le bon type de notification en fonction 
@@ -105,11 +105,29 @@ export default class Notifications_Factory extends React.Component {
                      notification = {this.props.notification}
                  />
              )
+
+            // Un joueur refuse de rejoindre une équipe
             case Types_Notification.REFUSER_INVITATION_REJOINDRE_EQUIPE : 
                 return(
-                    <Notif_Refu_Equipe
+                    <Notif_Refu_Accepte_Equipe
                         notification = {this.props.notification}
-                        />
+                    />
+                )
+            
+            // Un joueur accepte de rejoindre une équipe
+            case Types_Notification.ACCEPTER_INVITATION_REJOINDRE_EQUIPE : 
+                return(
+                    <Notif_Refu_Accepte_Equipe
+                        notification = {this.props.notification}
+                    />
+                )
+
+            // Un joueur à ajouté l'utilisateur à son réseau
+            case Types_Notification.AJOUT_RESEAU : 
+                return(
+                    <Notif_Ajout_Reseau
+                        notification = {this.props.notification}
+                    />
                 )
             default : 
         }

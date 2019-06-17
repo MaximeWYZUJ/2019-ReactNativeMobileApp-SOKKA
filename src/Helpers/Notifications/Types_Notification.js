@@ -75,7 +75,29 @@ export default class Types_Notification {
 
 
     /**
-     * Quand l'utilisateur refuse de rejoindre un équipe
+     * Quand l'utilisateur refuse de rejoindre une équipe
      */
     static REFUSER_INVITATION_REJOINDRE_EQUIPE ="REFUSER_INVITATION_REJOINDRE_EQUIPE"
+
+    /**
+     * Quand l'utilisateur accepte de rejoindre une équipe
+     */
+    static ACCEPTER_INVITATION_REJOINDRE_EQUIPE ="ACCEPTER_INVITATION_REJOINDRE_EQUIPE"
+
+
+    
+
+
+    //=========================================================================
+    //============================= POUR LE RESEAU  ===========================
+    //=========================================================================
+
+
+    /**
+     * Quand l'utilisateur est ajouté dans le reseau d'un autre joueur
+     */
+    static AJOUT_RESEAU ="AJOUT_RESEAU"
+
+
+
 }

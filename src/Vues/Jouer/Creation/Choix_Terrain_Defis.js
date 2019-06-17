@@ -9,7 +9,7 @@ import TabChoisirTerrainDefis from './TabChoisirTerrainDefis'
 import Type_Defs from '../Type_Defis'
 import { connect } from 'react-redux'
 import actions from '../../../Store/Reducers/actions'
-
+import Terrains from '../../../Helpers/Toulouse.json'
 /**
  * Vue qui va permettre à l'utilisateur de choisir le terrain pour le défi
  * qu'il est en train de construire 
@@ -43,6 +43,50 @@ class Choix_Terrain_Defis extends React.Component {
         }
     }
 
+    goToNextScreen() {
+        console.log("THIS TYPE" ,this.type)
+        if(this.type == Type_Defs.defis_2_equipes) { 
+            
+            
+            console.log('------' +  this.props.navigation.getParam('duree', '')+ '---------')
+            this.props.navigation.push("ChoixEquipeDefis",
+            {
+                
+                format : this.format,
+                type : this.type,
+                jour : this.jour,
+                heure : this.heure,
+                duree : this.props.navigation.getParam('duree', ''),
+                terrain : this.props.terrainSelectionne,
+                nomsTerrains : this.props.nomsTerrainSelectionne
+            })
+        } else if(this.type == Type_Defs.partie_entre_joueurs) {
+
+            
+            this.props.navigation.push("ChoixJoueursPartie",
+            {
+                
+                format : this.format,
+                type : this.type,
+                jour : this.jour,
+                heure : this.heure,
+                duree : this.props.navigation.getParam('duree', ''),
+                terrain : this.props.terrainSelectionne,
+                nomsTerrains : this.props.nomsTerrainSelectionne,
+                creationPartie: true
+
+            })
+        }
+    }
+
+    /**
+     * Fonction qui permet de trouver un terrain à partir de son id
+     */
+    findTerrainsfromId(id){
+        for(var i =0; i <Terrains.length; i++) {
+            if(Terrains[i].id == id) return Terrains[i]
+        }
+    }
 
 
     terrainChoose = (idTerrain)  => {
@@ -50,6 +94,8 @@ class Choix_Terrain_Defis extends React.Component {
 			terrainChoisi : idTerrain
 		})
     }
+
+    
     buttonNext(){
 
 
@@ -57,38 +103,28 @@ class Choix_Terrain_Defis extends React.Component {
                 return(
                     <TouchableOpacity
                         onPress ={() =>  {
-                            console.log("THIS TYPE" ,this.type)
-                            if(this.type == Type_Defs.defis_2_equipes) { 
-                                
-                                console.log('------' +  this.props.navigation.getParam('duree', '')+ '---------')
-                                this.props.navigation.push("ChoixEquipeDefis",
-                                {
-                                    
-                                    format : this.format,
-                                    type : this.type,
-                                    jour : this.jour,
-                                    heure : this.heure,
-                                    duree : this.props.navigation.getParam('duree', ''),
-                                    terrain : this.props.terrainSelectionne,
-                                    nomsTerrains : this.props.nomsTerrainSelectionne
-                                })
-                            } else if(this.type == Type_Defs.partie_entre_joueurs) {
-
-                                
-                                this.props.navigation.push("ChoixJoueursPartie",
-                                {
-                                    
-                                    format : this.format,
-                                    type : this.type,
-                                    jour : this.jour,
-                                    heure : this.heure,
-                                    duree : this.props.navigation.getParam('duree', ''),
-                                    terrain : this.props.terrainSelectionne,
-                                    nomsTerrains : this.props.nomsTerrainSelectionne,
-                                    creationPartie: true
-
-                                })
+                            var terrain = this.findTerrainsfromId(this.props.terrainSelectionne);
+                            if(terrain.Payant) {
+                                var txtBoutton = "Confimer"
+                                var msg = 'Le terrain sélectionné est un terrain payant. Je confirme avoir réservé le terrain en mon nom'
+                            } else{
+                                var txtBoutton = "Continuer"
+                                var msg = 'Le terrain sélectionné est un terrain public gratuit en accès libre'
                             }
+                            Alert.alert(
+                                '',
+                                msg,
+                                [
+                                    {text: txtBoutton, onPress: () => this.goToNextScreen()},
+                                    {
+                                        text: 'Annuler',
+                                        onPress: () => console.log('Cancel Pressed'),
+                                        style: 'cancel',
+                                    },
+                                ]
+                            )
+                          
+                            
 
                         }
                                 

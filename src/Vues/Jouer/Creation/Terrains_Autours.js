@@ -12,6 +12,7 @@ import Barre_Recherche from '../../../Components/Recherche/Barre_Recherche'
 import { withNavigation } from 'react-navigation'
 import Carousel from 'react-native-snap-carousel';
 import { ScrollView } from 'react-native-gesture-handler';
+import Color from '../../../Components/Colors';
 
 
 const { width, height } = Dimensions.get('window');
@@ -31,7 +32,8 @@ const MAP = 'map'
 class Terrains_Autours extends React.Component {
 
     constructor(props) {
-        super(props)
+		super(props)
+		console.log("MAJ !!!!")
 		this.latitude =	this.props.latitude
 		this.longitude =  this.props.longitude
 		this.allTerrains = this.fetchClosestTerrains(this.buildTerrains()),
@@ -42,9 +44,33 @@ class Terrains_Autours extends React.Component {
 			terrainFiltres : this.allTerrains,
 			sliderValue : DISTANCE_MAX, 
 			typeDisplay : LISTE,
-			markers: [],		
+			markers: [],	
+			region : {
+				latitude: 37.78825,
+				longitude: -122.4324,
+				latitudeDelta: 0.0922,
+				longitudeDelta: 0.0421,
+			  },
 
+			selectedTerrain : undefined
 		}
+	}
+
+	componentDidMount() {
+
+		var markers = []
+		for(var i =0 ; i < 8; i ++) {
+			var t =  {
+				title: ' ',
+				coordinates: {
+					latitude: parseFloat(this.allTerrains[i].Latitude)  ,
+					longitude: parseFloat(this.allTerrains[i].Longitude),
+				  },
+				  id : this.allTerrains[i].id
+			}
+			markers.push(t)
+		}
+		this.setState({markers : markers, selectedTerrain : markers[0]})
 	}
 	
 	
@@ -55,6 +81,37 @@ class Terrains_Autours extends React.Component {
 		for(var i =0 ; i < Terrains.length ; i++) {
 			let distance =  Distance.calculDistance(this.latitude,this.longitude, Terrains[i].Latitude,Terrains[i].Longitude)
 			
+			if(distance <= DISTANCE_MAX) {
+				let t = {
+					id : Terrains[i].id,
+					Latitude: Terrains[i].Latitude,
+					Longitude : Terrains[i].Longitude,
+					InsNom: Terrains[i].InsNom,
+					distance : distance,
+					N_Voie : Terrains[i].N_Voie,
+					Voie : Terrains[i].Voie,
+					Ville : Terrains[i].Ville,
+					id : Terrains[i].id,
+					Payant :  Terrains[i].Payant,
+					queryName : Terrains[i].queryName
+				}
+				liste.push(t)
+			}
+		}
+		return liste
+	}
+	
+
+	/**
+	 * Fonction qui va permettre de mettre en forme les terrains et calculer leur distance
+	 * par rapport à la nouvelle région de la carte
+	 */
+	buildTerrainsWithRegionChanged() {
+		let liste = []
+		for(var i =0 ; i < Terrains.length ; i++) {
+			var latitude = this.state.region.latitude
+			var longitude = this.state.region.longitude
+			let distance =  Distance.calculDistance(latitude,longitude, Terrains[i].Latitude,Terrains[i].Longitude)
 			if(distance <= DISTANCE_MAX) {
 				let t = {
 					id : Terrains[i].id,
@@ -147,9 +204,41 @@ class Terrains_Autours extends React.Component {
             liste.push(terrain)
 		}
 		
+
+		var max = 8;
+		var markers = []
+		if(liste.length < max) max = liste.length
+		
 		
 		return liste
 
+
+	
+
+
+
+	}
+
+
+	relancerRecherche() {
+
+		var newListe = this.fetchClosestTerrains(this.buildTerrainsWithRegionChanged())
+
+		console.log("after fetch closest terrain")
+		var markers = []
+		for(var i =0 ; i < 8; i ++) {
+			var t =  {
+				title: ' ',
+				coordinates: {
+					latitude: parseFloat(newListe[i].Latitude)  ,
+					longitude: parseFloat(newListe[i].Longitude),
+				  },
+				  id : newListe[i].id
+			}
+			console.log(i)
+			markers.push(t)
+		}
+		this.setState({markers : markers, terrainFiltres : newListe,terrainSelectionne : markers[0]})
 	}
 	
 	changeMarkerWithSlider(index) {
@@ -158,27 +247,44 @@ class Terrains_Autours extends React.Component {
 		let t = {
 			title: ' ',
 			  	coordinates: {
-				  		latitude: parseFloat(this.state.allTerrains[index].Latitude)  ,
-				  		longitude: parseFloat(this.state.allTerrains[index].Longitude),
-				}
+				  		latitude: parseFloat(this.state.terrainFiltres[index].Latitude)  ,
+				  		longitude: parseFloat(this.state.terrainFiltres[index].Longitude),
+				},
+				id : this.state.terrainFiltres[index].id
 		}
+		console.log(t.id)
 		liste.push(t)
-        this.setState({markers : liste, indexState : index})
+        this.setState({ indexState : index,selectedTerrain : t})
         //console.log(this.state.markers)
 		this.fitAllMarkers(index)
 
 	}
 
 	fitAllMarkers(index) {
+
         //console.log("IN FIT ALL MARKERS")
-		let markers = [
+		/*let markers = [
 				{latitude : this.latitude, longitude: this.longitude}, 
 				{latitude : parseFloat(this.state.allTerrains[index].Latitude), longitude : parseFloat(this.state.allTerrains[index].Longitude)}
             ]
             //console.log(this.state.terrains[index].Latitude)
             //console.log(this.state.terrains[index].Longitude)
-    	this.map.fitToCoordinates(markers, {edgePadding: DEFAULT_PADDING,animated: true,});
-  	}
+    	this.map.fitToCoordinates(markers, {edgePadding: DEFAULT_PADDING,animated: true,});*/
+	}
+	  
+
+
+	onRegionChange = (region) => {
+		oldRegion = this.state.region
+		distance = Distance.calculDistance(oldRegion.latitude, oldRegion.longitude, region.latitude, region.longitude)
+		if(distance >= 0.8) {
+			console.log("DISTANCE :", distance )
+			//console.log(region)
+			this.setState({ region : region })
+		}
+	
+	};
+
 
     
 	goToMapTerrains() {
@@ -232,6 +338,20 @@ class Terrains_Autours extends React.Component {
 				distance = {txtDistance}
 
 		/>)
+	}
+
+
+	/**
+	 * Fonction qui permet d'affihcer le boutton pour relancer une recherche dans un quartier.
+	 */
+	renderBtnRelancerRecherche() {
+
+		return(
+			<TouchableOpacity style = {{backgroundColor : Color.agOOraBlue, padding : hp('1%'), borderRadius : 5, position : "absolute" , top : hp('1%')}}
+				onPress = {() =>this.relancerRecherche()}>
+				<Text style = {{color : "white" }}>Relancer la recherche dans ce quartier</Text>
+			</TouchableOpacity>
+		)
 	}
 	
 
@@ -290,13 +410,17 @@ class Terrains_Autours extends React.Component {
 							provider={this.props.provider}
 							ref={ref => { this.map = ref; }}
 							mapType={MAP_TYPES.STANDARD}
+							
 							style={styles.map}
 							initialRegion = {
 									{latitude: this.latitude,
 									longitude: this.longitude,
 									latitudeDelta: LATITUDE_DELTA,
 									longitudeDelta: LONGITUDE_DELTA}
-							}>
+							}
+							
+							onRegionChange={this.onRegionChange}
+							>
 
 							
 							{/* Marker pour la position de l'utilisateur */}
@@ -310,14 +434,29 @@ class Terrains_Autours extends React.Component {
 							</MapView.Marker>
 
 							{/* Marker depuis le state : va etre le terrain en 1ier plan*/}
-							{this.state.markers.map(marker => (
-								<MapView.Marker 
-									coordinate={marker.coordinates}
-									title={marker.title}
-									description = {"okok"}>
-									<Image source = {require('../../../../res/marker_terrain.png')} style = {{width : 80, height : 80}}/>
-								</MapView.Marker>
-							))}
+							{this.state.markers.map(marker =>{
+								console.log("marker id : ", marker.id)
+								console.log("this.state.selectedTerrain.id", this.state.selectedTerrain.id)
+								if(marker.id  == this.state.selectedTerrain.id) {
+									return(
+										<MapView.Marker 
+											coordinate={marker.coordinates}
+											title={marker.title}
+											description = {"okok"}>
+											<Image source = {require('../../../../res/marker_terrain_selected.png')} style = {{width : 80, height : 80}}/>
+										</MapView.Marker>
+									)
+								} else {
+									return(
+										<MapView.Marker 
+											coordinate={marker.coordinates}
+											title={marker.title}
+											description = {"okok"}>
+											<Image source = {require('../../../../res/marker_terrain.png')} style = {{width : 80, height : 80}}/>
+										</MapView.Marker>
+									)
+								}
+							})}
 						</MapView>
 
 						{/* Vue contenant le carousel*/}
@@ -338,9 +477,10 @@ class Terrains_Autours extends React.Component {
 								contentContainerCustomStyle={styles.sliderContentContainer}
 							/>
 						</View>
+						{this.renderBtnRelancerRecherche()}
 
 						<TouchableOpacity
-							style = {{padding : wp('4%'),position : "absolute",bottom : hp('2%'), right: wp('1%')}}
+							style = {{padding : wp('4%'),position : "absolute",bottom : hp('6%'), right: wp('1%')}}
 							onPress={() => this.setState({typeDisplay : LISTE})}
 
 						>

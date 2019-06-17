@@ -97,7 +97,7 @@ export default class Creation_Equipe_Photo extends React.Component {
             citation : this.props.navigation.getParam("citation", "erreur"),
             fiabilite : 100,
             id : equipeRef.id,
-            joueurs : [LocalUser.data.id].concat(this.props.navigation.getParam("joueurs", [])),
+            joueurs : [LocalUser.data.id],
             mail  : LocalUser.data.mail,
             nbDefisCree : 0,
             nbDefisParticipe : 0,
@@ -109,7 +109,8 @@ export default class Creation_Equipe_Photo extends React.Component {
             telephone : LocalUser.data.telephone,
             ville : this.props.navigation.getParam("ville", " "),
             defis : [],
-            nbJoueurs : this.props.navigation.getParam("joueurs", []).length +1
+            nbJoueurs : this.props.navigation.getParam("joueurs", []).length +1,
+            joueursAttentes : this.props.navigation.getParam("joueurs", [])
         }).then(this.updateJoueur()).catch(function(error){
             console.log(error)
         })
