@@ -292,7 +292,7 @@ class Choix_Joueurs_Partie extends React.Component {
 
                 </View>
                 <Text style = {{alignSelf : "center", fontSize : RF(2.6) , marginBottom : hp('2%') , marginTop : hp('1%')}}>Quels joueurs souhaites-tu inviter</Text>
-                <Text style = {{fontSize :RF(2.6), marginBottom : hp('1%')}}> {this.props.joueursPartie.length} joueurs selectionnés</Text>
+                <Text style = {{fontSize :RF(2.6), marginBottom : hp('1%')}}> {this.props.joueursPartie.length} {this.props.joueursPartie.length > 1 ? "joueurs sélectionnés" : "joueur sélectionné"}</Text>
                 
                 <TabChoixJoueursDefis/>
 

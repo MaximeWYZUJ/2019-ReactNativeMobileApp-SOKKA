@@ -92,7 +92,18 @@ export default class FiltrerTerrain extends React.Component {
 
 
     returnFilter() {
-        return null;
+        b1 = this.state.ville.length > 0;
+        b2 = this.state.sanitaires;
+        b3 = this.state.eclairage;
+        b4 = this.state.handicap;
+        b5 = this.state.decouvert;
+        b6 = this.state.gratuit;
+        b7 = this.state.surface !== null;
+        if (b1 || b2 || b3 || b4 || b5 || b6 || b7) {
+            return {...this.state};
+        } else {
+            return null;
+        }
     }
 
 
@@ -101,35 +112,35 @@ export default class FiltrerTerrain extends React.Component {
             <View>
                 {/* Filtrer sur le lieu */}
                 <View style={styles.rowFilter}>
-                    <Text style={{width: wp('15%')}}>Département : </Text>
+                    <Text style={{width: wp('30%')}}>Département : </Text>
                     <TextInput style={{width: wp('60%')}} onChangeText={(t) => this.setState({departement: t})} placeholder={"Département de recherche"}/>
                 </View>
                 <View style={styles.rowFilter}>
-                    <Text style={{width: wp('15%')}}>Ville : </Text>
+                    <Text style={{width: wp('30%')}}>Ville : </Text>
                     <TextInput style={{width: wp('60%')}} onChangeText={(t) => this.setState({ville: t})} placeholder={"Ville de recherche"}/>
                 </View>
 
                 {/* Sanitaires */}
                 <View style={styles.rowFilter}>
-                    <Text style={{width: wp('15%'), marginRight: wp('5%')}}>Sanitaires</Text>
+                    <Text style={{width: wp('30%'), marginRight: wp('5%')}}>Sanitaires</Text>
                     <Switch value={this.state.sanitaires} onValueChange={() => this.setState({sanitaires: !this.state.sanitaires})}/>
                 </View>
 
                 {/* Couvert / Decouvert */}
                 <View style={styles.rowFilter}>
-                    <Text style={{width: wp('15%'), marginRight: wp('5%')}}>Decouvert</Text>
+                    <Text style={{width: wp('30%'), marginRight: wp('5%')}}>Decouvert</Text>
                     <Switch value={this.state.decouvert} onValueChange={() => this.setState({decouvert: !this.state.decouvert})}/>
                 </View>
 
                 {/* Eclairage */}
                 <View style={styles.rowFilter}>
-                    <Text style={{width: wp('15%'), marginRight: wp('5%')}}>Eclairage</Text>
+                    <Text style={{width: wp('30%'), marginRight: wp('5%')}}>Eclairage</Text>
                     <Switch value={this.state.eclairage} onValueChange={() => this.setState({eclairage: !this.state.eclairage})}/>
                 </View>
 
                 {/* Gratuit */}
                 <View style={styles.rowFilter}>
-                    <Text style={{width: wp('15%'), marginRight: wp('5%')}}>Gratuit</Text>
+                    <Text style={{width: wp('30%'), marginRight: wp('5%')}}>Gratuit</Text>
                     <Switch value={this.state.gratuit} onValueChange={() => this.setState({gratuit: !this.state.gratuit})}/>
                 </View>
 
@@ -137,7 +148,7 @@ export default class FiltrerTerrain extends React.Component {
                 {this.renderPickerSurface()}
 
                 {/* Validation */}
-                <View style={styles.rowFilter}>
+                <View style={{...styles.rowFilter, justifyContent: 'center'}}>
                     <Button
                         style={{flex: 1, flexDirection: 'row', justifyContent: 'center', borderRadius : 15, marginHorizontal: wp('30%'), marginTop: 5}}
                         title="valider"
@@ -156,6 +167,7 @@ const styles=StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginTop: 5,
-        marginBottom: 5
+        marginBottom: 5,
+        marginHorizontal: wp('5%')
     }
 })

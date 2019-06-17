@@ -622,7 +622,7 @@ class Feuille_Defi_A_Venir extends React.Component {
      * Fonction qui permet d'afficher le boutton relancer si l'utilisateur est 
      * capitaine
      */
-    _renderBtnRelancer() {
+    _renderBtnRelancer = () => {
         if(this.state.equipeOrganisatrice.capitaines.includes(this.monId)) {
             return(
                 <TouchableOpacity 
@@ -1059,23 +1059,18 @@ class Feuille_Defi_A_Venir extends React.Component {
                 <View>
                     <ScrollView>
                         <View>
-                        <Text style = {{alignSelf : "center", marginTop : hp('1%')}}>Feuille de match</Text> 
-                        <Text>Joueurs convoqués : {confirme.length + indisponibles.length + attente.length }</Text>
-                        <View style = {{flexDirection : 'row'}}>
-                            <Presences_Joueurs
-                                nbjoueursConfirmes = {confirme.length}
-                                nbIndisponibles = {indisponibles.length}
-                                nbAttentes = {attente.length}
-                                isPartie  = {false}
-                            />
-
-                            <View style = {{justifyContent: 'flex-end', flex :1}}>
-                                {this._renderBtnRelancer()}
+                            <Text style = {{alignSelf : "center", marginTop : hp('1%')}}>Feuille de match</Text> 
+                            <Text>Joueurs convoqués : {confirme.length + indisponibles.length + attente.length }</Text>
+                            <View style = {{flexDirection : 'row'}}>
+                                <Presences_Joueurs
+                                    nbjoueursConfirmes = {confirme.length}
+                                    nbIndisponibles = {indisponibles.length}
+                                    nbAttentes = {attente.length}
+                                    isPartie  = {false}
+                                    renderBtnRelancer={this.renderBtnRelancer}
+                                />
                             </View>
-
-                        </View>
                         
-
                             {this.renderListPlayer()}
                         </View>
                     </ScrollView>

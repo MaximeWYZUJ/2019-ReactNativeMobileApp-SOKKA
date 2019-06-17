@@ -90,7 +90,7 @@ export default class Barre_Recherche extends React.Component {
                     {/* Pour les filtres*/}
                     <TouchableOpacity
                         style = {{backgroundColor : 'white', flexDirection : 'row', marginLeft : wp('3%'),paddingVertical : hp('1%'), paddingHorizontal :wp('3%')}}
-                        onPress={() => {this.props.handleFilterButton(); this.searchedTerrains("")}}
+                        onPress={() => {this.props.handleFilterButton()}}
                         >
                             <Image 
                                 style={{width : wp('7%'), height : wp('7%'), alignSelf : 'center'}}
