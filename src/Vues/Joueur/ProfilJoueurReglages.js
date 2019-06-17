@@ -1,5 +1,5 @@
 import React from 'react'
-import {KeyboardAvoidingView, TouchableOpacity, ScrollView, View, Text, StyleSheet, Image, Button, TextInput, ListView } from 'react-native'
+import {Picker, TouchableOpacity, ScrollView, View, Text, StyleSheet, Image, Button, TextInput, ListView } from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
@@ -21,23 +21,29 @@ class ProfilJoueurReglages extends React.Component {
         this.id = this.props.navigation.getParam('id', null)
 
         var auj = new Date();
+        var jNaissance = firebase.firestore.Timestamp.fromMillis(Date.parse(this.joueur.naissance)).toDate();
+        var jNaissanceDisp = jNaissance.getDate()+'-'+(jNaissance.getMonth()+1)+'-'+jNaissance.getFullYear();
+        
         this.today = auj.getFullYear() + '-' + (auj.getMonth() + 1) + '-' + auj.getDate();
         this.todayDisp = auj.getDate() + '-' + (auj.getMonth() + 1) + '-' + auj.getFullYear();
         this.naissance = ""
+        
         this.ville = ""
         this.zone = ""
         this.pseudo = ""
-        this.score = ""
+        this.score = this.joueur.score;
         this.telephone = ""
         this.mail = ""
         this.searchedVilles = [];
         this.age = this.joueur.age;
+        
         this.state = {
-            naissanceDisp: this.todayDisp,
+            naissanceDisp: jNaissanceDisp,
             naissance : "",
             age : this.joueur.age,
             searchedVilles: [],
-            ville: ""
+            ville: "",
+            scoreDisp: this.score
         }
     }
 
@@ -143,9 +149,9 @@ class ProfilJoueurReglages extends React.Component {
             this.joueur.pseudo = this.pseudo
             this.joueur.queryPseudo = NormalizeString.normalize(this.pseudo);
         }
-        if (this.score) {
-            this.joueur.score = parseInt(this.score)
-        }
+        
+        this.joueur.score = this.score
+        
         if (this.telephone) {
             this.joueur.telephone = this.telephone
         }
@@ -238,14 +244,14 @@ class ProfilJoueurReglages extends React.Component {
                             renderRow={this.renderVille}
                         />
                     </View>
-                    <View style={styles.champ}>
+                    {/*<View style={styles.champ}>
                         <Text>Zone de jeu :  </Text>
                         <TextInput
                             style={{flex: 1, borderColor: '#C0C0C0'}}
                             onChangeText={(t) => this.zone=t}
                             placeholder={this.joueur.zone}
                             />
-                    </View>
+                    </View>*/}
                     <View style={styles.champ}>
                         <Text>AKA :  </Text>
                         <TextInput
@@ -256,14 +262,18 @@ class ProfilJoueurReglages extends React.Component {
                     </View>
                     <View style={styles.champ}>
                         <Text>Niveau :  </Text>
-                        <TextInput
-                            style={{flex: 1, borderColor: '#C0C0C0'}}
-                            onChangeText={(t) => this.score=t}
-                            placeholder={this.joueur.score+""}
-                            />
-                    </View>
-                    <View style={styles.champ}>
-                        <Text>Fiabilite :  {this.joueur.fiabilite+""}</Text>
+                        <Picker
+                            selectedValue={this.state.scoreDisp}
+                            style={{width: wp('60%')}}
+                            onValueChange={(itemValue, itemIndex) => {this.score = itemValue; this.setState({scoreDisp: itemValue})}}
+                            >
+                            <Picker.Item label={"0 étoile"} key={0} value={0}/>
+                            <Picker.Item label={"1 étoile"} key={1} value={1}/>
+                            <Picker.Item label={"2 étoiles"} key={2} value={2}/>
+                            <Picker.Item label={"3 étoiles"} key={3} value={3}/>
+                            <Picker.Item label={"4 étoiles"} key={4} value={4}/>
+                            <Picker.Item label={"5 étoiles"} key={5} value={5}/>
+                        </Picker>
                     </View>
                 </View>
                 

@@ -12,7 +12,9 @@ import Barre_Recherche from '../../../Components/Recherche/Barre_Recherche'
 import { withNavigation } from 'react-navigation'
 import Carousel from 'react-native-snap-carousel';
 import { ScrollView } from 'react-native-gesture-handler';
-import Color from '../../../Components/Colors';
+import Slider from "react-native-slider";
+import Color from '../../../Components/Colors'
+import FiltrerTerrain from '../../../Components/Recherche/FiltrerTerrain'
 
 
 const { width, height } = Dimensions.get('window');
@@ -23,6 +25,7 @@ const DEFAULT_PADDING = { top: 350, right: 200, bottom: 350, left: 200 };
 const DISTANCE_MAX = 1500
 const LISTE = 'liste'
 const MAP = 'map'
+const SLIDER_DISTANCE_MAX = 20;
 
 
 /**
@@ -42,9 +45,13 @@ class Terrains_Autours extends React.Component {
 			txtRecherche : '',
 			allTerrains :   this.allTerrains,
 			terrainFiltres : this.allTerrains,
+			terrainsFiltresEtDistance : this.allTerrains,
 			sliderValue : DISTANCE_MAX, 
 			typeDisplay : LISTE,
-			markers: [],	
+			markers: [],
+			sliderValueList : SLIDER_DISTANCE_MAX,
+			displayFiltres: false,
+			filtres: null,
 			region : {
 				latitude: 37.78825,
 				longitude: -122.4324,
@@ -92,8 +99,9 @@ class Terrains_Autours extends React.Component {
 					Voie : Terrains[i].Voie,
 					Ville : Terrains[i].Ville,
 					id : Terrains[i].id,
-					Payant :  Terrains[i].Payant,
+					Payant :  Terrains[i].Payant, // true, false
 					queryName : Terrains[i].queryName
+					// ajouter les champs relatifs aux sanitaires, type de sol, etc.
 				}
 				liste.push(t)
 			}
@@ -139,7 +147,8 @@ class Terrains_Autours extends React.Component {
 	 */
     recherche = (data)  => {
 		this.setState({
-			terrainFiltres : data
+			terrainFiltres : data,
+			terrainsFiltresEtDistance : this.filtrerDistanceSlider(data)
 		})
 	}
 
@@ -172,19 +181,40 @@ class Terrains_Autours extends React.Component {
 	}
 	
 
-	// !!!!! A CHANGER POUR INCLURE LES FILTRES !! !!!
 	/**
-	 * Pour filtrer
+	 * Pour filtrer les terrains, utilisé dans le composant BarreRecherche
 	 */
 	filtrerData = (data) => {
-        
-            return data;
-        
+		f = this.state.filtres;
+		filteredData = data;
+
+		if (f!=null) {
+			if (f.gratuit) {
+				filteredData = data.filter(function (terrain) {
+					return (terrain.Payant == false);
+				})
+			}
+
+			// faire des data.filter(condition) pour filtrer
+		}
+        return filteredData;
 	}
 
 	handleFilterButton = () =>{
-		console.log("filter press")
+		this.setState({displayFiltres: !this.state.displayFiltres});
 	}
+
+	handleValidateFilters = (q, f) => {
+		this.handleFilterButton();
+		this.setState({filtres: f})
+	}
+
+	displayFiltres() {
+		if (this.state.displayFiltres) {
+			return (<FiltrerTerrain handleValidate={this.handleValidateFilters}/>);
+		}
+	}
+
 
 	/**
 	 * Fonction qui va permettre de trier les terrains en fonction de leur distance 
@@ -211,12 +241,6 @@ class Terrains_Autours extends React.Component {
 		
 		
 		return liste
-
-
-	
-
-
-
 	}
 
 
@@ -240,6 +264,23 @@ class Terrains_Autours extends React.Component {
 		}
 		this.setState({markers : markers, terrainFiltres : newListe,terrainSelectionne : markers[0]})
 	}
+
+
+	filtrerDistanceSlider(liste) {
+		if (this.state.sliderValueList <= SLIDER_DISTANCE_MAX) {
+			let listeOK = [];
+			for (var i = 0; i<liste.length; i++) {
+				distance = liste[i].distance;
+				if (distance < this.state.sliderValueList) {
+					listeOK.push(liste[i]);
+				}
+			}
+			return listeOK;
+		} else {
+			return liste;
+		}
+	}
+
 	
 	changeMarkerWithSlider(index) {
 
@@ -373,8 +414,27 @@ class Terrains_Autours extends React.Component {
 							handleFilterButton={this.handleFilterButton}
 
 						/>
+						<View style={{flex: 1, justifyContent: 'center', alignContent: 'center', marginHorizontal: wp('5%')}}>
+							<View style={{flex: 1, alignItems: 'center'}}>
+								<Text>{this.state.sliderValueList > SLIDER_DISTANCE_MAX ? '> 20 km' : this.state.sliderValueList + " km"}</Text>
+							</View>
+							<Slider
+								minimumValue={1}
+								maximumValue={SLIDER_DISTANCE_MAX+1}
+								onValueChange={(v) => this.setState({
+									sliderValueList: v,
+									terrainsFiltresEtDistance: this.filtrerDistanceSlider(this.state.terrainFiltres)
+								})}
+								step={1}
+								value={this.state.sliderValueList}
+								minimumTrackTintColor={Color.lightGray}
+								maximumTrackTintColor={Color.lightGray}
+								thumbTintColor={Color.agOOraBlue}
+							/>
+						</View>
+						{this.displayFiltres()}
 						<FlatList
-								data= {this.state.terrainFiltres}
+								data= {this.state.terrainsFiltresEtDistance}
 								keyExtractor={(item) => item.id}
 								renderItem={this._renderItem}
 								extraData = {this.props.terrainSelectionne}
@@ -495,22 +555,16 @@ class Terrains_Autours extends React.Component {
 				
 			)
 		}
-			
-			
 	}
 	
     
     render() {
-
         return(
 			<View>
 				{this.displayRender()}
 			</View>
 		)
-		
     }
-
-
 
 }
 

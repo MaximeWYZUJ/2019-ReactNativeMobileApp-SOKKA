@@ -120,10 +120,20 @@ export default class Creation_Equipe_Zone extends React.Component {
      */
     renderVille = (adress) => {
         var txt = adress.Nom_commune.toLowerCase()
+
+        depCode = adress.Code_postal.toString();//.substring(0,2);
+        if (depCode.length < 5) {
+            depCode = "0"+depCode;
+        }
+        depCode = depCode.substring(0,2);
+        dep = Departement.filter(function (d) {
+            return (d.departmentCode === depCode);
+        })
+        console.log(dep[0].departmentName)
         
         return (
             <TouchableOpacity
-                onPress = {() => this.setState({ville : txt, searchedVilles : [] })}
+                onPress = {() => this.setState({ville : txt, searchedVilles : [], departement : dep[0].departmentName })}
                 style = {{backgroundColor : Colors.grayItem,  marginTop : hp('1%'), marginBottom : hp('1'),paddingVertical : hp('1%')}}
                 >
             
@@ -171,7 +181,7 @@ export default class Creation_Equipe_Zone extends React.Component {
                 </View>
 
                 {/* View contenant le champs pour le département */}
-                <View style = {{flexDirection : 'row', marginTop : hp('3%'), alignItems : 'center', alignContent : 'center'}}>
+                {/*<View style = {{flexDirection : 'row', marginTop : hp('3%'), alignItems : 'center', alignContent : 'center'}}>
                     <Animated.View style={[this.champsAnimation.getLayout()]}> 
                         <TextInput
                             style = {styles.input}
@@ -186,7 +196,7 @@ export default class Creation_Equipe_Zone extends React.Component {
                         
                         
                     </Animated.View>
-                </View>
+                </View>*/}
 
                  {/* View contenant le champs pour la ville */}
                  <View style = {{flexDirection : 'row', marginTop : hp('3%'), alignItems : 'center', alignContent : 'center'}}>

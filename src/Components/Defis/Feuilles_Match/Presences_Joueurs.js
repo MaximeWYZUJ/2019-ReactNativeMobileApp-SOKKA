@@ -54,9 +54,10 @@ export default class Presences_Joueurs extends React.Component {
                 </View>
 
                 {/* Nbr de joueurs en attente */}
-                <View style ={styles.bloc_disponibilite_joueurs}>
+                <View style ={{...styles.bloc_disponibilite_joueurs, alignItems: 'center'}}>
                     {this._renderCircleOfColor('#C0C0C0')}
                     <Text>En attente : {this.props.nbAttentes}</Text>
+                    {this.props.renderBtnRelancer()}
                 </View>
 
                 

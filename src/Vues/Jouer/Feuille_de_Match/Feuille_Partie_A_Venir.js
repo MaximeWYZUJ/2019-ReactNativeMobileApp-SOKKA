@@ -673,7 +673,7 @@ class Feuille_Partie_A_Venir extends React.Component {
         
     }
 
-    renderBtnRelancer() {
+    renderBtnRelancer = () => {
         if(this.state.partie != undefined) {
             if(this.monId == this.state.partie.organisateur) {
                 return(
@@ -731,6 +731,7 @@ class Feuille_Partie_A_Venir extends React.Component {
                         nbIndisponibles = {this.state.partie.indisponibles.length}
                         nbAttentes = {this.state.partie.attente.length}
                         isPartie = {true}
+                        renderBtnRelancer={this.renderBtnRelancer}
                     />
 
                    
@@ -739,7 +740,6 @@ class Feuille_Partie_A_Venir extends React.Component {
                     <View style ={styles.bloc_disponibilite_joueurs}>
                         {this._renderCircleOfColor(Colors.agooraBlueStronger)}
                         <Text>Joueurs recherchés restant : {this.partie.nbJoueursRecherche}</Text>
-                        {this.renderBtnRelancer()}
                     </View>
 
                     

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity,TextInput} from 'react-native'
+import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity,TextInput,Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../../Components/Colors'

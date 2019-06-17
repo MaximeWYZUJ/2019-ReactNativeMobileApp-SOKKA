@@ -3,6 +3,7 @@ import React from 'react'
 import {View, Text,  StyleSheet, Animated,TouchableOpacity,ScrollView,FlatList, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
+import Slider from "react-native-slider";
 import { Image } from 'react-native-elements';
 import Colors from '../../../Components/Colors'
 import TabChoisirTerrainDefis from './TabChoisirTerrainDefis'
@@ -24,6 +25,7 @@ class Choix_Terrain_Defis extends React.Component {
         this.heure = this.props.navigation.getParam('heure', ' ')
         this.jour = this.props.navigation.getParam('jour', ' ')
         this.format = this.props.navigation.getParam('format', ' ')
+        
 
 
         this.state = {
