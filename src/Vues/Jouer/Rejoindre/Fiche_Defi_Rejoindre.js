@@ -219,13 +219,14 @@ class Fiche_Defi_Rejoindre extends React.Component {
      * juste la suppr. On ajoute de plus l'id du joueur dans la liste des 
      * joueurs de l'équipe défiée.
      */
-    saveParticipationInDb(idEquipe) {
+    async saveParticipationInDb(idEquipe, nom) {
         
         var db = Database.initialisation()
 
         
         var defiRef = db.collection("Defis").doc(this.state.defi.id)
-        this.sendNotifDefisReleve(idEquipe)
+        await this.sendNotifsToCapitainesOrga(nom)
+        this.storeNotifDefisReleve(idEquipe)
         defiRef.update({
             equipeDefiee : idEquipe,
             recherche : false,
@@ -240,11 +241,64 @@ class Fiche_Defi_Rejoindre extends React.Component {
     }
 
 
+
+     // ===========================================================================
+    // ========================== NOTIFICATIONS ==================================
+    // ===========================================================================
+    
+    
+
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    async sendPushNotification(token , title,body ) {
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
     /**
      * Fonction qui va permettre d'envoyer les notifications aux capitaines
      * de l'équipe organisatrice
      */
-    sendNotifDefisReleve(idEquipe) {
+    async sendNotifsToCapitainesOrga(nom){
+        var titre = "Nouvelle notif"
+        var corps = "L'équipe " + nom + " souhaite relever le défi posté par ton équipe" + this.state.equipeOrganisatrice.nom
+        for(var i = 0; i < this.state.equipeOrganisatrice.capitaines.length; i++) {
+            var id = this.state.equipeOrganisatrice.capitaines[i]
+
+            var cap = await Database.getDocumentData(id, "Joueurs")
+            var tokens = []
+            if(cap.tokens != undefined) tokens = cap.tokens
+            for(var k = 0; k < tokens.length; k++) {
+                await this.sendPushNotification(tokens[k], corps, titre)
+            }
+        }
+    }
+
+
+
+    /**
+     * Fonction qui va permettre de sauvegarder les notifications dans la base de données.
+     */
+    async storeNotifDefisReleve(idEquipe) {
 
         var db = Database.initialisation()
         if(this.state.equipeOrganisatrice != undefined) {
@@ -268,6 +322,9 @@ class Fiche_Defi_Rejoindre extends React.Component {
     }
 
   
+
+    //  =================================================================================
+
 
     /**
      * Fonction qui va permettre à l'utilisateur de relever le defi. Si il 
@@ -831,7 +888,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
      * juste du texte !
      */
     renderAcepterEquipe() {
-        console.log("in renderAZccepterZEquoe")
+        /*console.log("in renderAZccepterZEquoe")
         console.log(this.state.equipeDefiee != undefined &&  !this.state.defi.defis_valide)
         if(this.state.equipeDefiee != undefined &&  !this.state.defi.defis_valide) {
             return(
@@ -851,7 +908,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
                     </View>
                 </View>
             )
-        }
+        }*/
     }
 
 
@@ -865,7 +922,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
                 <TouchableOpacity 
                     onPress = {() => {
                         this.chooseEquipe(item)
-                        this.saveParticipationInDb(item.id)
+                        this.saveParticipationInDb(item.id,item.nom)
                         Alert.alert(
                             ' ',
                             "Ta demande de relever le défi avec ton équipe " +

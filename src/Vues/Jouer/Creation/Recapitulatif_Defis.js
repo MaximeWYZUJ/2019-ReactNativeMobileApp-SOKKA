@@ -85,19 +85,50 @@ export default class Recapitulatif_Defis extends React.Component {
         
     }
 
+
+
+
+    /**
+     * Fonction qui va envoyer une notification aux capitaines de l'équipe adverse.
+     */
+    async sendNotifCapAdverses(dataEquipe){
+        if(this.equipeAdverse != undefined) {
+            var title = "Nouvelle notification"
+            var corps = "L'équipe " + this.allDataEquipe.nom + " défie ton équipe " + dataEquipe.nom
+            
+            
+            for(var i = 0; i < dataEquipe.capitaines.length; i++) {
+                // Récupérer les données des capitaine
+                var cap = await Database.getDocumentData(dataEquipe.capitaines[i], "Joueurs")
+
+                var tokens = []
+                if(cap.tokens != undefined) tokens = cap.tokens
+                for(var k = 0; k < tokens.length; k ++){
+                   await  this.sendPushNotification(tokens[k],title,corps)
+                }
+
+                
+            }
+            
+        }
+    }
+
+    /**
+     * Fonction qui envoie une notification aux joueurs convoqués
+     * @param {*} equipe 
+     * @param {*} joueurs 
+     * @param {*} date 
+     */
     async sendNotif(equipe, joueurs,date) {
-        console.log("JOUEURS : ", joueurs)
         for(var i = 0 ; i < joueurs.length; i++) {
 
             var j = await Database.getDocumentData(joueurs[i], "Joueurs")
-            console.log("Destinataire : ",j.tokens)
             if(j.tokens != undefined) {
                 for(var k = 0; k< j.tokens.length; k++) {
-                    console.log("before notif ", j.tokens[k])
                     var title = "Nouvelle notification"
                     var corps = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.allDataEquipe.nom 
                     corps = corps + " t'as convoqué / relancé pour un un défi le " + this.buildDate(date)
-                    this.sendPushNotification(j.tokens[k], title, corps) 
+                    await this.sendPushNotification(j.tokens[k], title, corps) 
                     //Notification.sendNotificationInvitationDefi(j.tokens[k],date,LocalUser.data,equipe)
                 }
             }
@@ -123,7 +154,6 @@ export default class Recapitulatif_Defis extends React.Component {
     
     
     sendPushNotification(token , title,body ) {
-        console.log('in send push !!')
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: token,
@@ -286,15 +316,16 @@ export default class Recapitulatif_Defis extends React.Component {
 
     /**
      * Fonction qui sauvegarde dans la db une notification a envoyer à l'équipe
-     * défiée si il y'en a une 
+     * défiée si il y'en a une . On va de plus envoyer une notification à chaque capitaine
      */
     async storeNotificationDefiEquipe(id) {
-        console.log("in store notif defi EQUIPE")
         if(this.equipeAdverse != undefined) {
 
             // Récupérer les données de l'équipe adversse 
             var equipe = await Database.getDocumentData(this.equipeAdverse, "Equipes")
-            console.log("ID EQUIPE : ", equipe.id)
+
+            // Envoyer la notif à chaque cap
+            await this.sendNotifCapAdverses(equipe)
             for(var i = 0; i < equipe.capitaines.length; i++) {
                 db.collection("Notifs").add(
                     {
@@ -424,8 +455,6 @@ export default class Recapitulatif_Defis extends React.Component {
     }
 
     render() {
-
-        console.log("in render display defi")
 
         return (
             <View>

@@ -39,6 +39,15 @@ export default class Types_Notification {
     static ACCEPTER_DEFI_RELEVE = "ACCEPTER_DEFI_RELEVE"
 
 
+    /**
+     * Quand l'utilisateur accepte de défier une équipe qui lui a proposé un défi
+     */
+    static ACCEPTER_CONVOCATION_DEFI_ADVERSE  = "ACCEPTER_CONVOCATION_DEFI_ADVERSE"
+
+    /**
+     * Quand l'utilisateur refuse de défier une équipe qui lui a proposé un défi
+     */
+    static REFUSER_CONVOCATION_DEFI_ADVERSE  = "REFUSER_CONVOCATION_DEFI_ADVERSE"
     
     //=========================================================================
     //============================ POUR LES PARTIE  ===========================
@@ -85,6 +94,11 @@ export default class Types_Notification {
     static ACCEPTER_INVITATION_REJOINDRE_EQUIPE ="ACCEPTER_INVITATION_REJOINDRE_EQUIPE"
 
 
+    /**
+     * Quand une équipe dont l'utilisateur est capitaine est ajouté aux équipes favorites 
+     * d'un autre joueur.
+     */
+    static AJOUT_EQUIPE_FAVORITE = "AJOUT_EQUIPE_FAVORITE"
     
 
 

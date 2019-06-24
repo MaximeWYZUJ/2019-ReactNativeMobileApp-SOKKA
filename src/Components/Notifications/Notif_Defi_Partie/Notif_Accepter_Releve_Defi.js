@@ -222,8 +222,8 @@ class Notif_Accepter_Releve_Defi extends React.Component {
                         {this.renderPhotoEquipeEmetteur()}
                     </View>
                     <View>
-                        <Text> L'équipe {this.renderNomEquipeEmettrice()} défie ton équipe</Text>
-                        <Text> {this.renderNomEquipeReceptrice()} </Text>
+                        <Text> L'équipe {this.renderNomEquipeEmettrice()} souhaite relever le</Text>
+                        <Text> défi posté par ton équipe {this.renderNomEquipeReceptrice()} </Text>
 
                         <TouchableOpacity
                             onPress = {() => this.goToFicheDefi()}

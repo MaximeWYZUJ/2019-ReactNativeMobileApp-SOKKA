@@ -9,6 +9,7 @@ import Simple_Loading from '../../Loading/Simple_Loading'
 import Database  from '../../../Data/Database'
 import LocalUser from '../../../Data/LocalUser.json'
 import { withNavigation } from 'react-navigation'
+import Types_Notification from '../../../Helpers/Notifications/Types_Notification';
 
 
 
@@ -53,6 +54,112 @@ class Notif_Defis_Contre_Equipe extends React.Component {
         var defi = await Database.getDocumentData(this.props.notification.defi, "Defis")
         this.setState({equipeEmettrice :equipeEmettrice , equipeReceptrice : equipeReceptrice, defi : defi, defis_valide : defi.defis_valide, defis_refuse  : defi.defis_refuse, isLoading : false})
     }
+
+
+    // ===========================================================================
+    // ========================== NOTIFICATIONS ==================================
+    // ===========================================================================
+    
+    
+
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    async sendPushNotification(token , title,body ) {
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+    /**
+     * Fonction qui envoie une notification de refus à chaque capitaine de l'équipe
+     */
+    async sendNotifRefu() {
+        var titre = "Nouvelle notif"
+        var corps = "L'équipe " + this.state.equipeReceptrice.nom + " a refusé le défi lancé par ton équipe "+ this.state.equipeEmettrice.nom
+
+        for(var i = 0; i <this.state.equipeEmettrice.capitaines.length; i++) {
+            var cap = await Database.getDocumentData(this.state.equipeEmettrice.capitaines[i], "Joueurs")
+
+            
+            if(id != LocalUser.data.id) {
+                var tokens = [] 
+                if(cap.tokens != undefined) tokens = cap.tokens
+
+                for(var k = 0; k < tokens.length; k++) {
+                    console.log("==== ", tokens[k])
+                    await this.sendPushNotification(tokens[k], titre, corps)
+                }
+            }
+        }
+    }
+
+    /**
+     * Fonction qui envoie une notification de refus à chaque capitaine de l'équipe
+     */
+    async sendNotifAccepter() {
+        var titre = "Nouvelle notif"
+        var corps = "L'équipe " + this.state.equipeReceptrice.nom + " a accepté le défi lancé par ton équipe "+ this.state.equipeEmettrice.nom
+
+        for(var i = 0; i <this.state.equipeEmettrice.capitaines.length; i++) {
+            var cap = await Database.getDocumentData(this.state.equipeEmettrice.capitaines[i], "Joueurs")
+
+            
+            if(cap.id != LocalUser.data.id) {
+                var tokens = [] 
+                if(cap.tokens != undefined) tokens = cap.tokens
+                
+                for(var k = 0; k < tokens.length; k++) {
+                    console.log("==== ", tokens[k])
+                    await this.sendPushNotification(tokens[k], titre, corps)
+                }
+            }
+        }
+    }
+
+
+
+    async storeNotifInDb(type) {
+
+        for(var i = 0; i < this.state.equipeEmettrice.capitaines.length; i++) {
+            var id = this.state.equipeEmettrice.capitaines[i]
+            var db =Database.initialisation()
+            db.collection("Notifs").add({
+                equipeOrga : this.state.equipeEmettrice.id,
+                equipeDefiee : this.state.equipeReceptrice.id,
+                type : type,
+                time : new Date(),
+                dateParse : Date.parse(new Date()),
+                recepteur : id,
+                defi : this.state.defi.id
+
+            })
+        }
+    }
+
+   
+
+
+    // ===========================================================================
+
+
 
     /**
      * Pour se rendre dans la fiche du defi
@@ -118,8 +225,10 @@ class Notif_Defis_Contre_Equipe extends React.Component {
     /**
      * Fonction qui permet d'accepter le défi
      */
-    accepterDefis() {
+    async accepterDefis() {
 
+        await this.sendNotifAccepter()
+        await this.storeNotifInDb(Types_Notification.ACCEPTER_CONVOCATION_DEFI_ADVERSE)
         var db = Database.initialisation()
         if(this.state.defi != undefined) {
             this.setState({defis_valide : true, defis_refuse : false})
@@ -133,7 +242,10 @@ class Notif_Defis_Contre_Equipe extends React.Component {
     /**
      * Fonction qui permet de refuser le défi
      */
-    refuserDefis() {
+    async refuserDefis() {
+  
+        await this.sendNotifRefu()
+        await this.storeNotifInDb(Types_Notification.REFUSER_CONVOCATION_DEFI_ADVERSE)
 
         var db = Database.initialisation()
         if(this.state.defi != undefined) {
