@@ -107,7 +107,7 @@ class Defis_2_Equipes_Contre_Qui extends React.Component {
                 <TouchableOpacity 
                     style = {styles.bloc}
                     onPress = {() => {this.goToRechercherUneEquipe()}}>
-                   <Text style ={styles.txtTitre}>Rechercher une équipes</Text>
+                   <Text style ={styles.txtTitre}>Rechercher une équipe</Text>
                    <Text style  = {styles.txt}>Recherche une équipe et propose-lui un défi !</Text>
                </TouchableOpacity>
 

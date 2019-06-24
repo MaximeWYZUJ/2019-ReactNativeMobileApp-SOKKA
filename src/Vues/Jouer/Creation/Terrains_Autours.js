@@ -21,7 +21,7 @@ const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / hp('48%');
 const LATITUDE_DELTA = 0.0522;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
-const DEFAULT_PADDING = { top: 350, right: 200, bottom: 350, left: 200 };
+const DEFAULT_PADDING = { top: 750, right: 200, bottom: 750, left: 200 };
 const DISTANCE_MAX = 1500
 const LISTE = 'liste'
 const MAP = 'map'
@@ -262,6 +262,16 @@ class Terrains_Autours extends React.Component {
 			console.log(i)
 			markers.push(t)
 		}
+
+		var region = {
+			latitude: parseFloat(newListe[0].Latitude),
+			longitude: parseFloat(newListe[0].Longitude),
+			latitudeDelta: 0.0922,
+			longitudeDelta: 0.0421,
+		}
+		//console.log(this.state.terrains[index].Latitude)
+		//console.log(this.state.terrains[index].Longitude)
+		this.map.animateToRegion(region,1000)
 		this.setState({markers : markers, terrainFiltres : newListe,terrainSelectionne : markers[0]})
 	}
 
@@ -304,13 +314,20 @@ class Terrains_Autours extends React.Component {
 	fitAllMarkers(index) {
 
         //console.log("IN FIT ALL MARKERS")
-		/*let markers = [
-				{latitude : this.latitude, longitude: this.longitude}, 
-				{latitude : parseFloat(this.state.allTerrains[index].Latitude), longitude : parseFloat(this.state.allTerrains[index].Longitude)}
-            ]
+		let markers = [
+				//{latitude : this.latitude, longitude: this.longitude}, 
+				{latitude : parseFloat(this.state.terrainFiltres[index].Latitude), longitude : parseFloat(this.state.terrainFiltres[index].Longitude)}
+			]
+			var region = {
+				latitude: parseFloat(this.state.terrainFiltres[index].Latitude),
+				longitude: parseFloat(this.state.terrainFiltres[index].Longitude),
+				latitudeDelta: 0.0922,
+				longitudeDelta: 0.0421,
+			}
             //console.log(this.state.terrains[index].Latitude)
-            //console.log(this.state.terrains[index].Longitude)
-    	this.map.fitToCoordinates(markers, {edgePadding: DEFAULT_PADDING,animated: true,});*/
+			//console.log(this.state.terrains[index].Longitude)
+			this.map.animateToRegion(region,1000)
+    //	this.map.fitToCoordinates(markers, {edgePadding: DEFAULT_PADDING,animated: true,});
 	}
 	  
 

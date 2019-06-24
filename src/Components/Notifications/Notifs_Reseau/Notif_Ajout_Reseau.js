@@ -38,6 +38,18 @@ class Notif_Ajout_Reseau extends React.Component {
     }
 
 
+    /**
+     * Fonction qui va permettre de se rendre sur le profil du joueur qui nous a ajouté
+     * à son réseau
+     */
+    async goToProfilJoueur() {
+
+        var equipes = await Database.getArrayDocumentData(this.state.emetteur.equipes, "Equipes")
+        this.props.navigation.push("ProfilJoueur", {id: this.state.emetteur.id, joueur : this.state.emetteur, equipes : equipes})
+
+    }
+
+
 
     renderPseudoEmetteur() {
         if(this.state.emetteur == undefined) {
@@ -86,7 +98,7 @@ class Notif_Ajout_Reseau extends React.Component {
          
                         
                         <TouchableOpacity
-                            //onPress = {() => this.goToProfileEquipe()}
+                            onPress = {() => this.goToProfilJoueur()}
                             >
                             <Text style = {styles.txtBtn}>Consulter</Text>
                         </TouchableOpacity>
@@ -95,6 +107,13 @@ class Notif_Ajout_Reseau extends React.Component {
             )
         }
     
+    }
+}
+
+
+const styles = {
+    txtBtn : {
+        fontWeight : "bold"
     }
 }
 

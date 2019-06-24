@@ -174,10 +174,14 @@ export default class Recapitulatif_Partie extends React.Component {
 
 
     goToFichePartie(id,date) {
-        
+        msg = "Les joueurs peuvent s'inscrire"
+        if(this.nbJoueursRecherche == 0) {
+            msg = "Ta partie a bien été créée et publiée. Les joueurs te confirmeront leur participation"
+        }
+
         Alert.alert(
             'Ta partie a bien été créée et publiée',
-            "Les joueurs peuvent s'inscrire",
+            msg,
             [
               {text: 'Ok',  onPress: () => {
                 this.storeNotificationInDb(id)

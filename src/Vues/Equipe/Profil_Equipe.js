@@ -319,6 +319,69 @@ export default class Profil_Equipe extends React.Component {
         this.setState(fullPicture)
     }
 
+       
+    // ==============================================================================
+    // ============================ NOTIFICATIONS ===================================
+    // ==============================================================================
+    
+    
+
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    async sendPushNotification(token , title,body ) {
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+    /**
+     * Fonction qui va envoyer la notification d'ajout de réseau au joueur concerné
+     */
+    async sendNotifAjoutReseau() {
+        var titre = "Nouvelle notif"
+        var corps = LocalUser.data.pseudo + " t'as ajouté à son réseau"
+
+        var tokens = []
+        if(this.joueur.tokens != undefined) tokens = this.joueur.tokens
+        for(var i = 0; i < this.joueur.tokens.length; i++) {
+           await  this.sendPushNotification(tokens[i],titre,corps)
+        }
+    }
+
+    /**
+     * Fonction qui va envoyer la notification puis la  sauvegarder
+     * dans la base de données.
+     */
+    async storeNotifAjoutInDb() {
+        await this.sendNotifAjoutReseau()
+        var db = Database.initialisation()
+        db.collection("Notifs").add({
+            emetteur : LocalUser.data.id,
+            recepteur : this.joueur.id,
+            type : Types_Notification.AJOUT_RESEAU,
+            time : new Date(),
+            dateParse : Date.parse(new Date())
+        })
+    }
+
 
 
     /*******************************************************************************

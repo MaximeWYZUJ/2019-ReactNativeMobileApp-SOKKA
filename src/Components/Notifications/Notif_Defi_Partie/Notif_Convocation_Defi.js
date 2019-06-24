@@ -544,22 +544,24 @@ class Notif_Convocation_Defi extends React.Component {
 
 
     renderBtnConfirmer() {
-        return(
-            <View style = {{flexDirection : "row"}}>
-                <Text>Confirmer : </Text>
-                <TouchableOpacity
-                    onPress = { () => this.handleConfirmerOui()}>
-                    <Text style = {styles.txtBtn}>Oui</Text>
-                </TouchableOpacity>
+        if(new  Date(this.state.defi.jour.seconds *1000) > new Date) {
+            return(
+                <View style = {{flexDirection : "row"}}>
+                    <Text>Confirmer : </Text>
+                    <TouchableOpacity
+                        onPress = { () => this.handleConfirmerOui()}>
+                        <Text style = {styles.txtBtn}>Oui</Text>
+                    </TouchableOpacity>
 
-                <Text>/</Text>
+                    <Text>/</Text>
 
-                <TouchableOpacity
-                    onPress = {() => this.handleConfirmerNon()}>
-                    <Text style = {styles.txtBtn}>Non</Text>
-                </TouchableOpacity>
-            </View>
-        )
+                    <TouchableOpacity
+                        onPress = {() => this.handleConfirmerNon()}>
+                        <Text style = {styles.txtBtn}>Non</Text>
+                    </TouchableOpacity>
+                </View>
+            )
+        }
 
     }
 
