@@ -9,9 +9,9 @@ import RechercheDefaut from '../../Vues/Rechercher/RechercheDefaut'
 
 const RechercherTabNavigator = createAppContainer(createMaterialTopTabNavigator({
 
-    "Autour de moi" : {screen: RechercheAutour},
-    "Favoris" : {screen: RechercheFavoris},
-    "Rechercher" : {screen: RechercheDefaut}
+    "OngletRecherche_Autour" : {screen: RechercheAutour},
+    "OngletRecherche_Favoris" : {screen: RechercheFavoris},
+    "OngletRecherche_Defaut" : {screen: RechercheDefaut}
 
 }, {
     tabBarComponent: TabBarTop,

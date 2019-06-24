@@ -159,6 +159,7 @@ export default class Profil_Equipe extends React.Component {
                 nom : doc.nom,
                 uriEtoile : 'app/res/' + doc.score + '_etoiles.png',
                 isCaptain : doc.capitaines.some(elmt => elmt === LocalUser.data.id),
+                isaMember : doc.joueurs.some(elmt => elmt === LocalUser.data.id),
                 isLoadingJoueurs : true,
                 isLoadingDefis : true,
                 stylePhoto : {
@@ -367,8 +368,8 @@ export default class Profil_Equipe extends React.Component {
     * de si le joueur est capitaine ou non
     */
     displayActionEquipe() {
-        /* Cas où le joueur est un membre de l'équipe. */
-        if ( ! this.state.isaMember) {
+        /* Cas où le joueur n'est pas un membre de l'équipe. */
+        if (!this.state.isaMember) {
             return (
                 <View style = {styles.main_container_action}>
                     <TouchableOpacity>
@@ -384,7 +385,7 @@ export default class Profil_Equipe extends React.Component {
                 </View>
             );
 
-        /* Cas où ce n'est pas un membre. */
+        /* Cas où c'est un membre. */
         } else {
             if(this.state.isCaptain) {
                 let eqData = this.state.equipeData;

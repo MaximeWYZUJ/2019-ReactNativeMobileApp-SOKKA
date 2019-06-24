@@ -35,6 +35,7 @@ class ProfilJoueurMonReseau extends React.Component {
             <View style={styles.main_container}>
                 <SearchList
                     title={this._get_header_title()}
+                    type={"Joueurs"}
                     list={<FlatList
                         data={this.reseau}
                         keyExtractor={(item) => item.id.toString()}

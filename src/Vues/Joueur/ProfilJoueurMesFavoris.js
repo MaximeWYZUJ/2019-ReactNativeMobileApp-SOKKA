@@ -1,9 +1,10 @@
 import React from 'react'
-import {Image, StyleSheet, ScrollView, TouchableOpacity, FlatList, Text} from 'react-native'
+import {View, Image, StyleSheet, ScrollView, TouchableOpacity, FlatList, Text} from 'react-native'
 import JoueurIcon from "../../Components/ProfilJoueur/JoueurIcon.js"
 import ItemTerrain from '../../Components/Terrain/ItemTerrain.js'
 import Database from '../../Data/Database'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import RF from 'react-native-responsive-fontsize';
 
 
 class ProfilJoueurMesFavoris extends React.Component {
@@ -155,28 +156,52 @@ class ProfilJoueurMesFavoris extends React.Component {
         }
     }
 
+
+    renderBtnPlus(route, navOption) {
+        if(this.monProfil) {
+            return(
+                <TouchableOpacity
+                    style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
+                    onPress={() => this.props.navigation.navigate(route, navOption)}
+                    >
+                    <Text style={styles.header}>+</Text>
+                </TouchableOpacity>
+            )
+        }
+    }
+
+
     render() {
         return (
             <ScrollView>
-                <TouchableOpacity
-                    style={styles.header_container}
-                    onPress={() => this.props.navigation.navigate('ProfilJoueurMonReseauScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
-                    {this._disp_header_reseau()}
-                </TouchableOpacity>
+                <View style={{flex: 1, flexDirection: 'row'}}>
+                    <TouchableOpacity
+                        style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}
+                        onPress={() => this.props.navigation.navigate('ProfilJoueurMonReseauScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
+                        {this._disp_header_reseau()}
+                    </TouchableOpacity>
+                    {this.renderBtnPlus("OngletRecherche_Defaut", {type: "Joueurs"})}
+                </View>
                 {this._dispJoueursFlatlist(this.state.reseau)}
 
-                <TouchableOpacity
-                    style={styles.header_container}
-                    onPress={() => this.props.navigation.navigate('ProfilJoueurMesEquipesFavScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
-                    {this._disp_header_equipes()}
-                </TouchableOpacity>
+                <View style={{flex: 1, flexDirection: 'row'}}>
+                    <TouchableOpacity
+                        style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}
+                        onPress={() => this.props.navigation.navigate('ProfilJoueurMesEquipesFavScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
+                        {this._disp_header_equipes()}
+                    </TouchableOpacity>
+                    {this.renderBtnPlus("OngletRecherche_Defaut", {type: "Equipes"})}
+                </View>
                 {this._dispEquipesFlatlist(this.state.equipesFav)}
 
-                <TouchableOpacity
-                    style={styles.header_container}
-                    onPress={() => this.props.navigation.navigate('ProfilJoueurMesTerrainsFavScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
-                    {this._disp_header_terrains()}
-                </TouchableOpacity>
+                <View style={{flex: 1, flexDirection: 'row'}}>
+                    <TouchableOpacity
+                        style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}
+                        onPress={() => this.props.navigation.navigate('ProfilJoueurMesTerrainsFavScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
+                        {this._disp_header_terrains()}
+                    </TouchableOpacity>
+                    {this.renderBtnPlus("OngletRecherche_Defaut", {type: "Terrains"})}
+                </View>
                 {this._dispTerrainsFlatlist(this.state.terrainsFav)}
             </ScrollView>
         );
@@ -192,20 +217,26 @@ const styles = StyleSheet.create({
     category_container: {
         flex: 1
     },
+
     header_container: {
-        flex: 1,
+        //flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        marginVertical: 10,
-        marginHorizontal: 10,
-        backgroundColor: '#C0C0C0'
+        marginBottom : hp('2%'),
+        //width : wp('88%'),
+        marginLeft : wp('5%'),
+        marginRight : wp('5%'),
+        marginTop : hp('3%'),
+        borderRadius : 15,
+        backgroundColor:'#52C3F7',
     },
+
     header: {
-        color: 'black',
-        fontSize: 20,
+        color: 'white',
+        fontSize: RF(2.7),
         fontWeight: 'bold',
         paddingVertical: 4
-    }
+    },
 })
 
 export default ProfilJoueurMesFavoris

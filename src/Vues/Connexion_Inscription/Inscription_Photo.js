@@ -1,9 +1,9 @@
 import React from 'react'
 
-import {View, Text,Image,TouchableOpacity,Alert} from 'react-native'
+import {View, Text, Image, TouchableOpacity, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
-import { ImagePicker, Permissions } from 'expo';
+import { Camera, ImagePicker, Permissions } from 'expo';
 import Database from '../../Data/Database'
 import NormalizeString from '../../Helpers/NormalizeString.js';
 import * as firebase from 'firebase';
@@ -50,7 +50,9 @@ export default class Inscription_Photo extends React.Component {
             naissance : naissance,
             age : age,
             zone : zone,
-            id : "erreur"
+            id : "erreur",
+
+            usingCamera: false
         }
     }
 
@@ -62,7 +64,7 @@ export default class Inscription_Photo extends React.Component {
      * Fonction qui permet d'ouvrir la galerie et de permettre à l'utilisateur
      * de choisir une photo de profil
      */
-    _pickImage = async () => {
+    pickImageGallerie = async () => {
 
         
         /* Obtenir les permissions. */
@@ -84,6 +86,28 @@ export default class Inscription_Photo extends React.Component {
         }
     };
 
+
+    /**
+     * Fonction qui permet de prendre une photo depuis la camera
+     */
+    pickImageCamera = async () => {
+        /* Obtenir les permissions. */
+        const { status } = await Permissions.askAsync(Permissions.CAMERA);
+
+        if (status === "granted") {
+            this.setState({usingCamera: true})
+        }
+    };
+
+    snapPhoto = async () => {
+        let photo = await this.camera.takePictureAsync();
+        this.setState({
+            photo: {uri: photo.uri},
+            txt_btn: 'SUIVANT',
+            image_changed: true,
+            usingCamera: false
+        })
+    }
    
 
     
@@ -310,7 +334,22 @@ export default class Inscription_Photo extends React.Component {
     
                         <TouchableOpacity 
                             style = {{marginBottom :hp('3%'), marginTop : hp('3%'), alignItems : 'center'}}
-                            onPress={this._pickImage}>
+                            onPress={
+                                () => Alert.alert(
+                                '',
+                                "Comment veux-tu prendre la photo ?",
+                                [
+                                    {
+                                        text: 'Caméra',
+                                        onPress: () => this.pickImageCamera(),
+                                    },
+                                    {
+                                        text: 'Gallerie',
+                                        onPress: () => this.pickImageGallerie(),
+                                        style: 'cancel',
+                                    },
+                                ],
+                                )}>
                             <Image
                                 style = {{width : wp('30%'), height : wp('30%'), alignSelf : 'center'}}
                                 source={this.state.photo}/>
@@ -362,11 +401,50 @@ export default class Inscription_Photo extends React.Component {
     }
 
     render() {
-        return(
-            <View style ={[styles.main_container ]}>
-            {this.diaplayRender()}
-            </View>
-        )
+        if (this.state.usingCamera) {
+            return (
+                <View style={{ flex: 1 }}>
+                    <Camera style={{ flex: 1 }} type={this.state.type} ref={ref => {this.camera = ref}}>
+                        <View
+                        style={{
+                            flex: 1,
+                            backgroundColor: 'transparent',
+                            flexDirection: 'row',
+                        }}>
+                            <TouchableOpacity
+                                style={{
+                                flex: 1,
+                                alignSelf: 'flex-end',
+                                alignItems: 'center',
+                                justifyContent: 'space-around'
+                                }}
+                                onPress={() => {
+                                    this.setState({
+                                        type: this.state.type === Camera.Constants.Type.back ? Camera.Constants.Type.front : Camera.Constants.Type.back,
+                                    });
+                                }}>
+                                <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> FLIP </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={{
+                                flex: 1,
+                                alignSelf: 'flex-end',
+                                alignItems: 'center',
+                                }}
+                                onPress={this.snapPhoto}>
+                                <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> SNAP </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Camera>
+                </View>
+            )
+        } else {
+            return(
+                <View style ={[styles.main_container ]}>
+                {this.diaplayRender()}
+                </View>
+            )
+        }
     }
 }
 
@@ -434,5 +512,27 @@ const styles = {
     txt_bas : {
         alignSelf : 'center',
         fontSize : RF(3)
+    },
+
+    container: {
+        flex: 1,
+        flexDirection: 'column',
+        backgroundColor: 'black',
+    },
+    
+    preview: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+    },
+
+    capture: {
+        flex: 0,
+        backgroundColor: '#fff',
+        borderRadius: 5,
+        padding: 15,
+        paddingHorizontal: 20,
+        alignSelf: 'center',
+        margin: 20,
     }
 }

@@ -19,8 +19,8 @@ export default class Calendrier_Joueur extends React.Component {
 
     constructor(props) {
         super(props)
-        this.monId = LocalUser.data.id
-        this.monPseudo = LocalUser.data.pseudo
+        this.monId = this.props.navigation.getParam('id', LocalUser.data.id);
+        this.monPseudo = this.props.navigation.getParam('pseudo', LocalUser.data.pseudo);
         this.state  = {
             defisPasses : [],
             defisaVenir : [],

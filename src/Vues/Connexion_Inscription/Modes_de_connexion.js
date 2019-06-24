@@ -205,7 +205,6 @@ export default class Modes_de_connexion extends React.Component {
                                     onChangeText ={(text) => this.mailTextInputChanged(text)} 
 
                                 />
-                            
                             </View>
                         
                             {/* Champs mot de passe */}
@@ -218,8 +217,6 @@ export default class Modes_de_connexion extends React.Component {
                                     onChangeText ={(text) => this.passwordTextInputChanged(text)} 
                                     onSubmitEditing={() => this.checkConnexion()}
                                 />
-                            
-                            
                             </View>
                         
                             <TouchableOpacity style = {styles.btn_Connexion}
