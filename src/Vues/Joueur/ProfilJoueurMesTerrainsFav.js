@@ -35,6 +35,7 @@ class ProfilJoueurMesTerrainsFav extends React.Component {
             <View style={styles.main_container}>
                 <SearchList
                     title={this._get_header_title()}
+                    type={"Terrains"}
                     list={<FlatList
                         data={this.terrains}
                         keyExtractor={(item) => item.id}

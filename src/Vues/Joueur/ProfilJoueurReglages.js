@@ -1,6 +1,7 @@
 import React from 'react'
-import {Picker, TouchableOpacity, ScrollView, View, Text, StyleSheet, Image, Button, TextInput, ListView } from 'react-native'
+import {Picker, TouchableOpacity, ScrollView, View, Text, StyleSheet, Image, Button, TextInput, ListView, Alert } from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import { Camera, ImagePicker, Permissions } from 'expo';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
 import DatePicker from 'react-native-datepicker'
@@ -43,7 +44,11 @@ class ProfilJoueurReglages extends React.Component {
             age : this.joueur.age,
             searchedVilles: [],
             ville: "",
-            scoreDisp: this.score
+            scoreDisp: this.score,
+
+            usingCamera: false,
+            image_changed: false,
+            photo: {uri: this.joueur.photo}
         }
     }
 
@@ -52,6 +57,88 @@ class ProfilJoueurReglages extends React.Component {
             title: navigation.getParam('header', 'Réglages')
         }
     }
+
+
+    //***************************************************************************
+    //********************** CHOIX DE LA PHOTO DE PROFIL ************************
+    //***************************************************************************
+
+    /**
+     * Fonction qui permet d'ouvrir la galerie et de permettre à l'utilisateur
+     * de choisir une photo de profil
+     */
+    pickImageGallerie = async () => {
+
+        
+        /* Obtenir les permissions. */
+        const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+
+        if (status === "granted") {
+            /* Ouvrir la galerie. */
+            let result = await ImagePicker.launchImageLibraryAsync({
+            });
+
+            /* Si l'utilisateur à choisis une image. */
+            if (!result.cancelled) {
+                this.setState({ 
+                photo: {uri : result.uri },
+                image_changed : true
+                });
+            }
+        }
+    };
+
+
+    /**
+     * Fonction qui permet de prendre une photo depuis la camera
+     */
+    pickImageCamera = async () => {
+        /* Obtenir les permissions. */
+        const { status } = await Permissions.askAsync(Permissions.CAMERA);
+
+        if (status === "granted") {
+            this.setState({usingCamera: true})
+        }
+    };
+
+    snapPhoto = async () => {
+        let photo = await this.camera.takePictureAsync();
+        this.setState({
+            photo: {uri: photo.uri},
+            image_changed: true,
+            usingCamera: false
+        })
+    }
+
+    /**
+     * Fonction qui va permettre d'uploader la photo de profil dans le storage
+     * firebase.
+     * 
+     * uri : uri de la photo de profil
+     * imageName : Nom à donner au fichier sur le storage
+     */
+    uploadImage = async (uri, imageName) => {
+        const blob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+              resolve(xhr.response);
+            };
+            xhr.onerror = function() {
+              reject(new TypeError('Network request failed'));
+            };
+            xhr.responseType = 'blob';
+            xhr.open('GET', uri, true);
+            xhr.send(null);
+        });
+        var ref = firebase.storage().ref().child("Photos_profil_Joueurs/test/" + imageName);
+        ref.put(blob);
+
+        return ref.getDownloadURL();
+    }
+
+
+    // ===================================================================
+    // ===================================================================
 
 
     calculAge(naissance) {
@@ -130,7 +217,7 @@ class ProfilJoueurReglages extends React.Component {
     };
 
 
-    _validate() {
+    async _validate() {
         console.log(this.ville);
         if (this.naissance) {
             var naissanceTimestamp = firebase.firestore.Timestamp.fromMillis(Date.parse(this.naissance));
@@ -158,7 +245,12 @@ class ProfilJoueurReglages extends React.Component {
         if (this.mail) {
             this.joueur.mail = this.mail
         }
-        console.log(this.joueur.ville)
+
+        if (this.state.image_changed) {
+            newPhoto = await this.uploadImage(this.state.photo.uri, this.joueur.id);
+            this.joueur.photo = newPhoto;
+        }
+
         /* Initialisation de la base de données. */
         var db = Database.initialisation()
     
@@ -173,7 +265,8 @@ class ProfilJoueurReglages extends React.Component {
             zone : this.joueur.zone,
             pseudo: this.joueur.pseudo,
             queryPseudo: this.joueur.queryPseudo,
-            ville: this.joueur.ville
+            ville: this.joueur.ville,
+            photo: this.joueur.photo
         },
         {
             merge: true
@@ -187,127 +280,174 @@ class ProfilJoueurReglages extends React.Component {
     }
 
     render() {
+        if (this.state.usingCamera) {
+            return (
+                <View style={{ flex: 1 }}>
+                    <Camera style={{ flex: 1 }} type={this.state.type} ref={ref => {this.camera = ref}}>
+                        <View
+                        style={{
+                            flex: 1,
+                            backgroundColor: 'transparent',
+                            flexDirection: 'row',
+                        }}>
+                            <TouchableOpacity
+                                style={{
+                                flex: 1,
+                                alignSelf: 'flex-end',
+                                alignItems: 'center',
+                                justifyContent: 'space-around'
+                                }}
+                                onPress={() => {
+                                    this.setState({
+                                        type: this.state.type === Camera.Constants.Type.back ? Camera.Constants.Type.front : Camera.Constants.Type.back,
+                                    });
+                                }}>
+                                <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> FLIP </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={{
+                                flex: 1,
+                                alignSelf: 'flex-end',
+                                alignItems: 'center',
+                                }}
+                                onPress={this.snapPhoto}>
+                                <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> SNAP </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Camera>
+                </View>
+            )
         
-        return (
-            <ScrollView style={styles.main_container}>
-                <View style={{alignItems: 'center'}}>
-                    <Image
-                        style={{width: 40, height: 40, marginHorizontal: 10, marginBottom: 20}}
-                        source={require('app/res/icon_reglage.png')}
-                        />
-                </View>
-                <View style={styles.infos_perso}>
-                    <Image style={styles.photo} source={{uri : this.joueur.photo}}/>
-                    <View style={styles.champ}>
-                        <Text>Date de naissance :  </Text>
-                        <DatePicker
-                            style={{width: wp('45%'), alignItems : 'center'}}
-                            date= {this.state.naissanceDisp}
-                            mode="date"
-                            placeholder="select date"
-                            format="DD-MM-YYYY"
-                            minDate="01-01-1900"
-                            maxDate={this.todayDisp}
-                            confirmBtnText="Confirm"
-                            cancelBtnText="Cancel"
-                            customStyles={{
-                            dateInput: {
-                                marginLeft: 0,
-                                borderWidth : 0
-                            }
-                            }}
-                            onDateChange={(date) => {
-                                s = date.split('-');
-                                s2 = s[2]+'-'+s[1]+'-'+s[0];
-                                this.setState({
-                                    naissanceDisp: date,
-                                    naissance: s2
-                                })
-                                this.naissance = s2; this.calculAge(s2)
-                            }}
-                        />
-                    </View>
-                    <View style={styles.champ}>
-                        <Text>Age :  {this.state.age} ans</Text>
-                    </View>
-                    <View style={styles.champ}>
-                        <Text>Ville :  </Text>
-                        <TextInput 
-                            placeholder = {this.joueur.ville}
-                            style = {styles.txt_input}
-                            placeholderTextColor ='#CECECE'
-                            onChangeText ={(text) => this.searchedVillesFunction(text)} 
-                            value = {this.state.ville}
-                        />
-                        <ListView
-                            dataSource={ds.cloneWithRows(this.state.searchedVilles)}
-                            renderRow={this.renderVille}
-                        />
-                    </View>
-                    {/*<View style={styles.champ}>
-                        <Text>Zone de jeu :  </Text>
-                        <TextInput
-                            style={{flex: 1, borderColor: '#C0C0C0'}}
-                            onChangeText={(t) => this.zone=t}
-                            placeholder={this.joueur.zone}
-                            />
-                    </View>*/}
-                    <View style={styles.champ}>
-                        <Text>AKA :  </Text>
-                        <TextInput
-                            style={{flex: 1, borderColor: '#C0C0C0'}}
-                            onChangeText={(t) => this.pseudo=t}
-                            placeholder={this.joueur.pseudo}
+        } else {
+            return (
+                <ScrollView style={styles.main_container}>
+                    <View style={{alignItems: 'center'}}>
+                        <Image
+                            style={{width: 40, height: 40, marginHorizontal: 10, marginBottom: 20}}
+                            source={require('app/res/icon_reglage.png')}
                             />
                     </View>
-                    <View style={styles.champ}>
-                        <Text>Niveau :  </Text>
-                        <Picker
-                            selectedValue={this.state.scoreDisp}
-                            style={{width: wp('60%')}}
-                            onValueChange={(itemValue, itemIndex) => {this.score = itemValue; this.setState({scoreDisp: itemValue})}}
-                            >
-                            <Picker.Item label={"0 étoile"} key={0} value={0}/>
-                            <Picker.Item label={"1 étoile"} key={1} value={1}/>
-                            <Picker.Item label={"2 étoiles"} key={2} value={2}/>
-                            <Picker.Item label={"3 étoiles"} key={3} value={3}/>
-                            <Picker.Item label={"4 étoiles"} key={4} value={4}/>
-                            <Picker.Item label={"5 étoiles"} key={5} value={5}/>
-                        </Picker>
-                    </View>
-                </View>
-                
-                <View style={styles.coordonnees}>
-                    <View style={{flex: 1, alignItems: 'center'}}>
-                        <Text style={{fontWeight: 'bold', fontSize: 18}}>Mes coordonnées</Text>
-                    </View>
-                    <View style={styles.champ}>
-                        <Text>Contact :  </Text>
-                        <TextInput
-                            style={{flex: 1, borderColor: '#C0C0C0'}}
-                            onChangeText={(t) => this.telephone=t}
-                            placeholder={this.joueur.telephone}
+                    <View style={styles.infos_perso}>
+                        <TouchableOpacity onPress={() => Alert.alert(
+                                '',
+                                "Comment veux-tu prendre la photo ?",
+                                [
+                                    {
+                                        text: 'Caméra',
+                                        onPress: () => this.pickImageCamera(),
+                                    },
+                                    {
+                                        text: 'Gallerie',
+                                        onPress: () => this.pickImageGallerie(),
+                                        style: 'cancel',
+                                    },
+                                ],
+                                )}>
+                            <Image style={styles.photo} source={{uri : this.state.photo.uri}}/>
+                        </TouchableOpacity>
+                        <View style={styles.champ}>
+                            <Text>Date de naissance :  </Text>
+                            <DatePicker
+                                style={{width: wp('45%'), alignItems : 'center'}}
+                                date= {this.state.naissanceDisp}
+                                mode="date"
+                                placeholder="choisis une date"
+                                format="DD-MM-YYYY"
+                                minDate="01-01-1900"
+                                maxDate={this.todayDisp}
+                                confirmBtnText="Confirmer"
+                                cancelBtnText="Annuler"
+                                customStyles={{
+                                dateInput: {
+                                    marginLeft: 0,
+                                    borderWidth : 0
+                                }
+                                }}
+                                onDateChange={(date) => {
+                                    s = date.split('-');
+                                    s2 = s[2]+'-'+s[1]+'-'+s[0];
+                                    this.setState({
+                                        naissanceDisp: date,
+                                        naissance: s2
+                                    })
+                                    this.naissance = s2; this.calculAge(s2)
+                                }}
                             />
-                    </View>
-                    <View style={styles.champ}>
-                        <Text>Mail :  </Text>
-                        <TextInput
-                            style={{flex: 1, borderColor: '#C0C0C0'}}
-                            onChangeText={(t) => this.mail=t}
-                            placeholder={this.joueur.mail}
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>Age :  {this.state.age} ans</Text>
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>Ville :  </Text>
+                            <TextInput 
+                                placeholder = {this.joueur.ville}
+                                style = {styles.txt_input}
+                                placeholderTextColor ='#CECECE'
+                                onChangeText ={(text) => this.searchedVillesFunction(text)} 
+                                value = {this.state.ville}
                             />
+                            <ListView
+                                dataSource={ds.cloneWithRows(this.state.searchedVilles)}
+                                renderRow={this.renderVille}
+                            />
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>AKA :  </Text>
+                            <TextInput
+                                style={{flex: 1, borderColor: '#C0C0C0'}}
+                                onChangeText={(t) => this.pseudo=t}
+                                placeholder={this.joueur.pseudo}
+                                />
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>Niveau :  </Text>
+                            <Picker
+                                selectedValue={this.state.scoreDisp}
+                                style={{width: wp('60%')}}
+                                onValueChange={(itemValue, itemIndex) => {this.score = itemValue; this.setState({scoreDisp: itemValue})}}
+                                >
+                                <Picker.Item label={"0 étoile"} key={0} value={0}/>
+                                <Picker.Item label={"1 étoile"} key={1} value={1}/>
+                                <Picker.Item label={"2 étoiles"} key={2} value={2}/>
+                                <Picker.Item label={"3 étoiles"} key={3} value={3}/>
+                                <Picker.Item label={"4 étoiles"} key={4} value={4}/>
+                                <Picker.Item label={"5 étoiles"} key={5} value={5}/>
+                            </Picker>
+                        </View>
                     </View>
-                </View>
+                    
+                    <View style={styles.coordonnees}>
+                        <View style={{flex: 1, alignItems: 'center'}}>
+                            <Text style={{fontWeight: 'bold', fontSize: 18}}>Mes coordonnées</Text>
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>Contact :  </Text>
+                            <TextInput
+                                style={{flex: 1, borderColor: '#C0C0C0'}}
+                                onChangeText={(t) => this.telephone=t}
+                                placeholder={this.joueur.telephone}
+                                />
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>Mail :  </Text>
+                            <TextInput
+                                style={{flex: 1, borderColor: '#C0C0C0'}}
+                                onChangeText={(t) => this.mail=t}
+                                placeholder={this.joueur.mail}
+                                />
+                        </View>
+                    </View>
 
-                <View style={styles.validate}>
-                    <Button title="Valider" onPress={() => this._validate()}/>
-                </View>
+                    <View style={styles.validate}>
+                        <Button title="Valider" onPress={() => this._validate()}/>
+                    </View>
 
-                {/* Blank space pour pouvoir scroller assez et eviter d'etre masqué par le clavier */}
-                <View style={{height: hp('50%'), width: wp('100%')}}>
-                </View>
-            </ScrollView>
-        );
+                    {/* Blank space pour pouvoir scroller assez et eviter d'etre masqué par le clavier */}
+                    <View style={{height: hp('50%'), width: wp('100%')}}>
+                    </View>
+                </ScrollView>
+            );
+        }
     }
 }
 

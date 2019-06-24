@@ -14,6 +14,7 @@ const TabAjouterJoueursEquipe = createAppContainer( createMaterialTopTabNavigato
     "Rechercher": { screen: Joueurs_Reseau },
 
   }, {
+    initialRouteName: "Mon reseau",
     tabBarComponent: TabBarTop,
     tabBarPosition: 'top',
     tabBarOptions: {

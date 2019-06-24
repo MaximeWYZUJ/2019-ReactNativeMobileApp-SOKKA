@@ -1,5 +1,9 @@
 import React from 'react'
 import { View, StyleSheet, Image, Text, TextInput, TouchableOpacity } from 'react-native'
+import RF from 'react-native-responsive-fontsize';
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import { withNavigation } from 'react-navigation'
+
 
 class SearchList extends React.Component {
 
@@ -8,7 +12,21 @@ class SearchList extends React.Component {
         this.state = {
             text: ''
         }
+        console.log(this.props.type)
     }
+
+
+    renderBtnPlus() {
+            return(
+                <TouchableOpacity
+                    style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
+                    onPress={() => this.props.navigation.navigate("OngletRecherche_Defaut", {type: this.props.type})}
+                    >
+                    <Text style={styles.header}>+</Text>
+                </TouchableOpacity>
+            )
+    }
+
 
     render() {
         const list = this.props.list
@@ -32,7 +50,15 @@ class SearchList extends React.Component {
 
                 {/* Liste des joueurs de mon reseau */}
                 <View style={{flex: 7}}>
-                    <Text style={styles.header}>{title}</Text>
+                    {/* HEADER */}
+                    <View style={{flex: 1, flexDirection: 'row'}}>
+                        <View style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}>
+                            <Text style={styles.header}>{title}</Text>
+                        </View>
+                        {this.renderBtnPlus()}
+                    </View>
+
+                    {/* LISTE */}
                     {list}
                 </View>
             </View>
@@ -57,14 +83,26 @@ const styles = StyleSheet.create({
         width: 30,
         height: 30,
     },
+    header_container: {
+        //flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom : hp('2%'),
+        //width : wp('88%'),
+        height: hp('10%'),
+        marginLeft : wp('5%'),
+        marginRight : wp('5%'),
+        marginTop : hp('3%'),
+        borderRadius : 15,
+        backgroundColor:'#52C3F7',
+    },
+
     header: {
-        color: 'black',
-        backgroundColor: '#C0C0C0',
-        fontSize: 20,
+        color: 'white',
+        fontSize: RF(2.7),
         fontWeight: 'bold',
-        paddingVertical: 4,
-        textAlign: 'center'
-    }
+        paddingVertical: 4
+    },
 })
 
-export default SearchList
+export default withNavigation(SearchList)

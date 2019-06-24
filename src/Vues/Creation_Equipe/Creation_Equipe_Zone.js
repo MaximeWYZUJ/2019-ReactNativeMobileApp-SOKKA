@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {View, Text,Image, Animated,TouchableOpacity, TextInput,ListView, ScrollView} from 'react-native'
+import {KeyboardAvoidingView, View, Text,Image, Animated,TouchableOpacity, TextInput,ListView, ScrollView} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
@@ -199,7 +199,7 @@ export default class Creation_Equipe_Zone extends React.Component {
                 </View>*/}
 
                  {/* View contenant le champs pour la ville */}
-                 <View style = {{flexDirection : 'row', marginTop : hp('3%'), alignItems : 'center', alignContent : 'center'}}>
+                 <KeyboardAvoidingView style = {{flexDirection : 'row', marginTop : hp('3%'), alignItems : 'center', alignContent : 'center'}}>
                     <Animated.View style={[this.champsAnimation.getLayout()]}> 
                         <TextInput
                             style = {styles.input}
@@ -214,7 +214,7 @@ export default class Creation_Equipe_Zone extends React.Component {
                         
                         
                     </Animated.View>
-                </View>
+                </KeyboardAvoidingView>
 
 
 

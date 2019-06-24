@@ -32,6 +32,33 @@ export default class RechercheFavoris extends React.Component {
     }
 
 
+    static navigationOptions = ({ navigation }) => {
+        return {
+            title: "Favoris"
+        }
+    }
+
+
+    // === Manipulation du lifecycle entre les onglets ===
+    componentDidMount() {
+        this.willBlurSubscription = this.props.navigation.addListener('willBlur', this.willBlurAction);
+    }
+
+    componentWillUnmount() {
+        this.willBlurSubscription.remove();
+    }
+
+    willBlurAction = () => {
+        this.setState({
+            dataFav: this.allFav,
+            displayFiltres: false,
+            filtres: null
+        })
+    }
+
+    // ====================================================
+
+
     renderItem(item) {
         switch(this.type) {
             case "Joueurs":

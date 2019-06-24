@@ -7,7 +7,7 @@ import RechercherTabNavigator from './RechercherTabNavigator'
 
 const RechercherStackNavigator = createStackNavigator({
 
-    Accueil : {
+    AccueilRechercher : {
         screen : AccueilRechercher
     },
 

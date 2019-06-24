@@ -3,6 +3,8 @@ import React from 'react'
 import { View, StyleSheet, FlatList } from 'react-native'
 import SearchList from '../../Components/SearchList.js'
 import Item_Equipe from '../../Components/Profil_Equipe/Item_Equipe.js'
+import LocalUser from '../../Data/LocalUser.json'
+
 
 class ProfilJoueurMesEquipesFav extends React.Component {
 
@@ -40,6 +42,7 @@ class ProfilJoueurMesEquipesFav extends React.Component {
             <View style={styles.main_container}>
                 <SearchList
                     title={this._get_header_title()}
+                    type={"Equipes"}
                     list={<FlatList
                         data={this.equipesFav}
                         keyExtractor={(item) => item.id.toString()}

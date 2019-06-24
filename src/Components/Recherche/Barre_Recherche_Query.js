@@ -7,6 +7,7 @@ import DataBase from '../../Data/Database'
 import LocalUser from '../../Data/LocalUser'
 import NormalizeString from "../../Helpers/NormalizeString"
 
+
 /**
  * Bare de recherche qui va permettre d'effectuer des query depuis la base de données
  * 

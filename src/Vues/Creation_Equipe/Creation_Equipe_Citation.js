@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {View, Text,Image,TouchableOpacity, TextInput} from 'react-native'
+import {KeyboardAvoidingView, View, Text,Image,TouchableOpacity, TextInput} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
@@ -55,14 +55,14 @@ export default class Creation_Equipe_Citation extends React.Component {
                 </View>
               
                 {/* Champs pour écrire la de l'équipe */}
-                <View style = {{alignItems : 'center', alignContent : 'center'}}>
+                <KeyboardAvoidingView style = {{alignItems : 'center', alignContent : 'center'}}>
                     <Text>Décris en quelques mots ton équipe</Text>
                     <TextInput
                         placeholder = "Phrase fétiche"
                         style = {styles.txt_input}
                         onChangeText = {(txt) => this.changeNom(txt)}
                     />
-                </View>
+                </KeyboardAvoidingView>
 
                 {/* View contenant les "compteur d'etape de creation"*/}
                 <View style ={{alignItems : 'center', alignContent : 'center'}}>

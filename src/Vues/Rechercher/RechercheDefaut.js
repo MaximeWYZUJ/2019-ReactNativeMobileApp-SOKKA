@@ -36,6 +36,35 @@ export default class RechercheDefaut extends React.Component {
     }
 
 
+    static navigationOptions = ({ navigation }) => {
+        return {
+            title: "Rechercher"
+        }
+    }
+    
+
+    // === Manipulation du lifecycle entre les onglets ===
+    componentDidMount() {
+        this.willBlurSubscription = this.props.navigation.addListener('willBlur', this.willBlurAction);
+    }
+
+    componentWillUnmount() {
+        this.willBlurSubscription.remove();
+    }
+
+    willBlurAction = () => {
+        this.setState({
+            dataDefaut: [],
+            displayFiltres: false
+        })
+        this.queryFiltre = null;
+    }
+
+
+    // ====================================================
+
+
+
     handleFilterButton = () => {
         this.setState({
             displayFiltres: !this.state.displayFiltres
@@ -101,7 +130,6 @@ export default class RechercheDefaut extends React.Component {
 
 
     validerRecherche = (data) => {
-        console.log(data)
         this.setState({
             dataDefaut: data
         })
