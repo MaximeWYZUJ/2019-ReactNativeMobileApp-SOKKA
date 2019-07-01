@@ -15,7 +15,7 @@ import Notif_Invitation_Equipe from './Notif_Equipe/Notif_Invitation_Equipe'
 import Notif_Refu_Accepte_Equipe from './Notif_Equipe/Notif_Refu_Accepte_Equipe';
 import Notif_Ajout_Reseau from './Notifs_Reseau/Notif_Ajout_Reseau';
 import Notif_Accepter_Refuser_Defi_Adverse from './Notif_Defi_Partie/Notif_Accepter_Refuser_Defi_Adverse'
-
+import Notif_feuille_completee_Defi from './Notifs_Feuille_Match/Notif_feuille_completee_Defi'
 /**
  * class qui va permettre d'afficher le bon type de notification en fonction 
  * de la notification recue en props
@@ -131,19 +131,29 @@ export default class Notifications_Factory extends React.Component {
                     />
                 )
 
-            // Une équipe à accepté un défi proposé
+            // Une équipe a accepté un défi proposé
             case Types_Notification.ACCEPTER_CONVOCATION_DEFI_ADVERSE : 
                     return(
                         <Notif_Accepter_Refuser_Defi_Adverse
                             notification = {this.props.notification}
                         />
                     )
+
+            // Une équipe a refusé un défi proposé 
             case Types_Notification.REFUSER_CONVOCATION_DEFI_ADVERSE :
                 return(
                     <Notif_Accepter_Refuser_Defi_Adverse
                         notification = {this.props.notification}
                     />
                 )
+
+                case Types_Notification.FEUILLE_COMPLETEE : 
+                    return(
+                        <Notif_feuille_completee_Defi
+                            notification = {this.props.notification}/>
+                    )
+            
+                
             default : 
         }
         

@@ -14,6 +14,7 @@ import actions from '../../../Store/Reducers/actions'
 import { connect } from 'react-redux'
 import TabDefiPasse from './TabDefiPasse'
 import LocalUser from '../../../Data/LocalUser'
+import Types_Notification from '../../../Helpers/Notifications/Types_Notification';
 const ORGA  = "ORGA"
 const DEFIEE = "DEFIEE"
 
@@ -66,6 +67,138 @@ class Feuille_Defi_Passe extends React.Component {
 
     }
 
+     // ===========================================================================
+    // ========================== NOTIFICATIONS ==================================
+    // ===========================================================================
+    
+    
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    async sendPushNotification(token , title,body ) {
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+    async sendNotifToCapitaineAdverse(equipe, nomEquipeAdverse) {
+        console.log("++++in send notif to cap adverse ++++++++++++")
+        if(equipe != undefined) {
+            var titre = "Nouvelle Notif"
+            var corps = "Le capitaine de l'équipe adverse " + nomEquipeAdverse + " a renseigné la feuille de match"
+            + " du défi contre ton équipe " + equipe.nom +"."
+            for(var i = 0; i <equipe.capitaines.length ; i++) {
+                var joueur = await Database.getDocumentData(equipe.capitaines[i], "Joueurs")
+                console.log("++++ ++++++++++++", joueur)
+
+                var tokens = [] 
+                if(joueur.tokens != undefined) tokens = joueur.tokens
+                for(var k = 0; k < tokens.length ; k++) {
+                    console.log("eeeeeeeeeeeeeeeee", tokens[k])
+                    this.sendPushNotification(tokens[k], titre, corps)
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Fonction qui envoie une notification aux joueurs une fois que la feuille de 
+     * match a été remplie par le capitaine.
+     */
+    async sendNotifFeuilleRemplieCap() {
+        console.log("in send notif feuille remplie cap")
+        var db = Database.initialisation
+        var titre = "Nouvelle notif"
+        var corps = ""
+        if(this.state.equipeOrganisatrice != undefined && this.state.equipeDefiee != undefined) {
+            console.log("in first if !!")
+            if(this.state.defi.joueursEquipeOrga.includes(this.monId) && this.state.equipeOrganisatrice.capitaines.includes(this.monId)) {
+                var joueurs = this.state.defi.confirmesEquipeOrga    
+                corps = "Le capitaine de ton équipe " + this.state.equipeOrganisatrice.nom + " a renseigné la feuille de match du défi contre "
+                corps = corps + this.state.equipeDefiee.nom + "."
+                
+                // Envoyer la notifs aux cap adverse 
+                await this.sendNotifToCapitaineAdverse(this.state.equipeDefiee, this.state.equipeOrganisatrice.nom)
+
+            } else if(this.state.equipeDefiee.capitaines.includes(this.monId)) {
+                var joueurs = this.state.defi.confirmesEquipeDefiee
+                corps = "Le capitaine de ton équipe " + this.state.equipeDefiee.nom + " a renseigné la feuille de match du défi contre "
+                corps = corps + this.state.equipeOrganisatrice.nom + "." 
+                
+                // Envoyer la notifs aux cap adverse 
+                await this.sendNotifToCapitaineAdverse(this.state.equipeOrganisatrice, this.state.equipeDefiee.nom)
+
+            } else {
+                var joueurs = []
+            }
+
+            console.log("before the for")
+            for(var i =0 ; i < joueurs.length; i++) {
+                if(joueurs[i] != this.monId)  {
+                    var j = await Database.getDocumentData(joueurs[i], "Joueurs")
+                    await this.storeNotifFeuilleCompletee(j,db)
+                    var tokens = []
+                    if(j.tokens != undefined) tokens = j.tokens
+                    console.log(tokens)
+                    for(var k = 0; k< tokens.length; k++) {
+                        await this.sendPushNotification(tokens[k], titre, corps)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Fonction qui va sauvegarder dans la base de donnée la notification indiquant que le
+     * capitaine a renseigné la feuille de match.
+     */
+    async storeNotifFeuilleCompletee(joueur) {
+        console.log(this.state.equipeDefiee)
+        console.log(this.state.equipeOrganisatrice)
+        if(this.state.equipeDefiee != null && this.state.equipeOrganisatrice != null ) {
+            console.log("in storeNotifFeuilleCompletee ")
+            console.log(Date.parse(new Date()))
+            console.log( this.state.defi.id)
+            console.log( LocalUser.data.id)
+            console.log( joueur.id)
+            console.log(Types_Notification.FEUILLE_COMPLETEE)
+            console.log(this.state.equipeDefiee)
+            console.log(this.state.equipeOrganisatrice)
+            var db = Database.initialisation()
+            db.collection("Notifs").add({
+                    time : new Date(),
+                    dateParse : Date.parse(new Date()),
+                    defi : this.state.defi.id,
+                    emetteur :  LocalUser.data.id,
+                    recepteur : joueur.id,
+                    type : Types_Notification.FEUILLE_COMPLETEE,
+                    equipeOrganisatrice  : this.state.equipeOrganisatrice.id,
+                    equipeDefiee : this.state.equipeDefiee.id
+
+            })
+        }
+    }
+
+    // ==================================================================
+
 
 
     /**
@@ -75,7 +208,7 @@ class Feuille_Defi_Passe extends React.Component {
     goBackToFiche() {
 
         // Trouver si c'est l'équipe orga ou non 
-        if(this.state.equipeOrganisatrice.joueurs.includes(this.monId)) {
+        if(this.state.equipeOrganisatrice.joueurs.includes(this.monId)&& this.state.defi.joueursEquipeOrga.includes(this.monId)) {
 
             var defi = this.state.defi
             defi["votes"] = this.props.votes
@@ -138,7 +271,9 @@ class Feuille_Defi_Passe extends React.Component {
      * Fonction qui va mettre à jour le défi dans la base de données pas besoin de changer 
      *  les listes des joueurs en attente car vu le fait qu'un joueurs soit dans les confirmé suffit.
      */
-    enregistrer() {
+    async enregistrer() {
+        await this.sendNotifFeuilleRemplieCap()
+        console.log("after send notif ")
         var db = Database.initialisation()
         var defisRef = db.collection("Defis").doc(this.state.defi.id);
         

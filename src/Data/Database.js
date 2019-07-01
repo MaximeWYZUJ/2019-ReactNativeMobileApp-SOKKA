@@ -25,14 +25,14 @@ export default class Database {
       };
     
     static initialisation() {
-        /*var config = {
+       /* var config = {
             apiKey: "AIzaSyCwFc_A3KZlTgfLJC9PWVR1o99MbGHZXNw",
             authDomain: "agoora-ccf6c.firebaseapp.com",
             databaseURL: "https://agoora-ccf6c.firebaseio.com",
             projectId: "agoora-ccf6c",
             storageBucket: "agoora-ccf6c.appspot.com",
             messagingSenderId: "486777683016"
-        };*/
+        }*/
 
         var config2 =  {
             apiKey: "AIzaSyDtl0_2Zx18V5m3SwtJVAbXkMbsvMruFsI",

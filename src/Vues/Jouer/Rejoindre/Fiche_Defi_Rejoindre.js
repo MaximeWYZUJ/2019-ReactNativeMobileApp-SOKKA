@@ -478,11 +478,12 @@ class Fiche_Defi_Rejoindre extends React.Component {
         var equipe = undefined
         var presents = []
 
-        if(this.state.equipeOrganisatrice.joueurs.includes(this.userData.id)) {
+        //if(this.state.equipeOrganisatrice.joueurs.includes(this.userData.id)) {
+        if(this.state.defi.joueursEquipeOrga.includes(this.userData.id)){
             joueurs = this.state.defi.joueursEquipeOrga
             equipe = this.state.equipeOrganisatrice
             presents = this.state.defi.confirmesEquipeOrga
-        } else if(this.state.equipeDefiee != undefined && this.state.equipeDefiee.joueurs.includes(this.userData.id)) {
+        } else if(this.state.equipeDefiee != undefined && this.state.defi.joueursEquipeDefiee.includes(this.userData.id)) {
             joueurs=  this.state.defi.joueursEquipeDefiee
             equipe = this.state.equipeDefiee
             presents = this.state.defi.confirmesEquipeDefiee
@@ -816,7 +817,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
                 <TouchableOpacity
                     style = {styles.btn_feuille_de_match} 
                     onPress = {() => this.goToFeuilleDefiPasse()} >
-                    <Text>Feuille de match3</Text>
+                    <Text>Feuille de match</Text>
                 </TouchableOpacity>
             
             )
