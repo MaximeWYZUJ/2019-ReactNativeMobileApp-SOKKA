@@ -48,6 +48,19 @@ export default class Types_Notification {
      * Quand l'utilisateur refuse de défier une équipe qui lui a proposé un défi
      */
     static REFUSER_CONVOCATION_DEFI_ADVERSE  = "REFUSER_CONVOCATION_DEFI_ADVERSE"
+
+
+
+    /**
+     * Quand l'utilisateur refuse qu'une equipe relève un défi qu'il a posté
+     */
+    static REFUSER_EQUIPE_DEFIEE = "REFUSER_EQUIPE_DEFIEE"
+
+    
+    /**
+     * Quand l'utilisateur accepte qu'une equipe relève un défi qu'il a posté
+     */
+    static ACCEPTER_EQUIPE_DEFIEE = "ACCEPTER_EQUIPE_DEFIEE"
     
     //=========================================================================
     //============================ POUR LES PARTIE  ===========================
@@ -112,6 +125,18 @@ export default class Types_Notification {
      */
     static AJOUT_RESEAU ="AJOUT_RESEAU"
 
+
+
+    //=========================================================================
+    //======================= POUR LES FEUILLES DE MATCH  =====================
+    //=========================================================================
+
+
+    /**
+     * Quand l'utilisateur complete la feuille de match pour une équipe dont il 
+     * est capitaine
+     */
+    static FEUILLE_COMPLETEE = "FEUILLE_COMPLETEE"
 
 
 }

@@ -13,7 +13,7 @@ export default class Database {
         messagingSenderId: "486777683016"
     };
 
-    
+
     static config2 = {
         apiKey: "AIzaSyDtl0_2Zx18V5m3SwtJVAbXkMbsvMruFsI",
         authDomain: "sokka-47c20.firebaseapp.com",
@@ -23,16 +23,16 @@ export default class Database {
         messagingSenderId: "952597067241",
         //appId: "1:952597067241:web:1f1b5c742caabbb0"
       };
-    
+
     static initialisation() {
-        var config = {
+       var config = {
             apiKey: "AIzaSyCwFc_A3KZlTgfLJC9PWVR1o99MbGHZXNw",
             authDomain: "agoora-ccf6c.firebaseapp.com",
             databaseURL: "https://agoora-ccf6c.firebaseio.com",
             projectId: "agoora-ccf6c",
             storageBucket: "agoora-ccf6c.appspot.com",
             messagingSenderId: "486777683016"
-        };
+        }
 
         /*var config2 =  {
             apiKey: "AIzaSyDtl0_2Zx18V5m3SwtJVAbXkMbsvMruFsI",
@@ -55,7 +55,7 @@ export default class Database {
     /**
      * Methode qui permet de recuperer un doc d'une collection.
      * Renvoie le resultat au format {id, data, ref}
-     * 
+     *
      * string collection : collection dont fait partie le doc
      * string idDoc : id du document dont on veut la subcollection
      */
@@ -74,7 +74,7 @@ export default class Database {
      * d'un doc dont on a la ref. (doc réel = doc pointé par une référence,
      * c'est à dire que la fonction renvoie le doc pointé plutot que sa ref)
      * Renvoie un tableau d'elements au format {id, data, ref}
-     * 
+     *
      * string collection : collection dont on veut les docs
      * ref document : document qui contient la collection
      * string champ : champ du doc qui fait ref au doc réel
@@ -100,7 +100,7 @@ export default class Database {
 
     /**
      * Méthode qui permet de récupérer les données d'une équipe depuis firebase
-     * @param {*} id 
+     * @param {*} id
      */
     static getEquipeWithId(id, callback) {
         var db = this.initialisation();
@@ -110,7 +110,7 @@ export default class Database {
             if (doc.exists) {
                // console.log(doc.data())
                 callback(doc.data())
-                //return doc.data();  
+                //return doc.data();
             } else {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
@@ -122,15 +122,15 @@ export default class Database {
         });
 
         callback()
-        
+
 
     }
 
     /**
      * Fonction permettant d'enregister un utilisateur dans le cloud firestore
      * à partir de son identifiant.
-     * @param {string} id 
-     * @param {object} user 
+     * @param {string} id
+     * @param {object} user
      */
     static storeUser(id, user) {
 
@@ -177,7 +177,7 @@ export default class Database {
         let docRef = db.collection(collection).doc(id);
         console.log("before docRef.get()")
         let doc = await docRef.get();
-        
+
         if (doc.exists) {
             return doc.data()
         } else {
@@ -233,7 +233,7 @@ export default class Database {
             }
         }
     }
-    
+
 
     // ----- RESEAU -----
     static async changeOtherIdToSelfArray_Reseau(otherId, boolAdd) {
@@ -322,7 +322,7 @@ export default class Database {
      /**
      * Fonction qui va permettre d'uploader la photo de profil dans le storage
      * firebase.
-     * 
+     *
      * uri : uri de la photo de profil
      * imageName : Nom à donner au fichier sur le storage
      */

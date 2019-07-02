@@ -8,6 +8,7 @@ import Simple_Loading from '../../Loading/Simple_Loading'
 import Database  from '../../../Data/Database'
 import LocalUser from '../../../Data/LocalUser.json'
 import { withNavigation } from 'react-navigation'
+import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
 
 /**
  * Classe qui permet d'afficher les notfications pour accèpter ou non une
@@ -79,19 +80,26 @@ class Notif_Accepter_Releve_Defi extends React.Component {
      * présence. 
      */
     handleConfirmerNon() {
-        console.log("in handle confirmer non")
-        Alert.alert(
-            '',
-            "Tu souhaite refuser le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
-            [
-                {text: 'Oui', onPress: () => this.refuserDefis()},
-                {
-                  text: 'Non',
-                  onPress: () => console.log('Cancel Pressed'),
-                  style: 'cancel',
-                },
-            ],
-        )
+        if(new Date(this.state.defi.jour.seconds *1000) > new Date())  {
+            Alert.alert(
+                '',
+                "Tu souhaite refuser le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
+                [
+                    {text: 'Oui', onPress: () => this.refuserDefis()},
+                    {
+                    text: 'Non',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                    },
+                ],
+            )
+        }else {
+            Alert.alert(
+                '',
+                "Le défi est déja passé"
+                
+            )  
+        }
 
     }
 
@@ -100,26 +108,35 @@ class Notif_Accepter_Releve_Defi extends React.Component {
      * présence. 
      */
     handleConfirmerOui() {
-        Alert.alert(
-            '',
-            "Tu souhaite accepter le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
-            [
-                {text: 'Oui', onPress: () => this.accepterDefis()},
-                {
-                  text: 'Non',
-                  onPress: () => console.log('Cancel Pressed'),
-                  style: 'cancel',
-                },
-            ],
-        )
+        if(new Date(this.state.defi.jour.seconds *1000) > new Date())  {
+
+            Alert.alert(
+                '',
+                "Tu souhaite accepter le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
+                [
+                    {text: 'Oui', onPress: () => this.accepterDefis()},
+                    {
+                    text: 'Non',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                    },
+                ],
+            )
+        }else {
+            Alert.alert(
+                '',
+                "Le défi est déja passé"
+                
+            )  
+        }
 
     }
 
     /**
      * Fonction qui permet d'accepter le défi
      */
-    accepterDefis() {
-
+    async accepterDefis() {
+        await this.storeNotifDefis(Types_Notification.ACCEPTER_EQUIPE_DEFIEE)
         var db = Database.initialisation()
         if(this.state.defi != undefined) {
             this.setState({defis_valide : true, defis_refuse : false})
@@ -133,8 +150,8 @@ class Notif_Accepter_Releve_Defi extends React.Component {
     /**
      * Fonction qui permet de refuser le défi
      */
-    refuserDefis() {
-
+    async refuserDefis() {
+        await this.storeNotifDefis(Types_Notification.REFUSER_EQUIPE_DEFIEE)
         var db = Database.initialisation()
         if(this.state.defi != undefined) {
             this.setState({defis_valide : false, defis_refuse : true})
@@ -144,6 +161,97 @@ class Notif_Accepter_Releve_Defi extends React.Component {
             })
         }
     }
+
+     // ===========================================================================
+    // ========================== NOTIFICATIONS ==================================
+    // ===========================================================================
+    
+    
+
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    async sendPushNotification(token , title,body ) {
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+    /**
+     * Fonction qui va permettre d'envoyer les notifications aux capitaines
+     * de l'équipe défiee
+     */
+    async sendNotifsToCapitainesDefiee(type){
+        var txt = "accepté"
+        if(type == Types_Notification.REFUSER_EQUIPE_DEFIEE) {
+            txt = "refusé"
+        }
+        var titre = "Nouvelle notif"
+        var corps = "L'équipe " + this.state.equipeReceptrice.nom + " a " + txt + " de vous défier"
+        for(var i = 0; i < this.state.equipeEmettrice.capitaines.length; i++) {
+            console.log("début boucle")
+
+            var id = this.state.equipeEmettrice.capitaines[i]
+
+            var cap = await Database.getDocumentData(id, "Joueurs")
+            console.log("after get cap in db")
+            var tokens = []
+            if(cap.tokens != undefined) tokens = cap.tokens
+            for(var k = 0; k < tokens.length; k++) {
+                await this.sendPushNotification(tokens[k], titre,corps)
+            }
+        }
+    }
+
+
+
+    /**
+     * Fonction qui va permettre de sauvegarder les notifications dans la base de données.
+     */
+    async storeNotifDefis(type) {
+        await this.sendNotifsToCapitainesDefiee(type)
+        var db = Database.initialisation()
+        if(this.state.equipeEmettrice != undefined) {
+            for(var i = 0 ; i < this.state.equipeEmettrice.capitaines.length ; i++) {
+
+            
+                db.collection("Notifs").add(
+                    {
+                        dateParse : Date.parse(new Date()),
+                        defi : this.state.defi.id,
+                        emetteur :  LocalUser.data.id,
+                        recepteur : this.state.equipeEmettrice.capitaines[i] ,
+                        time : new Date(),
+                        equipeEmettrice : this.state.equipeReceptrice.id ,
+                        type :type,
+                        equipeReceptrice : this.state.equipeEmettrice.id,
+                    }
+                )
+            } 
+        }
+    }
+
+  
+
+    //  =================================================================================
+
 
 
 
@@ -208,6 +316,39 @@ class Notif_Accepter_Releve_Defi extends React.Component {
 
 
 
+    renderNotif() {
+        console.log("this.state.defi.defis_valide =====", this.state.defi.defis_valide)
+        if(this.state.defis_valide) {
+            return(
+                <View style =  {{ marginTop : hp('1.5%')}}>
+                    <Text> Tu as accepté le défi relevé par l'équipe </Text>
+                    <Text> {this.renderNomEquipeEmettrice()} </Text> 
+                </View>
+            )
+        } else if(this.state.defis_refuse) {
+            return(
+                <View style =  {{ marginTop : hp('1.5%')}}>
+                    <Text> Tu as refusé le défi relevé par l'équipe </Text>
+                    <Text> {this.renderNomEquipeEmettrice()} </Text> 
+                </View>
+            )
+        } else {
+            return(
+                <View>
+                    <Text> L'équipe {this.renderNomEquipeEmettrice()} souhaite relever le</Text>
+                    <Text> défi posté par ton équipe {this.renderNomEquipeReceptrice()} </Text>
+
+                    <TouchableOpacity
+                        onPress = {() => this.goToFicheDefi()}
+                        >
+                        <Text style = {styles.txtBtn}>Consulter</Text>
+                    </TouchableOpacity>
+                    {this.renderBtnConfirmer()}
+                    
+                </View>
+            )
+        }
+    }
     render() {
         if(this.state.isLoading) {
             return(
@@ -217,22 +358,11 @@ class Notif_Accepter_Releve_Defi extends React.Component {
             )
         } else {
             return(
-                <View style = {{flexDirection : 'row', borderWidth : 1, marginTop : hp('2%')}}>
+                <View style = {{flexDirection : 'row', marginTop : hp('2%')}}>
                     <View>
                         {this.renderPhotoEquipeEmetteur()}
                     </View>
-                    <View>
-                        <Text> L'équipe {this.renderNomEquipeEmettrice()} souhaite relever le</Text>
-                        <Text> défi posté par ton équipe {this.renderNomEquipeReceptrice()} </Text>
-
-                        <TouchableOpacity
-                            onPress = {() => this.goToFicheDefi()}
-                            >
-                            <Text style = {styles.txtBtn}>Consulter</Text>
-                        </TouchableOpacity>
-                        {this.renderBtnConfirmer()}
-                        
-                    </View>
+                    {this.renderNotif()}
                 </View>
             )
         }

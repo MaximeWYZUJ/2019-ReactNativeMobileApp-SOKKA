@@ -1067,7 +1067,7 @@ class Feuille_Defi_A_Venir extends React.Component {
                                     nbIndisponibles = {indisponibles.length}
                                     nbAttentes = {attente.length}
                                     isPartie  = {false}
-                                    renderBtnRelancer={this.renderBtnRelancer}
+                                    renderBtnRelancer={this._renderBtnRelancer}
                                 />
                             </View>
                         
