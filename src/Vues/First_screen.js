@@ -8,6 +8,7 @@ import '@firebase/firestore'
 import {SkypeIndicator} from 'react-native-indicators';
 import { Constants, Location, Permissions, Notifications } from 'expo';
 import LocalUser from '../Data/LocalUser.json'
+import villes from '../Components/Creation/villes.json'
 
 
 /** Pour afficher 5sec faire deux fonction qui affiche qqchose et en fonction du state appeler une ou l'autre */
@@ -88,19 +89,6 @@ class First_screen extends React.Component {
    }
 
 
-   _getLocationAsync = async () => {
-        let { status } = await Permissions.askAsync(Permissions.LOCATION);
-        if (status !== 'granted') {
-        this.setState({
-        locationResult: 'Permission to access location was denied',
-        });
-        }
-        let location = await Location.getCurrentPositionAsync({});
-        console.log(location)
-        this.setState({ locationResult: JSON.stringify(location) });
-        };
-
-
     gotoInscription() {
         this.props.navigation.push("choixModeInscription");
     }
@@ -166,61 +154,28 @@ class First_screen extends React.Component {
             })
         }
     }
-    
 
-    gotoMapTerrains() {
 
-        this._getLocationAsync();
-        this.setState({isLoading : true})
+    /**
+     * Fonction qui renvoie la position de la ville à partir de son nom
+     * @param {String} Name : Nom de la ville 
+     */
+    findPositionVilleFromName(name) {
+        for(var i  =  0 ; i < villes.length; i++) {
+            if(name.toLocaleLowerCase() == villes[i].Nom_commune.toLocaleLowerCase()) {
+                var position = villes[i].coordonnees_gps
+                var latitude = position.split(',')[0]
+                var longitude = position.split(', ')[1]
+                 var pos = {
+                    latitude : parseFloat(latitude),
+                    longitude : parseFloat(longitude)
+                }
+               return pos
 
-        navigator.geolocation.getCurrentPosition(
-
-            (position) => {
-                // Calculer la distance pour tous les terrains
-                let latUser = position.coords.latitude
-                let longUser = position.coords.longitude
-                this.setState({isLoading : false})
-                this.props.navigation.push("RechercherTerrainsMap", {latitude : latUser, longitude : longUser})
-
-            },
-            (error) => {
-                Alert.alert("Tu dois obligatoirement activer ton gps ! ")
-                this.setState({isLoading : false})
-                console.log(error.message)
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge : 3600000}
-            //{ enableHighAccuracy: true, timeout: 20000, maximumAge : 300000}
-
-        )
+            }
+        }
     }
 
-   gotoRechercherTerrainNom() {
-    navigator.geolocation.getCurrentPosition(
-
-        (position) => {
-
-            // Calculer la distance pour tous les terrains
-            let latUser = position.coords.latitude
-            let longUser = position.coords.longitude
-            this.props.navigation.push("RechercherTerrainsNom", {latitude : latUser, longitude : longUser})
-
-        })
-   }
-
-   gotoAccueillJouer() {
-        this.props.navigation.push("AccueilJouer", {})
-
-    /*navigator.geolocation.getCurrentPosition(
-
-        (position) => {
-            // Calculer la distance pour tous les terrains
-            let latUser = position.coords.latitude
-            let longUser = position.coords.longitude
-            console.log(latUser)
-            this.props.navigation.push("AccueilJouer", {latitude : 44.9902646, longitude : 1.5267866})
-
-        })*/
-    }
 
     gotoProfilJoueur(id) {
        Database.getDocumentData(id, 'Joueurs').then(async (docData) => {
@@ -233,6 +188,8 @@ class First_screen extends React.Component {
             // Traitement des données locales
             LocalUser.exists = true;
             LocalUser.data = docData;
+            var villePos = this.findPositionVilleFromName(docData.ville);
+            LocalUser.geolocalisation = villePos;
 
             // Envoi
             //this.setState({isLoading : false})

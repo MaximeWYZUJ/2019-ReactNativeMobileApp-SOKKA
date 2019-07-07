@@ -111,8 +111,11 @@ class Accueil_Jouer extends React.Component {
                     latitude : latUser,
                     longitude : longUser
                 }
+
+                LocalUser.geolocalisation = pos;
                 const action = { type: actions.SAVE_COORDONNATES  , value: pos}
                 this.props.dispatch(action)
+                
                 this.setState({isLoading : false})
                 this.props.navigation.push("ChoixFormatDefi",  {type : type})
         },
@@ -125,8 +128,11 @@ class Accueil_Jouer extends React.Component {
                 [
                     {text: 'Oui', onPress: () => {
                         var pos = this.findPositionVilleFromName(LocalUser.data.ville)
+                        
+                        LocalUser.geolocalisation = pos;
                         const action = { type: actions.SAVE_COORDONNATES  , value: pos}
                         this.props.dispatch(action)
+                        
                         this.setState({isLoading : false})
                         this.props.navigation.push("ChoixFormatDefi",  {type : type})
 

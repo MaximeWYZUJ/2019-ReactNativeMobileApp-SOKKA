@@ -58,7 +58,6 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
                 
                 // Cas où on dépasse le nombre de joueurs recherchés,  this.props.nbJoueursRecherchesPartie = undefined lors de la creation d'une partie
                 if(this.props.joueursPartie.length   >= this.props.nbJoueursRecherchesPartie ) {
-                    console.log("in if")
                     Alert.alert(
                         '',
                         "Seulement " + this.props.nbJoueursRecherchesPartie +  " sont recherchés pour cette partie"
@@ -66,12 +65,9 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
 
                 // 
                 } else {
-                    console.log("this.props.JoueursParticipantsPartie : ", this.props.JoueursParticipantsPartie )
                     if(! this.props.JoueursParticipantsPartie.includes(idJoueur)) {
-                        console.log("in deuxieme if")
                         const action = { type: actions.CHOISIR_JOUEUR_PARTIE, value:  {id : idJoueur, photo : photoJoueur, tokens : tokens}}
                         this.props.dispatch(action)
-                        console.log("after dispatch")
                     } else if(this.props.joueursPartie.length  < this.props.nbJoueursRecherchesPartie ) {
                         Alert.alert(
                             '',
@@ -80,30 +76,7 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
                     }
                 }
             }
-                // Cas où on dépasse le nombre de joueurs recherchés,  this.props.nbJoueursRecherchesPartie = undefined lors de la creation d'une partie
-            /*if(this.props.joueursPartie.length +1  >= this.props.nbJoueursRecherchesPartie ) {
-                console.log("in if")
-                Alert.alert(
-                    '',
-                    "Seulement " + this.props.nbJoueursRecherchesPartie +  " sont recherchés pour cette partie"
-                )
-
-            // 
-            } else {
-                console.log("this.props.JoueursParticipantsPartie : ", this.props.JoueursParticipantsPartie )
-                if(! this.props.JoueursParticipantsPartie.includes(idJoueur)) {
-                    console.log("in deuxieme if")
-                    const action = { type: actions.CHOISIR_JOUEUR_PARTIE, value:  {id : idJoueur, photo : photoJoueur}}
-                    this.props.dispatch(action)
-                    console.log("after dispatch")
-                } else if(this.props.joueursPartie.length  < this.props.nbJoueursRecherchesPartie ) {
-                    Alert.alert(
-                        '',
-                        "Ce joueur participe déjà à la partie, tu ne peux pas l'ajouter"
-                    )
-                }
-            }*/
-    }
+        }
         
     
 

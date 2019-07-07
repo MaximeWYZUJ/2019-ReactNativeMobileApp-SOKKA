@@ -17,8 +17,6 @@ const RechercherTabNavigator = createAppContainer(createMaterialTopTabNavigator(
     tabBarComponent: TabBarTop,
     tabBarPosition: 'top'
 }
-
-
 ));
 
 

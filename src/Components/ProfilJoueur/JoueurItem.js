@@ -41,7 +41,7 @@ class JoueurItem extends React.Component {
         return (
             <TouchableOpacity style={styles.main_container} onPress={() => this.gotoProfilJoueur()}>
                 <Image
-                    style={{backgroundColor: 'red', width: wp('15%'), height: wp('15%'), borderRadius :28, marginLeft : wp('2%'), marginRight : wp('2%')}}
+                    style={{backgroundColor: "#C0C0C0", width: wp('15%'), height: wp('15%'), borderRadius :28, marginLeft : wp('2%'), marginRight : wp('2%')}}
                     source={{uri: photo}}/>
                 <View style={{flexDirection: 'column'}}>
                     <Text>{nom}</Text>

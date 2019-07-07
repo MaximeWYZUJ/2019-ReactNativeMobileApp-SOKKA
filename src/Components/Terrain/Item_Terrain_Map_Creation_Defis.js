@@ -20,7 +20,7 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            checked : this.props.isShown,
+            isShown : this.props.isShown,
         }
     }
 
@@ -40,8 +40,36 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
             }
         }
         this.props.dispatch(action2)
-
     }
+
+
+    renderCheckBox() {
+        if (this.props.gotoItemOnPress) {
+            return (
+                <TouchableOpacity style={{flexDirection :'row', justifyContent: 'center', alignItems: 'center'}} onPress={() => this.props.nav.navigate("ProfilTerrain", {id: this.props.id})}>
+                    <Text>GO !</Text>
+                </TouchableOpacity>
+            )
+        } else {
+            return (
+                <View style = {{flexDirection :'row'}}>
+                    <CheckBox
+                        title=' '
+                        checkedColor = {Colors.agOOraBlue}
+                        right
+                        containerStyle={{backgroundColor: 'white', borderWidth :0,marginTop : hp('0.1%'), alignSelf : 'center'}}                    
+                        checked={this.state.isShown}
+                        onPress={() => {
+                            this._chooseTerrain(this.props.id)
+                            var checked = this.state.isShown
+                            this.setState({isShown: !checked})
+                        }}
+                    />
+                </View>
+            )
+        }
+    }
+
 
     render() {
 
@@ -51,7 +79,7 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
                 <View style = {styles.slide}>
 
                     {/* View contenant les informations sur le terrain*/}
-                    <View>
+                    <View style={{flex: 5}}>
                         <Text style = {styles.InsNomStyle}>{this.props.InsNom}</Text>
                         <Text style={styles.title}>{this.props.N_Voie} {this.props.Voie} </Text>
 
@@ -65,19 +93,8 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
                     </View>
 
                     {/* View contenant la checkBox */}
-                    <View style = {{flexDirection :'row'}}>
-                        <CheckBox
-                            title=' '
-                            checkedColor = {Colors.agOOraBlue}
-                            right
-                            containerStyle={{backgroundColor: 'white', borderWidth :0,marginTop : hp('0.1%'), alignSelf : 'center'}}                    
-                            checked={isShown}
-                            onPress={() => {
-                                this._chooseTerrain(this.props.id)
-                                var checked = this.state.isShown
-                                this.setState({isShown: !checked})
-                            }}
-                        />
+                    <View style={{flex: 2, alignItems: 'center', justifyContent: 'center'}}>
+                        {this.renderCheckBox()}
                     </View>
                     
                 </View>
@@ -93,9 +110,8 @@ const styles = {
         paddingLeft : wp('1%'),
         paddinRight : wp('1%'),
         backgroundColor : 'white', 
-       flexDirection : 'row' ,
-       marginBottom : hp('1%')
-
+        flexDirection : 'row' ,
+        marginBottom : hp('1%'),
     },
 
     InsNomStyle :{

@@ -6,7 +6,7 @@ import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
 import Slider from "react-native-slider";
 import ItemTerrain from '../../Components/Terrain/ItemTerrain'
-import Terrains from '../../Helpers/Terrains.json'
+import Terrains from '../../Helpers/Toulouse.json'
 // A SUPPR !!!!!
 var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 const lat = 43.531486

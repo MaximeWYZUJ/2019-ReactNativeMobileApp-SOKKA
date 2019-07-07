@@ -11,6 +11,7 @@ import firebase from 'firebase'
 import '@firebase/firestore'
 import {SkypeIndicator} from 'react-native-indicators';
 import { Constants, Location, Permissions,Notifications } from 'expo';
+import villes from '../../Components/Creation/villes.json'
 
 /**
  * Classe qui va permettre d'afficher la page de choix du mode de connexion.
@@ -93,6 +94,28 @@ export default class Modes_de_connexion extends React.Component {
         
     }
 
+
+    /**
+     * Fonction qui renvoie la position de la ville à partir de son nom
+     * @param {String} Name : Nom de la ville 
+     */
+    findPositionVilleFromName(name) {
+        for(var i  =  0 ; i < villes.length; i++) {
+            if(name.toLocaleLowerCase() == villes[i].Nom_commune.toLocaleLowerCase()) {
+                var position = villes[i].coordonnees_gps
+                var latitude = position.split(',')[0]
+                var longitude = position.split(', ')[1]
+                 var pos = {
+                    latitude : parseFloat(latitude),
+                    longitude : parseFloat(longitude)
+                }
+               return pos
+
+            }
+        }
+    }
+
+
     /**
      * Fonction qui va permettre d'authentifier un utilisateur
      */
@@ -110,6 +133,8 @@ export default class Modes_de_connexion extends React.Component {
             // Update des données locales
             LocalUser.exists = true;
             LocalUser.data = j;
+            var villePos = this.findPositionVilleFromName(j.ville);
+            LocalUser.geolocalisation = villePos;
 
             // Enregistrement du token
             this.storeToken(j);
