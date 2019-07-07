@@ -8,8 +8,10 @@ import StarRating from 'react-native-star-rating'
 import Database from '../../../Data/Database'
 import TabFeuillePasse from './TabFeuillePasse'
 import { connect } from 'react-redux'
-
+import Simple_Loading from './../../../Components/Loading/Simple_Loading'
 import LocalUser from '../../../Data/LocalUser.json'
+import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
+
 
 /**
  * Classe qui permet d'afficher la feuille de match d'une partie déja jouée.
@@ -22,6 +24,7 @@ class Feuille_Partie_Passee extends React.Component {
         this.state = {
             partie : this.props.navigation.getParam('partie', undefined),
             joueurs : this.props.navigation.getParam('joueurs', []),
+            isLoading : false
         }
         this.joueurAnimation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
         this.goToFichePartie = this.goToFichePartie.bind(this)
@@ -48,10 +51,19 @@ class Feuille_Partie_Passee extends React.Component {
                 id : this.state.partie.id,
                 retour_arriere_interdit : true
             }
-        )
-               
-        
-        
+        )  
+    }
+
+
+    /**
+     * Fonction qui renvoie les données de l'organisateur de la partie
+     */
+    findOrganisateur() {
+        for(var i =0; i <this.state.joueurs.length; i++) {
+            if(this.state.joueurs[i].id == this.state.partie.organisateur) {
+                return this.state.joueurs[i]
+            }
+        }
     }
 
  
@@ -82,12 +94,101 @@ class Feuille_Partie_Passee extends React.Component {
         return liste
     }
 
+    
+     // ===========================================================================
+    // ========================== NOTIFICATIONS ==================================
+    // ===========================================================================
+    
+    
+    /**
+     * Fonction qui permet d'envoyer des notifications
+     * @param {String} token 
+     * @param {String} title 
+     * @param {String} body 
+     */
+    async sendPushNotification(token , title,body ) {
+        return fetch('https://exp.host/--/api/v2/push/send', {
+          body: JSON.stringify({
+            to: token,
+            title: title,
+            body: body,
+            data: { message: `${title} - ${body}` },
+           
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }).catch(function(error) {
+            console.log("ERROR :", error)
+        }).then(function(error) {
+            console.log("THEN", error)
+        });
+    }
+
+    
+
+
+    /**
+     * Fonction qui envoie une notification aux joueurs ayant confirmé une fois 
+     * que la feuille de match a été remplie par l'organisateur
+     */
+    async sendNotifFeuilleRemplie() {
+        console.log("in send notif feuille remplie cap")
+        var organisateur = this.findOrganisateur()
+        console.log(organisateur.pseudo)
+        var titre = "Nouvelle notif"
+        var corps = organisateur.pseudo + " a renseigné la feuille de match de partie"
+        var joueurs = this.buildListOfJoueursConfirme()
+        console.log("before 1ier for")
+        for(var i =0; i < joueurs.length; i++ ) {
+            console.log("in for", i)
+            if(joueurs[i].id != organisateur.id) {
+                var tokens = []
+                var joueur = joueurs[i]
+                if(joueur.tokens != undefined) tokens = joueur.tokens
+                console.log("BEFORE 2iemFOR")
+                for(var k =0; k < tokens.length ; k++) {
+                    console.log(tokens[k])
+                    await this.sendPushNotification(tokens[k], titre, corps)
+                    await this.storeNotifFeuilleCompletee(joueur)
+                } 
+            }
+        }
+        
+    }
+
+    /**
+     * Fonction qui va sauvegarder dans la base de donnée la notification indiquant que
+     * l'organisateur a renseigné la feuille de match.
+     */
+    async storeNotifFeuilleCompletee(joueur) {
+        console.log(this.state.equipeDefiee)
+        console.log(this.state.equipeOrganisatrice)
+        
+        var db = Database.initialisation()
+        db.collection("Notifs").add({
+                time : new Date(),
+                dateParse : Date.parse(new Date()),
+                partie : this.state.partie.id,
+                organisateur :  LocalUser.data.id,
+                recepteur : joueur.id,
+                type : Types_Notification.FEUILLE_COMPLETEE_PARTIE,
+        })
+        
+    }
+
+    //=============================================================================================
+
     /**
      * Fonction qui va permettre d'enregistrer les données dans la db, pas besoin de changer 
      * attente car vu le fait qu'un joueurs soit dans les confirmé suffit.
      */
-    enregistrerDonnees() {
+    async enregistrerDonnees() {
+        this.setState({isLoading : true})
         var db = Database.initialisation()
+
+        await this.sendNotifFeuilleRemplie()
         var defisRef = db.collection("Defis").doc(this.state.partie.id);
 
      
@@ -128,42 +229,52 @@ class Feuille_Partie_Passee extends React.Component {
 
 
     render() {
-        return(
-            <View style = {{flex :1}}>
-                {/* Bandeau superieur */}
-                <View style = {{flexDirection : 'row', backgroundColor : Colors.grayItem, justifyContent: 'space-between',paddingVertical : hp('2%'),paddingHorizontal : wp('3%')}}>
-                    <TouchableOpacity
-                        >
-                        <Text style = {styles.txtBoutton} >Annuler</Text>
-                    </TouchableOpacity>
+        if(!this.state.isLoading) {
+            return(
+                <View style = {{flex :1}}>
+                    {/* Bandeau superieur */}
+                    <View style = {{flexDirection : 'row', backgroundColor : Colors.grayItem, justifyContent: 'space-between',paddingVertical : hp('2%'),paddingHorizontal : wp('3%')}}>
+                        <TouchableOpacity
+                            >
+                            <Text style = {styles.txtBoutton} >Annuler</Text>
+                        </TouchableOpacity>
 
-                    <Text> Feuille de match </Text>
-                    
-                    <TouchableOpacity
-                        onPress= {() => this.enregistrerDonnees()}
-                        >
-                        <Text style = {styles.txtBoutton}>Enregister</Text>
-                    </TouchableOpacity>
+                        <Text> Feuille de match </Text>
+                        
+                        <TouchableOpacity
+                            onPress= {() => this.enregistrerDonnees()}
+                            >
+                            <Text style = {styles.txtBoutton}>Enregister</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* View contenant la liste des joueurs ayant confirmés */}
+                    <View style  = {styles.containerJoueur}>
+                        
+                        {/* Liste des joueurs */}
+                        <FlatList
+                            data = {this.buildListOfJoueursConfirme()}
+                            renderItem = {this._renderItem}
+                            numColumns={5}
+                            keyExtractor={(item) => item.id}
+                                
+                        />
+                    </View>
+
+                    <Text>Statistiques joueurs</Text>
+
+                    <TabFeuillePasse/>
                 </View>
-
-                {/* View contenant la liste des joueurs ayant confirmés */}
-                <View style  = {styles.containerJoueur}>
-                    
-                    {/* Liste des joueurs */}
-                    <FlatList
-                        data = {this.buildListOfJoueursConfirme()}
-                        renderItem = {this._renderItem}
-                        numColumns={5}
-                        keyExtractor={(item) => item.id}
-                            
-                    />
+            )
+        } else {
+            return(
+                <View>
+                    <Simple_Loading
+                        taille = {hp('3%')}
+                        />
                 </View>
-
-                <Text>Statistiques joueurs</Text>
-
-                <TabFeuillePasse/>
-            </View>
-        )
+            )
+        }
     }
 }
 const styles = {

@@ -15,6 +15,7 @@ import { connect } from 'react-redux'
 import TabDefiPasse from './TabDefiPasse'
 import LocalUser from '../../../Data/LocalUser'
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification';
+import Simple_Loading from '../../../Components/Loading/Simple_Loading'
 const ORGA  = "ORGA"
 const DEFIEE = "DEFIEE"
 
@@ -28,6 +29,7 @@ class Feuille_Defi_Passe extends React.Component {
         super(props)
         this.monId = LocalUser.data.id
         this.state = {
+            isLoading : false,
             defi : this.props.navigation.getParam('defi', undefined),
             equipeOrganisatrice :  this.props.navigation.getParam('equipeOrganisatrice', undefined),
             equipeDefiee :  this.props.navigation.getParam('equipeDefiee', undefined),
@@ -112,7 +114,8 @@ class Feuille_Defi_Passe extends React.Component {
                 if(joueur.tokens != undefined) tokens = joueur.tokens
                 for(var k = 0; k < tokens.length ; k++) {
                     console.log("eeeeeeeeeeeeeeeee", tokens[k])
-                    this.sendPushNotification(tokens[k], titre, corps)
+                    await this.sendPushNotification(tokens[k], titre, corps)
+                    await this.storeNotifToCapAdverse(joueur)
                 }
             }
         }
@@ -125,7 +128,7 @@ class Feuille_Defi_Passe extends React.Component {
      */
     async sendNotifFeuilleRemplieCap() {
         console.log("in send notif feuille remplie cap")
-        var db = Database.initialisation
+        var db = Database.initialisation()
         var titre = "Nouvelle notif"
         var corps = ""
         if(this.state.equipeOrganisatrice != undefined && this.state.equipeDefiee != undefined) {
@@ -137,7 +140,6 @@ class Feuille_Defi_Passe extends React.Component {
                 
                 // Envoyer la notifs aux cap adverse 
                 await this.sendNotifToCapitaineAdverse(this.state.equipeDefiee, this.state.equipeOrganisatrice.nom)
-
             } else if(this.state.equipeDefiee.capitaines.includes(this.monId)) {
                 var joueurs = this.state.defi.confirmesEquipeDefiee
                 corps = "Le capitaine de ton équipe " + this.state.equipeDefiee.nom + " a renseigné la feuille de match du défi contre "
@@ -145,7 +147,6 @@ class Feuille_Defi_Passe extends React.Component {
                 
                 // Envoyer la notifs aux cap adverse 
                 await this.sendNotifToCapitaineAdverse(this.state.equipeOrganisatrice, this.state.equipeDefiee.nom)
-
             } else {
                 var joueurs = []
             }
@@ -195,6 +196,31 @@ class Feuille_Defi_Passe extends React.Component {
 
             })
         }
+    }
+
+
+    /**
+     * Fonction qui va sauvegarder dans la base de donnée la notification indiquant que le
+     * capitaine adverse a renseigné la feuille de match.
+     */
+    async storeNotifToCapAdverse(joueur) {
+        console.log("In storeNotifToCapAdverse =============")
+        
+            await db.collection("Notifs").add({
+                    time : new Date(),
+                    dateParse : Date.parse(new Date()),
+                    defi : this.state.defi.id,
+                    emetteur :  LocalUser.data.id,
+                    recepteur : joueur.id,
+                    type : Types_Notification.FEUILLE_COMPLETEE_ADVERSE,
+                    equipeOrganisatrice  : this.state.equipeOrganisatrice.id,
+                    equipeDefiee : this.state.equipeDefiee.id
+
+            })
+                 
+            
+           
+        
     }
 
     // ==================================================================
@@ -272,6 +298,7 @@ class Feuille_Defi_Passe extends React.Component {
      *  les listes des joueurs en attente car vu le fait qu'un joueurs soit dans les confirmé suffit.
      */
     async enregistrer() {
+        this.setState({isLoading : true})
         await this.sendNotifFeuilleRemplieCap()
         console.log("after send notif ")
         var db = Database.initialisation()
@@ -618,54 +645,64 @@ class Feuille_Defi_Passe extends React.Component {
     // =====================================================================
 
     render() {
-        return(
-            <View style = {{flex : 1}}> 
-                {/* Bandeau superieur */}
-                <View style = {{flexDirection : 'row', backgroundColor : Colors.grayItem, justifyContent: 'space-between',paddingVertical : hp('1%'),paddingHorizontal : wp('3%')}}>
-                    <TouchableOpacity
-                        >
-                        <Text style = {styles.txtBoutton} >Annuler</Text>
-                    </TouchableOpacity>
+        if(!this.state.isLoading) {
+            return(
+                <View style = {{flex : 1}}> 
+                    {/* Bandeau superieur */}
+                    <View style = {{flexDirection : 'row', backgroundColor : Colors.grayItem, justifyContent: 'space-between',paddingVertical : hp('1%'),paddingHorizontal : wp('3%')}}>
+                        <TouchableOpacity
+                            >
+                            <Text style = {styles.txtBoutton} >Annuler</Text>
+                        </TouchableOpacity>
 
-                    <Text> Feuille de match </Text>
+                        <Text> Feuille de match </Text>
+                        
+                        <TouchableOpacity
+                            onPress= {() => this.enregistrer()}
+                            >
+                            <Text style = {styles.txtBoutton}>Enregister</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* View contenant les équipes */}
+                    <View >
+
+                        <Animated.View
+                            style = {this.equipe1Animation.getLayout()}
+                            >
+                            <Equipe_Nom_Score
+                                photo = {this.state.equipeOrganisatrice.photo}
+                                score = {this.state.equipeOrganisatrice.score}
+                                nom = {this.state.equipeOrganisatrice.nom}
+                                
+                            />
+                            {this.chooseBtnButToRender(this.state.equipeOrganisatrice.id)}
+                        </Animated.View>
+
+                        {this.renderScore()}
+
+                        
+                        {this._renderEquipeDefie()}
+
+                    </View>
+
                     
-                    <TouchableOpacity
-                        onPress= {() => this.enregistrer()}
-                        >
-                        <Text style = {styles.txtBoutton}>Enregister</Text>
-                    </TouchableOpacity>
+
+
+                    <Text>Statistiques joueurss</Text>
+
+                    <TabDefiPasse/>
                 </View>
-
-                {/* View contenant les équipes */}
-                <View >
-
-                    <Animated.View
-                        style = {this.equipe1Animation.getLayout()}
-                        >
-                        <Equipe_Nom_Score
-                            photo = {this.state.equipeOrganisatrice.photo}
-                            score = {this.state.equipeOrganisatrice.score}
-                            nom = {this.state.equipeOrganisatrice.nom}
-                            
+            )
+        } else {
+            return(
+                <View>
+                    <Simple_Loading
+                        taille = {hp('3%')}
                         />
-                        {this.chooseBtnButToRender(this.state.equipeOrganisatrice.id)}
-                    </Animated.View>
-
-                    {this.renderScore()}
-
-                    
-                    {this._renderEquipeDefie()}
-
                 </View>
-
-                
-
-
-                <Text>Statistiques joueurss</Text>
-
-                <TabDefiPasse/>
-            </View>
-        )
+            )
+        }
     }
 }
 

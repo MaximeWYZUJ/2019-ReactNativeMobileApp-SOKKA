@@ -16,6 +16,12 @@ import Notif_Refu_Accepte_Equipe from './Notif_Equipe/Notif_Refu_Accepte_Equipe'
 import Notif_Ajout_Reseau from './Notifs_Reseau/Notif_Ajout_Reseau';
 import Notif_Accepter_Refuser_Defi_Adverse from './Notif_Defi_Partie/Notif_Accepter_Refuser_Defi_Adverse'
 import Notif_feuille_completee_Defi from './Notifs_Feuille_Match/Notif_feuille_completee_Defi'
+import Notif_feuille_completee_Defi_adverse from './Notifs_Feuille_Match/Notif_feuille_completee_Defi_adverse'
+import Notif_feuille_completee_Partie from './Notifs_Feuille_Match/Notif_feuille_completee_Partie'
+import Notif_Ajout_Equipe_Favorite from './Notif_Equipe/Notif_Ajout_Equipe_Favorite'
+import Notif_Demande_Integrer_Equipe from './Notif_Equipe/Notif_Demande_Integrer_Equipe'
+import Notif_Rep_Demande_Integration_Equipe from './Notif_Equipe/Notif_Rep_Demande_Integration_Equipe'
+
 /**
  * class qui va permettre d'afficher le bon type de notification en fonction 
  * de la notification recue en props
@@ -147,13 +153,54 @@ export default class Notifications_Factory extends React.Component {
                     />
                 )
 
-                case Types_Notification.FEUILLE_COMPLETEE : 
+            // Le capitaine de mon équipe a complété la feuille de match d'un défi
+            case Types_Notification.FEUILLE_COMPLETEE : 
+                return(
+                    <Notif_feuille_completee_Defi
+                        notification = {this.props.notification}/>
+                )
+            
+            // Le cap adversse à complété la feuille de match d'un défi
+            case Types_Notification.FEUILLE_COMPLETEE_ADVERSE : 
+                return(
+                    <Notif_feuille_completee_Defi_adverse
+                        notification = {this.props.notification}
+                        />
+                )
+
+            // L'organisateur d'une partie a complété la feuille de match
+            case Types_Notification.FEUILLE_COMPLETEE_PARTIE : 
+                return(
+                    <Notif_feuille_completee_Partie
+                        notification = {this.props.notification}
+                    />
+                )
+            
+            
+            // Un joueur demande d'intégrer une équipe dont je suis cap
+            case Types_Notification.DEMANDE_REJOINDRE_EQUIPE : 
                     return(
-                        <Notif_feuille_completee_Defi
-                            notification = {this.props.notification}/>
+                        <Notif_Demande_Integrer_Equipe
+                            notification = {this.props.notification}
+                        />
                     )
             
-                
+
+            // Si notre demande pour intégrer une équipe a été refusée
+            case Types_Notification.REFUSER_DEMANDE_INTEGRATION_EQUIPE : 
+                return(
+                    <Notif_Rep_Demande_Integration_Equipe
+                        notification = {this.props.notification}
+                    />
+                )
+            
+            // Si notre demande pour intégrer une équipe a été acceptée
+            case Types_Notification.ACCEPTER_DEMANDE_INTEGRATION_EQUIPE : 
+            return(
+                <Notif_Rep_Demande_Integration_Equipe
+                    notification = {this.props.notification}
+                />
+            )
             default : 
         }
         

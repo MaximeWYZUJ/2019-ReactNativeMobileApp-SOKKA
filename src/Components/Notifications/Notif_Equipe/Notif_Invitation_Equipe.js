@@ -111,10 +111,16 @@ class Notif_Invitation_Equipe extends React.Component {
             var equipeRef = db.collection("Equipes").doc(this.state.equipe.id)
             equipeRef.update({
                 joueurs : firebase.firestore.FieldValue.arrayUnion(LocalUser.data.id),
-                joueursAttentes : firebase.firestore.FieldValue.arrayRemove(LocalUser.data.id)
+                joueursAttentes : firebase.firestore.FieldValue.arrayRemove(LocalUser.data.id),
+                nbJoueurs  : this.state.equipe.nbJoueurs +1
 
             }).then(console.log("ok doc  joueur"))
             .catch(function(error) {console.log(error)})
+
+            var joueurRef = db.collection("Joueurs").doc(LocalUser.data.id)
+            joueurRef.update({
+                equipes : firebase.firestore.FieldValue.arrayUnion(this.state.equipe.id)
+            }).then(console.log("ok doc equipes du joueur "))
 
         }
 
@@ -261,7 +267,7 @@ class Notif_Invitation_Equipe extends React.Component {
             if(id != LocalUser.data.id && ! this.state.equipe.capitaines.includes(id)) {
                 var joueur = await Database.getDocumentData(id,"Joueurs")
                 var tokens = [] 
-                if(joueur.tokens != undefined) tokens = cap.tokens
+                if(joueur.tokens != undefined) tokens = joueur.tokens
                 console.log("before boucle send notif", tokens)
                 console.log("before boucle send notif", tokens.length)
 

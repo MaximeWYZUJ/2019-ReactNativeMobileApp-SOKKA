@@ -112,8 +112,23 @@ export default class Types_Notification {
      * d'un autre joueur.
      */
     static AJOUT_EQUIPE_FAVORITE = "AJOUT_EQUIPE_FAVORITE"
+
+
+    /**
+     * Quand l'utilisateur demande à rejoindre une "équipe"
+     */
+    static DEMANDE_REJOINDRE_EQUIPE = "DEMANDE_REJOINDRE_EQUIPE"
     
 
+    /**
+     * Quand le cap d'une équipe accepte que j'intègre une des ses équipe
+     */
+    static ACCEPTER_DEMANDE_INTEGRATION_EQUIPE = "ACCEPTER_DEMANDE_INTEGRATION_EQUIPE"
+
+     /**
+     * Quand le cap d'une équipe refuse que j'intègre une des ses équipe
+     */
+    static REFUSER_DEMANDE_INTEGRATION_EQUIPE = "REFUSER_DEMANDE_INTEGRATION_EQUIPE"
 
     //=========================================================================
     //============================= POUR LE RESEAU  ===========================
@@ -138,5 +153,16 @@ export default class Types_Notification {
      */
     static FEUILLE_COMPLETEE = "FEUILLE_COMPLETEE"
 
+
+    /**
+     * Quand le cap de l'équipe adverse d'un défi à complété la feuille de match
+     */
+    static FEUILLE_COMPLETEE_ADVERSE = "FEUILLE_COMPLETEE_ADVERSE"
+
+
+     /**
+     * Quand l'organisateur d'une partie complete la feuille de match
+     */
+    static FEUILLE_COMPLETEE_PARTIE = "FEUILLE_COMPLETEE_PARTIE"
 
 }

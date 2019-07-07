@@ -109,7 +109,7 @@ export default class Creation_Equipe_Photo extends React.Component {
             telephone : LocalUser.data.telephone,
             ville : this.props.navigation.getParam("ville", " "),
             defis : [],
-            nbJoueurs : this.props.navigation.getParam("joueurs", []).length +1,
+            nbJoueurs : 1,
             joueursAttentes : this.props.navigation.getParam("joueurs", [])
         }).then(this.updateJoueur()).catch(function(error){
             console.log(error)
@@ -120,13 +120,18 @@ export default class Creation_Equipe_Photo extends React.Component {
 
     /**
      * Fonction qui va permettre d'ajouter l'id de l'équipe à la liste des 
-     * équipes des joueurs.
+     * équipes de l'utilisateur.
      */
     async updateJoueur() {
         await this.sendNotifInvitationEquipe(this.state.idEquipe)
         var joueurs = this.state.joueurs
-        var db = Database.initialisation() 
-        for(var i = 0; i < joueurs.length ; i++) {
+        var db = Database.initialisation()
+        var joueurRef  = db.collection("Joueurs").doc(LocalUser.data.id)
+        await joueurRef.update({
+            equipes : firebase.firestore.FieldValue.arrayUnion(this.state.idEquipe)  
+        })
+        /*for(var i = 0; i < joueurs.length ; i++) {
+            if(joueurs[i] == LocalUser.data.id ) {
             var joueurRef  = db.collection("Joueurs").doc(joueurs[i])
             console.log("=============")
             console.log(joueurs[i])
@@ -136,7 +141,7 @@ export default class Creation_Equipe_Photo extends React.Component {
             console.log("ok")
             console.log("=============")
 
-        }
+        }*/
 
         // Recuperer les équipe de l'utilisateur pour le profil
         var eq = []

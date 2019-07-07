@@ -1,17 +1,19 @@
 import React from 'react'
-import {View, ScrollView,TouchableOpacity,Image,Text,FlatList} from 'react-native'
+import {View, ScrollView,TouchableOpacity,Image,Text,FlatList,Alert} from 'react-native'
 import Photo_Joueur_Equipe from './Photo_Joueur_Equipe';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from "react-native-responsive-fontsize"
 import Defis_Equipe from './Defis_Equipe'
-import Database from 'app/src/Data/Database'
+import Database from '../../Data/Database'
 import LocalUser from 'app/src/Data/LocalUser.json'
 import Type_Defis from '../../Vues/Jouer/Type_Defis'
-import firebase from 'firebase'
+import firebase, { database } from 'firebase'
+import Simple_Loading from '../../Components/Loading/Simple_Loading'
 //import '@firebase/firestore'
 
 import Item_Defi from '../../Components/Defis/Item_Defi'
 import Item_Partie from '../../Components/Defis/Item_Partie'
+import Types_Notification from '../../Helpers/Notifications/Types_Notification';
 
 /* A changer quand on aura accès aux données. */
 const nbEtoile = 5;
@@ -63,7 +65,8 @@ export default class Profil_Equipe extends React.Component {
             joueurs :'erreur',
             defis : 'erreur',
             id : ''  ,           // Utile pour accéder aux joueurs qui likent 
-            allDefis : []
+            allDefis : [],
+            isLoading : false
         }
     }
 
@@ -145,6 +148,7 @@ export default class Profil_Equipe extends React.Component {
         Database.getDocumentData(id, 'Equipes').then(async (doc) => {
             // Lecture des données propres de l'équipe
             this.setState({
+                isaMember : doc.joueurs.some(elmt => elmt === LocalUser.data.id),
                 id: id,
                 equipeData: doc,
                 txt_identite : doc.age + ' ans, ' + doc.ville,
@@ -187,10 +191,13 @@ export default class Profil_Equipe extends React.Component {
         var liste = [];
         for (jId of jArray){
             j = await Database.getDocumentData(jId, 'Joueurs');
+            tokens = []
+            if(j.tokens != undefined) tokens = j.tokens
             j2 = {
                 id: jId,
                 isCaptain: equipe.capitaines.some(elmt => elmt === jId),
-                photo: j.photo
+                photo: j.photo,
+                tokens : tokens
             }
 
             liste.push(j2)
@@ -334,6 +341,10 @@ export default class Profil_Equipe extends React.Component {
      * @param {String} body 
      */
     async sendPushNotification(token , title,body ) {
+        console.log("in send push notif")
+        console.log(token)
+        console.log(title)
+        console.log(body)
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: token,
@@ -353,37 +364,91 @@ export default class Profil_Equipe extends React.Component {
         });
     }
 
-    /**
-     * Fonction qui va envoyer la notification d'ajout de réseau au joueur concerné
-     */
-    async sendNotifAjoutReseau() {
-        var titre = "Nouvelle notif"
-        var corps = LocalUser.data.pseudo + " t'as ajouté à son réseau"
 
-        var tokens = []
-        if(this.joueur.tokens != undefined) tokens = this.joueur.tokens
-        for(var i = 0; i < this.joueur.tokens.length; i++) {
-           await  this.sendPushNotification(tokens[i],titre,corps)
+
+
+    /**
+     * Fonction qui envoie une notif aux capitaines de l'équipe en indiquant que 
+     * l'utilisateur souhaite la rejoindre
+     */
+    async sendNotifAjoutEquipe() {
+        var titre = "Nouvelle notif"
+        var corps = LocalUser.data.pseudo + " souhaite intégrer ton équipe " + this.state.nom
+        for(var i = 0; i < this.state.joueurs.length; i ++) {
+            var joueur = this.state.joueurs[i]
+            if(joueur.isCaptain) {
+                console.log("===================================",joueur)
+                await this.storeNotifRejoindreEquipe(joueur.id)
+                console.log("after store")
+                for(var k = 0; k < joueur.tokens.length; k++) {
+                    await this.sendPushNotification(joueur.tokens[k], titre,corps)
+                }
+            }
         }
     }
 
+
     /**
-     * Fonction qui va envoyer la notification puis la  sauvegarder
-     * dans la base de données.
+     * Fonction qui va sauvegarder la notification de demande d'intégration à l'équipe
      */
-    async storeNotifAjoutInDb() {
-        await this.sendNotifAjoutReseau()
+    async storeNotifRejoindreEquipe(joueurId) {
         var db = Database.initialisation()
-        db.collection("Notifs").add({
-            emetteur : LocalUser.data.id,
-            recepteur : this.joueur.id,
-            type : Types_Notification.AJOUT_RESEAU,
-            time : new Date(),
-            dateParse : Date.parse(new Date())
-        })
+        db.collection("Notifs").add(
+            {
+                time : new Date(),
+                dateParse : Date.parse(new Date()),
+                recepteur : joueurId,
+                emetteur : LocalUser.data.id,
+                equipe : this.state.id,
+                type : Types_Notification.DEMANDE_REJOINDRE_EQUIPE
+            }
+        )
     }
 
 
+    /**
+     * Fonction qui affiche l'alert pour confirmer ou non le souhait de rejoindre
+     * l'équipe
+     */
+    buildAlertIntegerEquipe(){
+
+        Alert.alert(
+            '',
+            "Tu souhaites faire une demande pour intégrer l'équipe " + this.state.nom ,
+            [
+                {text: 'Confirmer', onPress: () =>this.joinEquipe()},
+                {
+                text: 'Annuler',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+                },
+            ],
+        )
+    }
+
+    /**
+     * Fonction qui ajoute l'utilisateur dans les joueurs en attente de l'équipe et envoie
+     * une notification aux capitaine.
+     */
+    async joinEquipe() {
+        this.setState({isLoading : true})
+        await this.sendNotifAjoutEquipe()
+        await this.addJoueurInEquipe()
+        Alert.alert('',"Ta demande a bien été envoyée à l'équipe " + this.state.nom)
+        this.setState({isLoading : false})
+    }
+
+
+    /**
+     * Fonction qui ajoute un joueur aux joueurs en attente de l'équipe
+     */
+    async addJoueurInEquipe() {
+        var db = Database.initialisation()
+        db.collection("Equipes").doc(this.state.id).update({
+            joueursAttentes : firebase.firestore.FieldValue.arrayUnion(LocalUser.data.id)
+        })
+    }
+    
 
     /*******************************************************************************
     ***********************   FONCTIONS POUR L'AFFICHAGE    ************************
@@ -440,7 +505,9 @@ export default class Profil_Equipe extends React.Component {
                             source = {require('app/res/icon_message.png')}
                             style = {styles.icon_message} />
                     </TouchableOpacity>
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                        onPress = {() => this.buildAlertIntegerEquipe()}>
+                            
                         <Image
                             source = {require('app/res/icon_plus.png')}
                             style = {styles.icon_plus} />
@@ -544,92 +611,100 @@ export default class Profil_Equipe extends React.Component {
      * Fonction qui nous permet d'afficher la vue du profil de l'équipe
      */
     displayProfil() {
-        return (
-            <ScrollView>
-                <View style = {styles.info_equipe}>
+        if(! this.state.isLoading) {
+            return (
+                <ScrollView>
+                    <View style = {styles.info_equipe}>
 
-                    {/* BLOC INFOS DE L'EQUIPE */}
-                    <View style = {styles.bloc_identite}>
+                        {/* BLOC INFOS DE L'EQUIPE */}
+                        <View style = {styles.bloc_identite}>
 
-                        <View style = {styles.main_container_photo}>
-                            <TouchableOpacity
-                                onPress = {()=>this.changeStateFullPictureWithBool(true)}
-                            >
-                                <Image source = {{uri :this.state.url}} style = {styles.image_profil_equipe} />
-                            </TouchableOpacity>
+                            <View style = {styles.main_container_photo}>
+                                <TouchableOpacity
+                                    onPress = {()=>this.changeStateFullPictureWithBool(true)}
+                                >
+                                    <Image source = {{uri :this.state.url}} style = {styles.image_profil_equipe} />
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* text de l'équipe */}
+                            <View style = {styles.main_container_txt}>
+                                <Text style = {styles.age_ville}>{this.state.txt_identite}</Text>
+                                <Text style = {styles.quote} numberOfLines={2}>{this.state.citation}</Text>
+                                <Text style = {styles.nb_joueur}>{this.state.nbJoueur}</Text>
+                            </View>
+
+                            {/* action de l'équipe */}
+                            {this.displayActionEquipe()}
                         </View>
 
-                        {/* text de l'équipe */}
-                        <View style = {styles.main_container_txt}>
-                            <Text style = {styles.age_ville}>{this.state.txt_identite}</Text>
-                            <Text style = {styles.quote} numberOfLines={2}>{this.state.citation}</Text>
-                            <Text style = {styles.nb_joueur}>{this.state.nbJoueur}</Text>
+                        {/* BLOC NOTATION ET NB DE LIKE */}
+                        <View style = {styles.bloc_notation_like}>
+                            <View style = {styles.main_container_notation}>
+                                <Image source = {require(uriEtoile)} style = {styles.etoiles} />
+                                <Text style = {styles.fiabilite}>Fiabilité, {this.state.fiabilite}</Text>
+                            </View>
+
+                            <View style = {styles.main_container_like}>
+                                <TouchableOpacity
+                                    onPress = {()=> {this.gotoJoueursQuiLikent()}}>
+                                    <Text>{this.state.equipeData.aiment.length} likes</Text>
+                                </TouchableOpacity>
+                                {this.likeEquipe()}
+                            </View>
                         </View>
 
-                        {/* action de l'équipe */}
-                        {this.displayActionEquipe()}
+                        {/* BLOC DEFIS */}
+                        <View style = {styles.bloc_defis}>
+                            <View style = {styles.vue_txt}><Text style = {styles.txt_defi} >{this.state.nbDefitCree} défis créés</Text></View>
+                            <View style = {styles.vue_txt}><Text style = {styles.txt_defi}>{this.state.nbDefitParticipe} défis participés</Text></View>
+                        </View>
+                        {/*this.displayCapitanat()*/}
                     </View>
 
-                    {/* BLOC NOTATION ET NB DE LIKE */}
-                    <View style = {styles.bloc_notation_like}>
-                        <View style = {styles.main_container_notation}>
-                            <Image source = {require(uriEtoile)} style = {styles.etoiles} />
-                            <Text style = {styles.fiabilite}>Fiabilité, {this.state.fiabilite}</Text>
+                    {/* BLOC POUR LES JOUEURS DE L'EQUIPE */}
+                    <View style = {styles.main_container_joueur}>
+                        <View style = {styles.vue_txt_joueur}>
+                            <Text style = {styles.txt_joueur}>Joueurs de l'équipe</Text>
                         </View>
 
-                        <View style = {styles.main_container_like}>
-                            <TouchableOpacity
-                                onPress = {()=> {this.gotoJoueursQuiLikent()}}>
-                                <Text>{this.state.equipeData.aiment.length} likes</Text>
-                            </TouchableOpacity>
-                            {this.likeEquipe()}
-                        </View>
+                        <FlatList style = {{marginLeft : wp('2%')}}
+                            data={this.state.joueurs}
+                            numColumns={5}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({item}) =>
+
+                                <View style = {styles.view_shadow}>
+                                    <Photo_Joueur_Equipe
+                                        urlPhoto = {item.photo}
+                                        isCaptain = {item.isCaptain}
+                                        id = {item.id}
+                                        nav = {this.props.navigation}
+                                    />
+                                </View>
+                            }
+                        />
                     </View>
 
                     {/* BLOC DEFIS */}
-                    <View style = {styles.bloc_defis}>
-                        <View style = {styles.vue_txt}><Text style = {styles.txt_defi} >{this.state.nbDefitCree} défis créés</Text></View>
-                        <View style = {styles.vue_txt}><Text style = {styles.txt_defi}>{this.state.nbDefitParticipe} défis participés</Text></View>
+                    <View style = {styles.main_container_defis}>
+                        <View style = {styles.view_txt_defis}>
+                            <TouchableOpacity>
+                                <Text style = {styles.txt_defis}>Parties de l'équipe</Text>
+                            </TouchableOpacity>
+
+                        </View>
+                        {this.displayDefis()}
                     </View>
-                    {/*this.displayCapitanat()*/}
-                </View>
-
-                {/* BLOC POUR LES JOUEURS DE L'EQUIPE */}
-                <View style = {styles.main_container_joueur}>
-                    <View style = {styles.vue_txt_joueur}>
-                        <Text style = {styles.txt_joueur}>Joueurs de l'équipe</Text>
-                    </View>
-
-                    <FlatList style = {{marginLeft : wp('2%')}}
-                        data={this.state.joueurs}
-                        numColumns={5}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({item}) =>
-
-                            <View style = {styles.view_shadow}>
-                                <Photo_Joueur_Equipe
-                                    urlPhoto = {item.photo}
-                                    isCaptain = {item.isCaptain}
-                                    id = {item.id}
-                                    nav = {this.props.navigation}
-                                />
-                            </View>
-                        }
-                    />
-                </View>
-
-                {/* BLOC DEFIS */}
-                <View style = {styles.main_container_defis}>
-                    <View style = {styles.view_txt_defis}>
-                        <TouchableOpacity>
-                            <Text style = {styles.txt_defis}>Parties de l'équipe</Text>
-                        </TouchableOpacity>
-
-                    </View>
-                    {this.displayDefis()}
-                </View>
-            </ScrollView>
-        )
+                </ScrollView>
+            )
+        } else {
+            return(
+                <Simple_Loading
+                    taille = {hp('5%')}
+                />
+            )
+        }
     }
 
 
