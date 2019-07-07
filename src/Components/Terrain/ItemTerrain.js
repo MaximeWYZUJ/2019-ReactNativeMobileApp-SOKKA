@@ -27,13 +27,18 @@ class ItemTerrain extends React.Component{
 
     displayWordKm() {
         if (this.props.distance != undefined) {
-            return (<Text>{this.props.distance} km</Text>)
+            let distString = this.props.distance+"";
+            let values = distString.split(".");
+            
+            if (values.length > 1) {
+                let dispDistance = values[0]+","+values[1].substr(0,2);
+                return (<Text>{dispDistance} km</Text>)
+            }
         }
     }
 
 
     render() {
-        console.log(this.props.nom)
         return (
             <View style = {{flexDirection : 'row',marginBottom : hp('2%'), backgroundColor : "white", paddingBottom : hp('2%'),paddingTop : hp('2%')}}>
                
@@ -50,10 +55,11 @@ class ItemTerrain extends React.Component{
                        {this.displayWordKm()}
                     </View>
 
-                    {/* ===== NOM DE L'INSTALATION ET DU TERRAINS ====*/}
+                    {/* ===== NOM DE L'INSTALLATION ET DU TERRAIN ====*/}
                     <View style = {{alignSelf: "center", marginLeft : wp('4%')}}>
                         <Text style = {{fontWeight : "bold",color : Colors.agooraBlueStronger, fontSize : RF(2.35)}}>{this.props.InsNom}</Text>
                         <Text>{this.props.EquNom}</Text>
+                        <Text>{this.props.Ville}</Text>
                     </View>
                 </TouchableOpacity>
 
@@ -67,26 +73,6 @@ class ItemTerrain extends React.Component{
                 </TouchableOpacity>
             </View>
         )
-        /*return (
-            <View style = {[styles.main_container, {backgroundColor : Colors.grayItem}]}>
-                <TouchableOpacity 
-                    style = {{flex:1, flexDirection : 'row'}}
-                    onPress={() => this.gotoProfilTerrain()}>
-                    <Image 
-                        source = {{uri : this.props.photo}}
-                        style = {{width : wp('15%'), height : wp('15%'), marginBottom : hp('1%'), marginTop : hp('1%')}}/>
-                    <View style = {styles.txt_container}>                    
-                        <Text style = {{fontSize : RF(2.3), marginLeft : wp('2%')}}>{this.props.nom} - {this.props.distance} km</Text>
-                        <Text style = {{fontSize : RF(2.3), marginLeft : wp('2%')}}>{this.props.ville}</Text>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity style = {{alignSelf: 'center'}}>
-                    <Image 
-                        style = {{width : wp('10%'), height : wp('10%')}}
-                        source ={require('app/res/icon_like.png')}/>
-                </TouchableOpacity>
-            </View>
-        )*/
     }
 }
 const styles = {

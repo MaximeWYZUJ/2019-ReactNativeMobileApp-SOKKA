@@ -11,7 +11,6 @@ export default class RechercheFavoris extends React.Component {
 
     constructor(props) {
         super(props)
-
         // Collection
         this.type = this.props.navigation.getParam("type", null); // Joueurs, Equipes, Terrains, Defis
         this.allFav = this.props.navigation.getParam("dataFav", []);

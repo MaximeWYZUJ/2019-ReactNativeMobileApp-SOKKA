@@ -1,5 +1,6 @@
 import React from 'react'
-import { View, Text, FlatList } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, Image, Alert } from 'react-native'
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 import BarreRechercheQuery from '../../Components/Recherche/Barre_Recherche_Query'
 import ItemJoueur from '../../Components/ProfilJoueur/JoueurItem'
@@ -32,7 +33,6 @@ export default class RechercheDefaut extends React.Component {
             dataDefaut: [],
             displayFiltres: false,
         }
-
     }
 
 
@@ -135,6 +135,32 @@ export default class RechercheDefaut extends React.Component {
         })
     }
 
+
+    renderSpecialButton() {
+        if (this.type == "Equipes") {
+            return (
+                <TouchableOpacity onPress={() => Alert.alert(
+                    '',
+                    "Tu souhaites créer une équipe ?",
+                    [
+                        {
+                            text: 'Annuler',
+                            onPress: () => {},
+                            style: 'cancel'
+                        },
+                        {
+                            text: 'Continuer',
+                            onPress: () => this.props.navigation.navigate("CreationEquipeNom"),
+                        },
+                    ],
+                    )}>
+                    <Image source={require('../../../res/icon_team.png')} style={{width: wp('20%'), height: wp('20%')}}/>
+                </TouchableOpacity>
+            )
+        }
+    }
+
+
     render() {
         console.log(this.type)
         if (this.queryFiltre === null) {
@@ -144,14 +170,21 @@ export default class RechercheDefaut extends React.Component {
         }
         return (
             <View style={{flex: 1}}>
-                <BarreRechercheQuery
-                    handleResults={this.validerRecherche}
-                    collection={this.type}
-                    field={this.champNom}
-                    nbOfChar={nbChar}
-                    handleFilterButton={this.handleFilterButton}
-                    handleFilterQuery={this.queryFiltre}
-                />
+                <View style={{flexDirection: 'row'}}>
+                    <View style={{flex: 4}}>
+                        <BarreRechercheQuery
+                            handleResults={this.validerRecherche}
+                            collection={this.type}
+                            field={this.champNom}
+                            nbOfChar={nbChar}
+                            handleFilterButton={this.handleFilterButton}
+                            handleFilterQuery={this.queryFiltre}
+                        />
+                    </View>
+                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                        {this.renderSpecialButton()}
+                    </View>
+                </View>
                 {this.displayFiltresComponents()}
                 <FlatList
                     data={this.state.dataDefaut}

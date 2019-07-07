@@ -2,7 +2,6 @@ import React from 'react'
 import {View, Text,Image,TouchableOpacity, TextInput, ScrollView,FlatList} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Colors from '../../Components/Colors'
-import Slider from "react-native-slider";
 import RF from 'react-native-responsive-fontsize';
 
 import Joueurs from '../../Helpers/JoueursForAjout'

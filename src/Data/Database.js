@@ -25,7 +25,7 @@ export default class Database {
       };
 
     static initialisation() {
-       var config = {
+        var config = {
             apiKey: "AIzaSyCwFc_A3KZlTgfLJC9PWVR1o99MbGHZXNw",
             authDomain: "agoora-ccf6c.firebaseapp.com",
             databaseURL: "https://agoora-ccf6c.firebaseio.com",

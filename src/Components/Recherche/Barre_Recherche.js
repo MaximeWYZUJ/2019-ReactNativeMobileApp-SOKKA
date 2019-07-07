@@ -30,8 +30,8 @@ export default class Barre_Recherche extends React.Component {
         this.field = this.props.field
         this.state = {
             data :this.props.data
-        } 
-
+        }
+        this.texteRecherche = "";
     }
 
 
@@ -42,21 +42,24 @@ export default class Barre_Recherche extends React.Component {
      * searchedText
 	 */
 	searchedTerrains = (searchedText) => {
+
         if (searchedText === "") {
-            if(this.filterData != undefined) {
+            if(this.filterData != undefined && this.filterData != null) {
                 this.props.handleTextChange(this.props.filterData(this.DataDepart))
             } else {
                 this.props.handleTextChange(this.DataDepart)
-
             }
+
         } else {
             let field = this.field
             let searchData = this.props.data.filter(function(data) {
                 return data[field].includes(NormalizeString.normalize(searchedText)) // toLowerCase().startsWith(searchedText.toLowerCase()) ;
             });
-            if(this.props.filterData != undefined) {
+
+            if(this.props.filterData != undefined && this.filterData != null) {
                 searchData = this.props.filterData(searchData);
             }
+
             this.props.handleTextChange(searchData)
         }
     };
@@ -74,13 +77,13 @@ export default class Barre_Recherche extends React.Component {
                         <TextInput
                             style={{flex: 1, borderWidth: 1, width : wp('9%'), backgroundColor : 'white'}}
                             placeholder = "  Rechercher"
-                            onChangeText={this.searchedTerrains}
+                            onChangeText={(t) => {this.texteRecherche = t; this.searchedTerrains(t)}}
                         />
 
                         {/* Icon de la loupe*/}
                         <TouchableOpacity
                             style = {{backgroundColor : Colors.agooraBlueStronger, paddingVertical : hp('1%'), paddingHorizontal : wp('3%'), borderRightWidth : 1, borderBottomWidth : 1, borderTopWidth : 1}}
-                            onPress={() => this.searchedTerrains("")}
+                            onPress={() => this.searchedTerrains(this.texteRecherche)}
                             >
                             <Image 
                                 style={{width : wp('5%'), height : wp('5%'), borderWidth : 1}}
@@ -92,7 +95,7 @@ export default class Barre_Recherche extends React.Component {
                         style = {{backgroundColor : 'white', flexDirection : 'row', marginLeft : wp('3%'),paddingVertical : hp('1%'), paddingHorizontal :wp('3%')}}
                         onPress={() => {this.props.handleFilterButton()}}
                         >
-                            <Image 
+                            <Image
                                 style={{width : wp('7%'), height : wp('7%'), alignSelf : 'center'}}
                                 source = {require('app/res/controls.png')} />
                     </TouchableOpacity>

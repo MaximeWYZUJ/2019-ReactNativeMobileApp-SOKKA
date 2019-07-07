@@ -4,6 +4,7 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import RF from 'react-native-responsive-fontsize';
 import MapView, { MAP_TYPES, ProviderPropType } from 'react-native-maps';
 import Terrains from '../../../Helpers/Toulouse.json'
+import ItemTerrain from '../../../Components/Terrain/ItemTerrain'
 import Item_Terrain_creation_defis from '../../../Components/Terrain/Item_Terrain_creation_defis'
 import Item_Terrain_Map_Creation_Defis from '../../../Components/Terrain/Item_Terrain_Map_Creation_Defis'
 import Distance from '../../../Helpers/Distance'
@@ -15,6 +16,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import Slider from "react-native-slider";
 import Color from '../../../Components/Colors'
 import FiltrerTerrain from '../../../Components/Recherche/FiltrerTerrain'
+import LocalUser from '../../../Data/LocalUser.json'
 
 
 const { width, height } = Dimensions.get('window');
@@ -36,10 +38,11 @@ class Terrains_Autours extends React.Component {
 
     constructor(props) {
 		super(props)
-		console.log("MAJ !!!!")
-		this.latitude =	this.props.latitude
-		this.longitude =  this.props.longitude
-		this.allTerrains = this.fetchClosestTerrains(this.buildTerrains()),
+		this.latitude =	LocalUser.geolocalisation.latitude;//this.props.latitude
+		this.longitude =  LocalUser.geolocalisation.longitude;
+		this.allTerrains = this.fetchClosestTerrains(this.buildTerrains())
+
+		console.log(this.latitude+"  ;  "+this.longitude);
 		
         this.state = {
 			txtRecherche : '',
@@ -53,8 +56,8 @@ class Terrains_Autours extends React.Component {
 			displayFiltres: false,
 			filtres: null,
 			region : {
-				latitude: 37.78825,
-				longitude: -122.4324,
+				latitude: this.latitude,
+				longitude: this.longitude,
 				latitudeDelta: 0.0922,
 				longitudeDelta: 0.0421,
 			  },
@@ -248,7 +251,6 @@ class Terrains_Autours extends React.Component {
 
 		var newListe = this.fetchClosestTerrains(this.buildTerrainsWithRegionChanged())
 
-		console.log("after fetch closest terrain")
 		var markers = []
 		for(var i =0 ; i < 8; i ++) {
 			var t =  {
@@ -259,7 +261,6 @@ class Terrains_Autours extends React.Component {
 				  },
 				  id : newListe[i].id
 			}
-			console.log(i)
 			markers.push(t)
 		}
 
@@ -269,8 +270,6 @@ class Terrains_Autours extends React.Component {
 			latitudeDelta: 0.0922,
 			longitudeDelta: 0.0421,
 		}
-		//console.log(this.state.terrains[index].Latitude)
-		//console.log(this.state.terrains[index].Longitude)
 		this.map.animateToRegion(region,1000)
 		this.setState({markers : markers, terrainFiltres : newListe,terrainSelectionne : markers[0]})
 	}
@@ -303,19 +302,15 @@ class Terrains_Autours extends React.Component {
 				},
 				id : this.state.terrainFiltres[index].id
 		}
-		console.log(t.id)
 		liste.push(t)
         this.setState({ indexState : index,selectedTerrain : t})
-        //console.log(this.state.markers)
 		this.fitAllMarkers(index)
 
 	}
 
 	fitAllMarkers(index) {
 
-        //console.log("IN FIT ALL MARKERS")
 		let markers = [
-				//{latitude : this.latitude, longitude: this.longitude}, 
 				{latitude : parseFloat(this.state.terrainFiltres[index].Latitude), longitude : parseFloat(this.state.terrainFiltres[index].Longitude)}
 			]
 			var region = {
@@ -324,8 +319,6 @@ class Terrains_Autours extends React.Component {
 				latitudeDelta: 0.0922,
 				longitudeDelta: 0.0421,
 			}
-            //console.log(this.state.terrains[index].Latitude)
-			//console.log(this.state.terrains[index].Longitude)
 			this.map.animateToRegion(region,1000)
     //	this.map.fitToCoordinates(markers, {edgePadding: DEFAULT_PADDING,animated: true,});
 	}
@@ -336,8 +329,6 @@ class Terrains_Autours extends React.Component {
 		oldRegion = this.state.region
 		distance = Distance.calculDistance(oldRegion.latitude, oldRegion.longitude, region.latitude, region.longitude)
 		if(distance >= 0.8) {
-			console.log("DISTANCE :", distance )
-			//console.log(region)
 			this.setState({ region : region })
 		}
 	
@@ -357,20 +348,32 @@ class Terrains_Autours extends React.Component {
 	_renderItem = ({item}) => {
         var distance = item.distance
         var txtDistance = distance.toString().split('.')[0];
-        txtDistance = txtDistance +','+ distance.toString().split('.')[1][0]
-        return (
-			<Item_Terrain_creation_defis
-				InsNom = {item.InsNom}
-				EquNom = {item.EquNom}
-				distance = {txtDistance}
-				id = {item.id}
-				isShown = {this.props.terrainSelectionne == item.id}
-				payant = {item.Payant}
-                N_Voie = {item.N_Voie}
-                Voie = {item.Voie}
-                Ville = {item.Ville}
-
-		/>)
+		txtDistance = txtDistance +','+ distance.toString().split('.')[1][0]
+		
+		if (this.props.gotoItemOnPress != undefined && this.props.gotoItemOnPress != null && this.props.gotoItemOnPress) {
+			return (
+				<ItemTerrain
+                    id={item.id}
+                    distance={distance}
+                    InsNom={item.InsNom}
+                    EquNom={item.EquNom}
+					Ville={item.Ville}
+                />
+			)
+		} else {
+			return (
+				<Item_Terrain_creation_defis
+					InsNom = {item.InsNom}
+					EquNom = {item.EquNom}
+					distance = {txtDistance}
+					id = {item.id}
+					isShown = {this.props.terrainSelectionne == item.id}
+					payant = {item.Payant}
+					N_Voie = {item.N_Voie}
+					Voie = {item.Voie}
+					Ville = {item.Ville}
+				/>)
+		}
 	}
 
 
@@ -381,11 +384,13 @@ class Terrains_Autours extends React.Component {
 	*/
     _renderItemCarrousel = ({item,index}) => {
 
-		//console.log(this.props.terrainSelectionne)
 		var distance = item.distance
         var txtDistance = distance.toString().split('.')[0];
-        txtDistance = txtDistance +','+ distance.toString().split('.')[1][0]
-        return (
+		txtDistance = txtDistance +','+ distance.toString().split('.')[1][0]
+
+		var gotoItem = this.props.gotoItemOnPress != undefined && this.props.gotoItemOnPress;
+
+		return (
 			<Item_Terrain_Map_Creation_Defis				
 				InsNom = {item.InsNom}
 				EquNom = {item.EquNom}
@@ -394,8 +399,10 @@ class Terrains_Autours extends React.Component {
 				id = {item.id}
 				isShown = {this.props.terrainSelectionne == item.id}
 				distance = {txtDistance}
-
-		/>)
+				gotoItemOnPress = {gotoItem}
+				nav = {this.props.navigation}
+			/>
+		)
 	}
 
 

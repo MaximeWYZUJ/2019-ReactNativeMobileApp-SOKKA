@@ -46,7 +46,6 @@ export default class Rechercher_Terrains_Map  extends React.Component {
 		super(props);
 		this.latitude = this.props.navigation.getParam('latitude', ' ')
 		this.longitude = this.props.navigation.getParam('longitude', ' ')
-		console.log("eee: ",this.longitude)
 
 		let terrains = this.fetchClosestTerrains()
 		let marker = {
@@ -56,7 +55,6 @@ export default class Rechercher_Terrains_Map  extends React.Component {
 				  		longitude: terrains[0].Longitude,
 				  }
 			}
-		//console.log(terrains)
 		this.state = {
 			indexState : 0,
 			location : null,
@@ -77,69 +75,6 @@ export default class Rechercher_Terrains_Map  extends React.Component {
 	static navigationOptions = {
 		title: 'Rechercher un terrain',
 	};
-
-
-
-
-	componentDidMount() {
-		//this.fitAllMarkers(0)
-
-		/*navigator.geolocation.getCurrentPosition(
-			(position) => {
-		
-				// Calculer la distance pour tous les terrains
-				let latUser = position.coords.latitude
-				let longUser = position.coords.longitude
-				let terrains = []
-				/*for(var i = 0; i< Terrains.length ; i++) {
-					let rad_lata = (latUser * Math.PI)/180;
-					let rad_long = ((longUser- Terrains[i].Longitude) * Math.PI)/180;
-					let rad_latb = (Terrains[i].Latitude * Math.PI)/180;
-					let d = Math.acos(Math.sin(rad_lata)*Math.sin(rad_latb)+
-					Math.cos(rad_lata)*Math.cos(rad_latb)*Math.cos(rad_long))*6371
-					var txtDistance = d.toString().split('.')[0];
-					txtDistance = txtDistance +','+ d.toString().split('.')[1][0]
-					
-					terrains.push({
-						InsNom: Terrains[i].InsNom,
-						EquNom:  Terrains[i].EquNom,
-						Longitude: Terrains[i].Longitude ,
-						Latitude: Terrains[i].Latitude,
-						distance : txtDistance,
-						id : i
-					})
-				}
-				
-
-			  	this.setState({
-					region : {
-						latitude: parseFloat(position.coords.latitude),
-						longitude: parseFloat(position.coords.longitude),
-						latitudeDelta: LATITUDE_DELTA,
-			  			longitudeDelta: LONGITUDE_DELTA,
-					},
-					//terrains : terrains,
-					loadingFinish : true
-					//markers : terrains
-			  });
-			  
-			},
-			//(error) => this.setState({ error: error.message }),
-			{ enableHighAccuracy: true, timeout: 2000, maximumAge: 10 },
-		);*/
-
-		// TEST GEOQUERY
-		/*const geofirestore  = new GeoFirestore(Database.initialisation())
-		const geocollection = geofirestore.collection('Terrains')
-		const query = geocollection.near({ center: new firebase.firestore.GeoPoint(this.latitude, this.longitude), radius: 10 });
-		query.limit(1).get().then((value) => {
-			console.log("nb docs : ",value.docs.length); // All docs returned by GeoQuery
-			
-			this.setState({terrainsQuery : value.docs})
-		});*/
-
-	}
-	  
 	
    
 	
@@ -212,19 +147,15 @@ export default class Rechercher_Terrains_Map  extends React.Component {
 		}
 		liste.push(t)
         this.setState({markers : liste, indexState : index})
-        //console.log(this.state.markers)
 		this.fitAllMarkers(index)
 
 	}
 
 	fitAllMarkers(index) {
-        //console.log("IN FIT ALL MARKERS")
 		let markers = [
 				{latitude : this.latitude, longitude: this.longitude}, 
 				{latitude : parseFloat(this.state.terrains[index].Latitude), longitude : parseFloat(this.state.terrains[index].Longitude)}
             ]
-            //console.log(this.state.terrains[index].Latitude)
-            //console.log(this.state.terrains[index].Longitude)
     	this.map.fitToCoordinates(markers, {edgePadding: DEFAULT_PADDING,animated: true,});
   	}
 	
@@ -290,9 +221,7 @@ export default class Rechercher_Terrains_Map  extends React.Component {
 			newListe  = x[1]
             liste.push(terrain)
 		}
-		
-		//console.log("Terrain : ", Terrains.length)
-		console.log("liste triée : ", liste.length )
+
 		return liste
 
 
@@ -307,7 +236,6 @@ export default class Rechercher_Terrains_Map  extends React.Component {
 	   * @param {*} param0 
 	*/
 	_renderItemCarrousel ({item, index}) {
-		console.log("eee: ")
 
 		return(
 			
@@ -317,28 +245,10 @@ export default class Rechercher_Terrains_Map  extends React.Component {
 					id = {item.id}
 				/>
 		)
-		/* Calcul de la distance 
-		let rad_lata = (this.props.navigation.getParam('latitude', ' ') * Math.PI)/180;
-		let rad_long = ((this.props.navigation.getParam('longitude', ' ')- parseFloat(item.Longitude)) * Math.PI)/180;
-		let rad_latb = (parseFloat(item.Latitude) * Math.PI)/180;
-		let d = Math.acos(Math.sin(rad_lata)*Math.sin(rad_latb)+
-		Math.cos(rad_lata)*Math.cos(rad_latb)*Math.cos(rad_long))*6371
-		var txtDistance = d.toString().split('.')[0];
-		txtDistance = txtDistance +','+ d.toString().split('.')[1][0]*/
-        /*return (
-            <Item_Terrain_search_map 
-				InsNom = {item.InsNom}
-				EquNom = {item.EquNom}
-                distance = {"txtDistance"}
-                id = {item.id}
-				isChoosen = {this.state.indexState == index}
-			/>
-        );*/
     }
 	
 	
     render() {
-		console.log("ekkkee: ",this.props.navigation.getParam('latitude', ' '))
 
         return (
 			<View>

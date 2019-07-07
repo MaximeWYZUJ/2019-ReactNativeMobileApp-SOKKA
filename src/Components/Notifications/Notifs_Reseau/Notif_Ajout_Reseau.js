@@ -30,7 +30,6 @@ class Notif_Ajout_Reseau extends React.Component {
      * Fonction qui permet de récupérer les données relatives à la notification
      */
     async getData() {
-        console.log('in get data')
         // Données de l'émeteur 
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 

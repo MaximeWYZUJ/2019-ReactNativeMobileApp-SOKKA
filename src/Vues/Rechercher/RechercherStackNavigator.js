@@ -12,7 +12,7 @@ const RechercherStackNavigator = createStackNavigator({
     },
 
     RechercherTab: {
-        screen: RechercherTabNavigator
+        screen: RechercherTabNavigator,
     }
 
 })
