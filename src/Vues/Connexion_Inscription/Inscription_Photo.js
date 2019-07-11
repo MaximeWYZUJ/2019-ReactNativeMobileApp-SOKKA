@@ -5,6 +5,8 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import RF from 'react-native-responsive-fontsize';
 import { Camera, ImagePicker, Permissions } from 'expo';
 import Database from '../../Data/Database'
+import villes from '../../Components/Creation/villes.json'
+import departements from '../../Components/Creation/departements.json'
 import NormalizeString from '../../Helpers/NormalizeString.js';
 import * as firebase from 'firebase';
 import '@firebase/firestore'
@@ -34,6 +36,7 @@ export default class Inscription_Photo extends React.Component {
         const naissance = navigation.getParam('naissance', ' ');
         const age = navigation.getParam('age','');
         const zone = navigation.getParam('zone', '');
+        const departement = this.getDepartement(ville);
 
         this.state = {
             nom : nom,
@@ -47,6 +50,7 @@ export default class Inscription_Photo extends React.Component {
             image_changed : false,
             isLoading : false,
             ville : ville,
+            departement: departement,
             naissance : naissance,
             age : age,
             zone : zone,
@@ -55,6 +59,26 @@ export default class Inscription_Photo extends React.Component {
             usingCamera: false
         }
     }
+
+
+    getDepartement(nomVille) {
+        for (var i=0; i<villes.length; i++) {
+            if (nomVille === villes[i].Nom_commune) {
+                var cp = villes[i].Code_postal+"";
+                if (cp.length < 5) {
+                    cp = "0" + cp;
+                }
+                var depCode = cp.substr(0, 2);
+                for (var j=0; j<departements.length; j++) {
+                    if (departements[j].departmentCode === depCode) {
+                        return departements[j].departmentName;
+                    }
+                }
+            }
+        }
+        return "erreur"
+    }
+
 
     //***************************************************************************
     //********************** CHOIX DE LA PHOTO DE PROFIL ************************
@@ -207,6 +231,7 @@ export default class Inscription_Photo extends React.Component {
                             telephone: "XX.XX.XX.XX.XX",
                             terrains: [],
                             ville: oldState.ville,
+                            departement: oldState.departement,
                             zone: oldState.zone
                         }
                         
@@ -248,6 +273,7 @@ export default class Inscription_Photo extends React.Component {
                         telephone: "XX.XX.XX.XX.XX",
                         terrains: [],
                         ville: oldState.ville,
+                        departement: oldState.departement,
                         zone: oldState.zone
                     }
 

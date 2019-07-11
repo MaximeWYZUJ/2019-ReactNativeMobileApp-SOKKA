@@ -36,12 +36,10 @@ export default class RechercheAutour extends React.Component {
         this.selfLat = LocalUser.geolocalisation.latitude;
         this.selfLong = LocalUser.geolocalisation.longitude;
 
-        console.log(this.selfLat+"  ;  "+this.selfLong);
-
         // Collection
         this.type = this.props.navigation.getParam("type", null); // Joueurs, Equipes, Terrains, Defis
         switch (this.type) {
-            case "Joueurs" : {this.champNomQuery = "nomQuery"; this.champNom = "pseudo"; break;}
+            case "Joueurs" : {this.champNomQuery = "nomQuery"; this.champNom = "nom"; break;}
             case "Equipes" : {this.champNomQuery = "queryName"; this.champNom = "nom"; break;}
             case "Terrains": {this.champNomQuery = "queryName"; this.champNom = "InsNom"; break;}
         }
@@ -263,6 +261,9 @@ export default class RechercheAutour extends React.Component {
         f = this.state.filtres;
         data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
         data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
+        if (f.departement !== "") {
+            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
+        }
         if (f.ville !== "") {
             data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
         }
@@ -277,6 +278,9 @@ export default class RechercheAutour extends React.Component {
         f = this.state.filtres;
         data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
         data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
+        if (f.departement !== "") {
+            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
+        }
         if (f.ville !== "") {
             data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
         }
