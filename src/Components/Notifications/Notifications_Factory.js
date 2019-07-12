@@ -21,6 +21,7 @@ import Notif_feuille_completee_Partie from './Notifs_Feuille_Match/Notif_feuille
 import Notif_Ajout_Equipe_Favorite from './Notif_Equipe/Notif_Ajout_Equipe_Favorite'
 import Notif_Demande_Integrer_Equipe from './Notif_Equipe/Notif_Demande_Integrer_Equipe'
 import Notif_Rep_Demande_Integration_Equipe from './Notif_Equipe/Notif_Rep_Demande_Integration_Equipe'
+import Notif_Demande_Rejoindre_Capitaines from './Notifs_Capitaines/Notif_Demande_Rejoindre_Capitaines'
 
 /**
  * class qui va permettre d'afficher le bon type de notification en fonction 
@@ -198,6 +199,14 @@ export default class Notifications_Factory extends React.Component {
             case Types_Notification.ACCEPTER_DEMANDE_INTEGRATION_EQUIPE : 
             return(
                 <Notif_Rep_Demande_Integration_Equipe
+                    notification = {this.props.notification}
+                />
+            )
+
+            // Si on a demandé à l'utilisateur d'être capitaine
+            case Types_Notification.DEMANDE_REJOINDRE_CAPITAINES  :
+            return(
+                <Notif_Demande_Rejoindre_Capitaines
                     notification = {this.props.notification}
                 />
             )

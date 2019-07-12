@@ -43,6 +43,7 @@ export default class Profil_Equipe extends React.Component {
         super(props)
 
         this.state = {
+            equipe : undefined,
             joueur : 'e',
             url : 'e',
             txt_identite :'erreur',
@@ -148,6 +149,7 @@ export default class Profil_Equipe extends React.Component {
         Database.getDocumentData(id, 'Equipes').then(async (doc) => {
             // Lecture des données propres de l'équipe
             this.setState({
+                equipe : doc,
                 isaMember : doc.joueurs.some(elmt => elmt === LocalUser.data.id),
                 id: id,
                 equipeData: doc,
@@ -197,7 +199,9 @@ export default class Profil_Equipe extends React.Component {
                 id: jId,
                 isCaptain: equipe.capitaines.some(elmt => elmt === jId),
                 photo: j.photo,
-                tokens : tokens
+                tokens : tokens,
+                pseudo : j.pseudo,
+                score : j.score
             }
 
             liste.push(j2)
@@ -256,6 +260,14 @@ export default class Profil_Equipe extends React.Component {
     }
 
 
+
+    /**
+     * Pour aller sur la vue présentant les joueurs de l'équipe
+     */
+    goToJoueursEquipes() {
+        this.props.navigation.navigate("JoueursEquipe",{equipe : this.state.equipe, joueurs : this.state.joueurs})
+
+    }
     
     /*******************************************************************************
     *************   FONCTIONS POUR ALLER VERS LES JOUEURS QUI LIKENT   ***************
@@ -664,9 +676,10 @@ export default class Profil_Equipe extends React.Component {
 
                     {/* BLOC POUR LES JOUEURS DE L'EQUIPE */}
                     <View style = {styles.main_container_joueur}>
-                        <View style = {styles.vue_txt_joueur}>
+                        <TouchableOpacity style = {styles.vue_txt_joueur}
+                            onPress = {() => this.goToJoueursEquipes()}>
                             <Text style = {styles.txt_joueur}>Joueurs de l'équipe</Text>
-                        </View>
+                        </TouchableOpacity>
 
                         <FlatList style = {{marginLeft : wp('2%')}}
                             data={this.state.joueurs}

@@ -11,6 +11,9 @@ import Types_Notification from '../../Helpers/Notifications/Types_Notification'
 import Item_Defi from '../../Components/Defis/Item_Defi'
 import Item_Partie from '../../Components/Defis/Item_Partie'
 import Color from '../../Components/Colors';
+import Simple_Loading from '../../Components/Loading/Simple_Loading'
+import firebase from 'firebase'
+import '@firebase/firestore'
 const latUser = 43.531486   // A suppr quand on aura les vrais coordonnées
 const longUser = 1.490306
 
@@ -24,10 +27,14 @@ class ProfilJoueur extends React.Component {
         this.joueur = this.props.navigation.getParam('joueur', LocalUser.data)
         this.goToFirstScreen  = this.goToFirstScreen.bind(this)
 
+        
         this.state = {
             allDefis : [],
             refreshing: false,
             displayFullPicture: false,
+            show_equipe : false,
+            equipesCap : [],
+            isLoading : false
         }
     }
 
@@ -66,6 +73,11 @@ class ProfilJoueur extends React.Component {
 
     }
 
+
+
+
+
+
     _displayReglages() {
         if (this.monProfil) {
             return (
@@ -75,6 +87,16 @@ class ProfilJoueur extends React.Component {
                     <Image
                         style={styles.image_param}
                         source = {require('app/res/icon_reglage.png')}/>
+                </TouchableOpacity>
+            )
+        } else {
+            return(
+                <TouchableOpacity
+                onPress = {() => this.buildAlertIntegerEquipe()}>
+                    
+                    <Image
+                        source = {require('app/res/icon_plus.png')}
+                        style = {styles.icon_plus} />
                 </TouchableOpacity>
             )
         }
@@ -307,8 +329,8 @@ class ProfilJoueur extends React.Component {
     }
 
     /**
-     * Fonction qui va envoyer la notification puis la  sauvegarder
-     * dans la base de données.
+     * Fonction qui va envoyer la notification d'ajout au reseau
+     *  puis la  sauvegarder dans la base de données.
      */
     async storeNotifAjoutInDb() {
         await this.sendNotifAjoutReseau()
@@ -322,6 +344,39 @@ class ProfilJoueur extends React.Component {
         })
     }
 
+
+     
+    async storeNotifIntegrerInDb(idEquipe) {
+        console.log("in storeNotifIntegrerInDb", idEquipe)
+        var db = Database.initialisation()
+        db.collection("Notifs").add({
+            emetteur : LocalUser.data.id,
+            recepteur : this.joueur.id,
+            equipe : idEquipe,
+            type : Types_Notification.INVITATION_REJOINDRE_EQUIPE,
+            time : new Date(),
+            dateParse : Date.parse(new Date())
+        })
+    }
+
+
+    async sendNotifIntegrerJoueur(equipeNom) {
+        console.log("in sendNotifIntegrerJoueur ", equipeNom)
+        var titre = "Nouvelle Notif"
+        var corps = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + equipeNom
+        + " souhaite t'intégrer dans son équipe"
+        var tokens = []
+        if(this.joueur.tokens != undefined) tokens = this.joueur.tokens
+        console.log("before for")
+        for(var i = 0; i < tokens.length; i++) {
+            console.log("in for send notif")
+            console.log(tokens[i])
+            console.log(titre)
+            console.log(corps)
+            await this.sendPushNotification(tokens[i], titre,corps)
+            console.log("after send notif")
+        }
+    }
 
     // ===============================================================================
     // ================ METHODES POUR LES EQUIPES FAVORITES ==========================
@@ -451,11 +506,77 @@ class ProfilJoueur extends React.Component {
         this.joueur =  await this.getDocumentJoueur()
         this.getAllDefisAndPartie()
         //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
+        this.equipes = await Database.getArrayDocumentData(this.joueur.equipes, "Equipes")
         this.setState({refreshing : false})
     }
     
 
     // ==========================================================================
+
+
+    async integrerJoueur(idEquipe, nomEquipe) {
+        console.log("in integrer joueur :::::::: ")
+        
+        await this.sendNotifIntegrerJoueur(nomEquipe)
+        await this.storeNotifIntegrerInDb(idEquipe)
+
+        console.log(idEquipe)
+        console.log(this.joueur.id)
+        var db = Database.initialisation()
+        this.setState({equipes : [], show_equipe : false})
+        await db.collection("Equipes").doc(idEquipe).update({
+            joueursAttentes : firebase.firestore.FieldValue.arrayUnion(this.joueur.id)
+        }).then(console.log("ok update"))
+        .catc(function(error) {
+            console.log("ERROR UPDATE !! ", error)
+        })
+    }
+
+
+    /**
+     * Fonction qui va chercher dans la base de données toutes les équipes dont l'utilisateur 
+     * est capitaine.
+     */
+    getEquipesUserCap() {
+        this.setState({isLoading : true,show_equipe : true})
+        var equipes = []
+        var db = Database.initialisation()
+        var ref = db.collection("Equipes");
+        var query = ref.where("capitaines", "array-contains", LocalUser.data.id)
+
+        query.get().then(async (results) => {
+            // go through all results
+            console.log("RESULT.LENGTH !!" , results.length)
+            for(var i = 0; i < results.docs.length ; i++) {
+                console.log(" =========== ",  results.docs[i].data().id)
+                if( ! results.docs[i].data().joueurs.includes(this.id) && ! results.docs[i].data().joueursAttentes.includes(this.id)) {
+                    equipes.push(results.docs[i].data())
+
+                }
+            }
+            this.setState({equipes : equipes, isLoading : false})
+        })
+    }
+
+     /**
+     * Fonction qui affiche l'alerte pour confirmer ou non l'integration du joueur dans une équipe
+     */
+    buildAlertIntegerEquipe(){
+
+        Alert.alert(
+            '',
+            "Tu souhaites intégrer " + this.joueur.pseudo + " dans une de tes équipe ?"  ,
+            [
+                {text: 'Confirmer', onPress: () => this.getEquipesUserCap()},
+                {
+                text: 'Annuler',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+                },
+            ],
+        )
+    }
+
 
     /**
      * Fonction qui permet de construire la liste des participants à une partie, elle 
@@ -563,6 +684,101 @@ class ProfilJoueur extends React.Component {
                 >
                 <Text style={styles.header}>+</Text>
             </TouchableOpacity>
+            )
+        }
+    }
+
+     /**
+     * Va permettre de render les équipes dont l'utilisateur est capitaine
+     */
+    _renderItemEquipe =({item}) => {  
+        if(this.state.show_equipe) {
+            return(
+
+                <TouchableOpacity 
+                    onPress = {() => {
+                       // this.chooseEquipe(item)
+                        //this.saveParticipationInDb(item.id,item.nom)
+                        this.integrerJoueur(item.id, item.nom)
+                        Alert.alert(
+                            '',
+                            "Ta demande pour intégrer " + this.joueur.pseudo  + " à l'équipe " + item.nom
+                            + " a bien été envoyéee. Tu seras informé quand le joueur aura accepté ou non"
+                        )
+                    }}>
+                   <View style = {{flexDirection : "row"}}>
+                        <Image
+                            source = {{uri : item.photo}}
+                            style = {styles.photoEquipe}
+                        /> 
+
+                        {/* View contenant le pseudo est le score*/}
+                        <View style = {{justifyContent : "center"}}>
+                            <Text>{item.nom}</Text>
+                            <StarRating
+                                disabled={true}
+                                maxStars={5}
+                                rating={item.score}
+                                starSize={hp('2.2%')}
+                                fullStarColor='#F8CE08'
+                                emptyStarColor='#B1ACAC'
+                            />
+
+                            
+                        </View> 
+                   </View>
+                </TouchableOpacity>
+                
+            )
+        }
+
+    }
+
+    /**
+     * Fonction qui permet d'afficher un cadre montrant les équipes dont l'utilisateur est 
+     * capitaine pour y intégrer un nouveau joueur.
+     */
+    _renderListEquipe() {
+        if(this.state.show_equipe) {
+
+            return(
+                <View style = {styles.containerListEquipe}>
+                    <Text>
+                        Dans quelle équipe souhaites-tu intégrer {this.joueur.pseudo}
+                    </Text>
+
+                    {this.renderListEquipesLoading()}
+                    
+                    <TouchableOpacity
+                        onPress = {() => this.setState({show_equipe : false})} >
+                        <Text style = {{fontWeight : "bold"}}>Annuler</Text>
+                    </TouchableOpacity>
+                </View>
+            )
+        }
+    }
+
+    /**
+     * Fonction qui affiche soit la liste des équipes dont l'utilisateur est capitaine soit 
+     * l'indication de chargement
+     */
+    renderListEquipesLoading(){
+        if(! this.state.isLoading) {
+            return(
+                <ScrollView>
+                    <FlatList
+                        style={{alignSelf : "center"}}
+                        data={this.state.equipes}
+                        renderItem={this._renderItemEquipe}
+                    />
+                </ScrollView>
+                
+            )
+        } else {
+            return(
+                <Simple_Loading
+                    taille = {hp('6%')}
+                />
             )
         }
     }
@@ -692,6 +908,7 @@ class ProfilJoueur extends React.Component {
                         {this.displayDefis()}
                     </View>
                     {this.renderBtnDeco()}
+                    {this._renderListEquipe()}
 
                 </ScrollView>
             )
@@ -826,6 +1043,35 @@ const styles = StyleSheet.create({
         fontSize: RF(2.7),
         fontWeight: 'bold',
         paddingVertical: 4
+    },
+    icon_plus : {
+        width : 30,
+        height : 30,
+        marginBottom : hp('1.5%')
+
+    },
+    
+    containerListEquipe : {
+        position : "absolute", 
+        backgroundColor : "white", 
+        top :100,
+        width :wp('90%'), 
+        alignItems :"center" ,
+        paddingTop : hp('3%'),
+        paddingBottom : hp('4%'),
+        alignSelf : "center",
+        borderWidth : 1,
+        borderRadius : 5
+    },
+
+    
+    photoEquipe : {
+        width : wp('18%'),
+        height :wp('18%'),
+        marginLeft : wp('2%'),
+        marginRight : wp('2%'),
+        marginTop : hp('1%'),
+        marginBottom : hp('1%')
     },
 
 })

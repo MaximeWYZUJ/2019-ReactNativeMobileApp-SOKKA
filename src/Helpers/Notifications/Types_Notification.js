@@ -165,4 +165,16 @@ export default class Types_Notification {
      */
     static FEUILLE_COMPLETEE_PARTIE = "FEUILLE_COMPLETEE_PARTIE"
 
+
+    
+    //=========================================================================
+    //=========================== POUR LES CAPITAINES  ========================
+    //=========================================================================
+
+    /**
+     * Quand on propose à un joueur d'être capitaine.
+     */
+    static DEMANDE_REJOINDRE_CAPITAINES = "DEMANDE_REJOINDRE_CAPITAINES"
+
+
 }

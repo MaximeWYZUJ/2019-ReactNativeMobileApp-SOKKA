@@ -23,7 +23,8 @@ import Choix_Date_Defis from '../Vues/Jouer/Creation/Choix_Date_Defis'
 import Rechercher_Terrain_Nom from '../Vues/Terrain/Rechercher_Terrain_Nom'
 import ProfilJoueurMesEquipes from '../Vues/Joueur/ProfilJoueurMesEquipes';
 import Calendrier_Joueur from '../Vues/Jouer/Historique/Calendrier_Joueur'
-
+import Joueurs_Equipe from '../Vues/Equipe/Joueurs_Equipe'
+import Choix_Capitaines_Equipe from '../Vues/Equipe/Choix_Capitaines_Equipe'
 
 /*import Accueil_Jouer from '../Vues/Jouer/Accueil_Jouer'
 import Choix_Format_Defi from '../Vues/Jouer/Creation/Choix_Format_Defi'
@@ -119,6 +120,20 @@ const stackNavigator = createStackNavigator({
     screen : Rechercher_Terrain_Nom
   },
 
+
+  /**
+   * Screen qui affiche tous les joueurs d'une équipe
+   */
+  JoueursEquipe : {
+    screen: Joueurs_Equipe
+  },
+
+  /**
+   * Screen qui permet de choisir les capitaines de l'équipe
+   */
+  ChoixCapitainesEquipe : {
+    screen  :Choix_Capitaines_Equipe 
+  },
 
   /**
    * Page d'acceuil pour jouer
