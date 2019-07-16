@@ -1,6 +1,6 @@
 
 import React from 'react'
-import { StyleSheet, Text, Image, ScrollView, TouchableOpacity, View, FlatList,RefreshControl, Alert } from 'react-native'
+import { Text, ScrollView, TouchableOpacity, View, FlatList, Alert } from 'react-native'
 import { CheckBox } from 'react-native-elements'
 
 import StarRating from 'react-native-star-rating'
@@ -74,7 +74,36 @@ export default class Choix_Capitaines_Equipe extends React.Component {
         }
         
     }
+
+    buildAlertAretCap(){
+        Alert.alert(
+            '',
+            "Tu souhaites arrêter d'être capitaine de l'équipe "  + this.state.equipe.nom + " ?",
+            [
+                {text: 'Confirmer', onPress: async() =>  {
+                    this.arreterCap()
+                }},
+                {
+                  text: 'Annuler',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                },
+            ], 
+        )
+    }
     
+    async arreterCap(){
+        this.setState({isLoading : true})
+        var db = Database.initialisation()
+        await db.collection("Equipes").doc(this.state.equipe.id).update({
+            capitaines : firebase.firestore.FieldValue.arrayRemove(LocalUser.data.id)
+        })
+
+        await this.sendNotifArretCap()
+        await this.storeNotifArretCap()
+        this.setState({isLoading : false})
+        this.props.navigation.push("Profil_Equipe", {equipeId : this.state.equipe.id})
+    }
 
     // ===========================================================================
     // ========================== NOTIFICATIONS ==================================
@@ -107,6 +136,26 @@ export default class Choix_Capitaines_Equipe extends React.Component {
         });
     }
 
+    async sendNotifArretCap() {
+        var titre = "Nouvelle Notif"
+        var corps = LocalUser.data.pseudo + " n'est plus capitaine de l'équipe " + this.state.equipe.nom
+        for(var i = 0; i < this.state.joueurs.length; i++){
+            if(this.state.joueurs[i].id != LocalUser.data.id){
+                var joueur = this.state.joueurs[i]
+                var tokens = []
+                if(joueur.tokens != undefined) {
+                    tokens = joueur.tokens
+                    console.log("======" ,joueur)
+                }
+                for(var k =0; k < tokens.length; k ++) {
+                    await this.sendPushNotification(tokens[k], titre,corps)
+                }
+            }
+        }
+    }
+
+
+
     async sendNotif() {
         this.setState({isLoading : true})
         var joueursId = []
@@ -117,7 +166,9 @@ export default class Choix_Capitaines_Equipe extends React.Component {
             var joueur = this.state.joueursSelectionnes[i]
             joueursId.push(joueur.id)
             var tokens = []
-            if(joueur.tokens != undefined) tokens = joueur.tokens
+            if(joueur.tokens != undefined) {
+                tokens = joueur.tokens
+            }
             for(var k =0 ; k < tokens.length; k++){
                 await this.sendPushNotification(tokens[k], titre,corps)
             }
@@ -141,6 +192,27 @@ export default class Choix_Capitaines_Equipe extends React.Component {
                 dateParse : Date.parse(new Date()),
                 equipe : this.state.equipe.id
             })
+        }
+    }
+
+    async storeNotifArretCap(){
+        console.log("in store notif arret")
+        var db = Database.initialisation()
+        for(var i = 0 ; i < this.state.joueurs.length; i++){
+            if(this.state.joueurs.id != LocalUser.data.id) {
+                console.log("in if")
+                console.log(Types_Notification.ARRET_CAPITAINE)
+                var joueur = this.state.joueurs[i]
+                await db.collection("Notifs").add({
+                    emetteur : LocalUser.data.id,
+                    recepteur : joueur.id,
+                    type : Types_Notification.ARRET_CAPITAINE,
+                    time : new Date(),
+                    dateParse : Date.parse(new Date()),
+                    equipe : this.state.equipe.id
+
+                })
+            }
         }
     }
 
@@ -181,11 +253,15 @@ export default class Choix_Capitaines_Equipe extends React.Component {
 
                     }}
                 />
+
+                {this.renderArretCapitanat(item.id)}
             </View>
             
         )
         
     }
+
+    
 
 
     /**
@@ -231,6 +307,16 @@ export default class Choix_Capitaines_Equipe extends React.Component {
         }
     }
 
+    renderArretCapitanat(joueurId){
+        if(joueurId == LocalUser.data.id && this.state.equipe.capitaines.includes(joueurId) && this.state.equipe.capitaines.length > 1){
+            return(
+                <TouchableOpacity style = {{marginLeft : -wp('3%')}}
+                    onPress = {()=> this.buildAlertAretCap()}>
+                    <Text>{"Arrêter d'être \ncapitaine"}</Text>
+                </TouchableOpacity>
+            )
+        }
+    }
 
     render() {
         if(this.state.isLoading) {

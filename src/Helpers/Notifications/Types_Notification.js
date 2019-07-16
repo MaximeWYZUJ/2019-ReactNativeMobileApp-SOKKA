@@ -177,4 +177,25 @@ export default class Types_Notification {
     static DEMANDE_REJOINDRE_CAPITAINES = "DEMANDE_REJOINDRE_CAPITAINES"
 
 
+    /**
+     * Quand un joueur à qui on a proposé d'être cap a refusé
+     */ 
+    static REFUS_DEMANDE_CAPITAINE = "REFUS_DEMANDE_CAPITAINE"
+
+    /**
+     * Quand un joueur à qui on a proposé d'être cap a accepté
+     */ 
+    static ACCEPTE_DEMANDE_CAPITAINE = "ACCEPTE_DEMANDE_CAPITAINE"
+
+
+    /**
+     * Quand l'éuquipe a un nouveau capitaine
+     */
+    static NEW_CAP = "NEW_CAP"
+
+
+    /**
+     * Quand un joueur arrete d'être capitaine
+     */
+    static ARRET_CAPITAINE = "ARRET_CAPITAINE"
 }

@@ -74,6 +74,7 @@ export default class Profil_Equipe extends React.Component {
     componentDidMount(){
         this.getEquipeWithId(this.props.navigation.getParam('equipeId', null))
     }
+    
 
 
     //================================================================================
@@ -144,7 +145,7 @@ export default class Profil_Equipe extends React.Component {
     * @param {*} id
     */
     getEquipeWithId(id) {
-        console.log("in get Equipe"),
+        console.log("in get Equipe ============="),
         console.log(id)
         Database.getDocumentData(id, 'Equipes').then(async (doc) => {
             // Lecture des données propres de l'équipe

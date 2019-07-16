@@ -13,7 +13,9 @@ import Item_Partie from '../../Components/Defis/Item_Partie'
 import Color from '../../Components/Colors';
 import Simple_Loading from '../../Components/Loading/Simple_Loading'
 import firebase from 'firebase'
+import t from '../../Components/Conversation/Icon_Message'
 import '@firebase/firestore'
+import Icon_Message from '../../Components/Conversation/Icon_Message';
 const latUser = 43.531486   // A suppr quand on aura les vrais coordonnées
 const longUser = 1.490306
 
@@ -813,6 +815,13 @@ class ProfilJoueur extends React.Component {
                     onRefresh={this._onRefresh}
                     />
                 }>
+
+
+                {/* L'icon message */}
+                <View style = {{position : "absolute" , right : wp('1%')}}>
+                    <Icon_Message/>
+                </View>
+
 
                     {/* Caracteristiques du joueur */}
                     <View style={[styles.perso_container]}>

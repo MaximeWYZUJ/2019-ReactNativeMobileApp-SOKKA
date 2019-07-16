@@ -22,6 +22,10 @@ import Notif_Ajout_Equipe_Favorite from './Notif_Equipe/Notif_Ajout_Equipe_Favor
 import Notif_Demande_Integrer_Equipe from './Notif_Equipe/Notif_Demande_Integrer_Equipe'
 import Notif_Rep_Demande_Integration_Equipe from './Notif_Equipe/Notif_Rep_Demande_Integration_Equipe'
 import Notif_Demande_Rejoindre_Capitaines from './Notifs_Capitaines/Notif_Demande_Rejoindre_Capitaines'
+import Notifs_Rep_Demande_Cap from './Notifs_Capitaines/Notifs_Rep_Demande_Cap'
+import Notif_New_Cap from './Notifs_Capitaines/Notif_New_Cap'
+import Notif_Arret_Cap from './Notifs_Capitaines/Notif_Arret_Cap'
+
 
 /**
  * class qui va permettre d'afficher le bon type de notification en fonction 
@@ -210,6 +214,36 @@ export default class Notifications_Factory extends React.Component {
                     notification = {this.props.notification}
                 />
             )
+
+            // Si l'utilisateur a accepté d'être cap
+            case Types_Notification.ACCEPTE_DEMANDE_CAPITAINE : 
+                return(
+                    <Notifs_Rep_Demande_Cap
+                        notification = {this.props.notification}
+                    />
+                )
+           
+            // Si l'utilisateur a refusé d'être cap
+            case Types_Notification.REFUS_DEMANDE_CAPITAINE : 
+                return(
+                    <Notifs_Rep_Demande_Cap
+                        notification = {this.props.notification}
+                    />
+                )
+            case Types_Notification.NEW_CAP : 
+                return(
+                    <Notif_New_Cap
+                        notification = {this.props.notification}
+                        />
+                )
+
+            // Si un joueur arrete d'être cap d'une des equipes où je suis membre
+            case Types_Notification.ARRET_CAPITAINE : 
+                    return(
+                        <Notif_Arret_Cap
+                            notification = {this.props.notification}
+                        />
+                    )
             default : 
         }
         
