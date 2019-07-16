@@ -2,14 +2,19 @@ import React from 'react'
 import {View, Text,  StyleSheet, Animated,TouchableOpacity,ScrollView,FlatList, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
-import { Image, colors } from 'react-native-elements';
+import { Image } from 'react-native-elements';
 import Color from '../../Components/Colors'
-import DataBase from '../../Data/Database'
+import Database from '../../Data/Database'
+import Terrains from '../../Helpers/Toulouse.json'
+import LocalUser from '../../Data/LocalUser.json'
+import Distance from '../../Helpers/Distance'
+import Item_Defi from '../../Components/Defis/Item_Defi'
+import Item_Partie from '../../Components/Defis/Item_Partie'
+import Type_Defis from '../../Vues/Jouer/Type_Defis'
+
+
 const url_icon_like = 'app/res/icon_like.png'
-import Defis_Equipe from '../Equipe/Defis_Equipe'
-const latUser = 43.531486   // A suppr quand on aura les vrais coordonnées
-const longUser = 1.490306
-const equipements = ['robinet','vestiaire','douche', 'lumiere']
+
     
 
 /**
@@ -23,23 +28,44 @@ export default class Profil_Terrain extends React.Component {
         super(props)
 
         this.id = this.props.navigation.getParam('id', ' ')
-        this.distance = this.props.navigation.getParam('distance', ' ')
+
+        this.localData = this.findTerrainFromLocalDB(this.id);
+        if (this.localData == null) {
+            console.log("ERROR : pas de localData associee au terrain "+this.id);
+        }
+
+        var distance = Distance.calculDistance(this.localData.Latitude, this.localData.Longitude, LocalUser.geolocalisation.latitude, LocalUser.geolocalisation.longitude);
+        var distString = distance+"";
+        let values = distString.split(".");
+            
+        if (values.length > 1) {
+            this.dispDistance = values[0]+","+values[1].substr(0,2)+" km";
+        } else {
+            this.dispDistance = "";
+        }
+
+        var typeSol = this.localData.TypeSol.split(" ");
+        this.gazon = typeSol[0] === "Gazon";
+        this.bitume = typeSol[0] === "Bitume" || typeSol[0] === "Béton";
+        this.synthetique = typeSol[0] === "Synthétique";
+
+        this.payant = this.localData.Payant;
+
+        this.sanitaire = this.localData.EquSanitairePublic === "-1";
+
+        this.eclairage = this.localData.EquEclairage === "-1";
+
+        this.handicap = this.localData.EquAccesHandimAire === "Oui";
+
+        this.equipements = this.buildIconEquipement();
+
 
         this.state = {
-            id : '',
-            longueur: 0,
-            largeur : 0,
-            Insnom : '',
-            Equnom : ' ',
-            nbAime : 0,
-            lumiere : "0",
-            sanitaire : "0",
-            vestiaire :  "0",
-            horloge :  "0",
-            but :  "0",
-            douche :  "0",
-            defis : []
+            nbAime: 0,
+            defis: []
         }
+
+        this.getAllDefisAndPartie();
     }
 
     
@@ -48,82 +74,15 @@ export default class Profil_Terrain extends React.Component {
             title: navigation.getParam('titre', ' ')
         }
     }
-    componentDidMount(){
-       // this.getTerrainwithId(this.props.navigation.getParam('equipeId', null))  A DE COMENTER APRES
-       this.getTerrainwithId(this.id)
-    }
 
 
-    /**
-     * Méthode qui va permettre de récupérer les donnés du terrain 
-     * depuis Firebase
-     * @param {String} id 
-     */
-    getTerrainwithId(id){
-        var db = DataBase.initialisation();
-        var docRef = db.collection('Terrains').doc(id);
-        docRef.get().then(async (doc) => {
-            if (doc.exists) {
-                this.setState({id : id,docRef : docRef})
-               const collDefis = docRef.collection('defis')
-               const defisSnapshot = await collDefis.get()
-                this.changeTerrain(doc.data(), defisSnapshot.docs)
-            } else {
-                console.log("No such document!");
+    findTerrainFromLocalDB(id) {
+        for (var i=0; i<Terrains.length; i++) {
+            if (Terrains[i].id === id) {
+                return Terrains[i];
             }
-        }).catch(function(error) {
-            console.log("Error getting document:", error);
-        });
-    }
-
-    /**
-     * Fonction qui permet d'actualiser le state en fonction des données
-     * récupéré de la base de données.
-     * @param {*} t // data du terrain
-     * @param {*} dCollec // collection de ref sur des Defis
-     */
-    changeTerrain(t, dCollec){
-        var data  = t.d
-        var nbAime = 0
-        console.log(data)
-        
-        if(data.nbAime != undefined){
-            nbAime  = data.nbAime
         }
-        this.setState({
-            id : data.id,
-            longueur : data.EquLongueurEvolution,
-            largeur :  data.EquLargeurEvolution,
-            Insnom : data.InsNom,
-            Equnom : data.EquNom,
-            nbAime : nbAime,
-            lumiere : data.EquEclairage,
-            sanitaire : data.EquSanitairePublic,
-            vestiaire : data.vestiaire,
-            horloge : data.horloge,
-            but : data.but,
-            douche : data.douche,            
-        })
-        this.getDefis(dCollec)
-    }
-
-
-    /**
-     * Méthode qui permet de calculer la distance du terrain par rapport
-     * à l'utilisateur et renvoi un string bien formé 
-     * @param {double} lat_b  // Latitude du terrain 
-     * @param {double} lon_b  // Longitude du terrain
-     */
-    calculDistance(lat_b, lon_b){
-        let rad_lata = (latUser * Math.PI)/180;
-        let rad_long = ((longUser- lon_b) * Math.PI)/180;
-        let rad_latb = (lat_b * Math.PI)/180;
-        let d = Math.acos(Math.sin(rad_lata)*Math.sin(rad_latb)+
-        Math.cos(rad_lata)*Math.cos(rad_latb)*Math.cos(rad_long))*6371
-
-        var txtDistance = d.toString().split('.')[0];
-        txtDistance = txtDistance +','+ d.toString().split('.')[1][0]
-        return txtDistance;
+        return null;
     }
 
 
@@ -132,77 +91,57 @@ export default class Profil_Terrain extends React.Component {
      * les équipements du terrain.
      */
     buildIconEquipement() {
-        var eq = equipements;
         var liste = []
-        var txt = 'Ce terrain dispose '
-        let oui = "-1"
         
-        if(this.state.robinet == oui) {
+        if(this.sanitaire) {
             liste.push({
                 id : 'robinet',
-                image : require('../../../res/water_tap.png'),
-                text :txt + "d'un robinet"
-            })
-        }
-        if(this.state.horloge == oui) {
-            liste.push({
-                id : 'horloge',
-                image : require('../../../res/clock.png'),
-                text : txt + "d'une horloge"
-
-            })
-        }
-        if(this.state.douche) {
-            liste.push({
-                id : 'douche',
                 image : require('../../../res/shower.png'),
-                text : txt + "de douches"
-
             })
         }
-        if(this.state.lumiere == oui) {
+        
+        if(this.eclairage) {
             liste.push({
                 id : 'lumiere',
                 image : require('../../../res/light.png'),
-                text : txt + "d'un éclairage"
 
             })
         }
-        if(this.state.vestiaire == oui) {
-            liste.push({
-                id : 'vestiaire',
-                image : require('../../../res/dressing-room.png'),
-                text : txt + "d'un vestiaire"
 
-            })
-        }if(this.state.but == oui) {
-            liste.push({
-                id : 'but',
-                image : require('../../../res/goal.png'),
-                text : txt + "de cages de but"
-
-            })
-        }
-        if(this.state.gazon == oui) {
+        if(this.gazon) {
             liste.push({
                 id : 'gazon',
                 image : require('../../../res/gazon.png'),
-                text : txt + "d'une surface de jeu en gazon"
-
-            })
-        }if(this.state.synthetique == oui) {
-            liste.push({
-                id : 'synthetique',
-                image : require(url_icon_like),  // A CHANGER !
-                text : txt + "d'une surface de jeu en synthétique "
 
             })
         }
-        if(this.state.sanitaire == oui) {
+        if(this.synthetique) {
             liste.push({
-                id : 'sanitaire',
-                image : require('../../../res/toilet.png'),
-                text : txt + " de sanitaire"
+                id : 'synthetique',
+                image : require('app/res/land.png'),
+
+            })
+        }
+        if(this.bitume) {
+            liste.push({
+                id : 'bitume',
+                image : require('../../../res/bitume.jpg'),
+
+            })
+        }
+
+        if(this.handicap) {
+            liste.push({
+                id : 'handicap',
+                image : require('../../../res/disabled.png'),
+
+            })
+        }
+
+        if(this.payant) {
+            liste.push({
+                id : 'payant',
+                image : require('../../../res/coin.png'),
 
             })
         }
@@ -212,50 +151,97 @@ export default class Profil_Terrain extends React.Component {
 
 
     
-    /**
-     * Fonction qui permet de renvoyer une liste  contenant les informations
-     * utiles pour l'affichage des defis de l'équipe;
-     * @param {*} defis
+    /** Fonction qui va permettre de trouver tous les défis et parties à venir auxquels 
+     * participes l'utilisateur
      */
-    async getDefis(defis) {
+    async getAllDefisAndPartie() {
+        var db = Database.initialisation()
+        var allDefis = [];
 
-        var liste = [];
-        for(var i = 0; i< defis.length; i++) {
-            let d = defis[i]
-            let refDefi = d.data().refDefi
-            let gotRefDefi = await refDefi.get()
-            let defiBeginDate = gotRefDefi.data().dateDebut.toDate()
-            let defiEndDate = gotRefDefi.data().dateFin.toDate()
+        var ref = db.collection("Defis");
+        var query = ref.where("terrain", "==", this.id).orderBy("dateParse")
 
-            dateObj = {
-                annee: defiBeginDate.getFullYear(),
-                heureDebut: defiBeginDate.getHours(),
-                heureFin: defiEndDate.getHours(),
-                jours: defiBeginDate.getDate(),
-                minutesDebut: defiBeginDate.getMinutes(),
-                minutesFin: defiEndDate.getMinutes(),
-                mois: defiBeginDate.getMonth() + 1
-            }
-
-            let gotRefEquipe1 = await gotRefDefi.data().equipe1.get()
-            let gotRefEquipe2 = await gotRefDefi.data().equipe2.get()
-
-            j = {
-                id : gotRefDefi.id,
-                format : gotRefDefi.data().format,
-                photo1 : gotRefEquipe1.data().photo,
-                photo2 : gotRefEquipe2.data().photo,
-                nom1 : gotRefEquipe1.data().nom,
-                nom2 : gotRefEquipe2.data().nom,
-                date : dateObj
-            }
-            liste.push(j)    
-            
+        // On regarde s'il y a eu des defis sur ce terrain
+        var results = await ref.get();
+        console.log("nb results : " + results.docs.length);
+        for(var i = 0; i < results.docs.length ; i++) {
+            allDefis.push(results.docs[i].data());
         }
+        this.setState({defis : allDefis})
+    }
 
-        this.setState({
-            defis: liste
-        })
+
+    _renderItemDefi =({item}) => {   
+        if(item.type == Type_Defis.partie_entre_joueurs){
+          
+            return(
+                <Item_Partie
+                    id = {item.id}
+                    format = {item.format}
+                    jour = {new Date(item.jour.seconds *1000)} 
+                    duree = {item.duree}
+                    joueurs = {this.buildJoueurs(item)}
+                    nbJoueursRecherche =  {item.nbJoueursRecherche}
+                    terrain=  {item.terrain}
+                    latitudeUser = {LocalUser.geolocalisation.latitude}
+                    longitudeUser = {LocalUser.geolocalisation.longitude}
+                    message_chauffe  = {item.message_chauffe}
+                />
+            )
+        } else if(item.type == Type_Defis.defis_2_equipes) {
+            return(
+                <Item_Defi
+                    format = {item.format}
+                    jour = {new Date(item.jour.seconds * 1000)}
+                    duree ={item.duree}
+                    equipeOrganisatrice = {item.equipeOrganisatrice}
+                    equipeDefiee = {item.equipeDefiee}
+                    terrain = {item.terrain}
+                    allDataDefi = {item}
+                />
+            )
+        } else {
+            return(
+                <Text>Erreur</Text>
+            )
+        }  
+    }
+
+
+    /**
+     * Fonction qui permet de construire la liste des participants à une partie, elle 
+     * enlève de la liste les joueurs indisponibles
+     * @param {*} item 
+     */
+    buildJoueurs(item) {
+        var liste = []
+        for(var i = 0; i < item.participants.length ; i++) {
+            if(! item.indisponibles.includes(item.participants[i])) {
+                liste.push(item.participants[i])
+            }
+        }
+        return liste
+    }
+
+
+    displayDefis(){
+        if(this.state.defis == undefined || this.state.defis == []) {
+            return (
+                <View>
+                    <Text>Pas encore de défi</Text>
+                </View>
+            )
+        }else {
+            console.log("display defi");
+            return(
+                <FlatList style = {{marginLeft : wp('2%')}}
+                        data={this.state.defis}
+                        numColumns={1}
+                        keyExtractor={(item) => item.id}
+                        renderItem={this._renderItemDefi}
+                />
+            )
+        }
     }
 
 
@@ -264,9 +250,8 @@ export default class Profil_Terrain extends React.Component {
      * likent le terrains et d'afficher la vue.
      */
     gotoJoueursQuiLikent() {
-        console.log("debut")
-        var db = DataBase.initialisation();
-        var docRef = db.collection('Terrains').doc(this.state.id);
+        var db = Database.initialisation();
+        var docRef = db.collection('Terrains').doc(this.id);
         docRef.get().then(async (doc) => {
             if (doc.exists) {
                 const collJoueurs = docRef.collection('aiment')
@@ -297,51 +282,8 @@ export default class Profil_Terrain extends React.Component {
             console.log(j)
         }   
         liste.push(j)
-
-        
-            
     }
 
-
-    displayDefis(){
-        if(this.state.defis.length == 0) {
-            return (
-                <View>
-                    <Text>Pas encore de défis</Text>
-                </View>
-            )
-        }else {
-            return(
-                <FlatList
-                        data={this.state.defis}
-                        numColumns={1}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({item}) =>
-                            <View style = {{marginTop : hp('2%')}}>
-                                <Defis_Equipe
-                                format = {item.format}
-                                photo1 = {item.photo1}
-                                photo2 = {item.photo2}
-                                nom1 = {item.nom1}
-                                nom2 = {item.nom2}
-                                date = {item.date}
-                            />
-                            </View>
-                           
-                        }
-                />
-            )
-        }
-    }
-
-   
-    
-    showAlert = (item) =>{
-        Alert.alert(
-           item.text
-        )
-
-    }
 
     render(){
         const styleBloc = {
@@ -368,39 +310,31 @@ export default class Profil_Terrain extends React.Component {
             paddingVertical: 4
         }
 
-        const showAlert = () =>{
-            Alert.alert(
-               'You need to..llll.'
-            )
-        }
-       var eq  = this.buildIconEquipement();
+
         return (
             <ScrollView style = {{marginTop : hp('4%')}}>
-                 
+                
                 <View>
-                    {/* BLOC INFOS DE L'EQUIPE */}
+                    {/* BLOC INFOS DU TERRAIN */}
                     <View style = {{flexDirection : 'row', marginLeft : wp('2%')}}>
 
                         {/* Bloc pour le terrain et le dimension */}
                         <View>
                             <View style = {{flexDirection : 'row', marginBottom : hp('1%'), marginTop : hp('1%')}}>
                                 <Image source = {require('../../../res/field.png')} style = {{width : wp('30%'),height: wp('19%')}} />
-                                <Text 
-                                style = {{alignSelf : "center"}}>{this.state.largeur} m </Text>
-                            </View>
-                            <View style = {{ width : wp('30%'), marginTop : -hp('1%')}}>
-                                <Text style = {{alignSelf : "center"}}>{this.state.longueur} m</Text>
                             </View>
                         </View>
 
-                        {/* texte de l'équipe */}
+                        {/* Adresse et nom */}
                         <View style = {{flex : 1, marginLeft : wp('4%')}}>
-                            <Text style= {{fontWeight : 'bold', fontSize: RF(2.5)}}>{this.state.Insnom}</Text>
-                            <Text style= {{fontSize: RF(2.2)}}>{this.state.Equnom}</Text>
+                            <Text style= {{fontWeight : 'bold', fontSize: RF(2.5)}}>{this.localData.InsNom}</Text>
+                            <Text style= {{fontSize: RF(2.2)}}>{this.localData.EquNom}</Text>
+                            <Text style= {{fontSize: RF(2.2)}}>{this.localData.N_Voie} {this.localData.Voie}</Text>
+                            <Text style= {{fontSize: RF(2.2)}}>{this.localData.CodePostal} {this.localData.Ville}</Text>
 
                             {/* Distance et joueurs qui likent */}
                             <View style = {{flexDirection : 'row', justifyContent: 'space-between'}}>
-                                <Text style= {{fontSize: RF(2.2)}}>{this.distance} km </Text>
+                                <Text style= {{fontSize: RF(2.2)}}>{this.dispDistance}</Text>
 
                                 {/* bloc du nb de like*/}
                                 <View style = {{flexDirection : "row"}}>
@@ -418,47 +352,31 @@ export default class Profil_Terrain extends React.Component {
                             </View>
                             </View>
                         </View>
-
-                        {/* Icon reglage */}
-                        <TouchableOpacity>
-                            <Image
-                                source = {require('../../../res/icon_reglage.png')}
-                                style = {{width : wp('9%'), height : wp('9%'),marginLeft : wp('2%')}}/>
-                        </TouchableOpacity>
                     </View>
 
                     {/*View contenant les équipement du terrains */}
                     <View style = {styleBloc}>   
-                        <TouchableOpacity>
-                            <Text style = {styleTxtBloc}>Equipements de ce terrain</Text>
-                        </TouchableOpacity>
+                        <Text style = {styleTxtBloc}>Equipements de ce terrain</Text>
                     </View>
                     <View style = {{alignItems : 'center', marginTop : hp('2%')}}>
                         <FlatList
-                            data={eq}
-                            numColumns={5}
+                            data={this.equipements}
+                            numColumns={this.equipements.length}
                             keyExtractor={(item) => item.id}
                             renderItem={({item}) =>
-                                <TouchableOpacity
-                                    onPress={() =>{ Alert.alert(item.text)}}
-                                    >
+                                <View>
                                     <Image 
                                         source = {item.image}
                                         style = {{width : wp('12%'), height : wp('12%'), marginLeft : wp('2%'), marginRight : wp('2%'),marginBottom : hp('1%'),  marginTop : hp('1%')}}/>
-                                </TouchableOpacity>
+                                </View>
                                 
                             }
                         />
                     </View>
                     {/* Pour les défis */}
                     <View style = {styles.main_container_defis}>
-                        
                         <View style = {styleBloc}>
-                            
-                            <TouchableOpacity>
-                                <Text style = {styleTxtBloc}>Défis et match sur ce terrain</Text>
-                            </TouchableOpacity>
-
+                            <Text style = {styleTxtBloc}>Défis et match sur ce terrain</Text>
                         </View>
                     </View>
                     <View style = {{ alignItems : "center"}}>

@@ -596,10 +596,10 @@ class ProfilJoueur extends React.Component {
     }
     displayDefis(){
 
-        if(this.state.allDefis == undefined ) {
+        if(this.state.allDefis == undefined || this.state.allDefis == []) {
             return (
                 <View>
-                    <Text>Pas encore de défis</Text>
+                    <Text>Pas encore de défi</Text>
                 </View>
             )
         }else {

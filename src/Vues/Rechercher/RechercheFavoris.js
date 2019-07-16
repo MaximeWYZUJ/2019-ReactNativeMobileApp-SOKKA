@@ -127,6 +127,9 @@ export default class RechercheFavoris extends React.Component {
         f = this.state.filtres;
         data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
         data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
+        if (f.departement !== "") {
+            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
+        }
         if (f.ville !== "") {
             data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
         }
@@ -138,10 +141,32 @@ export default class RechercheFavoris extends React.Component {
     }
 
 
+    filtrerEquipes = (data) => {
+        f = this.state.filtres;
+        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
+        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
+        if (f.departement !== "") {
+            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
+        }
+        if (f.ville !== "") {
+            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
+        }
+        if (f.score !== null) {
+            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
+        }
+        if (f.nbJoueurs != 0) {
+            data = data.filter(((elmt) => {return elmt["nbJoueurs"] === f.nbJoueurs}))
+        }
+
+        return data;
+    }
+
+
     filtrerData = (data) => {
         if (this.state.filtres !== null) {
             switch (this.type) {
                 case "Joueurs" : return this.filtrerJoueurs(data)
+                case "Equipes" : return this.filtrerEquipes(data)
             }
         
         } else {

@@ -6,7 +6,9 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import RF from 'react-native-responsive-fontsize';
 import DatePicker from 'react-native-datepicker'
 import villes from '../../Components/Creation/villes.json'
+import departements from '../../Components/Creation/departements.json'
 import Colors from '../../Components/Colors'
+
 var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
 
@@ -104,6 +106,26 @@ export default class Inscription_Age_Zone extends React.Component {
         return (d.getFullYear()  - x.getFullYear())
     }
 
+
+    getDepartement(nomVille) {
+        for (var i=0; i<villes.length; i++) {
+            if (nomVille === villes[i].Nom_commune) {
+                var cp = villes[i].Code_postal+"";
+                if (cp.length < 5) {
+                    cp = "0" + cp;
+                }
+                var depCode = cp.substr(0, 2);
+                for (var j=0; j<departements.length; j++) {
+                    if (departements[j].departmentCode === depCode) {
+                        return departements[j].departmentName;
+                    }
+                }
+            }
+        }
+        return "erreur"
+    }
+
+
     callNextScreen() {
         if(this.isVilleOk()) {
             this.props.navigation.navigate("InscriptionPhoto", {
@@ -179,8 +201,6 @@ export default class Inscription_Age_Zone extends React.Component {
                                                 placeholderTextColor ='#CECECE'
                                                 onChangeText ={(text) => this.searchedVilles(text)} 
                                                 value = {this.state.ville}
-
-
                                             />
 
                                             <ListView
