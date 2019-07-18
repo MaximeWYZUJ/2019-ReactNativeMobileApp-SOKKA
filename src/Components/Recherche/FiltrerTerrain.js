@@ -13,6 +13,60 @@ var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
 export default class FiltrerTerrain extends React.Component {
 
+
+    static filtrerTerrains = (data, f) => {
+        console.log("very start");
+        if (f != null) {
+            console.log("start")
+            if (f.departement !== "") {
+                data = data.filter(((elmt) => {return elmt["Departement"] === f.departement}))
+            }
+            console.log("dep OK");
+            if (f.ville !== "") {
+                data = data.filter(((elmt) => {return elmt["Ville"] === f.ville}))
+            }
+            console.log("ville OK");
+            if (f.sanitaires) {
+                data = data.filter(((elmt) => {return elmt["EquSanitairePublic"] === "-1"}))
+            }
+            console.log("san OK");
+            if (f.eclairage) {
+                data = data.filter(((elmt) => {return elmt["EquEclairage"] === "-1"}))
+            }
+            console.log("eclairage OK");
+            if (f.handicap) {
+                data = data.filter(((elmt) => {return elmt["EquAccesHandimAire"] === "Oui"}))
+            }
+            console.log("handicap OK");
+            if (f.decouvert) {
+                data = data.filter(((elmt) => {return elmt["Decouvert_Couvert"] === "Découvert"}))
+            }
+            console.log("decouv OK");
+            if (f.gratuit) {
+                data = data.filter(((elmt) => {return elmt["Payant"] === false}))
+            }
+            console.log("gratuit OK")
+            if (f.surface != null) {
+                if (f.surface === "Gazon naturel") {
+                    data = data.filter(((elmt) => {return elmt["TypeSol"] === "Gazon naturel"}))
+                }
+                if (f.surface === "Gazon synthétique") {
+                    data = data.filter(((elmt) => {return elmt["TypeSol"] === "Gazon synthétique"}))
+                }
+                if (f.surface === "Bitume") {
+                    data = data.filter(((elmt) => {return elmt["TypeSol"] === "Bitume"}))
+                }
+                if (f.surface === "Synthétique (hors gazon)") {
+                    data = data.filter(((elmt) => {return elmt["TypeSol"] === "Synthétique (hors gazon)"}))
+                }        
+            }
+            console.log("surface OK");
+        }
+
+        return data;
+    }
+
+
     /**
      * Props du composant FiltrerJoueur :
      *      handleValidate: fonction appelée à la validation du filtrage
@@ -20,17 +74,33 @@ export default class FiltrerTerrain extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-            sanitaires: false,
-            eclairage: false,
-            handicap: false,
-            decouvert: false,
-            departement: "",
-            ville: "",
-            searchedDepartements: [],
-            searchedVilles: [],
-            gratuit: false,
-            surface: null
+        if (this.props.init == null || this.props.init == undefined) {
+            this.state = {
+                sanitaires: false,
+                eclairage: false,
+                handicap: false,
+                decouvert: false,
+                departement: "",
+                ville: "",
+                searchedDepartements: [],
+                searchedVilles: [],
+                gratuit: false,
+                surface: null
+            }
+        } else {
+            var init = this.props.init;
+            this.state = {
+                sanitaires: init.sanitaires,
+                eclairage: init.eclairage,
+                handicap: init.handicap,
+                decouvert: init.decouvert,
+                departement: init.departement,
+                ville: init.ville,
+                searchedDepartements: [],
+                searchedVilles: [],
+                gratuit: init.gratuit,
+                surface: init.surface
+            }
         }
     }
 
@@ -261,6 +331,12 @@ export default class FiltrerTerrain extends React.Component {
                 <View style={styles.rowFilter}>
                     <Text style={{width: wp('30%'), marginRight: wp('5%')}}>Eclairage</Text>
                     <Switch value={this.state.eclairage} onValueChange={() => this.setState({eclairage: !this.state.eclairage})}/>
+                </View>
+
+                {/* Acces handicap */}
+                <View style={styles.rowFilter}>
+                    <Text style={{width: wp('30%'), marginRight: wp('5%')}}>Accès handicapé</Text>
+                    <Switch value={this.state.handicap} onValueChange={() => this.setState({handicap: !this.state.handicap})}/>
                 </View>
 
                 {/* Gratuit */}

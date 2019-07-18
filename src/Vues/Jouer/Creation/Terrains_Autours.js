@@ -214,7 +214,7 @@ class Terrains_Autours extends React.Component {
 
 	displayFiltres() {
 		if (this.state.displayFiltres) {
-			return (<FiltrerTerrain handleValidate={this.handleValidateFilters}/>);
+			return (<FiltrerTerrain handleValidate={this.handleValidateFilters} init={this.state.filtres}/>);
 		}
 	}
 

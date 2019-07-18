@@ -3,7 +3,6 @@ import {View, Animated,TouchableOpacity,FlatList, Image,Dimensions,StyleSheet,Te
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../Colors'
-import Barre_Recherche from '../Recherche/Barre_Recherche'
 import StarRating from 'react-native-star-rating'
 import { CheckBox } from 'react-native-elements'
 import { connect } from 'react-redux'
@@ -50,11 +49,10 @@ class Joueur_item_Rejoindre_Partie extends React.PureComponent{
                 }
             }
         }
-        
-    }
+
 
     render()  {
-        const  isChecked  = this.props.isChecked
+        const  isChecked  = this.props.isChecked;
 
         return(
             <View style = {{flexDirection : "row",justifyContent: "space-between", marginTop : hp('3%'), backgroundColor : "white", paddingVertical : hp('2%')}}>

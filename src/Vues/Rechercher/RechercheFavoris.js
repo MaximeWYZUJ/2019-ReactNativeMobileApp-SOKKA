@@ -6,14 +6,27 @@ import ItemJoueur from '../../Components/ProfilJoueur/JoueurItem'
 import ItemEquipe from '../../Components/Profil_Equipe/Item_Equipe'
 import ItemTerrain from '../../Components/Terrain/ItemTerrain'
 import FiltrerJoueur from '../../Components/Recherche/FiltrerJoueur'
+import FiltrerTerrain from '../../Components/Recherche/FiltrerTerrain'
+import FiltrerEquipe from '../../Components/Recherche/FiltrerEquipe'
+
+import LocalUser from '../../Data/LocalUser.json'
+import Database from '../../Data/Database'
+
 
 export default class RechercheFavoris extends React.Component {
 
     constructor(props) {
+        console.log("recherche fav");
         super(props)
         // Collection
         this.type = this.props.navigation.getParam("type", null); // Joueurs, Equipes, Terrains, Defis
-        this.allFav = this.props.navigation.getParam("dataFav", []);
+        
+        switch(this.type) {
+            case "Joueurs" : this.allFavId = LocalUser.data.reseau; break;
+            case "Equipes" : this.allFavId = LocalUser.data.equipesFav; break;
+            case "Terrains": this.allFavId = LocalUser.data.terrains; break;
+        }
+        this.allFav = [];
 
         // Champ(s) sur lequel faire la query
         switch (this.type) {
@@ -24,7 +37,7 @@ export default class RechercheFavoris extends React.Component {
         
         // State
         this.state = {
-            dataFav: this.allFav,
+            dataFav: [],
             displayFiltres: false,
             filtres: null
         }
@@ -40,6 +53,11 @@ export default class RechercheFavoris extends React.Component {
 
     // === Manipulation du lifecycle entre les onglets ===
     componentDidMount() {
+        Database.getArrayDocumentData(this.allFavId, this.type).then(data => {
+            this.allFav = data;
+            this.setState({dataFav: data})
+        })
+
         this.willBlurSubscription = this.props.navigation.addListener('willBlur', this.willBlurAction);
     }
 
@@ -100,7 +118,12 @@ export default class RechercheFavoris extends React.Component {
 
     displayFiltresComponents() {
         if (this.state.displayFiltres) {
-            return (<FiltrerJoueur handleValidate={this.handleValidateFilters}/>)
+            switch (this.type) {
+                case "Joueurs": return (<FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+                case "Equipes": return (<FiltrerEquipe handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+                case "Terrains": return (<FiltrerTerrain handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+            }
+            
         }
     }
 
@@ -114,59 +137,16 @@ export default class RechercheFavoris extends React.Component {
 
     handleValidateFilters = (q, f) => {
         this.handleFilterButton();
-        switch(this.type) {
-            case "Joueurs": {
-                this.setState({filtres: f});
-                break;
-            }
-        }
-    }
-
-
-    filtrerJoueurs = (data) => {
-        f = this.state.filtres;
-        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
-        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
-        if (f.departement !== "") {
-            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
-        }
-        if (f.ville !== "") {
-            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
-        }
-        if (f.score !== null) {
-            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
-        }
-
-        return data;
-    }
-
-
-    filtrerEquipes = (data) => {
-        f = this.state.filtres;
-        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
-        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
-        if (f.departement !== "") {
-            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
-        }
-        if (f.ville !== "") {
-            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
-        }
-        if (f.score !== null) {
-            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
-        }
-        if (f.nbJoueurs != 0) {
-            data = data.filter(((elmt) => {return elmt["nbJoueurs"] === f.nbJoueurs}))
-        }
-
-        return data;
+        this.setState({filtres: f});
     }
 
 
     filtrerData = (data) => {
         if (this.state.filtres !== null) {
             switch (this.type) {
-                case "Joueurs" : return this.filtrerJoueurs(data)
-                case "Equipes" : return this.filtrerEquipes(data)
+                case "Joueurs" : return FiltrerJoueur.filtrerJoueurs(data, this.state.filtres)
+                case "Equipes" : return FiltrerEquipe.filtrerEquipes(data, this.state.filtres)
+                case "Terrains": return FiltrerTerrain.filtrerTerrains(data, this.state.filtres)
             }
         
         } else {

@@ -3,7 +3,6 @@ import {View, Animated,TouchableOpacity,FlatList, Image,Dimensions,StyleSheet,Te
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../Colors'
-import Barre_Recherche from '../Recherche/Barre_Recherche'
 import StarRating from 'react-native-star-rating'
 import { CheckBox } from 'react-native-elements'
 

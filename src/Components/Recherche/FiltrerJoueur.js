@@ -12,6 +12,24 @@ var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
 export default class FiltrerJoueur extends React.Component {
 
+    static filtrerJoueurs = (data, f) => {
+        
+        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
+        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
+        if (f.departement !== "") {
+            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
+        }
+        if (f.ville !== "") {
+            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
+        }
+        if (f.score !== null) {
+            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
+        }
+
+        return data;
+    }
+
+
     /**
      * Props du composant FiltrerJoueur :
      *      handleValidate: fonction appelée à la validation du filtrage
@@ -19,16 +37,43 @@ export default class FiltrerJoueur extends React.Component {
     constructor(props) {
         super(props);
 
-        
-        this.state = {
-            ageMin: 0,
-            ageMax: 99,
-            score: null,
-            ville: "",
-            searchedVilles: [],
-            departement: "",
-            searchedDepartements: [],
-            lookForCaptain: false
+        if (this.props.init == null || this.props.init == undefined) {
+            this.villePlaceholder = "Ville de recherche";
+            this.depPlaceholder = "Département de recherche";
+            this.ageMinPlaceholder = "0";
+            this.ageMaxPlaceholder = "99";
+            
+            this.state = {
+                ageMin: 0,
+                ageMax: 99,
+                score: null,
+                poste: null,
+                sexe: null,
+                ville: "",
+                searchedVilles: [],
+                departement: "",
+                searchedDepartements: [],
+                lookForCaptain: false,
+            }
+        } else {
+            var init = this.props.init;
+            this.villePlaceholder = init.ville;
+            this.depPlaceholder = init.departement;
+            this.ageMinPlaceholder = init.ageMin;
+            this.ageMaxPlaceholder = init.ageMax;
+
+            this.state = {
+                ageMin: init.ageMin,
+                ageMax: init.ageMax,
+                score: init.score,
+                poste: init.poste,
+                sexe: init.sexe,
+                ville: init.ville,
+                searchedVilles: [],
+                departement: init.departement,
+                searchedDepartements: [],
+                lookForCaptain: init.lookForCaptain
+            }
         }
     }
 
@@ -47,6 +92,38 @@ export default class FiltrerJoueur extends React.Component {
                 <Picker.Item label={"3 étoiles"} key={4} value={3}/>
                 <Picker.Item label={"4 étoiles"} key={5} value={4}/>
                 <Picker.Item label={"5 étoiles"} key={6} value={5}/>
+            </Picker>
+        )
+    }
+
+
+    renderPickerPoste() {
+        return (
+            <Picker
+                selectedValue={this.state.poste}
+                style={{width: wp('60%'), marginRight: wp('5%')}}
+                onValueChange={(itemValue, itemIndex) => this.setState({poste: itemValue})}
+                >
+                <Picker.Item label={"indifférent"} key={0} value={null}/>
+                <Picker.Item label={"mixte"} key={1} value={"mixte"}/>
+                <Picker.Item label={"offensif"} key={2} value={"offensif"}/>
+                <Picker.Item label={"defensif"} key={3} value={"defensif"}/>
+                <Picker.Item label={"gardien"} key={4} value={"gardien"}/>
+            </Picker>
+        )
+    }
+
+
+    renderPickerSexe() {
+        return (
+            <Picker
+                selectedValue={this.state.sexe}
+                style={{width: wp('60%'), marginRight: wp('5%')}}
+                onValueChange={(itemValue, itemIndex) => this.setState({sexe: itemValue})}
+                >
+                <Picker.Item label={"indifférent"} key={0} value={null}/>
+                <Picker.Item label={"Masculin"} key={1} value={"masculin"}/>
+                <Picker.Item label={"Féminin"} key={2} value={"feminin"}/>
             </Picker>
         )
     }
@@ -167,6 +244,14 @@ export default class FiltrerJoueur extends React.Component {
             ref = ref.where('score', '==', this.state.score)
             bool = true;
         }
+        if (this.state.poste != null) {
+            ref = ref.where('poste', '==', this.state.poste)
+            bool = true;
+        }
+        if (this.state.sexe != null) {
+            ref = ref.where('sexe', '==', this.state.sexe)
+            bool = true;
+        }
 
         if (!bool) {ref=null}
         return ref;
@@ -174,12 +259,14 @@ export default class FiltrerJoueur extends React.Component {
 
 
     returnFilter() {
-        b0 = tihs.state.departement.length > 0;
+        b0 = this.state.departement.length > 0;
         b1 = this.state.ville.length > 0;
         b2 = this.state.ageMin > 0;
         b3 = this.state.ageMax < 99;
         b4 = this.state.score != null;
-        if (b1 || b2 || b3 || b4) {
+        b5 = this.state.poste != null;
+        b6 = this.state.sexe != null;
+        if (b0 || b1 || b2 || b3 || b4 ||b5 || b6) {
             return {...this.state}
         } else {
             return null;
@@ -197,7 +284,7 @@ export default class FiltrerJoueur extends React.Component {
                         <TextInput
                             style={{width: wp('60%')}}
                             onChangeText={(t) => this.searchedDepartements(t)}
-                            placeholder={"Département de recherche"}
+                            placeholder={this.depPlaceholder}
                             value={this.state.departement}
                         />
                         
@@ -213,7 +300,7 @@ export default class FiltrerJoueur extends React.Component {
                         <TextInput
                             style={{width: wp('60%')}}
                             onChangeText={(t) => this.searchedVilles(t)}
-                            placeholder={"Ville de recherche"}
+                            placeholder={this.villePlaceholder}
                             value={this.state.ville}
                             />
                     
@@ -224,17 +311,29 @@ export default class FiltrerJoueur extends React.Component {
                     </ScrollView>
                 </View>
 
+                {/* Filtrer sur le poste */}
+                <View style={styles.rowFilter}>
+                    <Text style={{width: wp('30%')}}>Poste : </Text>
+                    {this.renderPickerPoste()}
+                </View>
+
+                {/* Filtrer sur le sexe */}
+                <View style={styles.rowFilter}>
+                    <Text style={{width: wp('30%')}}>Sexe : </Text>
+                    {this.renderPickerSexe()}
+                </View>
+
                 {/* Filtrer sur l'age */}
                 <KeyboardAvoidingView style={styles.rowFilter} behavior="padding" enabled>
                     <Text style={{width: wp('30%')}}>Age : </Text>
-                    <TextInput style={{width: wp('25%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({ageMin: 0}) : this.setState({ageMin: parseInt(t,10)})} placeholder={"min"}/>
-                    <TextInput style={{width: wp('25%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({ageMax: 99}) : this.setState({ageMax: parseInt(t,10)})} placeholder={"max"}/>
+                    <TextInput style={{width: wp('25%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({ageMin: 0}) : this.setState({ageMin: parseInt(t,10)})} placeholder={"min : "+this.ageMinPlaceholder}/>
+                    <TextInput style={{width: wp('25%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({ageMax: 99}) : this.setState({ageMax: parseInt(t,10)})} placeholder={"max : "+this.ageMaxPlaceholder}/>
                 </KeyboardAvoidingView>
 
                 {/* Filtrer sur le score */}
                 <View style={styles.rowFilter}>
                     <Text style={{width: wp('30%')}}>Score : </Text>
-                    {this.renderPickerScore(true)}
+                    {this.renderPickerScore()}
                 </View>
 
                 {/* Capitaine d'équipe */}

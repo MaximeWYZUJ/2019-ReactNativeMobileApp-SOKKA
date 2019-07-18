@@ -12,6 +12,27 @@ var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
 export default class FiltrerEquipe extends React.Component {
 
+    static filtrerEquipes = (data, f) => {
+        
+        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
+        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
+        if (f.departement !== "") {
+            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
+        }
+        if (f.ville !== "") {
+            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
+        }
+        if (f.score !== null) {
+            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
+        }
+        if (f.nbJoueurs != 0) {
+            data = data.filter(((elmt) => {return elmt["nbJoueurs"] === f.nbJoueurs}))
+        }
+
+        return data;
+    }
+
+
     /**
      * Props du composant FiltrerJoueur :
      *      handleValidate: fonction appelée à la validation du filtrage
@@ -19,16 +40,29 @@ export default class FiltrerEquipe extends React.Component {
     constructor(props) {
         super(props);
 
-        
-        this.state = {
-            ageMin: 0,
-            ageMax: 99,
-            score: null,
-            ville: "",
-            searchedVilles: [],
-            departement: "",
-            searchedDepartements: [],
-            nbJoueurs: 0
+        if (this.props.init == null || this.props.init == undefined) {
+            this.state = {
+                ageMin: 0,
+                ageMax: 99,
+                score: null,
+                ville: "",
+                searchedVilles: [],
+                departement: "",
+                searchedDepartements: [],
+                nbJoueurs: 0
+            }
+        } else {
+            var init = this.props.init;
+            this.state = {
+                ageMin: init.ageMin,
+                ageMax: init.ageMax,
+                score: init.score,
+                ville: init.ville,
+                searchedVilles: [],
+                departement: init.departement,
+                searchedDepartements: [],
+                nbJoueurs: init.nbJoueurs
+            }
         }
     }
 

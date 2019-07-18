@@ -44,8 +44,11 @@ export default class Barre_Recherche extends React.Component {
 	searchedTerrains = (searchedText) => {
 
         if (searchedText === "") {
-            if(this.filterData != undefined && this.filterData != null) {
-                this.props.handleTextChange(this.props.filterData(this.DataDepart))
+            if(this.props.filterData != undefined && this.props.filterData != null) {
+                console.log("ON FILTRE DANS LA barrrrrrrre DE RECHERCHE")
+                var fData = this.props.filterData(this.DataDepart);
+                console.log("ON A FILTRE");
+                this.props.handleTextChange(fData);
             } else {
                 this.props.handleTextChange(this.DataDepart)
             }
@@ -56,7 +59,7 @@ export default class Barre_Recherche extends React.Component {
                 return data[field].includes(NormalizeString.normalize(searchedText)) // toLowerCase().startsWith(searchedText.toLowerCase()) ;
             });
 
-            if(this.props.filterData != undefined && this.filterData != null) {
+            if(this.props.filterData != undefined && this.props.filterData != null) {
                 searchData = this.props.filterData(searchData);
             }
 

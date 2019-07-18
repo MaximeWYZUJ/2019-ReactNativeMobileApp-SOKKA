@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {View, Text,Image, Animated,TouchableOpacity,TextInput} from 'react-native'
+import {Picker, View, Text,Image, Animated,TouchableOpacity,TextInput} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 import RF from 'react-native-responsive-fontsize';
@@ -24,6 +24,7 @@ export default class Inscription_Nom_Pseudo extends React.Component {
             nom : ' ',
             prenom : ' ',
             pseudo : ' ',
+            sexe: ' ',
             mail : mail,
             mdp : mdp,
         }
@@ -75,7 +76,8 @@ export default class Inscription_Nom_Pseudo extends React.Component {
                 mdp : this.state.mdp,
                 nom : this.state.nom,
                 prenom : this.state.prenom,
-                pseudo : this.state.pseudo
+                pseudo : this.state.pseudo,
+                sexe: this.state.sexe
             })
 
     }
@@ -140,6 +142,22 @@ export default class Inscription_Nom_Pseudo extends React.Component {
                                     onChangeText ={(text) => this.changePseudo(text)} 
 
                                 />
+                            </Animated.View>
+
+                        </View>
+
+                        {/* Pour le sexe */}
+                        <View style = {styles.view_champ}>
+                            <Animated.View style={[this.inputNom.getLayout(), {borderBottomWidth : 1, flexDirection: 'row'}]}>
+                                <Text>Sexe : </Text>
+                                <Picker
+                                    selectedValue={this.state.sexe}
+                                    style={{width: wp('60%'), marginRight: wp('5%')}}
+                                    onValueChange={(itemValue, itemIndex) => {this.setState({sexe: itemValue})}}
+                                    >
+                                    <Picker.Item label={"Masculin"} key={1} value={"masculin"}/>
+                                    <Picker.Item label={"Féminin"} key={2} value={"feminin"}/>
+                                </Picker>
                             </Animated.View>
 
                         </View>

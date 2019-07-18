@@ -1,5 +1,8 @@
 import React from 'react'
-import { View, Text, Button, StyleSheet, Alert } from 'react-native'
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native'
+
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import RF from 'react-native-responsive-fontsize';
 
 import Database from '../../Data/Database'
 import LocalUser from '../../Data/LocalUser.json'
@@ -8,6 +11,20 @@ import villes from '../../Components/Creation/villes.json'
 
 
 export default class AccueilRechercher extends React.Component {
+
+    constructor(props) {
+        super(props);
+    }
+
+
+    static navigationOptions = ({ navigation }) => {
+        return {
+            title: 'Rechercher',
+            tabBarOnPress({jumpToIndex, scene}) {
+                jumpToIndex(scene.index);
+            }
+        }
+    }
 
 
     /**
@@ -31,18 +48,15 @@ export default class AccueilRechercher extends React.Component {
     }
 
 
-    async rechercheJoueur() {
-        var jFav = await Database.getArrayDocumentData(LocalUser.data.reseau, "Joueurs");
-        this.props.navigation.navigate("RechercherTab", {type: "Joueurs", dataFav: jFav});
+    rechercheJoueur() {
+        this.props.navigation.navigate("RechercherTab", {type: "Joueurs"});
     }
 
-    async rechercheEquipe() {
-        var eFav = await Database.getArrayDocumentData(LocalUser.data.equipesFav, "Equipes");
-        this.props.navigation.navigate("RechercherTab", {type: "Equipes", dataFav: eFav});
+    rechercheEquipe() {
+        this.props.navigation.navigate("RechercherTab", {type: "Equipes"});
     }
 
-    async rechercheTerrain() {
-        var tFav = await Database.getArrayDocumentData(LocalUser.data.terrains, "Terrains");
+    rechercheTerrain() {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 let latUser = position.coords.latitude
@@ -53,7 +67,7 @@ export default class AccueilRechercher extends React.Component {
                 }
                 LocalUser.geolocalisation = pos;
                 
-                this.props.navigation.navigate("RechercherTab", {type: "Terrains", dataFav: tFav});
+                this.props.navigation.navigate("RechercherTab", {type: "Terrains"});
         },
         (error) => {
             
@@ -65,8 +79,7 @@ export default class AccueilRechercher extends React.Component {
                     {text: 'Oui', onPress: () => {
                         var pos = this.findPositionVilleFromName(LocalUser.data.ville)
                         LocalUser.geolocalisation = pos;
-
-                        this.props.navigation.navigate("RechercherTab", {type: "Terrains", dataFav: tFav});
+                        this.props.navigation.navigate("RechercherTab", {type: "Terrains"});
                     } },
                     {
                       text: 'Non',
@@ -83,11 +96,40 @@ export default class AccueilRechercher extends React.Component {
 
     render() {
         return (
-            <View style={styles.button}>
-                <Text>Accueil Rechercher</Text>
-                <Button title="Rechercher Joueur" onPress={() => this.rechercheJoueur()}/>
-                <Button title="Rechercher Equipe" onPress={() => this.rechercheEquipe()}/>
-                <Button title="Rechercher Terrain" onPress={() => this.rechercheTerrain()}/>
+            <View style={styles.main_container}>
+                <TouchableOpacity
+                    style={styles.header_container}
+                    onPress={() => this.rechercheJoueur()}>
+                    <Text style={styles.header}>Rechercher un joueur</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.header_container}
+                    onPress={() => this.rechercheEquipe()}>
+                    <Text style={styles.header}>Rechercher une équipe</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.header_container}
+                    onPress={() => this.rechercheTerrain()}>
+                    <Text style={styles.header}>Rechercher un terrain</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.header_container}
+                    onPress={() => Alert.alert(
+                        '', 
+                        "Fonctionnalité pas encore implémentée",
+                        [
+                            {
+                                text: "OK",
+                                onPress: () => {},
+                                style: 'cancel',
+                            },
+                        ],
+                    )}>
+                    <Text style={styles.header}>Rechercher un défi</Text>
+                </TouchableOpacity>
             </View>
         )
     }
@@ -97,10 +139,30 @@ export default class AccueilRechercher extends React.Component {
 
 const styles =  StyleSheet.create({
 
-    button: {
+    main_container: {
         flex: 1,
         flexDirection: 'column',
-        justifyContent: 'space-around'
+        justifyContent: 'space-around',
+        alignItem: 'center'
+    },
+
+    header_container: {
+        marginTop : hp('1%'),
+        marginBottom : hp('1%'),
+        borderWidth : 1,
+        borderRadius : 8,
+        alignSelf : 'center',
+        width : wp('80%'),
+        paddingVertical : hp('1%'),
+        backgroundColor : '#313131'
+    },
+
+    header: {
+        fontWeight : 'bold',
+        fontSize : RF(2.4),
+        marginLeft : wp('3%'),
+        color : '#DE6868',
+        textAlign: 'center'
     }
 
 })

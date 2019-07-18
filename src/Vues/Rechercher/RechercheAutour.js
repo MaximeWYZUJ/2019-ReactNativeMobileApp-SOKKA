@@ -31,6 +31,7 @@ export default class RechercheAutour extends React.Component {
 
 
     constructor(props) {
+        console.log("recherche autour");
         super(props);
         this.villesTriees = [];
         this.selfLat = LocalUser.geolocalisation.latitude;
@@ -236,9 +237,9 @@ export default class RechercheAutour extends React.Component {
     displayFiltresComponents() {
         if (this.state.displayFiltres) {
             switch(this.type) {
-                case "Joueurs": return (<FiltrerJoueur handleValidate={this.handleValidateFilters}/>)
-                case "Equipes": return (<FiltrerEquipes handleValidate={this.handleValidateFilters}/>)
-                case "Terrains": return (<FiltrerTerrains handleValidate={this.handleValidateFilters}/>)
+                case "Joueurs": return (<FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+                case "Equipes": return (<FiltrerEquipes handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+                case "Terrains": return (<FiltrerTerrains handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
             }
         }
     }
