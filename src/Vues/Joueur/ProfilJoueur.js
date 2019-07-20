@@ -785,6 +785,15 @@ class ProfilJoueur extends React.Component {
         }
     }
 
+    renderIconMessage() {
+        if(this.monProfil){
+            return(
+                <View style = {{position : "absolute" , right : wp('1%')}}>
+                    <Icon_Message/>
+                </View>
+            )
+        }
+    }
     render() {
         if (this.state.displayFullPicture) {
             return(
@@ -818,9 +827,8 @@ class ProfilJoueur extends React.Component {
 
 
                 {/* L'icon message */}
-                <View style = {{position : "absolute" , right : wp('1%')}}>
-                    <Icon_Message/>
-                </View>
+                {this.renderIconMessage()}
+               
 
 
                     {/* Caracteristiques du joueur */}

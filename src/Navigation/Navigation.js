@@ -26,6 +26,8 @@ import Calendrier_Joueur from '../Vues/Jouer/Historique/Calendrier_Joueur'
 import Joueurs_Equipe from '../Vues/Equipe/Joueurs_Equipe'
 import Choix_Capitaines_Equipe from '../Vues/Equipe/Choix_Capitaines_Equipe'
 import Accueil_Conversation from "../Vues/Conversation/Accueil_Conversation"
+import List_Messages from '../Vues/Conversation/List_Messages'
+
 
 /*import Accueil_Jouer from '../Vues/Jouer/Accueil_Jouer'
 import Choix_Format_Defi from '../Vues/Jouer/Creation/Choix_Format_Defi'
@@ -142,6 +144,10 @@ const stackNavigator = createStackNavigator({
    */
   AccueilConversation : {
     screen : Accueil_Conversation
+  },
+
+  ListMessages : {
+    screen : List_Messages
   },
   /**
    * Page d'acceuil pour jouer
