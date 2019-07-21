@@ -412,9 +412,9 @@ class Terrains_Autours extends React.Component {
 	renderBtnRelancerRecherche() {
 
 		return(
-			<TouchableOpacity style = {{backgroundColor : Color.agOOraBlue, padding : hp('1%'), borderRadius : 5, position : "absolute" , top : hp('1%')}}
+			<TouchableOpacity style = {{flex: 1, backgroundColor : Color.agOOraBlue, padding : hp('1%'), borderRadius : 5, marginHorizontal: hp('10%')}}
 				onPress = {() =>this.relancerRecherche()}>
-				<Text style = {{color : "white" }}>Relancer la recherche dans ce quartier</Text>
+				<Text style = {{color : "white", textAlign: 'center'}}>Relancer la recherche dans ce quartier</Text>
 			</TouchableOpacity>
 		)
 	}
@@ -427,8 +427,7 @@ class Terrains_Autours extends React.Component {
 	displayRender() {
 		if(this.state.typeDisplay == LISTE ) {
 			return(
-				<View>
-				<ScrollView style = {{marginBottom : hp('1%')}}>
+				[<ScrollView style = {{marginBottom : hp('1%')}}>
 					<View style = {{flex : 1}}>
 						<Barre_Recherche
 							handleTextChange ={this.recherche}
@@ -465,129 +464,117 @@ class Terrains_Autours extends React.Component {
 						/>
 						
 					</View>
-				</ScrollView>
+				</ScrollView>,
+
 				<TouchableOpacity 
-								style = {{position : "absolute",bottom : hp('20%'), right: wp('1%')}}
-								onPress={() => this.setState({typeDisplay : MAP})}
-								>
-								<Image
-									source = {require('../../../../res/map.png')}
-									style = {{width : wp('17%'), height : wp('17%')}}/>
-						</TouchableOpacity>
-				</View>
+					style = {{padding : wp('4%'),position : "absolute",bottom : hp('6%'), right: wp('1%')}}
+					onPress={() => this.setState({typeDisplay : MAP})}
+					>
+					<Image
+						source = {require('../../../../res/map.png')}
+						style = {{width : wp('17%'), height : wp('17%')}}/>
+				</TouchableOpacity>]
 			)
 		} else {
 			return(
-				<View>
-					<Barre_Recherche
+					[<Barre_Recherche
 						handleTextChange ={this.recherche}
 						data = {this.allTerrains}
 						field = "queryName"
 						filtrerData = {this.filtrerData}
 						handleFilterButton={this.handleFilterButton}
-					/>
+					/>,
 
-					<View style = {styles.container}>
-					
-
-						<MapView
-							provider={this.props.provider}
-							ref={ref => { this.map = ref; }}
-							mapType={MAP_TYPES.STANDARD}
-							
-							style={styles.map}
-							initialRegion = {
-									{latitude: this.latitude,
-									longitude: this.longitude,
-									latitudeDelta: LATITUDE_DELTA,
-									longitudeDelta: LONGITUDE_DELTA}
-							}
-							
-							onRegionChange={this.onRegionChange}
-							>
-
-							
-							{/* Marker pour la position de l'utilisateur */}
-							<MapView.Marker
-								coordinate={
-									{latitude: this.latitude,
-									longitude:  this.longitude}
-								}
-								title={"title"}
-								description={"description"}>
-							</MapView.Marker>
-
-							{/* Marker depuis le state : va etre le terrain en 1ier plan*/}
-							{this.state.markers.map(marker =>{
-								console.log("marker id : ", marker.id)
-								console.log("this.state.selectedTerrain.id", this.state.selectedTerrain.id)
-								if(marker.id  == this.state.selectedTerrain.id) {
-									return(
-										<MapView.Marker 
-											coordinate={marker.coordinates}
-											title={marker.title}
-											description = {"okok"}>
-											<Image source = {require('../../../../res/marker_terrain_selected.png')} style = {{width : 80, height : 80}}/>
-										</MapView.Marker>
-									)
-								} else {
-									return(
-										<MapView.Marker 
-											coordinate={marker.coordinates}
-											title={marker.title}
-											description = {"okok"}>
-											<Image source = {require('../../../../res/marker_terrain.png')} style = {{width : 80, height : 80}}/>
-										</MapView.Marker>
-									)
-								}
-							})}
-						</MapView>
-
-						{/* Vue contenant le carousel*/}
-						<View style = {{position : "absolute", bottom : hp('1%')}}>
-							<Carousel
-								ref={c => this._slider1Ref = c}
-								data={this.state.terrainFiltres}	
-								extraData = {this.props.terrainSelectionne}		 
-								//renderItem={this._renderItemCarrousel.bind(this)}
-								renderItem={this._renderItemCarrousel}
-								sliderWidth={wp('100%')}
-								itemWidth={wp('80%')}
-								hasParallaxImages={true}
-								inactiveSlideScale={0.94}
-								inactiveSlideOpacity={0.7}
-								containerCustomStyle={styles.slider}
-								onSnapToItem={(index) =>this.changeMarkerWithSlider(index) }
-								contentContainerCustomStyle={styles.sliderContentContainer}
-							/>
-						</View>
+					<View style={{marginVertical : hp('1%'), flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
 						{this.renderBtnRelancerRecherche()}
+					</View>,
 
-						<TouchableOpacity
-							style = {{padding : wp('4%'),position : "absolute",bottom : hp('6%'), right: wp('1%')}}
-							onPress={() => this.setState({typeDisplay : LISTE})}
-
+					<MapView
+						provider={this.props.provider}
+						ref={ref => { this.map = ref; }}
+						mapType={MAP_TYPES.STANDARD}
+						
+						style={styles.map}
+						initialRegion = {
+								{latitude: this.latitude,
+								longitude: this.longitude,
+								latitudeDelta: LATITUDE_DELTA,
+								longitudeDelta: LONGITUDE_DELTA}
+						}
+							
+						onRegionChange={this.onRegionChange}
 						>
-							<Image
-								source = {require('../../../../res/list.png')}
-								style = {{width : wp('17%'), height : wp('17%')}}/>
 
-						</TouchableOpacity>
+							
+						{/* Marker pour la position de l'utilisateur */}
+						<MapView.Marker
+							coordinate={
+								{latitude: this.latitude,
+								longitude:  this.longitude}
+							}
+							title={"title"}
+							description={"description"}>
+						</MapView.Marker>
 
-					</View>
-				</View>
-				
+						{/* Marker depuis le state : va etre le terrain en 1ier plan*/}
+						{this.state.markers.map(marker =>{
+							if(marker.id  == this.state.selectedTerrain.id) {
+								return(
+									<MapView.Marker 
+										coordinate={marker.coordinates}
+										title={marker.title}
+										description = {"okok"}>
+										<Image source = {require('../../../../res/marker_terrain_selected.png')} style = {{width : 80, height : 80}}/>
+									</MapView.Marker>
+								)
+							} else {
+								return(
+									<MapView.Marker 
+										coordinate={marker.coordinates}
+										title={marker.title}
+										description = {"okok"}>
+										<Image source = {require('../../../../res/marker_terrain.png')} style = {{width : 80, height : 80}}/>
+									</MapView.Marker>
+								)
+							}
+						})}
+					</MapView>,
+
+					/* Vue contenant le carousel*/
+					<View style = {{position : "absolute", bottom : hp('1%')}}>
+						<Carousel
+							ref={c => this._slider1Ref = c}
+							data={this.state.terrainFiltres}	
+							extraData = {this.props.terrainSelectionne}		 
+							//renderItem={this._renderItemCarrousel.bind(this)}
+							renderItem={this._renderItemCarrousel}
+							sliderWidth={wp('100%')}
+							itemWidth={wp('80%')}
+							hasParallaxImages={true}
+							inactiveSlideScale={0.94}
+							inactiveSlideOpacity={0.7}
+							containerCustomStyle={styles.slider}
+							onSnapToItem={(index) =>this.changeMarkerWithSlider(index) }
+							contentContainerCustomStyle={styles.sliderContentContainer}
+						/>
+					</View>,
+
+					<TouchableOpacity
+						style = {{padding : wp('4%'),position : "absolute",bottom : hp('6%'), right: wp('1%')}}
+						onPress={() => this.setState({typeDisplay : LISTE})}
+						>
+						<Image
+							source = {require('../../../../res/list.png')}
+							style = {{width : wp('17%'), height : wp('17%')}}/>
+
+					</TouchableOpacity>]
 			)
 		}
 	}
 	
     
     render() {
-        return(
-			<View>
-				{this.displayRender()}
-			</View>
-		)
+        return this.displayRender();
     }
 
 }
@@ -606,14 +593,10 @@ const mapStateToProps = (state) => {
 }
 
 const styles = StyleSheet.create({
-	container: {
-		height : hp('54.5%'),
-	  //...StyleSheet.absoluteFillObject,
-	  justifyContent: 'flex-end',
-	  alignItems: 'center',
-	},
+
 	map: {
-	  ...StyleSheet.absoluteFillObject,
+	  flex: 1,
+	  alignItems: 'center'
 	},
 
 	slider: {

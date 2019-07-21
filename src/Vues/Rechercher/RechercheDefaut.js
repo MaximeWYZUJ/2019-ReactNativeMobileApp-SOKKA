@@ -8,9 +8,15 @@ import BarreRecherche from '../../Components/Recherche/Barre_Recherche'
 import ItemJoueur from '../../Components/ProfilJoueur/JoueurItem'
 import ItemEquipe from '../../Components/Profil_Equipe/Item_Equipe'
 import ItemTerrain from '../../Components/Terrain/ItemTerrain'
+import Item_Defi from '../../Components/Defis/Item_Defi'
+import Item_Partie  from '../../Components/Defis/Item_Partie'
+import Type_Defis from '../Jouer/Type_Defis'
+
+
 import FiltrerJoueur from '../../Components/Recherche/FiltrerJoueur'
 import FiltrerEquipes from '../../Components/Recherche/FiltrerEquipe'
 import FiltrerTerrains from '../../Components/Recherche/FiltrerTerrain'
+import FiltrerDefi from '../../Components/Recherche/FiltrerDefi'
 
 import allTerrains from '../../Helpers/Toulouse.json'
 
@@ -29,6 +35,7 @@ export default class RechercheDefaut extends React.Component {
             case "Joueurs" : this.champNom = "nomQuery"; break;
             case "Equipes" : this.champNom = "queryName"; break;
             case "Terrains": this.champNom = "queryName"; break;
+            case "Defis": this.champNom = "queryName"; break;
         }
 
         this.queryFiltre = null;
@@ -82,6 +89,16 @@ export default class RechercheDefaut extends React.Component {
         this.handleFilterButton();
         this.queryFiltre = q;
         this.filtres = f;
+    
+        if (this.type === "Defis" && q != null) {
+            q.get().then((results) => {
+                var data = [];
+                for (var i=0; i<results.docs.length; i++) {
+                    data.push(results.docs[i].data());
+                }
+                this.setState({dataDefaut: data})
+            })
+        }
     }
 
 
@@ -91,6 +108,7 @@ export default class RechercheDefaut extends React.Component {
                 case "Joueurs": return (<FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.filtres}/>)
                 case "Equipes": return (<FiltrerEquipes handleValidate={this.handleValidateFilters} init={this.filtres}/>)
                 case "Terrains": return (<FiltrerTerrains handleValidate={this.handleValidateFilters} init={this.filtres}/>)
+                case "Defis": return (<FiltrerDefi handleValidate={this.handleValidateFilters} init={this.filtres}/>)
             }
         }
     }
@@ -98,7 +116,21 @@ export default class RechercheDefaut extends React.Component {
 
 
     renderSearchbar() {
-        if (this.type === "Terrains") {
+        if (this.type === "Defis") {
+            return (
+                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <Text>Appuie sur le bouton à droite pour faire une recherche</Text>
+                    <TouchableOpacity
+                        style = {{backgroundColor : 'white', flexDirection : 'row', marginLeft : wp('3%'),paddingVertical : hp('1%'), paddingHorizontal :wp('3%')}}
+                        onPress={() => {this.handleFilterButton()}}
+                        >
+                            <Image
+                                style={{width : wp('7%'), height : wp('7%'), alignSelf : 'center'}}
+                                source = {require('app/res/controls.png')} />
+                    </TouchableOpacity>
+                </View>
+            )
+        } else if (this.type === "Terrains") {
             return (
                 <BarreRecherche
                     handleTextChange={this.validerRecherche}
@@ -120,6 +152,17 @@ export default class RechercheDefaut extends React.Component {
                 />
             )
         }
+    }
+
+
+    buildJoueurs(partie) {
+        var liste = []
+        for(var i = 0; i < partie.participants.length ; i++) {
+            if(! partie.indisponibles.includes(partie.participants[i])) {
+                liste.push(partie.participants[i])
+            }
+        }
+        return liste
     }
 
 
@@ -159,6 +202,38 @@ export default class RechercheDefaut extends React.Component {
                         EquNom={item.EquNom}
                     />
                 )
+
+            case "Defis":
+                if(item.type == Type_Defis.partie_entre_joueurs){
+            
+                    return(
+                        <Item_Partie
+                            id = {item.id}
+                            format = {item.format}
+                            jour = {new Date(item.jour.seconds *1000)} 
+                            duree = {item.duree}
+                            joueurs = {this.buildJoueurs(item)}
+                            nbJoueursRecherche =  {item.nbJoueursRecherche}
+                            terrain=  {item.terrain}
+                            latitudeUser = {this.state.latitude}
+                            longitudeUser = {this.state.longitude}
+                            message_chauffe  = {item.message_chauffe}
+                        />
+                    )
+                } else if(item.type == Type_Defis.defis_2_equipes) {
+                    return(
+                        <Item_Defi
+                            format = {item.format}
+                            jour = {new Date(item.jour.seconds * 1000)}
+                            duree ={item.duree}
+                            equipeOrganisatrice = {item.equipeOrganisatrice}
+                            equipeDefiee = {item.equipeDefiee}
+                            terrain = {item.terrain}
+                            allDataDefi = {item}
+                                
+                        />
+                    )
+                }
         }
     }
 

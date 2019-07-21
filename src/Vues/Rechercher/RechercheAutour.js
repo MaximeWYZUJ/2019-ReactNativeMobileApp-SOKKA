@@ -23,6 +23,7 @@ import Database from '../../Data/Database';
 import NormalizeString from '../../Helpers/NormalizeString'
 
 import RechercheTerrainJouer from '../Jouer/Creation/Terrains_Autours'
+import RechercheDefiAutour from './RechercheDefiAutour'
 
 
 const SLIDER_DISTANCE_MAX = 20;
@@ -349,7 +350,7 @@ export default class RechercheAutour extends React.Component {
                         <Slider
                             minimumValue={1}
                             maximumValue={SLIDER_DISTANCE_MAX}
-                            onValueChange={(v) => {
+                            onSlidingComplete={(v) => {
                                 this.setState({
                                     sliderValue: v,
                                     filtres: null,

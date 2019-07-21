@@ -127,7 +127,7 @@ class Item_Partie extends React.Component {
     }
 
     goToRejoindrePartie()  {
-        this.props.navigation.push("FichePartieRejoindre", 
+        this.props.navigation.push("FichePartieRejoindre",
             {
                 id : this.props.id,
                 jour : this.buildDate(),

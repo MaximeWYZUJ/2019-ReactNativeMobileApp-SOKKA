@@ -10,7 +10,6 @@ export default class Simple_Loading extends React.Component {
 
     constructor(props) {
         super(props) 
-        
     }
 
     render() {

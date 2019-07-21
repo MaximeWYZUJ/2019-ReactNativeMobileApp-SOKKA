@@ -3,7 +3,7 @@ import { createStackNavigator, createAppContainer } from 'react-navigation';
 
 import AccueilRechercher from '../../Vues/Rechercher/AccueilRechercher'
 import RechercherTabNavigator from './RechercherTabNavigator'
-
+import RechercherTabNavigatorDefi from './RechercherTabNavigatorDefi'
 
 const RechercherStackNavigator = createStackNavigator({
 
@@ -13,6 +13,10 @@ const RechercherStackNavigator = createStackNavigator({
 
     RechercherTab: {
         screen: RechercherTabNavigator
+    },
+
+    RechercherTabDefi: {
+        screen: RechercherTabNavigatorDefi
     }
 
 })
