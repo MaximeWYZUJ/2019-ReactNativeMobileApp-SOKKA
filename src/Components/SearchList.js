@@ -1,52 +1,213 @@
 import React from 'react'
-import { View, StyleSheet, Image, Text, TextInput, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, Image, Text, ScrollView, TouchableOpacity, Alert, FlatList } from 'react-native'
 import RF from 'react-native-responsive-fontsize';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { withNavigation } from 'react-navigation'
+import BarreRecherche from './Recherche/Barre_Recherche'
+
+import FiltrerEquipe from './Recherche/FiltrerEquipe'
+import FiltrerJoueur from './Recherche/FiltrerJoueur'
+import FiltrerTerrain from './Recherche/FiltrerTerrain'
 
 
 class SearchList extends React.Component {
 
     constructor(props) {
         super(props)
+
+
         this.state = {
-            text: ''
+            text: '',
+            filtres: null,
+            displayFiltres: false,
+            dataFiltree: this.props.data
         }
-        console.log(this.props.type)
+
+        // Champ(s) sur lequel faire la query
+        switch (this.props.type) {
+            case "Joueurs" : this.champNom = "nomQuery"; break;
+            case "Equipes" : this.champNom = "queryName"; break;
+            case "EquipesFav" : this.champNom = "queryName"; break;
+            case "Terrains": this.champNom = "queryName"; break;
+        }
+    }
+
+
+    displayFiltresComponents() {
+        if (this.state.displayFiltres) {
+            switch (this.props.type) {
+                case "Joueurs": return (<FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+                case "Equipes": return (<FiltrerEquipe handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+                case "EquipesFav": return (<FiltrerEquipe handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+                case "Terrains": return (<FiltrerTerrain handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+            }
+            
+        }
+    }
+
+
+    handleFilterButton = () => {
+        this.setState({
+            displayFiltres: !this.state.displayFiltres
+        })
+    }
+
+
+    handleValidateFilters = (q, f) => {
+        this.handleFilterButton();
+        this.setState({filtres: f});
+    }
+
+
+    filtrerData = (data) => {
+        if (this.state.filtres !== null) {
+            switch (this.props.type) {
+                case "Joueurs" : return FiltrerJoueur.filtrerJoueurs(data, this.state.filtres)
+                case "Equipes" : return FiltrerEquipe.filtrerEquipes(data, this.state.filtres)
+                case "EquipesFav" : return FiltrerEquipe.filtrerEquipes(data, this.state.filtres)
+                case "Terrains": return FiltrerTerrain.filtrerTerrains(data, this.state.filtres)
+            }
+        
+        } else {
+            return data;
+        }
+    }
+
+
+    validerRecherche = (data) => {
+        this.setState({
+            dataFiltree: data
+        })
+    }
+
+
+    getPlusButtonJoueursFav() {
+        return (
+            <TouchableOpacity
+                style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
+                onPress={() => Alert.alert(
+                                '',
+                                "Tu souhaites ajouter de nouveaux joueurs à ton réseau",
+                                [
+                                    {
+                                        text: 'Confirmer',
+                                        onPress: () => this.props.navigation.navigate("OngletRecherche_Autour", {type: "Joueurs"})
+                                    },
+                                    {
+                                        text: 'Annuler',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                        )}
+                >
+                <Text style={styles.header}>+</Text>
+            </TouchableOpacity>
+        )
+    }
+
+
+    getPlusButtonEquipesFav() {
+        return (
+            <TouchableOpacity
+                style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
+                onPress={() => Alert.alert(
+                                '',
+                                "Tu souhaites ajouter de nouvelles équipes dans tes équipes favorites",
+                                [
+                                    {
+                                        text: 'Confirmer',
+                                        onPress: () => this.props.navigation.navigate("OngletRecherche_Autour", {type: "Equipes"})
+                                    },
+                                    {
+                                        text: 'Annuler',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                        )}
+                >
+                <Text style={styles.header}>+</Text>
+            </TouchableOpacity>
+        )
+    }
+
+
+    getPlusButtonTerrainsFav() {
+        return (
+            <TouchableOpacity
+                style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
+                onPress={() => Alert.alert(
+                                '',
+                                "Tu souhaites ajouter de nouveaux terrains dans tes terrains favoris",
+                                [
+                                    {
+                                        text: 'Confirmer',
+                                        onPress: () => this.props.navigation.navigate("OngletRecherche_Autour", {type: "Terrains"})
+                                    },
+                                    {
+                                        text: 'Annuler',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                        )}
+                >
+                <Text style={styles.header}>+</Text>
+            </TouchableOpacity>
+        )
+    }
+
+
+    getPlusButtonEquipes() {
+        return (
+            <TouchableOpacity
+                style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
+                onPress={() => Alert.alert(
+                                '',
+                                "Que veux-tu faire ? CREER UNE EQUIPE ou RECHERCHER UNE EQUIPE A INTEGRER",
+                                [
+                                    {
+                                        text: 'Créer',
+                                        onPress: () => this.props.navigation.push("CreationEquipeNom")
+                                    },
+                                    {
+                                        text: 'Rechercher',
+                                        onPress: () => this.props.navigation.navigate("OngletRecherche_Autour", {type: "Equipes"}),
+                                    },
+                                ],
+                        )}
+                >
+                <Text style={styles.header}>+</Text>
+            </TouchableOpacity>
+        )
     }
 
 
     renderBtnPlus() {
-            return(
-                <TouchableOpacity
-                    style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
-                    onPress={() => this.props.navigation.navigate("OngletRecherche_Defaut", {type: this.props.type})}
-                    >
-                    <Text style={styles.header}>+</Text>
-                </TouchableOpacity>
-            )
+        switch(this.props.type) {
+            case "Equipes": return this.getPlusButtonEquipes();
+            case "EquipesFav": return this.getPlusButtonEquipesFav();
+            case "Joueurs": return this.getPlusButtonJoueursFav();
+            case "Terrains": return this.getPlusButtonTerrainsFav();
+        }
     }
 
 
     render() {
-        const list = this.props.list
-        const title = this.props.title
+        const title = this.props.title        
+
         return (
-            <View style={styles.main_container}>
+            <ScrollView style={styles.main_container}>
                 {/* Barre de recherche */}
-                <View style={styles.search_container}>
-                    <Image style={styles.search_image}
-                       source = {require('app/res/search.png')} />
-                    <TextInput
-                        style={{flex: 1, borderWidth: 1, marginHorizontal: 15, borderRadius : 10}}
-                        onChangeText={(t) => this.setState({text: t})}
-                        value={this.state.text}
-                    />
-                    <TouchableOpacity onPress={() => this.setState({text: ''})}>
-                        <Image style={styles.search_image}
-                                source = {require('app/res/cross.png')}/>
-                    </TouchableOpacity>
-                </View>
+                <BarreRecherche
+                    handleTextChange={this.validerRecherche}
+                    data={this.props.data}
+                    field={this.champNom}
+                    filterData={this.filtrerData}
+                    handleFilterButton={this.handleFilterButton}
+                />
+                {this.displayFiltresComponents()}
 
                 {/* Liste des joueurs de mon reseau */}
                 <View style={{flex: 7}}>
@@ -59,9 +220,13 @@ class SearchList extends React.Component {
                     </View>
 
                     {/* LISTE */}
-                    {list}
+                    <FlatList
+                        data={this.state.dataFiltree}
+                        keyExtractor={(item) => item.id}
+                        renderItem={this.props.renderItem}
+                    />
                 </View>
-            </View>
+            </ScrollView>
         );
     }
 }

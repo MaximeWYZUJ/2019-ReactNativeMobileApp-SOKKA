@@ -7,6 +7,7 @@ import Colors from '../../Components/Colors'
 import DatePicker from 'react-native-datepicker'
 import villes from '../../Components/Creation/villes.json'
 import Database from '../../Data/Database'
+import Simple_Loader from '../../Components/Loading/Simple_Loading'
 import NormalizeString from '../../Helpers/NormalizeString';
 import * as firebase from 'firebase';
 import '@firebase/firestore'
@@ -40,7 +41,16 @@ class ProfilJoueurReglages extends React.Component {
         this.sexe = this.joueur.sexe;
         this.poste = this.joueur.poste;
         
+        if (this.joueur.AKA == undefined || this.joueur.AKA === "") {
+            this.AKAplaceholder = "...";
+            this.AKA = "";
+        } else {
+            this.AKAplaceholder = this.joueur.AKA;
+            this.AKA = this.joueur.AKA;
+        }
+        
         this.state = {
+            isLoading: false,
             naissanceDisp: jNaissanceDisp,
             naissance : "",
             age : this.joueur.age,
@@ -276,6 +286,8 @@ class ProfilJoueurReglages extends React.Component {
         this.joueur.score = this.score;
         this.joueur.sexe = this.sexe;
         this.joueur.poste = this.poste;
+
+        this.joueur.AKA = this.AKA;
         
         if (this.telephone) {
             this.joueur.telephone = this.telephone
@@ -292,6 +304,7 @@ class ProfilJoueurReglages extends React.Component {
         /* Initialisation de la base de données. */
         var db = Database.initialisation()
     
+        this.setState({isLoading: true})
         /* Enregistrer l'utilisateur dans la base de données. */
         db.collection("Joueurs").doc(this.id).set({
             age : this.state.age,
@@ -308,6 +321,7 @@ class ProfilJoueurReglages extends React.Component {
             score: this.joueur.score,
             sexe: this.joueur.sexe,
             poste: this.joueur.poste,
+            AKA: this.joueur.AKA
         },
         {
             merge: true
@@ -315,12 +329,21 @@ class ProfilJoueurReglages extends React.Component {
         }).then(() => {
             console.log("Document successfully written!");
             this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', ''),retour_arriere_interdit : true})
+            this.setState({isLoading: false});
         }).catch(function(error) {
+            this.setState({isLoading: false})
             console.log("Error writing document: ", error);
         });
     }
 
     render() {
+        if (this.state.isLoading) {
+            return (
+                <View>
+                    <Simple_Loader taille={hp('3%')}/>
+                </View>
+            )
+        }
         if (this.state.usingCamera) {
             return (
                 <View style={{ flex: 1 }}>
@@ -419,8 +442,12 @@ class ProfilJoueurReglages extends React.Component {
                             <Text>Age :  {this.state.age} ans</Text>
                         </View>
                         <View style={styles.champ}>
-                            <Text>Sexe : ></Text>
+                            <Text>Sexe :  </Text>
                             {this.renderPickerSexe()}
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>Poste :  </Text>
+                            {this.renderPickerPoste()}
                         </View>
                         <View style={styles.champ}>
                             <Text>Ville :  </Text>
@@ -437,11 +464,19 @@ class ProfilJoueurReglages extends React.Component {
                             />
                         </View>
                         <View style={styles.champ}>
-                            <Text>AKA :  </Text>
+                            <Text>Pseudo :  </Text>
                             <TextInput
                                 style={{flex: 1, borderColor: '#C0C0C0'}}
                                 onChangeText={(t) => this.pseudo=t}
                                 placeholder={this.joueur.pseudo}
+                                />
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>AKA :  </Text>
+                            <TextInput
+                                style={{flex: 1, borderColor: '#C0C0C0'}}
+                                onChangeText={(t) => this.AKA=t}
+                                placeholder={this.AKAplaceholder}
                                 />
                         </View>
                         <View style={styles.champ}>

@@ -1,5 +1,5 @@
 import React from 'react'
-import { TouchableOpacity, View, StyleSheet, FlatList } from 'react-native'
+import { TouchableOpacity, View, StyleSheet, FlatList, Alert } from 'react-native'
 import SearchList from '../../Components/SearchList.js'
 import Item_Equipe from '../../Components/Profil_Equipe/Item_Equipe.js';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -29,31 +29,6 @@ class ProfilJoueurMesEquipes extends React.Component {
     }
 
 
-    getPlusButton() {
-        return (
-            <TouchableOpacity
-                style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%')}}
-                onPress={() => Alert.alert(
-                                '',
-                                "Que veux-tu faire ?",
-                                [
-                                    {
-                                        text: 'Créer',
-                                        onPress: () => this.props.navigation.push("CreationEquipeNom")
-                                    },
-                                    {
-                                        text: 'Rechercher',
-                                        onPress: () => this.props.navigation.navigate("AccueilRechercher"),
-                                        style: 'cancel',
-                                    },
-                                ],
-                        )}
-                >
-                <Text style={styles.header}>+</Text>
-            </TouchableOpacity>
-        )
-    }
-
 
     render() {
         return (
@@ -61,21 +36,19 @@ class ProfilJoueurMesEquipes extends React.Component {
                 <SearchList
                     title={this._get_header_title()}
                     type={"Equipes"}
-                    list={<FlatList
-                        data={this.equipes}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({item}) =>
-                            <Item_Equipe
-                                isCaptain={item.capitaines.some(elmt => elmt === this.joueur.id)}
-                                alreadyLike={item.aiment.some(elmt => elmt === this.joueur.id)}
-                                id={item.id}
-                                nom={item.nom}
-                                score={item.score}
-                                photo={item.photo}
-                                nbJoueurs={item.joueurs.length}
-                                nav={this.props.navigation}
-                            />}
-                        />}
+                    data={this.equipes}
+                    renderItem={({item}) =>
+                        <Item_Equipe
+                            isCaptain={item.capitaines.some(elmt => elmt === this.joueur.id)}
+                            alreadyLike={item.aiment.some(elmt => elmt === this.joueur.id)}
+                            id={item.id}
+                            nom={item.nom}
+                            score={item.score}
+                            photo={item.photo}
+                            nbJoueurs={item.joueurs.length}
+                            nav={this.props.navigation}
+                        />
+                    }
                     />
             </View>
         );

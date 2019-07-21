@@ -36,15 +36,12 @@ class ProfilJoueurMesTerrainsFav extends React.Component {
                 <SearchList
                     title={this._get_header_title()}
                     type={"Terrains"}
-                    list={<FlatList
-                        data={this.terrains}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({item}) => <ItemTerrain
-                            id={item.id}
-                            distance={item.distance}
-                            InsNom={item.InsNom}
-                            EquNom={item.EquNom}
-                        />}
+                    data={this.terrains}
+                    renderItem={({item}) => <ItemTerrain
+                        id={item.id}
+                        distance={item.distance}
+                        InsNom={item.InsNom}
+                        EquNom={item.EquNom}
                     />}
                 />
             </View>

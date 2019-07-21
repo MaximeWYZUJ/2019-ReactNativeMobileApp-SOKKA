@@ -42,22 +42,19 @@ class ProfilJoueurMesEquipesFav extends React.Component {
             <View style={styles.main_container}>
                 <SearchList
                     title={this._get_header_title()}
-                    type={"Equipes"}
-                    list={<FlatList
-                        data={this.equipesFav}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({item}) => <Item_Equipe
-                            isCaptain={item.capitaines.some(elmt => elmt === this.joueur.id)}
-                            alreadyLike={item.aiment.some(elmt => elmt === this.joueur.id)}
-                            id={item.id}
-                            nom={item.nom}
-                            score={item.score}
-                            photo={item.photo}
-                            nbJoueurs={item.joueurs.length}
-                            nav={this.props.navigation}
-                            />}
-                        />}
-                    />
+                    type={"EquipesFav"}
+                    data={this.equipesFav}
+                    renderItem={({item}) => <Item_Equipe
+                        isCaptain={item.capitaines.some(elmt => elmt === this.joueur.id)}
+                        alreadyLike={item.aiment.some(elmt => elmt === this.joueur.id)}
+                        id={item.id}
+                        nom={item.nom}
+                        score={item.score}
+                        photo={item.photo}
+                        nbJoueurs={item.joueurs.length}
+                        nav={this.props.navigation}
+                    />}
+                />
             </View>
         );
     }
