@@ -15,13 +15,33 @@ class List_Messages extends React.Component {
     this.state = {
         conv : this.props.navigation.getParam('conv', undefined),
         messages : [],
-        isLoading : true
+        isLoading : true,
+        joueurs : []
     }
   }
+
+  static navigationOptions = ({ navigation }) => {
+
+        
+    return { title:"Discussions", 
+    headerRight: (
+
+       <TouchableOpacity
+        onPress = {() => console.log("TODO!!")} >
+           <Image
+            style = {{width : 30, height : 30, marginRight :15}}
+            source = {require('../../../res/write.png')}
+           />
+       </TouchableOpacity>
+      ),
+    };     
+};
 
     componentDidMount(){
         if(! this.isAgroupConv()){
             this.getMessage()
+        } else {
+            this.getMessageGroupConv()
         }
     }
 
@@ -35,6 +55,43 @@ class List_Messages extends React.Component {
             var i  = 0
             querySnapshot.docs.forEach(doc => {
                 var msg = this.buildMsgForChat(doc.data(), i)
+                messages.push(msg);
+                i++
+            });
+        }).catch(function(errro) {console.log(errro)});
+        console.log(messages)
+        
+        this.setState({messages : messages, isLoading : false})
+    }
+
+
+    async getJoueursGroupeData(){
+        var joueurs = []
+        var joueursToGetData = []
+        // On télécharge pas les données de l'utilisateur, on les a déja
+        for(var i = 0; i < this.state.conv.participants.length ; i++) {
+            if(this.state.conv.participants[i] != LocalUser.data.id){
+                joueursToGetData.push(this.state.conv.participants[i])
+            }
+        }
+        joueurs = await Database.getArrayDocumentData("Joueurs", joueursToGetData)
+        return joueurs
+    }
+
+
+
+    async getMessageGroupConv() {
+        console.log("in get message")
+        var messages = []
+
+        var joueurs = await this.getJoueursGroupeData()
+        var id = this.state.conv.id 
+        var db = Database.initialisation()
+        await db.collection("Conversations").doc(id).collection("Messages").orderBy("dateEnvoie","desc" ).limit(10).get()
+        .then(querySnapshot => {
+            var i  = 0
+            querySnapshot.docs.forEach(doc => {
+                var msg = this.buildMsgForChatGroup(doc.data(), i, joueurs)
                 messages.push(msg);
                 i++
             });
@@ -63,6 +120,32 @@ class List_Messages extends React.Component {
                 _id : msg.emetteur,
                 name : this.state.conv.joueur.pseudo,
                 avatar :this.state.conv.joueur.photo
+            }
+        }
+        return msg
+    }
+
+    buildMsgForChatGroup(msg, id, joueurs) {
+        msg._id = id
+        msg.createdAt = new Date(msg.dateEnvoie)
+        if(msg.emetteur == LocalUser.data.id){
+            msg.user = {
+                _id : msg.emetteur,
+                name : LocalUser.data.pseudo,
+                avatar : LocalUser.data.photo
+            }
+        } else {
+           var _id = msg.emetteur
+           for(var i = 0 ; i < joueurs.length; i++){
+               if(joueurs[i].id == msg.emetteur) {
+                   var name = joueurs[i].pseudo
+                   var avatar = joueurs[i].photo
+               }
+           }
+           msg.user = {
+                _id :_id,
+                name :name,
+                avatar : avatar
             }
         }
         return msg
@@ -172,18 +255,13 @@ class List_Messages extends React.Component {
 
     async gotoToProfilJoueur(){
         var joueur = this.state.conv.joueur
-        console.log(joueur)
             // Traitement de la collection Reseau
             arrayReseau = await Database.getArrayDocumentData(joueur.reseau, 'Joueurs');
-console.log(arrayReseau)
             // Traitement de la collection Equipes
             arrayEquipes = await Database.getArrayDocumentData(joueur.equipes, 'Equipes');
-console.log(arrayEquipes)
             // Traitement des données propres
             joueur.naissance = new Date(joueur.naissance.toDate());
-console.log(joueur.naissance)
             // Envoi
-            console.log("before envoie")
             this.props.navigation.push("ProfilJoueur", {id: joueur.id, joueur : joueur, reseau : arrayReseau, equipes : arrayEquipes})
         
         
