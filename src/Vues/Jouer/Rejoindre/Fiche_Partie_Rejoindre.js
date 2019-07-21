@@ -680,7 +680,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
         if(this.state.isLoading) {
             return (
                 <View>
-                    <Text>okoko</Text>
+                    <Text>Patientez quelques secondes...</Text>
                 </View>
             )
         } else {

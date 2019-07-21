@@ -1,6 +1,7 @@
 import React from 'react'
 import { KeyboardAvoidingView, Text, Button, StyleSheet, View, ListView, ScrollView, TextInput, Switch, Picker, TouchableOpacity } from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import DatePicker from 'react-native-datepicker'
 import RF from 'react-native-responsive-fontsize';
 import Database from '../../Data/Database'
 import villes from '../../Components/Creation/villes.json'
@@ -10,24 +11,8 @@ import NormalizeString from '../../Helpers/NormalizeString'
 
 var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
-export default class FiltrerJoueur extends React.Component {
 
-    static filtrerJoueurs = (data, f) => {
-        
-        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
-        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
-        if (f.departement !== "") {
-            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
-        }
-        if (f.ville !== "") {
-            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
-        }
-        if (f.score !== null) {
-            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
-        }
-
-        return data;
-    }
+export default class FiltrerDefi extends React.Component {
 
 
     /**
@@ -37,93 +22,82 @@ export default class FiltrerJoueur extends React.Component {
     constructor(props) {
         super(props);
 
+        var ajd = new Date();
+        this.today = ajd.getFullYear() + '-' + (ajd.getMonth() + 1) + '-' +  ajd.getDate();
+        var s = this.today.split('-');
+        this.todayTxt = s[2]+'-'+s[1]+'-'+s[0];
+
         if (this.props.init == null || this.props.init == undefined) {
             this.villePlaceholder = "Ville de recherche";
             this.depPlaceholder = "Département de recherche";
-            this.ageMinPlaceholder = "0";
-            this.ageMaxPlaceholder = "99";
             
             this.state = {
-                ageMin: 0,
-                ageMax: 99,
-                score: null,
-                poste: null,
-                sexe: null,
                 ville: "",
                 searchedVilles: [],
                 departement: "",
                 searchedDepartements: [],
-                lookForCaptain: false,
+                format: null,
+                defiOuPartie: null,
+                gratuit: false,
+                dateDebut: "2000-01-01",
+                dateFin: this.today,
+                recherche: false,
+                dateDebutTxt: "01-01-2000",
+                dateFinTxt: this.todayTxt
             }
         } else {
             var init = this.props.init;
             this.villePlaceholder = init.ville;
             this.depPlaceholder = init.departement;
-            this.ageMinPlaceholder = init.ageMin;
-            this.ageMaxPlaceholder = init.ageMax;
 
             this.state = {
-                ageMin: init.ageMin,
-                ageMax: init.ageMax,
-                score: init.score,
-                poste: init.poste,
-                sexe: init.sexe,
                 ville: init.ville,
                 searchedVilles: [],
                 departement: init.departement,
                 searchedDepartements: [],
-                lookForCaptain: init.lookForCaptain
+                format: init.format,
+                defiOuPartie: init.defiOuPartie,
+                gratuit: init.gratuit,
+                dateDebut: init.dateDebut,
+                dateFin: init.dateFin,
+                recherche: init.recherche,
+                dateDebutTxt: init.dateDebutTxt,
+                dateFinTxt: init.dateFinTxt
             }
         }
     }
 
 
-    renderPickerScore() {
+    renderPickerDefiOuPartie() {
         return (
             <Picker
-                selectedValue={this.state.score}
+                selectedValue={this.state.defiOuPartie}
                 style={{width: wp('60%'), marginRight: wp('5%')}}
-                onValueChange={(itemValue, itemIndex) => this.setState({score: itemValue})}
+                onValueChange={(itemValue, itemIndex) => this.setState({defiOuPartie: itemValue, recherche: true})}
                 >
                 <Picker.Item label={"indifférent"} key={0} value={null}/>
-                <Picker.Item label={"0 étoile"} key={1} value={0}/>
-                <Picker.Item label={"1 étoile"} key={2} value={1}/>
-                <Picker.Item label={"2 étoiles"} key={3} value={2}/>
-                <Picker.Item label={"3 étoiles"} key={4} value={3}/>
-                <Picker.Item label={"4 étoiles"} key={5} value={4}/>
-                <Picker.Item label={"5 étoiles"} key={6} value={5}/>
+                <Picker.Item label={"Défis entre 2 équipes"} key={1} value={"Défis entre 2 équipes"}/>
+                <Picker.Item label={"Partie entre joueurs"} key={2} value={"Partie entre joueurs"}/>
             </Picker>
         )
     }
 
 
-    renderPickerPoste() {
+    renderPickerFormat() {
         return (
             <Picker
-                selectedValue={this.state.poste}
+                selectedValue={this.state.format}
                 style={{width: wp('60%'), marginRight: wp('5%')}}
-                onValueChange={(itemValue, itemIndex) => this.setState({poste: itemValue})}
+                onValueChange={(itemValue, itemIndex) => this.setState({format: itemValue})}
                 >
                 <Picker.Item label={"indifférent"} key={0} value={null}/>
-                <Picker.Item label={"mixte"} key={1} value={"mixte"}/>
-                <Picker.Item label={"offensif"} key={2} value={"offensif"}/>
-                <Picker.Item label={"defensif"} key={3} value={"defensif"}/>
-                <Picker.Item label={"gardien"} key={4} value={"gardien"}/>
-            </Picker>
-        )
-    }
-
-
-    renderPickerSexe() {
-        return (
-            <Picker
-                selectedValue={this.state.sexe}
-                style={{width: wp('60%'), marginRight: wp('5%')}}
-                onValueChange={(itemValue, itemIndex) => this.setState({sexe: itemValue})}
-                >
-                <Picker.Item label={"indifférent"} key={0} value={null}/>
-                <Picker.Item label={"Masculin"} key={1} value={"masculin"}/>
-                <Picker.Item label={"Féminin"} key={2} value={"feminin"}/>
+                <Picker.Item label={"2 x 2"} key={1} value={"2 x 2"}/>
+                <Picker.Item label={"3 x 3"} key={2} value={"3 x 3"}/>
+                <Picker.Item label={"4 x 4"} key={3} value={"4 x 4"}/>
+                <Picker.Item label={"5 x 5"} key={4} value={"5 x 5"}/>
+                <Picker.Item label={"6 x 6"} key={5} value={"6 x 6"}/>
+                <Picker.Item label={"7 x 7"} key={6} value={"7 x 7"}/>
+                <Picker.Item label={"11 x 11"} key={7} value={"11 x 11"}/>
             </Picker>
         )
     }
@@ -220,9 +194,28 @@ export default class FiltrerJoueur extends React.Component {
 
 
 
+    renderPhraseRecherche() {
+        var phrase = "";
+        if (this.state.defiOuPartie != null) {
+            if (this.state.defiOuPartie === "Partie entre joueurs") {
+                phrase = "Parties avec au moins 1 joueur recherché";
+            } else {
+                phrase = "Défis avec une équipe recherchée";
+            }
+
+            return (
+                <View style={styles.rowFilter}>
+                    <Text style={{width: wp('60%')}}>{phrase}</Text>
+                    <Switch value={this.state.recherche} onValueChange={() => this.setState({recherche: !this.state.recherche})}/>
+                </View>
+            )
+        }
+    }
+
+
     createQuery() {
         var db = Database.initialisation();
-        var ref = db.collection('Joueurs');
+        var ref = db.collection('Defis');
         var bool = false;
 
         if (this.state.departement.length > 0) {
@@ -232,26 +225,29 @@ export default class FiltrerJoueur extends React.Component {
             ref = ref.where('ville', '==', this.state.ville);
             bool = true;
         }
-        if (this.state.ageMin > 0) {
-            ref = ref.where('age', '>=', this.state.ageMin);
+        if (this.state.defiOuPartie != null) {
+            ref = ref.where('type', '==', this.state.defiOuPartie)
+            bool = true;
+            
+            ref = ref.where('recherche', '==', this.state.recherche)
+        }
+        if (this.state.format != null) {
+            ref = ref.where('format', '==', this.state.format)
             bool = true;
         }
-        if (this.state.ageMax < 99) {
-            ref = ref.where('age', '<=', this.state.ageMax);
+        /*if (this.state.gratuit) {
+            ref = ref.where('gratuit', '==', this.state.gratuit);
+            bool = true;
+        }*/
+        if (this.state.dateDebut != "2000-01-01") {
+            ref = ref.where('dateParse', '>=', Date.parse(this.state.dateDebut));
             bool = true;
         }
-        if (this.state.score != null) {
-            ref = ref.where('score', '==', this.state.score)
+        if (this.state.dateFin != this.today) {
+            ref = ref.where('dateParse', '<=', Date.parse(this.state.dateFin));
             bool = true;
         }
-        if (this.state.poste != null) {
-            ref = ref.where('poste', '==', this.state.poste)
-            bool = true;
-        }
-        if (this.state.sexe != null) {
-            ref = ref.where('sexe', '==', this.state.sexe)
-            bool = true;
-        }
+
 
         if (!bool) {ref=null}
         return ref;
@@ -261,12 +257,11 @@ export default class FiltrerJoueur extends React.Component {
     returnFilter() {
         b0 = this.state.departement.length > 0;
         b1 = this.state.ville.length > 0;
-        b2 = this.state.ageMin > 0;
-        b3 = this.state.ageMax < 99;
-        b4 = this.state.score != null;
-        b5 = this.state.poste != null;
-        b6 = this.state.sexe != null;
-        if (b0 || b1 || b2 || b3 || b4 ||b5 || b6) {
+        b2 = this.state.defiOuPartie != null;
+        b4 = this.state.format != null;
+        b5 = this.state.dateDebut != "2000-01-01";
+        b6 = this.state.dateFin != this.today;
+        if (b0 || b1 || b2 || b4 ||b5 || b6) {
             return {...this.state}
         } else {
             return null;
@@ -276,7 +271,7 @@ export default class FiltrerJoueur extends React.Component {
 
     render() {
         return (
-            <View>
+            <ScrollView>
                 {/* Filtrer sur le lieu */}
                 <View style={styles.rowFilter}>
                     <Text style={{width: wp('30%')}}>Département : </Text>
@@ -311,36 +306,83 @@ export default class FiltrerJoueur extends React.Component {
                     </ScrollView>
                 </View>
 
-                {/* Filtrer sur le poste */}
+                {/* Filtrer sur le type */}
                 <View style={styles.rowFilter}>
-                    <Text style={{width: wp('30%')}}>Poste : </Text>
-                    {this.renderPickerPoste()}
+                    <Text style={{width: wp('30%')}}>Défi ou partie ? </Text>
+                    {this.renderPickerDefiOuPartie()}
                 </View>
 
-                {/* Filtrer sur le sexe */}
+                {/* Filtrer sur le fait qu'on veut un defi qui recherche des gens ou non */}
+                {this.renderPhraseRecherche()}
+
+                {/* Filtrer sur le format */}
                 <View style={styles.rowFilter}>
-                    <Text style={{width: wp('30%')}}>Sexe : </Text>
-                    {this.renderPickerSexe()}
+                    <Text style={{width: wp('30%')}}>Format </Text>
+                    {this.renderPickerFormat()}
                 </View>
 
-                {/* Filtrer sur l'age */}
-                <KeyboardAvoidingView style={styles.rowFilter} behavior="padding" enabled>
-                    <Text style={{width: wp('30%')}}>Age : </Text>
-                    <TextInput style={{width: wp('25%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({ageMin: 0}) : this.setState({ageMin: parseInt(t,10)})} placeholder={"min : "+this.ageMinPlaceholder}/>
-                    <TextInput style={{width: wp('25%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({ageMax: 99}) : this.setState({ageMax: parseInt(t,10)})} placeholder={"max : "+this.ageMaxPlaceholder}/>
-                </KeyboardAvoidingView>
-
-                {/* Filtrer sur le score */}
+                {/* Filtrer sur la gratuite du terrain */}
                 <View style={styles.rowFilter}>
-                    <Text style={{width: wp('30%')}}>Score : </Text>
-                    {this.renderPickerScore()}
+                    <Text style={{width: wp('60%')}}>Terrains gratuits seulement </Text>
+                    <Switch value={this.state.gratuit} onValueChange={() => this.setState({gratuit: !this.state.gratuit})}/>
                 </View>
 
-                {/* Capitaine d'équipe */}
-                {/*<View style={styles.rowFilter}>
-                    <Text style={{width: wp('25%')}}>Capitaine ? </Text>
-                    <Switch value={this.state.lookForCaptain} onValueChange={() => this.setState({lookForCaptain: !this.state.lookForCaptain})}/>
-                </View>*/}
+                {/* Filtrer sur la date */}
+                <View style={styles.rowFilter}>
+                    <Text style={{width: wp('30%')}}>Quand ?</Text>
+                    <View style={{flexDirection: 'column'}}>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                            <Text style = {{color : '#CECECE'}}>Du</Text>
+                            <DatePicker
+                                style={{width: wp('45%'), alignItems : 'center'}}
+                                date= {this.state.dateDebutTxt}
+                                mode="date"
+                                placeholder="select date"
+                                format="DD-MM-YYYY"
+                                minDate="01-01-2000"
+                                maxDate={"01-01-"+((new Date()).getFullYear()+2)}
+                                confirmBtnText="Confirmer"
+                                cancelBtnText="Annuler"
+                                customStyles={{
+                                dateInput: {
+                                    marginLeft: 0,
+                                    borderWidth : 0
+                                }
+                                }}
+                                onDateChange={(date) => {
+                                    s = date.split('-');
+                                    s2 = s[2]+'-'+s[1]+'-'+s[0];
+                                    this.setState({dateDebut: s2, dateDebutTxt: date})
+                                }}
+                            />
+                        </View>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                            <Text style = {{color : '#CECECE'}}>Au</Text>
+                            <DatePicker
+                                style={{width: wp('45%'), alignItems : 'center'}}
+                                date= {this.state.dateFinTxt}
+                                mode="date"
+                                placeholder="select date"
+                                format="DD-MM-YYYY"
+                                minDate="01-01-2000"
+                                maxDate={"01-01-"+((new Date()).getFullYear()+2)}
+                                confirmBtnText="Confirmer"
+                                cancelBtnText="Annuler"
+                                customStyles={{
+                                dateInput: {
+                                    marginLeft: 0,
+                                    borderWidth : 0
+                                }
+                                }}
+                                onDateChange={(date) => {
+                                    s = date.split('-');
+                                    s2 = s[2]+'-'+s[1]+'-'+s[0];
+                                    this.setState({dateFin: s2, dateFinTxt: date})
+                                }}
+                            />
+                        </View>
+                    </View>
+                </View>
 
                 {/* Validation */}
                 <View style={{...styles.rowFilter, justifyContent: 'center'}}>
@@ -351,10 +393,9 @@ export default class FiltrerJoueur extends React.Component {
                         onPress={() => {this.props.handleValidate(this.createQuery(), this.returnFilter())}}
                     />
                 </View>
-            </View>
+            </ScrollView>
         )
     }
-
 }
 
 const styles=StyleSheet.create({

@@ -22,7 +22,7 @@ class First_screen extends React.Component {
 
     constructor(props) {
         super(props)
-        console.log("hello")
+        console.log("helloooo")
         this.state = {
             timePassed : false,
             isLoading : false,

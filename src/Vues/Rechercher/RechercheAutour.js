@@ -23,6 +23,7 @@ import Database from '../../Data/Database';
 import NormalizeString from '../../Helpers/NormalizeString'
 
 import RechercheTerrainJouer from '../Jouer/Creation/Terrains_Autours'
+import RechercheDefiAutour from './RechercheDefiAutour'
 
 
 const SLIDER_DISTANCE_MAX = 20;
@@ -31,6 +32,7 @@ export default class RechercheAutour extends React.Component {
 
 
     constructor(props) {
+        console.log("recherche autour");
         super(props);
         this.villesTriees = [];
         this.selfLat = LocalUser.geolocalisation.latitude;
@@ -236,9 +238,9 @@ export default class RechercheAutour extends React.Component {
     displayFiltresComponents() {
         if (this.state.displayFiltres) {
             switch(this.type) {
-                case "Joueurs": return (<FiltrerJoueur handleValidate={this.handleValidateFilters}/>)
-                case "Equipes": return (<FiltrerEquipes handleValidate={this.handleValidateFilters}/>)
-                case "Terrains": return (<FiltrerTerrains handleValidate={this.handleValidateFilters}/>)
+                case "Joueurs": return (<FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+                case "Equipes": return (<FiltrerEquipes handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+                case "Terrains": return (<FiltrerTerrains handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
             }
         }
     }
@@ -348,7 +350,7 @@ export default class RechercheAutour extends React.Component {
                         <Slider
                             minimumValue={1}
                             maximumValue={SLIDER_DISTANCE_MAX}
-                            onValueChange={(v) => {
+                            onSlidingComplete={(v) => {
                                 this.setState({
                                     sliderValue: v,
                                     filtres: null,

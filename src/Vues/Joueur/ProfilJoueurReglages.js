@@ -37,6 +37,8 @@ class ProfilJoueurReglages extends React.Component {
         this.mail = ""
         this.searchedVilles = [];
         this.age = this.joueur.age;
+        this.sexe = this.joueur.sexe;
+        this.poste = this.joueur.poste;
         
         this.state = {
             naissanceDisp: jNaissanceDisp,
@@ -45,6 +47,8 @@ class ProfilJoueurReglages extends React.Component {
             searchedVilles: [],
             ville: "",
             scoreDisp: this.score,
+            sexe: this.joueur.sexe,
+            poste: this.joueur.poste,
 
             usingCamera: false,
             image_changed: false,
@@ -217,6 +221,38 @@ class ProfilJoueurReglages extends React.Component {
     };
 
 
+    renderPickerPoste() {
+        return (
+            <Picker
+                selectedValue={this.state.poste}
+                style={{width: wp('60%'), marginRight: wp('5%')}}
+                onValueChange={(itemValue, itemIndex) => {this.poste = itemValue; this.setState({poste: itemValue})}}
+                >
+                <Picker.Item label={"indifférent"} key={0} value={null}/>
+                <Picker.Item label={"mixte"} key={1} value={"mixte"}/>
+                <Picker.Item label={"offensif"} key={2} value={"offensif"}/>
+                <Picker.Item label={"defensif"} key={3} value={"defensif"}/>
+                <Picker.Item label={"gardien"} key={4} value={"gardien"}/>
+            </Picker>
+        )
+    }
+
+
+    renderPickerSexe() {
+        return (
+            <Picker
+                selectedValue={this.state.sexe}
+                style={{width: wp('60%'), marginRight: wp('5%')}}
+                onValueChange={(itemValue, itemIndex) => {this.sexe = itemValue; this.setState({sexe: itemValue})}}
+                >
+                <Picker.Item label={"indifférent"} key={0} value={null}/>
+                <Picker.Item label={"Masculin"} key={1} value={"masculin"}/>
+                <Picker.Item label={"Féminin"} key={2} value={"feminin"}/>
+            </Picker>
+        )
+    }
+
+
     async _validate() {
         console.log(this.ville);
         if (this.naissance) {
@@ -237,7 +273,9 @@ class ProfilJoueurReglages extends React.Component {
             this.joueur.queryPseudo = NormalizeString.normalize(this.pseudo);
         }
         
-        this.joueur.score = this.score
+        this.joueur.score = this.score;
+        this.joueur.sexe = this.sexe;
+        this.joueur.poste = this.poste;
         
         if (this.telephone) {
             this.joueur.telephone = this.telephone
@@ -266,7 +304,10 @@ class ProfilJoueurReglages extends React.Component {
             pseudo: this.joueur.pseudo,
             queryPseudo: this.joueur.queryPseudo,
             ville: this.joueur.ville,
-            photo: this.joueur.photo
+            photo: this.joueur.photo,
+            score: this.joueur.score,
+            sexe: this.joueur.sexe,
+            poste: this.joueur.poste,
         },
         {
             merge: true
@@ -376,6 +417,10 @@ class ProfilJoueurReglages extends React.Component {
                         </View>
                         <View style={styles.champ}>
                             <Text>Age :  {this.state.age} ans</Text>
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>Sexe : ></Text>
+                            {this.renderPickerSexe()}
                         </View>
                         <View style={styles.champ}>
                             <Text>Ville :  </Text>

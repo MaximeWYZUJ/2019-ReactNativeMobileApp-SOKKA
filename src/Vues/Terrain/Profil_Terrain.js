@@ -159,11 +159,11 @@ export default class Profil_Terrain extends React.Component {
         var allDefis = [];
 
         var ref = db.collection("Defis");
-        var query = ref.where("terrain", "==", this.id).orderBy("dateParse")
+        var query = ref.where("terrain", "==", this.id).orderBy("dateParse", "desc")
 
         // On regarde s'il y a eu des defis sur ce terrain
-        var results = await ref.get();
-        console.log("nb results : " + results.docs.length);
+        var results = await query.get();
+
         for(var i = 0; i < results.docs.length ; i++) {
             allDefis.push(results.docs[i].data());
         }

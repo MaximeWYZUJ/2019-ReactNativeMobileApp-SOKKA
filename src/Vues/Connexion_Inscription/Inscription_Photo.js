@@ -32,6 +32,7 @@ export default class Inscription_Photo extends React.Component {
         const nom = navigation.getParam('nom', ' ');
         const prenom = navigation.getParam('prenom', ' ');
         const pseudo = navigation.getParam('pseudo', ' ');
+        const sexe = navigation.getParam('sexe', ' ');
         const ville = navigation.getParam('ville', '');
         const naissance = navigation.getParam('naissance', ' ');
         const age = navigation.getParam('age','');
@@ -42,6 +43,7 @@ export default class Inscription_Photo extends React.Component {
             nom : nom,
             prenom : prenom,
             pseudo : pseudo,
+            sexe: sexe,
             mail : mail,
             mdp : mdp,
             photo: require('app/res/camera_icone.png'),
@@ -226,13 +228,15 @@ export default class Inscription_Photo extends React.Component {
                             position: null,
                             pseudo: oldState.pseudo,
                             queryPseudo: NormalizeString.normalize(oldState.pseudo),
+                            sexe: oldState.sexe,
                             reseau: [],
                             score: 0,
                             telephone: "XX.XX.XX.XX.XX",
                             terrains: [],
                             ville: oldState.ville,
                             departement: oldState.departement,
-                            zone: oldState.zone
+                            zone: oldState.zone,
+                            poste: "mixte"
                         }
                         
                         console.log("before store localUser")
@@ -268,13 +272,15 @@ export default class Inscription_Photo extends React.Component {
                         position: null,
                         pseudo: oldState.pseudo,
                         queryPseudo: NormalizeString.normalize(oldState.pseudo),
+                        sexe: oldState.sexe,
                         reseau: [],
                         score: 0,
                         telephone: "XX.XX.XX.XX.XX",
                         terrains: [],
                         ville: oldState.ville,
                         departement: oldState.departement,
-                        zone: oldState.zone
+                        zone: oldState.zone,
+                        poste: "mixte"
                     }
 
                     // Stockage en local

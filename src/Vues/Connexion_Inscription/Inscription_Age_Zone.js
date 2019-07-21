@@ -27,6 +27,7 @@ export default class Inscription_Age_Zone extends React.Component {
         const nom = navigation.getParam('nom', ' ');
         const prenom = navigation.getParam('prenom', ' ');
         const pseudo = navigation.getParam('pseudo', ' ');
+        const sexe = navigation.getParam('sexe', ' ');
 
         this.state = {
             ville : '',
@@ -38,6 +39,7 @@ export default class Inscription_Age_Zone extends React.Component {
             nom : nom,
             prenom : prenom,
             pseudo : pseudo,
+            sexe: sexe,
             age : 0,
             searchedVilles : []
         }
@@ -134,13 +136,14 @@ export default class Inscription_Age_Zone extends React.Component {
                 nom : this.state.nom,
                 prenom : this.state.prenom,
                 pseudo : this.state.pseudo,
+                sexe: this.state.sexe,
                 ville : this.state.ville,
                 zone : this.state.zone,
                 naissance : this.state.today,
                 age : this.calculAge()
             })
         } else {
-            Alert.alert('Tu dois choisir une ville présente dans la base SoKKa')
+            Alert.alert('Tu dois choisir une ville présente dans la base SOKKA')
         }
     }
 
