@@ -74,7 +74,8 @@ class List_Messages extends React.Component {
                 joueursToGetData.push(this.state.conv.participants[i])
             }
         }
-        joueurs = await Database.getArrayDocumentData("Joueurs", joueursToGetData)
+        console.log(joueursToGetData)
+        joueurs = await Database.getArrayDocumentData( joueursToGetData, "Joueurs")
         return joueurs
     }
 
@@ -85,11 +86,15 @@ class List_Messages extends React.Component {
         var messages = []
 
         var joueurs = await this.getJoueursGroupeData()
+        console.log("after joueur")
         var id = this.state.conv.id 
         var db = Database.initialisation()
+        console.log(id)
         await db.collection("Conversations").doc(id).collection("Messages").orderBy("dateEnvoie","desc" ).limit(10).get()
         .then(querySnapshot => {
+        
             var i  = 0
+            console.log("i ===", i)
             querySnapshot.docs.forEach(doc => {
                 var msg = this.buildMsgForChatGroup(doc.data(), i, joueurs)
                 messages.push(msg);
@@ -201,12 +206,39 @@ class List_Messages extends React.Component {
     async sendNotifNewMessage() {
         var titre = "Nouvelle Notif"
         var corps = LocalUser.data.pseudo + " t'as envoyé un message"
-        var tokens = []
-        var joueur = this.state.conv.joueur
-        if(joueur.tokens != undefined) tokens = joueur.tokens
-        for(var i = 0 ; i < tokens.length; i++) {
-            await this.sendPushNotification(tokens[i], titre,corps)
+        if(! this.isAgroupConv()) {
+            var tokens = []
+            var joueur = this.state.conv.joueur
+            await this.incrementeNbMsgNonLu(this.state.conv.joueur.id)
+            if(joueur.tokens != undefined) tokens = joueur.tokens
+            for(var i = 0 ; i < tokens.length; i++) {
+                await this.sendPushNotification(tokens[i], titre,corps)
+            }
+        } else {
+            console.log("in send notif message group")
+            for(var i = 0 ; i < this.state.joueurs.length; i++){
+                var joueur = this.state.joueurs[i]
+                // LE LOG SR RRETE LA §§§§§§§!!!!!!!!!
+                console.log("joueur pseudo ", joueur.pseudo)
+                await this.incrementeNbMsgNonLu(joueur.id)
+                var tokens = []
+                if(joueur.tokens != undefined) tokens = joueur.tokens
+                for(var k = 0; k < tokens.length; k++) {
+                    await this.sendPushNotification(tokens[k], titre,corps)
+                }
+            }
         }
+    }
+
+    async incrementeNbMsgNonLu(idJoueur){
+        console.log("in increment")
+        var db = Database.initialisation()
+        await db.collection("Joueurs").doc(idJoueur).update({
+            nbMessagesNonLu : firebase.firestore.FieldValue.increment(1)
+        }).then(console.log("ok increment"))
+        .catch(function(error){
+            console.log(error)
+        })
     }
 
 

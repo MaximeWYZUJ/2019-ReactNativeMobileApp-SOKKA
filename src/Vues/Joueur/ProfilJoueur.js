@@ -789,7 +789,8 @@ class ProfilJoueur extends React.Component {
         if(this.monProfil){
             return(
                 <View style = {{position : "absolute" , right : wp('1%')}}>
-                    <Icon_Message/>
+                    <Icon_Message
+                        nbMessagesNonLu = {this.joueur.nbMessagesNonLu}/>
                 </View>
             )
         }
