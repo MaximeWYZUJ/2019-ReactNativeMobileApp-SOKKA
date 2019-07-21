@@ -16,6 +16,7 @@ import firebase from 'firebase'
 import t from '../../Components/Conversation/Icon_Message'
 import '@firebase/firestore'
 import Icon_Message from '../../Components/Conversation/Icon_Message';
+
 const latUser = 43.531486   // A suppr quand on aura les vrais coordonnées
 const longUser = 1.490306
 
@@ -29,14 +30,19 @@ class ProfilJoueur extends React.Component {
         this.joueur = this.props.navigation.getParam('joueur', LocalUser.data)
         this.goToFirstScreen  = this.goToFirstScreen.bind(this)
 
-        
         this.state = {
             allDefis : [],
             refreshing: false,
             displayFullPicture: false,
-            show_equipe : false,
+			show_equipe : false,
             equipesCap : [],
             isLoading : false
+        }
+
+        if (this.joueur.sexe === "masculin") {
+            this.sexeIcon = require('app/res/masculine.png');
+        } else {
+            this.sexeIcon = require('app/res/femenine.png');
         }
     }
 
@@ -52,8 +58,8 @@ class ProfilJoueur extends React.Component {
     static navigationOptions = ({ navigation }) => {
         if(! navigation.getParam("retour_arriere_interdit",false)) {
             return {
-                title: navigation.getParam('joueur', ' ').nom,
-                
+                title: navigation.getParam('joueur', ' ').pseudo,
+
                 tabBarOnPress({jumpToIndex, scene}) {
                     console.log("tab bar on pressss");
                     jumpToIndex(scene.index);
@@ -63,7 +69,7 @@ class ProfilJoueur extends React.Component {
         } else {
             const {state} = navigation;
             return { 
-                title: navigation.getParam('joueur', ' ').nom,
+                title: navigation.getParam('joueur', ' ').pseudo,
                 
                 tabBarOnPress({jumpToIndex, scene}) {
                     console.log("tab bar on press");
@@ -74,11 +80,6 @@ class ProfilJoueur extends React.Component {
         }
 
     }
-
-
-
-
-
 
     _displayReglages() {
         if (this.monProfil) {
@@ -101,7 +102,7 @@ class ProfilJoueur extends React.Component {
                         style = {styles.icon_plus} />
                 </TouchableOpacity>
             )
-        }
+		}
     }
 
     goToFirstScreen() {
@@ -331,8 +332,8 @@ class ProfilJoueur extends React.Component {
     }
 
     /**
-     * Fonction qui va envoyer la notification d'ajout au reseau
-     *  puis la  sauvegarder dans la base de données.
+     * Fonction qui va envoyer la notification puis la  sauvegarder
+     * dans la base de données.
      */
     async storeNotifAjoutInDb() {
         await this.sendNotifAjoutReseau()
@@ -345,10 +346,9 @@ class ProfilJoueur extends React.Component {
             dateParse : Date.parse(new Date())
         })
     }
-
-
-     
-    async storeNotifIntegrerInDb(idEquipe) {
+	
+	
+	async storeNotifIntegrerInDb(idEquipe) {
         console.log("in storeNotifIntegrerInDb", idEquipe)
         var db = Database.initialisation()
         db.collection("Notifs").add({
@@ -379,6 +379,7 @@ class ProfilJoueur extends React.Component {
             console.log("after send notif")
         }
     }
+
 
     // ===============================================================================
     // ================ METHODES POUR LES EQUIPES FAVORITES ==========================
@@ -456,6 +457,15 @@ class ProfilJoueur extends React.Component {
                     </TouchableOpacity>
                 )
             }
+        } else {
+            // C'est notre profil
+            return (
+                <View style={{marginLeft: 10, marginRight: 15, width: 30, height: 30}}>
+                    <Image
+                        style={{width: 30, height: 30}}
+                        source = {require('app/res/icon_like_gray.png')}/>
+                </View>
+            )
         }
     }
 
@@ -508,15 +518,14 @@ class ProfilJoueur extends React.Component {
         this.joueur =  await this.getDocumentJoueur()
         this.getAllDefisAndPartie()
         //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
-        this.equipes = await Database.getArrayDocumentData(this.joueur.equipes, "Equipes")
+		this.equipes = await Database.getArrayDocumentData(this.joueur.equipes, "Equipes")
         this.setState({refreshing : false})
     }
     
 
     // ==========================================================================
 
-
-    async integrerJoueur(idEquipe, nomEquipe) {
+	async integrerJoueur(idEquipe, nomEquipe) {
         console.log("in integrer joueur :::::::: ")
         
         await this.sendNotifIntegrerJoueur(nomEquipe)
@@ -578,8 +587,8 @@ class ProfilJoueur extends React.Component {
             ],
         )
     }
-
-
+	
+	
     /**
      * Fonction qui permet de construire la liste des participants à une partie, elle 
      * enlève de la liste les joueurs indisponibles
@@ -689,8 +698,9 @@ class ProfilJoueur extends React.Component {
             )
         }
     }
-
-     /**
+	
+	
+	/**
      * Va permettre de render les équipes dont l'utilisateur est capitaine
      */
     _renderItemEquipe =({item}) => {  
@@ -795,6 +805,9 @@ class ProfilJoueur extends React.Component {
             )
         }
     }
+	
+	
+
     render() {
         if (this.state.displayFullPicture) {
             return(
@@ -825,13 +838,9 @@ class ProfilJoueur extends React.Component {
                     onRefresh={this._onRefresh}
                     />
                 }>
-
-
-                {/* L'icon message */}
-                {this.renderIconMessage()}
-               
-
-
+					{/* L'icon message */}
+					{this.renderIconMessage()}
+							
                     {/* Caracteristiques du joueur */}
                     <View style={[styles.perso_container]}>
                         <View style={styles.top_infos_container}>
@@ -842,11 +851,24 @@ class ProfilJoueur extends React.Component {
                                     style={styles.image_photo}
                                     source = {{uri : this.joueur.photo} } />
                             </TouchableOpacity>
-                            <View style={styles.nom_container}>
-                                <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville}</Text>
-                                <Text style={{margin: 5,  fontSize : RF(3.25)}}>AKA {this.joueur.pseudo}</Text>
-                            </View>
-                            {this._displayReglages()}
+                            <TouchableOpacity
+                                style={styles.nom_container}
+                                onPress={() => {
+                                    if (this.monProfil) {
+                                        this.props.navigation.push('ProfilJoueurReglagesScreen', {id: this.id, joueur: this.joueur, equipes: this.equipes, header: this.joueur.nom});
+                                    }
+                                }}>
+                                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                    <Image
+                                        style={{width: 15, height: 15, marginHorizontal: 2}}
+                                        source={this.sexeIcon}
+                                        />
+                                    <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville}</Text>
+                                </View>
+                                <Text style={{margin: 5,  fontSize : RF(3.25)}}>{this.joueur.pseudo}</Text>
+                                <Text>Joueur {this.joueur.poste}</Text>
+                            </TouchableOpacity>
+                            {/*this._displayReglages()*/}
                         </View>
 
                         <View style={{flex: 1, flexDirection: 'row'}}>
@@ -859,18 +881,18 @@ class ProfilJoueur extends React.Component {
                                     fullStarColor='#F8CE08'
                                     emptyStarColor='#B1ACAC'
                                     containerStyle={styles.rating}/>
-                                <Text style={{}}>Numéro de téléphone : {this.joueur.telephone}</Text>
                             </View>
                             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center'}}>
 
                                 <TouchableOpacity
                                     style={{}}
                                     onPress = {()=> {this.gotoJoueursQuiLikent()}}>
-                                    <Text style={{paddingVertical: 10, paddingHorizontal: 5}}>{this.joueur.aiment.length} likes</Text>
+                                    <Text style={{paddingVertical: 10, paddingHorizontal: 5}}>{this.joueur.aiment.length}</Text>
                                 </TouchableOpacity>
                                 {this.likeJoueur()}
                             </View>
                         </View>
+                        <Text style={{fontStyle: 'italic'}}>phrase d'accroche</Text>
                     </View>
 
 
@@ -926,7 +948,7 @@ class ProfilJoueur extends React.Component {
                         {this.displayDefis()}
                     </View>
                     {this.renderBtnDeco()}
-                    {this._renderListEquipe()}
+					{this._renderListEquipe()}
 
                 </ScrollView>
             )
@@ -1062,7 +1084,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         paddingVertical: 4
     },
-    icon_plus : {
+	
+	
+	icon_plus : {
         width : 30,
         height : 30,
         marginBottom : hp('1.5%')
