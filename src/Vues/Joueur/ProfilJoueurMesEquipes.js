@@ -16,9 +16,10 @@ class ProfilJoueurMesEquipes extends React.Component {
 
     constructor(props) {
         super(props)
-        this.equipes = this.props.navigation.getParam('equipes', null)
-        this.joueur = this.props.navigation.getParam('joueur', null)
+        this.equipes = this.props.navigation.getParam('equipes', null);
+        this.joueur = this.props.navigation.getParam('joueur', null);
     }
+
 
     _get_header_title() {
         if (this.props.monProfil) {
@@ -39,7 +40,7 @@ class ProfilJoueurMesEquipes extends React.Component {
                     data={this.equipes}
                     renderItem={({item}) =>
                         <Item_Equipe
-                            isCaptain={item.capitaines.some(elmt => elmt === this.joueur.id)}
+                            isCaptain={false}
                             alreadyLike={item.aiment.some(elmt => elmt === this.joueur.id)}
                             id={item.id}
                             nom={item.nom}

@@ -255,7 +255,6 @@ class ProfilJoueurReglages extends React.Component {
                 style={{width: wp('60%'), marginRight: wp('5%')}}
                 onValueChange={(itemValue, itemIndex) => {this.sexe = itemValue; this.setState({sexe: itemValue})}}
                 >
-                <Picker.Item label={"indifférent"} key={0} value={null}/>
                 <Picker.Item label={"Masculin"} key={1} value={"masculin"}/>
                 <Picker.Item label={"Féminin"} key={2} value={"feminin"}/>
             </Picker>

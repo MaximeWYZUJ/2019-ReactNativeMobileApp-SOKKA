@@ -172,7 +172,7 @@ export default class RechercheDefaut extends React.Component {
                 return (
                     <ItemJoueur
                         id={item.id}
-                        nom={item.nom}
+                        nom={item.pseudo}
                         photo={item.photo}
                         score={item.score}
                         nav={this.props.navigation}    

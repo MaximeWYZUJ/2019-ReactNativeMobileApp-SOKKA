@@ -376,7 +376,7 @@ export default class Profil_Terrain extends React.Component {
                     {/* Pour les défis */}
                     <View style = {styles.main_container_defis}>
                         <View style = {styleBloc}>
-                            <Text style = {styleTxtBloc}>Défis et match sur ce terrain</Text>
+                            <Text style = {styleTxtBloc}>Défis et parties sur ce terrain</Text>
                         </View>
                     </View>
                     <View style = {{ alignItems : "center"}}>

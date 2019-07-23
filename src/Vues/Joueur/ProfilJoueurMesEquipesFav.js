@@ -45,7 +45,7 @@ class ProfilJoueurMesEquipesFav extends React.Component {
                     type={"EquipesFav"}
                     data={this.equipesFav}
                     renderItem={({item}) => <Item_Equipe
-                        isCaptain={item.capitaines.some(elmt => elmt === this.joueur.id)}
+                        isCaptain={false}
                         alreadyLike={item.aiment.some(elmt => elmt === this.joueur.id)}
                         id={item.id}
                         nom={item.nom}

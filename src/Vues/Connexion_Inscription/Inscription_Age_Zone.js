@@ -31,7 +31,7 @@ export default class Inscription_Age_Zone extends React.Component {
 
         this.state = {
             ville : '',
-            zone : ' ',
+            zone : 'pas de zone',
             today : auj.getFullYear() + '-' + (auj.getMonth() + 1) + '-' +  auj.getDate(),
             txtDateNaissance : 'Date de naissance',
             mail : mail,
@@ -194,7 +194,6 @@ export default class Inscription_Age_Zone extends React.Component {
                             </View>
 
                             {/* Txt input pour la ville */}
-                            
                             <View style = {{marginTop : hp('25%')}}>
                                 <View style = {styles.view_champ}>
                                         <Animated.View style={[this.inputChamps.getLayout(), {borderBottomWidth : 1}]}>
@@ -215,8 +214,7 @@ export default class Inscription_Age_Zone extends React.Component {
                                 </View>
 
                                 {/* Txt input pour la zone */}
-                                
-                                <View style = {styles.view_champ}>
+                                {/*<View style = {styles.view_champ}>
                                         <Animated.View style={[this.inputChamps.getLayout(), {borderBottomWidth : 1}]}>
                                             <TextInput 
                                                 placeholder = "Zone"
@@ -227,7 +225,7 @@ export default class Inscription_Age_Zone extends React.Component {
 
                                             />
                                         </Animated.View>
-                                </View>
+                                </View>*/}
                             </View>
                             
                             <View style = {{ width : wp('80%')}}>
