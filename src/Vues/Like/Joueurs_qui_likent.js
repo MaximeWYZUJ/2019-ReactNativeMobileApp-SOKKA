@@ -58,6 +58,7 @@ class SectionHeader extends React.Component {
             score={this.props.item.score}
             photo={this.props.item.photo}
             nav={this.props.item.nav}
+            showLike={true}
         />
         </View>
       );

@@ -336,7 +336,7 @@ class ProfilJoueur extends React.Component {
 
         var tokens = []
         if(this.joueur.tokens != undefined) tokens = this.joueur.tokens
-        for(var i = 0; i < this.joueur.tokens.length; i++) {
+        for(var i = 0; i < tokens.length; i++) {
            await  this.sendPushNotification(tokens[i],titre,corps)
         }
     }

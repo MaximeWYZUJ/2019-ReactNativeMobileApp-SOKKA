@@ -153,6 +153,8 @@ class First_screen extends React.Component {
             db.collection("Joueurs").doc(id).update({
                 tokens : listeToken
             })
+            
+            LocalUser.data.tokens = listeToken;
         }
     }
 

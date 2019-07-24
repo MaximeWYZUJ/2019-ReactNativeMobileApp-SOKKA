@@ -42,6 +42,7 @@ class ProfilJoueurMonReseau extends React.Component {
                         score={item.score}
                         photo={item.photo}
                         nav={this.props.navigation}
+                        showLike={true}
                     />}
                 />
             </View>

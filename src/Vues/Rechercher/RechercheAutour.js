@@ -252,7 +252,8 @@ export default class RechercheAutour extends React.Component {
                         nom={item.pseudo}
                         photo={item.photo}
                         score={item.score}
-                        nav={this.props.navigation}    
+                        nav={this.props.navigation}
+                        showLike={true}
                     />
                 )
             
