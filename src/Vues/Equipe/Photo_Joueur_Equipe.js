@@ -86,7 +86,8 @@ const styles = {
         resizeMode:  'cover',
         alignSelf: 'center',
         borderColor : "black",
-        borderRadius : 30
+        borderRadius : 30,
+        backgroundColor: 'gray'
 
     },
     c : {

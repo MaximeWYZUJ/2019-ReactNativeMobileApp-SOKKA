@@ -4,6 +4,7 @@ import Photo_Joueur_Equipe from './Photo_Joueur_Equipe';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from "react-native-responsive-fontsize"
 import Defis_Equipe from './Defis_Equipe'
+import StarRating from 'react-native-star-rating'
 import Database from '../../Data/Database'
 import LocalUser from 'app/src/Data/LocalUser.json'
 import Type_Defis from '../../Vues/Jouer/Type_Defis'
@@ -15,18 +16,12 @@ import Item_Defi from '../../Components/Defis/Item_Defi'
 import Item_Partie from '../../Components/Defis/Item_Partie'
 import Types_Notification from '../../Helpers/Notifications/Types_Notification';
 
-/* A changer quand on aura accès aux données. */
-const nbEtoile = 5;
-const uriEtoile = 'app/res/' + nbEtoile + '_etoiles.png';
-const url_icon_like = 'app/res/icon_like.png'
 
 
 /**
  * Classe permettant de définir la vue du profil d'une Equipe.
  */
 export default class Profil_Equipe extends React.Component {
-
-    urlEtoile =  'app/res/' + nbEtoile + '_etoiles.png'
 
     static navigationOptions = ({ navigation }) => {
         const { state } = navigation;
@@ -48,6 +43,7 @@ export default class Profil_Equipe extends React.Component {
             url : 'e',
             txt_identite :'erreur',
             citation : 'erreur',
+            sexe : 'erreur',
             nbJoueur : 'erreur',
             nbEtoile : 'erreur',
             fiabilite : 'erreur',
@@ -62,7 +58,6 @@ export default class Profil_Equipe extends React.Component {
             isaMember : true,
             isCaptain : true,
             nom :' ',
-            uriEtoile :'erreur',
             joueurs :'erreur',
             defis : 'erreur',
             id : ''  ,           // Utile pour accéder aux joueurs qui likent 
@@ -72,7 +67,7 @@ export default class Profil_Equipe extends React.Component {
     }
 
     componentDidMount(){
-        this.getEquipeWithId(this.props.navigation.getParam('equipeId', null))
+        this.getEquipeWithId(this.props.navigation.getParam('equipeId', null));
     }
     
 
@@ -148,6 +143,12 @@ export default class Profil_Equipe extends React.Component {
         console.log("in get Equipe ============="),
         console.log(id)
         Database.getDocumentData(id, 'Equipes').then(async (doc) => {
+            if (doc.joueurs.length > 1) {
+                var nbJ = doc.joueurs.length + " joueurs";
+            } else {
+                var nbJ = doc.joueurs.length + " joueur";
+            }
+
             // Lecture des données propres de l'équipe
             this.setState({
                 equipe : doc,
@@ -156,15 +157,15 @@ export default class Profil_Equipe extends React.Component {
                 equipeData: doc,
                 txt_identite : doc.age + ' ans, ' + doc.ville,
                 citation : doc.citation,
-                nbJoueur : doc.joueurs.length + ' joueurs',
-                nbEtoile : doc.score,
+                sexe : doc.sexe,
+                nbJoueur : nbJ,
+                nbEtoile : 0,
                 nbDefitCree : doc.nbDefisCrees,
                 nbDefitParticipe : doc.nbDefisParticipe,
                 url : doc.photo,
                 fiabilite : doc.fiabilite,
                 nbAime : doc.nbAime,
                 nom : doc.nom,
-                uriEtoile : 'app/res/' + doc.score + '_etoiles.png',
                 isCaptain : doc.capitaines.some(elmt => elmt === LocalUser.data.id),
                 isaMember : doc.joueurs.some(elmt => elmt === LocalUser.data.id),
                 isLoadingJoueurs : true,
@@ -202,15 +203,17 @@ export default class Profil_Equipe extends React.Component {
                 photo: j.photo,
                 tokens : tokens,
                 pseudo : j.pseudo,
-                score : j.score
+                score : parseInt(j.score+"")
             }
 
             liste.push(j2)
         }
 
+        var listeBuild = this.buildJoueursCapNonCap(liste);
+
         this.setState({
             isLoadingJoueurs: false,
-            joueurs: liste
+            joueurs: listeBuild,
         })
     }
 
@@ -425,18 +428,33 @@ export default class Profil_Equipe extends React.Component {
      */
     buildAlertIntegerEquipe(){
 
-        Alert.alert(
-            '',
-            "Tu souhaites faire une demande pour intégrer l'équipe " + this.state.nom ,
-            [
-                {text: 'Confirmer', onPress: () =>this.joinEquipe()},
-                {
-                text: 'Annuler',
-                onPress: () => console.log('Cancel Pressed'),
-                style: 'cancel',
-                },
-            ],
-        )
+        if (this.state.equipe.joueursAttentes.includes(LocalUser.data.id)) {
+            Alert.alert(
+                '',
+                "Ta demande pour intégrer l'équipe " + this.state.nom + " a déjà été envoyée",
+                [
+                    {
+                    text: "D'accord",
+                    onPress: () => {},
+                    style: 'cancel',
+                    },
+                ],
+            )
+        } else {
+
+            Alert.alert(
+                '',
+                "Tu souhaites faire une demande pour intégrer l'équipe " + this.state.nom ,
+                [
+                    {text: 'Confirmer', onPress: () =>this.joinEquipe()},
+                    {
+                    text: 'Annuler',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                    },
+                ],
+            )
+        }
     }
 
     /**
@@ -527,27 +545,6 @@ export default class Profil_Equipe extends React.Component {
                     </TouchableOpacity>
                 </View>
             );
-
-        /* Cas où c'est un membre. */
-        } else {
-            if(this.state.isCaptain) {
-                let eqData = this.state.equipeData;
-
-                return(
-                    <View style = {styles.main_container_action}>
-                        <TouchableOpacity
-                            onPress={async () => { 
-                                joueursData = await Database.getArrayDocumentData(eqData.joueurs, 'Joueurs');
-                                this.props.navigation.navigate("Reglages_Equipe", {equipeData: eqData, joueursData: joueursData})
-                            }}
-                        >
-                            <Image
-                                source = {require('app/res/icon_reglage.png')}
-                                style = {styles.icon_message} />
-                        </TouchableOpacity>
-                    </View>
-                );
-            }
         }
     }
 
@@ -564,10 +561,10 @@ export default class Profil_Equipe extends React.Component {
 
     displayDefis(){
 
-        if(this.state.allDefis == undefined ) {
+        if(this.state.allDefis == undefined || this.state.allDefis.length == 0) {
             return (
-                <View>
-                    <Text>Pas encore de défis</Text>
+                <View style={{alignItems: 'center'}}>
+                    <Text>aucun défi programmé</Text>
                 </View>
             )
         }else {
@@ -580,6 +577,17 @@ export default class Profil_Equipe extends React.Component {
                 />
             )
         }
+    }
+
+
+    buildJoueurs(partie) {
+        var liste = []
+        for(var i = 0; i < partie.participants.length ; i++) {
+            if(! partie.indisponibles.includes(partie.participants[i])) {
+                liste.push(partie.participants[i])
+            }
+        }
+        return liste
     }
 
     _renderItemDefi =({item}) => {   
@@ -618,7 +626,103 @@ export default class Profil_Equipe extends React.Component {
             )
         }  
     }
+
+
+
+    /**
+     * Fonction qui permet de trier les joueurs en fonction de l'ordre laphabethique
+     * de leur pseudo.
+     * @param {*} dataVrac 
+     */
+    buildJoueursAlphabetique(dataVrac) {
+        let  data =  {
+            A: [],
+            B: [],
+            C: [],
+            D: [],
+            E: [],
+            F: [],
+            G: [],
+            H: [],
+            I: [],
+            J: [],
+            K: [],
+            L: [],
+            M: [],
+            N: [],
+            O: [],
+            P: [],
+            Q: [],
+            R: [],
+            S: [],
+            T: [],
+            U: [],
+            V: [],
+            W: [],
+            X: [],
+            Y: [],
+            Z: [],
+        }
+        for(var i = 0; i < dataVrac.length ; i ++) {
+            var d = dataVrac[i]
+            var lettre = d.pseudo[0].toUpperCase();
+            let arrayj = data[lettre];
+            arrayj.push(dataVrac[i]);
+            data[lettre] = arrayj;
+        }
+
+
+        var dataTrie = [];
+        Object.keys(data).forEach(char => {
+            var arrayLettre = data[char];
+            for (var j=0; j<arrayLettre.length; j++) {
+                dataTrie.push(arrayLettre[j]);
+            }
+        })
+
+        return dataTrie;
+    }
+
+
+    buildJoueursCapNonCap(joueurs) {
+        var capitaines = [];
+        var nonCapitaines = [];
+        for (var i=0; i<joueurs.length; i++) {
+            if (joueurs[i].isCaptain) {
+                capitaines.push(joueurs[i]);
+            } else {
+                nonCapitaines.push(joueurs[i]);
+            }
+        }
+
+        var capitainesTrie = this.buildJoueursAlphabetique(capitaines);
+        var nonCapitainesTrie = this.buildJoueursAlphabetique(nonCapitaines);
+
+        var data = [];
+        for (var i=0; i<capitainesTrie.length; i++) {
+            data.push(capitainesTrie[i]);
+        }
+        for (var i=0; i<nonCapitainesTrie.length; i++) {
+            data.push(nonCapitainesTrie[i]);
+        }
+
+        return data;
+    }
       
+
+    getNbEtoiles() {
+        if (this.state.joueurs == undefined) {
+            return 0;
+        } else {
+            var scoreMoy = 0;
+            for (var i=0; i<this.state.joueurs.length; i++) {
+                scoreMoy += this.state.joueurs[i].score;
+            }
+            scoreMoy = Math.ceil(scoreMoy / this.state.joueurs.length);
+
+            return scoreMoy;
+        }
+    }
 
     /**
      * Fonction qui nous permet d'afficher la vue du profil de l'équipe
@@ -641,11 +745,18 @@ export default class Profil_Equipe extends React.Component {
                             </View>
 
                             {/* text de l'équipe */}
-                            <View style = {styles.main_container_txt}>
+                            <TouchableOpacity
+                                style = {styles.main_container_txt}
+                                onPress = {async () => {
+                                    if(this.state.isCaptain) {
+                                        let eqData = this.state.equipeData;
+                                        joueursData = await Database.getArrayDocumentData(eqData.joueurs, 'Joueurs');
+                                        this.props.navigation.navigate("Reglages_Equipe", {equipeData: eqData, joueursData: joueursData})
+                                    }
+                                }}>
                                 <Text style = {styles.age_ville}>{this.state.txt_identite}</Text>
-                                <Text style = {styles.quote} numberOfLines={2}>{this.state.citation}</Text>
-                                <Text style = {styles.nb_joueur}>{this.state.nbJoueur}</Text>
-                            </View>
+                                <Text style = {styles.nb_joueur}>Equipe {this.state.sexe}, {this.state.nbJoueur}</Text>
+                            </TouchableOpacity>
 
                             {/* action de l'équipe */}
                             {this.displayActionEquipe()}
@@ -654,24 +765,35 @@ export default class Profil_Equipe extends React.Component {
                         {/* BLOC NOTATION ET NB DE LIKE */}
                         <View style = {styles.bloc_notation_like}>
                             <View style = {styles.main_container_notation}>
-                                <Image source = {require(uriEtoile)} style = {styles.etoiles} />
-                                <Text style = {styles.fiabilite}>Fiabilité, {this.state.fiabilite}</Text>
+                                <StarRating
+                                    disabled={true}
+                                    maxStars={5}
+                                    rating={this.getNbEtoiles()}
+                                    starSize={hp('4%')}
+                                    fullStarColor='#F8CE08'
+                                    emptyStarColor='#B1ACAC'
+                                />
+                                {/*<Text style = {styles.fiabilite}>Fiabilité, {this.state.fiabilite}</Text>*/}
                             </View>
 
                             <View style = {styles.main_container_like}>
                                 <TouchableOpacity
                                     onPress = {()=> {this.gotoJoueursQuiLikent()}}>
-                                    <Text>{this.state.equipeData.aiment.length} likes</Text>
+                                    <Text>{this.state.equipeData.aiment.length} </Text>
                                 </TouchableOpacity>
                                 {this.likeEquipe()}
                             </View>
                         </View>
 
+                        <View style={{marginHorizontal: wp('2%'), marginVertical: wp('2%')}}>
+                            <Text style = {styles.quote} numberOfLines={2}>{this.state.citation}</Text>
+                        </View>
+
                         {/* BLOC DEFIS */}
-                        <View style = {styles.bloc_defis}>
+                        {/*<View style = {styles.bloc_defis}>
                             <View style = {styles.vue_txt}><Text style = {styles.txt_defi} >{this.state.nbDefitCree} défis créés</Text></View>
                             <View style = {styles.vue_txt}><Text style = {styles.txt_defi}>{this.state.nbDefitParticipe} défis participés</Text></View>
-                        </View>
+                        </View>*/}
                         {/*this.displayCapitanat()*/}
                     </View>
 
@@ -798,6 +920,7 @@ const styles = {
     bloc_identite : {
         flex: 1,
         flexDirection: 'row',
+        justifyContent: 'space-between',
         marginTop : hp('2%'),
     },
 
@@ -811,15 +934,17 @@ const styles = {
     },
 
     quote : {
-        width: wp('50%'),
-        fontSize : RF(2.4)
+        fontSize : RF(2.4),
+        fontStyle: 'italic'
     },
 
     nb_joueur : {
         fontSize : RF(2.4)
     },
     main_container_action : {
-        marginLeft : wp('5%')
+        marginLeft : wp('5%'),
+        alignItems: 'flex-end',
+        marginRight: wp('2%')
     },
 
     icon_message : {
@@ -838,6 +963,7 @@ const styles = {
     bloc_notation_like : {
         flex: 1,
         flexDirection: 'row',
+        justifyContent: 'space-between'
     },
 
     main_container_notation : {

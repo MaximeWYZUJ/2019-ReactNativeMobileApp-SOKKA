@@ -11,9 +11,6 @@ import AlphabetListView from 'react-native-alphabetlistview'
 import LocalUser from '../../Data/LocalUser.json'
 import DataBase from '../../Data/Database'
 
-const latUser = 43.531486   // A suppr quand on aura les vrais coordonnées
-const longUser = 1.490306
-const DISTANCE_MAX_FROM_USER = 50;
 
 
 /**

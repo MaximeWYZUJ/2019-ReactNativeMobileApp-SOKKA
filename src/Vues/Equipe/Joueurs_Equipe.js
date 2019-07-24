@@ -84,27 +84,29 @@ export default class Joueurs_Equipe extends React.Component {
     }
 
     renderBtnChooseCap() {
-        return(
-            <TouchableOpacity
-            style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%')}}
-            onPress={() => Alert.alert(
-                            '',
-                            "Tu souhaites modifier les capitaines de l'équipe " + this.state.equipe.nom,
-                            [
-                                {
-                                    text: 'Confirmer',
-                                    onPress : () => {this.goToChoixCapitaine()}
-                                },
-                                {
-                                    text: 'Annuler',
-                                    style: 'cancel',
-                                },
-                            ],
-                    )}
-            >
-            <Text style={styles.header}>+</Text>
-        </TouchableOpacity>
-        )  
+        if (this.state.equipe != undefined && this.state.equipe.capitaines.includes(LocalUser.data.id)) {
+            return(
+                <TouchableOpacity
+                style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%')}}
+                onPress={() => Alert.alert(
+                                '',
+                                "Tu souhaites modifier les capitaines de l'équipe " + this.state.equipe.nom,
+                                [
+                                    {
+                                        text: 'Confirmer',
+                                        onPress : () => {this.goToChoixCapitaine()}
+                                    },
+                                    {
+                                        text: 'Annuler',
+                                        style: 'cancel',
+                                    },
+                                ],
+                        )
+                }>
+                <Text style={styles.header}>+</Text>
+            </TouchableOpacity>
+            )
+        }
     }
     renderBtnJoueur() {
         if(this.state.equipe != undefined && this.state.equipe.capitaines.includes(LocalUser.data.id)) {
@@ -113,13 +115,14 @@ export default class Joueurs_Equipe extends React.Component {
                 style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%')}}
                 onPress={() => Alert.alert(
                                 '',
-                                "Que veux-tu faire ?",
+                                "Tu souhaites rechercher de nouveaux joueurs pour les ajouter à l'équipe " + this.state.equipe.nom + " ?",
                                 [
                                     {
-                                        text: 'Créer',
+                                        text: 'Confirmer',
+                                        onPress : () => {this.props.navigation.navigate("OngletRecherche_Autour", {type: "Joueurs"})}
                                     },
                                     {
-                                        text: 'Rechercher',
+                                        text: 'Annuler',
                                         style: 'cancel',
                                     },
                                 ],
@@ -137,7 +140,7 @@ export default class Joueurs_Equipe extends React.Component {
             
 
                 <View style = {{marginTop  : hp('1.2%')}}>
-                    <Text style = {{fontWeight : "bold", fontSize : RF("2.7"), alignSelf : "center"}}>Joueurs de l'équipes</Text>
+                    <Text style = {{fontWeight : "bold", fontSize : RF("2.7"), alignSelf : "center"}}>Joueurs de l'équipe</Text>
                 </View>
 
             

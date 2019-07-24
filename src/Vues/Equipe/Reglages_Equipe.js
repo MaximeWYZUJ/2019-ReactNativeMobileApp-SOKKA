@@ -1,8 +1,11 @@
 import React from 'react'
-import {View,Text,Button, Picker, TextInput} from 'react-native'
+import {View,Text,Button, Picker, TextInput, TouchableOpacity, Image, Alert} from 'react-native'
+import { Camera, ImagePicker, Permissions } from 'expo';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from "react-native-responsive-fontsize"
 import Database from '../../Data/Database';
+import * as firebase from 'firebase';
+import '@firebase/firestore'
 
 const policeSize = RF(2.4);
 
@@ -17,7 +20,7 @@ export default class Reglages_Equipe extends React.Component {
         for (j of this.joueursData) {
             this.niveau = this.niveau + j.score;
         }
-        this.niveau = this.niveau / this.joueursData.length;
+        this.niveau = Math.ceil(this.niveau / this.joueursData.length);
 
         this.ville = "";
         this.citation = "";
@@ -34,7 +37,12 @@ export default class Reglages_Equipe extends React.Component {
 
         this.state = {
             contactSelected: this.equipeData.telephone,
-            mailSelected: this.equipeData.mail
+            mailSelected: this.equipeData.mail,
+            sexeSelected: this.equipeData.sexe,
+
+            usingCamera: false,
+            image_changed: false,
+            photo: {uri: this.equipeData.photo}
         }
     }
 
@@ -43,6 +51,103 @@ export default class Reglages_Equipe extends React.Component {
         return {
             title: navigation.getParam('header', "Réglage de l'équipe")
         }
+    }
+
+
+
+    //***************************************************************************
+    //********************** CHOIX DE LA PHOTO DE PROFIL ************************
+    //***************************************************************************
+
+    /**
+     * Fonction qui permet d'ouvrir la galerie et de permettre à l'utilisateur
+     * de choisir une photo de profil
+     */
+    pickImageGallerie = async () => {
+
+        
+        /* Obtenir les permissions. */
+        const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+
+        if (status === "granted") {
+            /* Ouvrir la galerie. */
+            let result = await ImagePicker.launchImageLibraryAsync({
+            });
+
+            /* Si l'utilisateur à choisis une image. */
+            if (!result.cancelled) {
+                this.setState({ 
+                photo: {uri : result.uri },
+                image_changed : true
+                });
+            }
+        }
+    };
+
+
+    /**
+     * Fonction qui permet de prendre une photo depuis la camera
+     */
+    pickImageCamera = async () => {
+        /* Obtenir les permissions. */
+        const { status } = await Permissions.askAsync(Permissions.CAMERA);
+
+        if (status === "granted") {
+            this.setState({usingCamera: true})
+        }
+    };
+
+    snapPhoto = async () => {
+        let photo = await this.camera.takePictureAsync();
+        this.setState({
+            photo: {uri: photo.uri},
+            image_changed: true,
+            usingCamera: false
+        })
+    }
+
+    /**
+     * Fonction qui va permettre d'uploader la photo de profil dans le storage
+     * firebase.
+     * 
+     * uri : uri de la photo de profil
+     * imageName : Nom à donner au fichier sur le storage
+     */
+    uploadImage = async (uri, imageName) => {
+        const blob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+              resolve(xhr.response);
+            };
+            xhr.onerror = function() {
+              reject(new TypeError('Network request failed'));
+            };
+            xhr.responseType = 'blob';
+            xhr.open('GET', uri, true);
+            xhr.send(null);
+        });
+        var ref = firebase.storage().ref().child("Photos_Profil_Equipes/tests/" + imageName);
+        ref.put(blob);
+
+        return ref.getDownloadURL();
+    }
+
+
+    // ========================================================
+
+
+    renderPickerSexe() {
+        return (
+            <Picker
+                selectedValue={this.state.sexeSelected}
+                style={{height: 50, width: wp('50%')}}
+                onValueChange={(itemValue, itemIndex) => this.setState({sexeSelected: itemValue})}
+                >
+                <Picker.Item label={"mixte"} key={0} value={"mixte"}/>
+                <Picker.Item label={"masculine"} key={0} value={"masculine"}/>
+                <Picker.Item label={"féminine"} key={0} value={"féminine"}/>
+            </Picker>
+        )
     }
 
 
@@ -82,7 +187,7 @@ export default class Reglages_Equipe extends React.Component {
     }
 
 
-    validate() {
+    async validate() {
         modifs = {};
 
         if (this.ville) {
@@ -93,76 +198,144 @@ export default class Reglages_Equipe extends React.Component {
             modifs["citation"] = this.citation;
         }
 
+        modifs["sexe"] = this.state.sexeSelected;
+
         modifs["mail"] = this.state.mailSelected;
         
         modifs["telephone"] = this.state.contactSelected;
 
+        modifs["score"] = this.niveau;
+
+        if (this.state.image_changed) {
+            newPhoto = await this.uploadImage(this.state.photo.uri, this.equipeData.id);
+            modifs["photo"] = newPhoto;
+        }
+
         db = Database.initialisation();
         db.collection("Equipes").doc(this.equipeData.id).set(modifs, {merge: true})
         .then(() => {
-            console.log("Successfully updated team. Now goback");
-            this.props.navigation.goBack();
+            this.props.navigation.push("Profil_Equipe", {equipeId: this.equipeData.id});
         })
     }
 
 
     render() {
-       
-        return(
-            <View style = {styles.main_container}>
-                {/* CHAMPS A REMPLIR */}
-                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
-                    <Text>Age moyen :  {this.equipeData.age}</Text>
+        if (this.state.usingCamera) {
+            return (
+                <View style={{ flex: 1 }}>
+                    <Camera style={{ flex: 1 }} type={this.state.type} ref={ref => {this.camera = ref}}>
+                        <View
+                        style={{
+                            flex: 1,
+                            backgroundColor: 'transparent',
+                            flexDirection: 'row',
+                        }}>
+                            <TouchableOpacity
+                                style={{
+                                flex: 1,
+                                alignSelf: 'flex-end',
+                                alignItems: 'center',
+                                justifyContent: 'space-around'
+                                }}
+                                onPress={() => {
+                                    this.setState({
+                                        type: this.state.type === Camera.Constants.Type.back ? Camera.Constants.Type.front : Camera.Constants.Type.back,
+                                    });
+                                }}>
+                                <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> FLIP </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={{
+                                flex: 1,
+                                alignSelf: 'flex-end',
+                                alignItems: 'center',
+                                }}
+                                onPress={this.snapPhoto}>
+                                <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> SNAP </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Camera>
                 </View>
-                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
-                    <Text>Ville :  </Text>
-                    <TextInput
-                        style={{flex: 1, borderColor: '#C0C0C0'}}
-                        onChangeText={(t) => this.ville=t}
-                        placeholder={this.equipeData.ville}
+            )
+        
+        } else {
+            return(
+                <View style = {styles.main_container}>
+                    <View style = {{alignItems: 'center'}}>
+                        <TouchableOpacity onPress={() => Alert.alert(
+                                '',
+                                "Comment veux-tu prendre la photo ?",
+                                [
+                                    {
+                                        text: 'Caméra',
+                                        onPress: () => this.pickImageCamera(),
+                                    },
+                                    {
+                                        text: 'Gallerie',
+                                        onPress: () => this.pickImageGallerie(),
+                                        style: 'cancel',
+                                    },
+                                ],
+                                )}>
+                            <Image style={styles.photo} source={{uri : this.state.photo.uri}}/>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* CHAMPS A REMPLIR */}
+                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
+                        <Text>Age moyen :  {this.equipeData.age}</Text>
+                    </View>
+                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
+                        <Text>Ville :  </Text>
+                        <TextInput
+                            style={{flex: 1, borderColor: '#C0C0C0'}}
+                            onChangeText={(t) => this.ville=t}
+                            placeholder={this.equipeData.ville}
+                            />
+                    </View>
+                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
+                        <Text>Phrase fétiche :  </Text>
+                        <TextInput
+                            style={{flex: 1, borderColor: '#C0C0C0'}}
+                            onChangeText={(t) => this.citation=t}
+                            placeholder={this.equipeData.citation}
+                            />
+                    </View>
+                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
+                        <Text>Niveau :  {this.niveau}</Text>
+                    </View>
+                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
+                        <Text>Sexe :  </Text>
+                        {this.renderPickerSexe()}
+                    </View>
+
+                    {/* COORDONNEES PICKER */}
+                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: "#C0C0C0"}}>
+                        <Text>Coordonnées de l'équipe</Text>
+                    </View>
+                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
+                        <Text>Contact :  </Text>
+                        {this.renderPickerContact()}
+                    </View>
+                    <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
+                        <Text>Mail :  </Text>
+                        {this.renderPickerMail()}
+                    </View>
+
+                    {/* BLANK SPACE */}
+                    <View style={{flex: 3, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                    </View>
+
+                    {/* VALIDER */}
+                    <View style={{flex: 3, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                        <Button
+                            title="Valider"
+                            onPress={() => this.validate()}
                         />
+                    </View>
                 </View>
-                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
-                    <Text>Phrase fétiche :  </Text>
-                    <TextInput
-                        style={{flex: 1, borderColor: '#C0C0C0'}}
-                        onChangeText={(t) => this.citation=t}
-                        placeholder={this.equipeData.citation}
-                        />
-                </View>
-                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
-                    <Text>Niveau :  {this.niveau}</Text>
-                </View>
-                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
-                    <Text>Fiabilite :  {this.equipeData.fiabilite}</Text>
-                </View>
-
-                {/* COORDONNEES PICKER */}
-                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: "#C0C0C0"}}>
-                    <Text>Coordonnées de l'équipe</Text>
-                </View>
-                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
-                    <Text>Contact :  </Text>
-                    {this.renderPickerContact()}
-                </View>
-                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
-                    <Text>Mail :  </Text>
-                    {this.renderPickerMail()}
-                </View>
-
-                {/* BLANK SPACE */}
-                <View style={{flex: 3, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                </View>
-
-                {/* VALIDER */}
-                <View style={{flex: 3, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
-                    <Button
-                        title="Valider"
-                        onPress={() => this.validate()}
-                    />
-                </View>
-            </View>
-        )
+            )
+        }
     }
 }
 
@@ -171,6 +344,12 @@ const styles = {
         marginTop : hp('1%'),
         flex: 1,
         flexDirection: 'column'
+    },
+
+    photo: {
+        width: 100,
+        height: 100,
+        backgroundColor: 'gray'
     },
 
     view_icon_reglage : {

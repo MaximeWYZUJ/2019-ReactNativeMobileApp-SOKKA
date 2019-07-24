@@ -3,6 +3,7 @@ import { View, StyleSheet, Image, Text, ScrollView, TouchableOpacity, Alert, Fla
 import RF from 'react-native-responsive-fontsize';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { withNavigation } from 'react-navigation'
+import AlphabetListView from 'react-native-alphabetlistview'
 import BarreRecherche from './Recherche/Barre_Recherche'
 
 import FiltrerEquipe from './Recherche/FiltrerEquipe'
@@ -30,6 +31,57 @@ class SearchList extends React.Component {
             case "EquipesFav" : this.champNom = "queryName"; break;
             case "Terrains": this.champNom = "queryName"; break;
         }
+    }
+
+
+    /**
+     * Fonction qui permet de trier les joueurs en fonction de l'ordre laphabethique
+     * de leur pseudo.
+     * @param {*} dataVrac 
+     */
+    buildJoueurs(dataVrac) {
+        let  data =  {
+            A: [],
+            B: [],
+            C: [],
+            D: [],
+            E: [],
+            F: [],
+            G: [],
+            H: [],
+            I: [],
+            J: [],
+            K: [],
+            L: [],
+            M: [],
+            N: [],
+            O: [],
+            P: [],
+            Q: [],
+            R: [],
+            S: [],
+            T: [],
+            U: [],
+            V: [],
+            W: [],
+            X: [],
+            Y: [],
+            Z: [],
+        }
+        for(var i = 0; i < dataVrac.length ; i ++) {
+            d = dataVrac[i]
+            let lettre;
+            switch(this.props.type) {
+                case "Joueurs": {lettre = d.pseudo[0].toUpperCase(); break;}
+                case "Equipes": {lettre = d.nom[0].toUpperCase(); break;}
+                case "EquipesFav": {lettre = d.nom[0].toUpperCase(); break;}
+                case "Terrains": {lettre = d.InsNom[0].toUpperCase(); break;}
+            }
+            let arrayj = data[lettre];
+            arrayj.push(dataVrac[i])
+            data[lettre] = arrayj
+        }
+        return data
     }
 
 
@@ -220,11 +272,16 @@ class SearchList extends React.Component {
                     </View>
 
                     {/* LISTE */}
-                    <FlatList
-                        data={this.state.dataFiltree}
-                        keyExtractor={(item) => item.id}
-                        renderItem={this.props.renderItem}
-                    />
+                    <View style={{flex: 1}}>
+                        <AlphabetListView
+                            data={this.buildJoueurs(this.state.dataFiltree)}
+                            cell={this.props.renderItem}
+                            cellHeight={30}
+                            sectionListItem={SectionItem}
+                            sectionHeader={SectionHeader}
+                            sectionHeaderHeight={22.5}
+                        />
+                    </View>
                 </View>
             </ScrollView>
         );
@@ -271,3 +328,39 @@ const styles = StyleSheet.create({
 })
 
 export default withNavigation(SearchList)
+
+
+
+class SectionHeader extends React.Component {
+
+    render() {
+    // inline styles used for brevity, use a stylesheet when possible
+    var textStyle = {
+      color:'black',
+      fontWeight:'bold',
+      fontSize:RF(2.5),
+      marginLeft : wp('2.5%')
+    };
+
+    var viewStyle = {
+      backgroundColor: '#F7F7F7'
+    };
+  
+    return (
+        <View style={viewStyle}>
+        <Text style={textStyle}>{this.props.title}</Text>
+      </View>
+      
+    );
+  }
+}
+
+class SectionItem extends React.Component {
+  render() {
+    
+
+    return (<View></View>);/* (
+        <Text style={{color:'black'}}>{this.props.title}</Text>
+    );*/
+  }
+}

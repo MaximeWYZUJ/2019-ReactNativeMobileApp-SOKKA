@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {Picker, View, Text,Image, Animated,TouchableOpacity,TextInput} from 'react-native'
+import {Picker, View, Text,Image, Animated,TouchableOpacity,TextInput, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 import RF from 'react-native-responsive-fontsize';
@@ -21,10 +21,10 @@ export default class Inscription_Nom_Pseudo extends React.Component {
         const mdp = navigation.getParam('mdp', ' ');
 
         this.state = {
-            nom : ' ',
-            prenom : ' ',
-            pseudo : ' ',
-            sexe: ' ',
+            nom : '',
+            prenom : '',
+            pseudo : '',
+            sexe: 'masculin',
             mail : mail,
             mdp : mdp,
         }
@@ -70,15 +70,36 @@ export default class Inscription_Nom_Pseudo extends React.Component {
     }
 
     callNextScreen() {
-        this.props.navigation.push("InscriptionZone", 
+        if (this.state.prenom.length == 0 || this.state.nom.length == 0) {
+            Alert.alert(
+                '',
+                "Tu dois renseigner au moins ton nom et ton prénom"  ,
+                [
+                    {
+                    text: "D'accord",
+                    onPress: () => {},
+                    style: 'cancel',
+                    },
+                ],
+            )
+        } else {
+
+            var pseudoBis = this.state.pseudo;
+            if (pseudoBis.length == 0) {
+                pseudoBis = this.state.prenom + " " + this.state.nom;
+            }
+
+            this.props.navigation.push("InscriptionZone", 
             {
                 mail : this.state.mail,
                 mdp : this.state.mdp,
                 nom : this.state.nom,
                 prenom : this.state.prenom,
-                pseudo : this.state.pseudo,
+                pseudo : pseudoBis,
                 sexe: this.state.sexe
             })
+
+        }
 
     }
 

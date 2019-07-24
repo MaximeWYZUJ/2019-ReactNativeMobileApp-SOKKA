@@ -54,7 +54,7 @@ class SectionHeader extends React.Component {
 		  <View style = {{marginRight : wp('8%')}}>
         <JoueurItem
             id={this.props.item.id}
-            nom={this.props.item.nom}
+            nom={this.props.item.pseudo}
             score={this.props.item.score}
             photo={this.props.item.photo}
             nav={this.props.item.nav}

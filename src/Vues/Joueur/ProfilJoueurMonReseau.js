@@ -38,7 +38,7 @@ class ProfilJoueurMonReseau extends React.Component {
                     data={this.reseau}
                     renderItem={({item}) => <JoueurItem
                         id={item.id}
-                        nom={item.nom}
+                        nom={item.pseudo}
                         score={item.score}
                         photo={item.photo}
                         nav={this.props.navigation}
