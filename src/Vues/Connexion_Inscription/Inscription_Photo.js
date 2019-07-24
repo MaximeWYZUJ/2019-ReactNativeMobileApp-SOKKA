@@ -236,7 +236,8 @@ export default class Inscription_Photo extends React.Component {
                             ville: oldState.ville,
                             departement: oldState.departement,
                             zone: oldState.zone,
-                            poste: "mixte"
+                            poste: "mixte",
+                            nbMessagesNonLu : 0
                         }
                         
                         console.log("before store localUser")

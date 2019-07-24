@@ -9,6 +9,17 @@ import Database from '../../Data/Database'
 import LocalUser from '../../Data/LocalUser.json'
 import Simple_Loading from '../../Components/Loading/Simple_Loading'
 import Color from '../../Components/Colors';
+import firebase from 'firebase'
+import '@firebase/firestore'
+import { StackActions, NavigationActions } from 'react-navigation';
+
+// Rememttre à Zéro le stack navigator pour empecher le retour en arriere
+const resetAction = StackActions.reset({
+    index: 0, // <-- currect active route from actions array
+    actions: [
+      NavigationActions.navigate({ routeName: 'ProfilJoueur' }),
+    ],
+});
 
 export default class Accueil_Conversation extends React.Component {
 
@@ -26,20 +37,48 @@ export default class Accueil_Conversation extends React.Component {
 
     static navigationOptions = ({ navigation }) => {
 
-        
-            return { title:"Discussions", 
-            headerRight: (
-
-               <TouchableOpacity
-                onPress = {() => console.log("TODO!!")} >
-                   <Image
-                    style = {{width : 30, height : 30, marginRight :15}}
-                    source = {require('../../../res/write.png')}
-                   />
-               </TouchableOpacity>
-              ),
-            };     
+            if(!navigation.getParam("retour_arriere_interdit",false)) {
+                return { title:"Discussions", 
+                headerRight: (
+    
+                   <TouchableOpacity
+                    onPress = {() => navigation.push("NewMessage")}>
+                       <Image
+                        style = {{width : 30, height : 30, marginRight :15}}
+                        source = {require('../../../res/write.png')}
+                       />
+                   </TouchableOpacity>
+                  ),
+                  
+                };  
+            } else {
+                return { title:"Discussions", 
+                headerRight: (
+    
+                   <TouchableOpacity
+                    onPress = {() => console.log("TODO!!")} >
+                       <Image
+                        style = {{width : 30, height : 30, marginRight :15}}
+                        source = {require('../../../res/write.png')}
+                       />
+                   </TouchableOpacity>
+                  ),
+                  
+                    headerLeft : (
+                        <TouchableOpacity
+                        onPress = {() =>navigation.dispatch(resetAction)} >
+                           <Image
+                            style = {{width : 20, height : 20, marginLeft :15}}
+                            source = {require('../../../res/right-arrow-nav.png')}
+                           />
+                       </TouchableOpacity>
+                    )
+                };   
+            }
+              
     };
+
+
   
     componentDidMount(){
         this.getConversations()
@@ -92,6 +131,27 @@ export default class Accueil_Conversation extends React.Component {
 
     }
 
+
+    async updateLecteur(aLue,idConv){
+        console.log("in update lecteur !!!!")
+        if(! aLue) {
+            this.setState({isLoading : true}) 
+            console.log(idConv)
+            console.log("before init!!!!!!!!")
+            var db = Database.initialisation()
+            await db.collection("Conversations").doc(idConv).update({
+                lecteurs : firebase.firestore.FieldValue.arrayUnion(LocalUser.data.id)
+            }).catch(function(error){console.log(error)})
+            var j = await Database.getDocumentData(LocalUser.data.id, "Joueurs")
+            if (j.nbMessagesNonLu > 0) {
+                await db.collection("Joueurs").doc(LocalUser.data.id).update({
+                    nbMessagesNonLu : j.nbMessagesNonLu - 1
+                }).catch(function(error){console.log(error)})
+            }
+            this.setState({isLoading : false})
+        }
+    }
+
     
 
     nomConv(conv){
@@ -134,12 +194,23 @@ export default class Accueil_Conversation extends React.Component {
     }
 
 
+    
 
     _renderItem = ({item}) => {
+        if(item.lecteurs != undefined){
+            var aLue = item.lecteurs.includes(LocalUser.data.id)
+        } else {
+            aLue = true
+        }
+        var color = "white"
+        if(! aLue ) color = Color.grayItem
         return(
             <TouchableOpacity 
-                style = {{flexDirection : "row", marginBottom : hp('1.5%'), justifyContent : "space-between"}}
-                onPress = {() => this.props.navigation.push("ListMessages", {conv : item})}>
+                style = {{flexDirection : "row", marginBottom : hp('1.5%'), justifyContent : "space-between", backgroundColor : color}}
+                onPress = {async () => {
+                    await this.updateLecteur(aLue,item.id)
+                    if(! aLue) item.lecteurs = item.lecteurs.push(LocalUser.data.id)
+                    this.props.navigation.push("ListMessages", {conv : item})}}>
                 <View  style = {{flexDirection : "row" , justifyContent : "center"}}>
                     {this._renderPhotoConv(item)}
                     <View style = {{alignSelf: "center"}}>
@@ -186,7 +257,6 @@ export default class Accueil_Conversation extends React.Component {
     
 
     render(){
-        console.log(this.state.conversations)
         if(this.state.isLoading) {
             return(
                 <Simple_Loading

@@ -1,5 +1,5 @@
 import React from 'react'
-import { GiftedChat } from 'react-native-gifted-chat'
+import { GiftedChat, Send } from 'react-native-gifted-chat'
 import { StyleSheet, Text, Image, ScrollView, TouchableOpacity, View, FlatList,RefreshControl, Alert,TextInput,KeyboardAvoidingView,SafeAreaView } from 'react-native'
 
 import LocalUser from '../../Data/LocalUser.json'
@@ -9,6 +9,10 @@ import Simple_Loading from '../../Components/Loading/Simple_Loading'
 
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
+
+import firebase from 'firebase'
+import '@firebase/firestore'
+
 class List_Messages extends React.Component {
   constructor(props){
       super(props)
@@ -16,7 +20,8 @@ class List_Messages extends React.Component {
         conv : this.props.navigation.getParam('conv', undefined),
         messages : [],
         isLoading : true,
-        joueurs : []
+        joueurs : [],
+        lastMessageId  : undefined
     }
   }
 
@@ -24,16 +29,29 @@ class List_Messages extends React.Component {
 
         
     return { title:"Discussions", 
-    headerRight: (
+        headerRight: (
 
-       <TouchableOpacity
-        onPress = {() => console.log("TODO!!")} >
-           <Image
-            style = {{width : 30, height : 30, marginRight :15}}
-            source = {require('../../../res/write.png')}
-           />
-       </TouchableOpacity>
-      ),
+            <TouchableOpacity
+                onPress = {() => console.log("TODO!!")} >
+                <Image
+                    style = {{width : 30, height : 30, marginRight :15}}
+                    source = {require('../../../res/write.png')}
+                />
+            </TouchableOpacity>
+        ),
+
+
+        headerLeft : (
+            <TouchableOpacity
+            onPress = {() =>navigation.push("AccueilConversation", {retour_arriere_interdit : true})} >
+               <Image
+                style = {{width : 20, height : 20, marginLeft :15}}
+                source = {require('../../../res/right-arrow-nav.png')}
+               />
+           </TouchableOpacity>
+        )
+
+    
     };     
 };
 
@@ -49,19 +67,25 @@ class List_Messages extends React.Component {
         console.log("in get message")
         var messages = []
         var id = this.state.conv.id 
+        var lastMessageId = undefined
+        var nbMessages = 0
         var db = Database.initialisation()
-        await db.collection("Conversations").doc(id).collection("Messages").orderBy("dateEnvoie","desc" ).limit(10).get()
+         db.collection("Conversations").doc(id).collection("Messages").orderBy("dateEnvoie","desc" ).limit(10).get()
         .then(querySnapshot => {
             var i  = 0
             querySnapshot.docs.forEach(doc => {
                 var msg = this.buildMsgForChat(doc.data(), i)
+                lastMessageId = doc.id
                 messages.push(msg);
                 i++
+                nbMessages = i
             });
+            console.log("ok build all messages")
+            this.setState({messages : messages, isLoading : false, lastMessageId :lastMessageId, nbMessages : nbMessages})
+
         }).catch(function(errro) {console.log(errro)});
         console.log(messages)
         
-        this.setState({messages : messages, isLoading : false})
     }
 
 
@@ -81,11 +105,49 @@ class List_Messages extends React.Component {
 
 
 
+    async getMoreMessage(){
+        console.log("in get more message")
+        console.log(this.state.lastMessageId)
+        var messages =[]
+        for(var i = 0 ; i < this.state.messages.length ; i++){
+            messages.push(this.state.messages[i])
+        }
+        var id = this.state.conv.id 
+        var db = Database.initialisation()
+        console.log("after init")
+        console.log(id)
+        nbMessages = this.state.nbMessages
+        lastEnvoie = this.state.messages[this.state.nbMessages].dateEnvoie
+        var lastMessageId = undefined
+        console.log("before write query")
+        var query =  db.collection("Conversations").doc(id).collection("Messages").orderBy("dateEnvoie","desc" ).limit(10).startAfter(lastEnvoie)
+        console.log("before get query")
+        query.get().then(async (results) => {
+            console.log("LENGTH RESULT  ",results.docs.length)
+            for(var i = 0; i < results.docs.length ; i++) {
+                var index  = this.state.nbMessages +1
+                if(this.isAgroupConv()){
+                    var msg = this.buildMsgForChatGroup(results.docs[i].data(), index, this.state.joueurs)
+                } else {
+                    var msg = this.buildMsgForChat(results.docs[i].data(), index)
+                }
+                messages.push(msg)
+                lastMessageId = results.docs[i].id
+                nbMessages ++
+           
+            }
+            this.setState({messages : messages, nbMessages : nbMessages, lastMessageId : lastMessageId})
+            console.log(this.state.messages)
+        }).catch(function(error) {console.log(error)}).then(console.log("ok more message"));
+    }
+
     async getMessageGroupConv() {
         console.log("in get message")
         var messages = []
 
         var joueurs = await this.getJoueursGroupeData()
+        var lastMessageId = undefined
+        var nbMessages = 0
         console.log("after joueur")
         var id = this.state.conv.id 
         var db = Database.initialisation()
@@ -96,14 +158,16 @@ class List_Messages extends React.Component {
             var i  = 0
             console.log("i ===", i)
             querySnapshot.docs.forEach(doc => {
-                var msg = this.buildMsgForChatGroup(doc.data(), i, joueurs)
+                    var msg = this.buildMsgForChatGroup(doc.data(), i, joueurs)
+                    lastMessageId = doc.id
+                    nbMessages =i
                 messages.push(msg);
                 i++
             });
         }).catch(function(errro) {console.log(errro)});
         console.log(messages)
         
-        this.setState({messages : messages, isLoading : false})
+        this.setState({messages : messages, isLoading : false, joueurs : joueurs,lastMessageId :lastMessageId, nbMessages : nbMessages})
     }
 
 
@@ -158,10 +222,14 @@ class List_Messages extends React.Component {
 
 
     async sendMsg(msg){
-        console.log("in send msg", msg.text)
+        console.log("in send msg", this.state.conv.lecteurs)
         console.log(LocalUser.data.id)
         console.log( Date.parse(new Date()))
         var db = Database.initialisation()
+        if(this.state.conv.lecteurs != undefined){
+            await this.incrementeNbMsgNonLu()
+        }
+
         await db.collection("Conversations").doc(this.state.conv.id).collection("Messages").add({
             aLue : false,
             dateEnvoie : Date.parse(new Date()),
@@ -169,6 +237,19 @@ class List_Messages extends React.Component {
             text : msg.text
         }).catch(function(error){console.log(error)})
         .then(console.log("msg send"))
+
+        await db.collection("Conversations").doc(this.state.conv.id).update({
+            txtDernierMsg : msg.text,
+            dateDernierMessage : Date.parse(new Date()),
+            aLue : false,
+            lecteurs : [LocalUser.data.id]
+        })
+        conv = this.state.conv
+        conv.txtDernierMsg = msg.text,
+        conv.dateDernierMessage = Date.parse(new Date()),
+        conv.aLue = false,
+        conv.lecteurs = [LocalUser.data.id]
+        this.setState({conv : conv})
     }
     
 
@@ -209,18 +290,16 @@ class List_Messages extends React.Component {
         if(! this.isAgroupConv()) {
             var tokens = []
             var joueur = this.state.conv.joueur
-            await this.incrementeNbMsgNonLu(this.state.conv.joueur.id)
             if(joueur.tokens != undefined) tokens = joueur.tokens
             for(var i = 0 ; i < tokens.length; i++) {
                 await this.sendPushNotification(tokens[i], titre,corps)
             }
         } else {
             console.log("in send notif message group")
+            corps =  LocalUser.data.pseudo + " a envoyé un message au groupe " + this.state.conv.nom
             for(var i = 0 ; i < this.state.joueurs.length; i++){
                 var joueur = this.state.joueurs[i]
-                // LE LOG SR RRETE LA §§§§§§§!!!!!!!!!
                 console.log("joueur pseudo ", joueur.pseudo)
-                await this.incrementeNbMsgNonLu(joueur.id)
                 var tokens = []
                 if(joueur.tokens != undefined) tokens = joueur.tokens
                 for(var k = 0; k < tokens.length; k++) {
@@ -230,15 +309,49 @@ class List_Messages extends React.Component {
         }
     }
 
-    async incrementeNbMsgNonLu(idJoueur){
-        console.log("in increment")
-        var db = Database.initialisation()
-        await db.collection("Joueurs").doc(idJoueur).update({
-            nbMessagesNonLu : firebase.firestore.FieldValue.increment(1)
-        }).then(console.log("ok increment"))
-        .catch(function(error){
-            console.log(error)
-        })
+    async incrementeNbMsgNonLu(){
+
+        if(this.isAgroupConv()) {
+            console.log("====================in increment if !! ========")
+            for(var i = 0 ; i < this.state.joueurs.length; i++) {
+                var joueur = this.state.joueurs[i]
+                console.log("in boucle", joueur.pseudo)
+                if( this.state.conv.lecteurs.includes(joueur.id)){
+                    console.log("in increment",joueur.id)
+                    var db = Database.initialisation()
+                    var ref =  db.collection("Joueurs").doc(joueur.id)
+                    var j = await ref.get().then((doc) => {
+                        ref.update({
+                            nbMessagesNonLu : doc.data().nbMessagesNonLu +1
+                            
+                        }).catch(function(error) {
+                            console.log("ERROR :", error)
+                        }).then(console.log("ok increment"))
+                    })
+               
+                }
+            }
+            
+        } else {
+            var joueur = this.state.conv.joueur
+                if( this.state.conv.lecteurs.includes(joueur.id)){
+                    console.log("in increment",joueur.id)
+                    var db = Database.initialisation()
+                    var ref =  db.collection("Joueurs").doc(joueur.id)
+                    var j = await ref.get().then((doc) => {
+                        ref.update({
+                            nbMessagesNonLu : doc.data().nbMessagesNonLu +1
+                            
+                        }).catch(function(error) {
+                            console.log("ERROR :", error)
+                        }).then(console.log("ok increment"))
+                    })
+               
+                }
+        }
+        
+        
+       
     }
 
 
@@ -354,16 +467,40 @@ class List_Messages extends React.Component {
     this.setState(previousState => ({
         messages: GiftedChat.append(previousState.messages, messages),
       }))
+      await this.sendNotifNewMessage()
+
     for(var i = 0; i < messages.length ; i++) {
         await this.sendMsg(messages[i])
     }
-    await this.sendNotifNewMessage()
     
     
   }
 
+  renderLoadEarlier(){
+      return(
+          <TouchableOpacity 
+                style = {{alignSelf : "center", borderRadius : wp('1%'), backgroundColor : Color.grayItem, marginTop : hp('1%') }}
+                onPress = {() => this.getMoreMessage()}>
+              <Text>Charger les messages plus anciens</Text>
+          </TouchableOpacity>
+      )
+  }
+  renderSend(props) {
+    return (
+        
+            <Send
+                {...props}
+            >
+                <View style={{marginRight: 10, marginBottom: 10}}>
+                    <Image 
+                        source={require('../../../res/send-button.png')}
+                        style = {{width : wp('7%'), height : wp('7%')}}/>
+                </View>
+            </Send>
+    );
+}
+
   render() {
-      console.log(this.state.messages)
         if(this.state.isLoading) {
             return(
                 <Simple_Loading
@@ -375,12 +512,18 @@ class List_Messages extends React.Component {
                 <View  style={{flex:1}}>
                     {this._renderConvHeader()}
                     <GiftedChat
-
+                        renderSend = {this.renderSend}
+                        placeholder = {"Taper un message"}
+                        extraData = {this.state.messages}
                         messages={this.state.messages} 
                         onSend={messages => this.onSend(messages)}
                         user={{
                         _id: LocalUser.data.id,
                         }}
+                        loadEarlier = {true}
+                        onLoadEarlier = {() => this.getMoreMessage()}
+                        renderLoading = {() => {return(<Simple_Loading taille = {hp('3%')}/>)}}
+                        renderLoadEarlier = {() => this.renderLoadEarlier()}
                     ></GiftedChat>
 
                      <KeyboardAvoidingView behavior={'padding'} keyboardVerticalOffset={80}/>

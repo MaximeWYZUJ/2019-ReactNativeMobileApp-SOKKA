@@ -3,6 +3,7 @@ import { StyleSheet, Text, Image, ScrollView, Button, TouchableOpacity, View, Fl
 import StarRating from 'react-native-star-rating'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { withNavigation } from 'react-navigation'
+import Database from '../../Data/Database';
 
 class Icon_Message extends React.Component {
 
@@ -20,6 +21,7 @@ class Icon_Message extends React.Component {
             )
         }
     }
+
     render(){
         return(
             <View style = {{paddingTop : hp('1%'), paddingRight : wp('3.2%')}}>

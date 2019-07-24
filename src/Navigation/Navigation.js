@@ -27,8 +27,8 @@ import Joueurs_Equipe from '../Vues/Equipe/Joueurs_Equipe'
 import Choix_Capitaines_Equipe from '../Vues/Equipe/Choix_Capitaines_Equipe'
 import Accueil_Conversation from "../Vues/Conversation/Accueil_Conversation"
 import List_Messages from '../Vues/Conversation/List_Messages'
-
-
+import New_Message from '../Vues/Conversation/New_Message'
+import New_Groupe from '../Vues/Conversation/New_Groupe'
 /*import Accueil_Jouer from '../Vues/Jouer/Accueil_Jouer'
 import Choix_Format_Defi from '../Vues/Jouer/Creation/Choix_Format_Defi'
 import Choix_Terrain_Defis from '../Vues/Jouer/Creation/Choix_Terrain_Defis'
@@ -146,8 +146,25 @@ const stackNavigator = createStackNavigator({
     screen : Accueil_Conversation
   },
 
+
+  /**
+   * Screen qui affiche la liste des messages d'une conversation
+   */
   ListMessages : {
     screen : List_Messages
+  },
+
+
+  /**
+   * Screen qui permet de choisir un joueur pour démarer une conversation ou éventuelement 
+   * créer un groupe.
+   */
+  NewMessage : {
+    screen : New_Message
+  },
+
+  NewGroupe : {
+    screen : New_Groupe
   },
   /**
    * Page d'acceuil pour jouer
