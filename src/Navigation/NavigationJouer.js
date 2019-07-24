@@ -203,6 +203,8 @@ const stackNavigator = createStackNavigator({
     screen : ProfilJoueur
   }
 
+}, {
+  headerLayoutPreset: 'center'
 })
 
 export default createAppContainer(stackNavigator)

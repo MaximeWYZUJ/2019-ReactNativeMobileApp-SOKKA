@@ -16,6 +16,7 @@ import firebase from 'firebase'
 import t from '../../Components/Conversation/Icon_Message'
 import '@firebase/firestore'
 import Icon_Message from '../../Components/Conversation/Icon_Message';
+
 const latUser = 43.531486   // A suppr quand on aura les vrais coordonnées
 const longUser = 1.490306
 
@@ -29,14 +30,29 @@ class ProfilJoueur extends React.Component {
         this.joueur = this.props.navigation.getParam('joueur', LocalUser.data)
         this.goToFirstScreen  = this.goToFirstScreen.bind(this)
 
-        
+        if (this.joueur.AKA != undefined && this.joueur.AKA != "") {
+            this.AKA = this.joueur.AKA;
+        } else {
+            if (this.monProfil) {
+                this.AKA = "Tu n'as pas de AKA ! Pense à compléter ton profil dans les réglages...";
+            } else {
+                this.AKA = "";
+            }
+        }
+
         this.state = {
             allDefis : [],
             refreshing: false,
             displayFullPicture: false,
-            show_equipe : false,
+			show_equipe : false,
             equipesCap : [],
             isLoading : false
+        }
+
+        if (this.joueur.sexe === "masculin") {
+            this.sexeIcon = require('app/res/masculine.png');
+        } else {
+            this.sexeIcon = require('app/res/femenine.png');
         }
     }
 
@@ -52,8 +68,8 @@ class ProfilJoueur extends React.Component {
     static navigationOptions = ({ navigation }) => {
         if(! navigation.getParam("retour_arriere_interdit",false)) {
             return {
-                title: navigation.getParam('joueur', ' ').nom,
-                
+                title: navigation.getParam('joueur', ' ').pseudo,
+
                 tabBarOnPress({jumpToIndex, scene}) {
                     console.log("tab bar on pressss");
                     jumpToIndex(scene.index);
@@ -63,7 +79,7 @@ class ProfilJoueur extends React.Component {
         } else {
             const {state} = navigation;
             return { 
-                title: navigation.getParam('joueur', ' ').nom,
+                title: navigation.getParam('joueur', ' ').pseudo,
                 
                 tabBarOnPress({jumpToIndex, scene}) {
                     console.log("tab bar on press");
@@ -75,14 +91,9 @@ class ProfilJoueur extends React.Component {
 
     }
 
-
-
-
-
-
     _displayReglages() {
         if (this.monProfil) {
-            return (
+            return;/* (
                 <TouchableOpacity
                     style={{flex: 1, alignItems: 'center'}}
                     onPress={() => this.props.navigation.push('ProfilJoueurReglagesScreen', {id: this.id, joueur: this.joueur, equipes: this.equipes, header: this.joueur.nom})}>
@@ -90,7 +101,7 @@ class ProfilJoueur extends React.Component {
                         style={styles.image_param}
                         source = {require('app/res/icon_reglage.png')}/>
                 </TouchableOpacity>
-            )
+            )*/
         } else {
             return(
                 <TouchableOpacity
@@ -101,7 +112,7 @@ class ProfilJoueur extends React.Component {
                         style = {styles.icon_plus} />
                 </TouchableOpacity>
             )
-        }
+		}
     }
 
     goToFirstScreen() {
@@ -279,7 +290,7 @@ class ProfilJoueur extends React.Component {
     async gotoReseau() {
         let reseau = await Database.getArrayDocumentData(this.joueur.reseau, 'Joueurs');
 
-        this.props.navigation.push('ProfilJoueurMonReseauScreen', {joueur: this.joueur, reseau: reseau, header: this.joueur.nom, monProfil: this.monProfil});
+        this.props.navigation.push('ProfilJoueurMonReseauScreen', {joueur: this.joueur, reseau: reseau, header: this.joueur.pseudo, monProfil: this.monProfil});
     }
 
 
@@ -331,8 +342,8 @@ class ProfilJoueur extends React.Component {
     }
 
     /**
-     * Fonction qui va envoyer la notification d'ajout au reseau
-     *  puis la  sauvegarder dans la base de données.
+     * Fonction qui va envoyer la notification puis la  sauvegarder
+     * dans la base de données.
      */
     async storeNotifAjoutInDb() {
         await this.sendNotifAjoutReseau()
@@ -345,10 +356,9 @@ class ProfilJoueur extends React.Component {
             dateParse : Date.parse(new Date())
         })
     }
-
-
-     
-    async storeNotifIntegrerInDb(idEquipe) {
+	
+	
+	async storeNotifIntegrerInDb(idEquipe) {
         console.log("in storeNotifIntegrerInDb", idEquipe)
         var db = Database.initialisation()
         db.collection("Notifs").add({
@@ -380,6 +390,7 @@ class ProfilJoueur extends React.Component {
         }
     }
 
+
     // ===============================================================================
     // ================ METHODES POUR LES EQUIPES FAVORITES ==========================
     // ===============================================================================
@@ -391,7 +402,7 @@ class ProfilJoueur extends React.Component {
             equipesFav.push(equipeFavData);
         }
 
-        this.props.navigation.push('ProfilJoueurMesEquipesFavScreen', {joueur: this.joueur, equipesFav: equipesFav, header: this.joueur.nom, monProfil: this.monProfil});
+        this.props.navigation.push('ProfilJoueurMesEquipesFavScreen', {joueur: this.joueur, equipesFav: equipesFav, header: this.joueur.pseudo, monProfil: this.monProfil});
     }
 
 
@@ -456,6 +467,15 @@ class ProfilJoueur extends React.Component {
                     </TouchableOpacity>
                 )
             }
+        } else {
+            // C'est notre profil
+            return (
+                <View style={{marginLeft: 10, marginRight: 15, width: 30, height: 30}}>
+                    <Image
+                        style={{width: 30, height: 30}}
+                        source = {require('app/res/icon_like_gray.png')}/>
+                </View>
+            )
         }
     }
 
@@ -493,7 +513,7 @@ class ProfilJoueur extends React.Component {
             terrainsFav.push(t);
         }
 
-        this.props.navigation.push("ProfilJoueurMesTerrainsFavScreen", {terrains : terrainsFav, titre : this.joueur.nom})
+        this.props.navigation.push("ProfilJoueurMesTerrainsFavScreen", {terrains : terrainsFav, titre : this.joueur.pseudo})
     }
 
     async getDocumentJoueur() {
@@ -508,15 +528,14 @@ class ProfilJoueur extends React.Component {
         this.joueur =  await this.getDocumentJoueur()
         this.getAllDefisAndPartie()
         //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
-        this.equipes = await Database.getArrayDocumentData(this.joueur.equipes, "Equipes")
+		this.equipes = await Database.getArrayDocumentData(this.joueur.equipes, "Equipes")
         this.setState({refreshing : false})
     }
     
 
     // ==========================================================================
 
-
-    async integrerJoueur(idEquipe, nomEquipe) {
+	async integrerJoueur(idEquipe, nomEquipe) {
         console.log("in integrer joueur :::::::: ")
         
         await this.sendNotifIntegrerJoueur(nomEquipe)
@@ -548,38 +567,78 @@ class ProfilJoueur extends React.Component {
 
         query.get().then(async (results) => {
             // go through all results
-            console.log("RESULT.LENGTH !!" , results.length)
+            console.log("RESULT.LENGTH !!" , results.docs.length)
             for(var i = 0; i < results.docs.length ; i++) {
                 console.log(" =========== ",  results.docs[i].data().id)
                 if( ! results.docs[i].data().joueurs.includes(this.id) && ! results.docs[i].data().joueursAttentes.includes(this.id)) {
-                    equipes.push(results.docs[i].data())
-
+                    equipes.push(results.docs[i].data());
                 }
             }
             this.setState({equipes : equipes, isLoading : false})
+            console.log(this.state.equipes);
+            console.log(this.state.isLoading);
         })
     }
 
      /**
      * Fonction qui affiche l'alerte pour confirmer ou non l'integration du joueur dans une équipe
      */
-    buildAlertIntegerEquipe(){
+    async buildAlertIntegerEquipe(){
 
-        Alert.alert(
-            '',
-            "Tu souhaites intégrer " + this.joueur.pseudo + " dans une de tes équipe ?"  ,
-            [
-                {text: 'Confirmer', onPress: () => this.getEquipesUserCap()},
-                {
-                text: 'Annuler',
-                onPress: () => console.log('Cancel Pressed'),
-                style: 'cancel',
-                },
-            ],
-        )
+        var db = Database.initialisation();
+        var query = await db.collection("Equipes").where("capitaines", "array-contains", LocalUser.data.id).get();
+
+        if (query.docs.length == 0) {
+            Alert.alert(
+                '',
+                "Pour intégrer " + this.joueur.pseudo + " dans une de tes équipe, tu dois être capitaine d'au moins une équipe"  ,
+                [
+                    {
+                    text: "D'accord",
+                    onPress: () => {},
+                    style: 'cancel',
+                    },
+                ],
+            )
+        } else {
+            var equipes = query.docs;
+            var pasDansToutesLesEquipes = false;
+            for (var i=0; i<equipes.length; i++) {
+                if (!equipes[i].joueurs.includes(this.id) && !equipes[i].joueurs.includes(this.is)) {
+                    pasDansToutesLesEquipes = true;
+                }
+            }
+
+            if (pasDansToutesLesEquipes) {
+                Alert.alert(
+                    '',
+                    "Tu souhaites intégrer " + this.joueur.pseudo + " dans une de tes équipe ?"  ,
+                    [
+                        {text: 'Confirmer', onPress: () => this.getEquipesUserCap()},
+                        {
+                        text: 'Annuler',
+                        onPress: () => console.log('Cancel Pressed'),
+                        style: 'cancel',
+                        },
+                    ],
+                )
+            } else {
+                Alert.alert(
+                    '',
+                    this.joueur.pseudo + " fait déjà partie de tes équipes dont tu es capitaines"  ,
+                    [
+                        {
+                        text: "D'accord",
+                        onPress: () => {},
+                        style: 'cancel',
+                        },
+                    ],
+                )
+            }
+        }
     }
-
-
+	
+	
     /**
      * Fonction qui permet de construire la liste des participants à une partie, elle 
      * enlève de la liste les joueurs indisponibles
@@ -595,11 +654,10 @@ class ProfilJoueur extends React.Component {
         return liste
     }
     displayDefis(){
-
-        if(this.state.allDefis == undefined || this.state.allDefis == []) {
+        if(this.state.allDefis == undefined || this.state.allDefis.length == 0) {
             return (
-                <View>
-                    <Text>Pas encore de défi</Text>
+                <View style={{alignItems: 'center'}}>
+                    <Text>aucun défi / partie programmé</Text>
                 </View>
             )
         }else {
@@ -689,8 +747,9 @@ class ProfilJoueur extends React.Component {
             )
         }
     }
-
-     /**
+	
+	
+	/**
      * Va permettre de render les équipes dont l'utilisateur est capitaine
      */
     _renderItemEquipe =({item}) => {  
@@ -795,6 +854,28 @@ class ProfilJoueur extends React.Component {
             )
         }
     }
+
+
+    renderIconCapitaine() {
+        var isCaptain = false;
+        for (var i=0; i<this.equipes.length; i++) {
+            if (this.equipes[i].capitaines.includes(this.id)) {
+                isCaptain = true;
+            }
+        }
+
+        if (isCaptain) {
+            return (
+                <Image
+                    style={{width: 30, height: 30}}
+                    source={require('app/res/c.png')}
+                />
+            )
+        }
+    }
+	
+	
+
     render() {
         if (this.state.displayFullPicture) {
             return(
@@ -825,13 +906,7 @@ class ProfilJoueur extends React.Component {
                     onRefresh={this._onRefresh}
                     />
                 }>
-
-
-                {/* L'icon message */}
-                {this.renderIconMessage()}
-               
-
-
+							
                     {/* Caracteristiques du joueur */}
                     <View style={[styles.perso_container]}>
                         <View style={styles.top_infos_container}>
@@ -842,10 +917,23 @@ class ProfilJoueur extends React.Component {
                                     style={styles.image_photo}
                                     source = {{uri : this.joueur.photo} } />
                             </TouchableOpacity>
-                            <View style={styles.nom_container}>
-                                <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville}</Text>
-                                <Text style={{margin: 5,  fontSize : RF(3.25)}}>AKA {this.joueur.pseudo}</Text>
-                            </View>
+                            <TouchableOpacity
+                                style={styles.nom_container}
+                                onPress={() => {
+                                    if (this.monProfil) {
+                                        this.props.navigation.push('ProfilJoueurReglagesScreen', {id: this.id, joueur: this.joueur, equipes: this.equipes, header: this.joueur.nom});
+                                    }
+                                }}>
+                                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                    <Image
+                                        style={{width: 15, height: 15, marginHorizontal: 2}}
+                                        source={this.sexeIcon}
+                                        />
+                                    <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville}</Text>
+                                </View>
+                                <Text style={{margin: 5,  fontSize : RF(3.25)}}>{this.joueur.pseudo}</Text>
+                                <Text>Joueur {this.joueur.poste}</Text>
+                            </TouchableOpacity>
                             {this._displayReglages()}
                         </View>
 
@@ -859,18 +947,19 @@ class ProfilJoueur extends React.Component {
                                     fullStarColor='#F8CE08'
                                     emptyStarColor='#B1ACAC'
                                     containerStyle={styles.rating}/>
-                                <Text style={{}}>Numéro de téléphone : {this.joueur.telephone}</Text>
                             </View>
                             <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center'}}>
 
                                 <TouchableOpacity
                                     style={{}}
                                     onPress = {()=> {this.gotoJoueursQuiLikent()}}>
-                                    <Text style={{paddingVertical: 10, paddingHorizontal: 5}}>{this.joueur.aiment.length} likes</Text>
+                                    <Text style={{paddingVertical: 10, paddingHorizontal: 5}}>{this.joueur.aiment.length}</Text>
                                 </TouchableOpacity>
                                 {this.likeJoueur()}
+                                {this.renderIconCapitaine()}
                             </View>
                         </View>
+                        <Text style={{fontStyle: 'italic'}}>{this.AKA}</Text>
                     </View>
 
 
@@ -879,7 +968,7 @@ class ProfilJoueur extends React.Component {
                         <View style={{flexDirection: 'row'}}>
                             <TouchableOpacity
                                 style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}
-                                onPress={() => this.props.navigation.push('ProfilJoueurMesEquipesScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil, equipes: this.equipes})}>
+                                onPress={() => this.props.navigation.push('ProfilJoueurMesEquipesScreen', {joueur: this.joueur, header: this.joueur.pseudo, monProfil: this.monProfil, equipes: this.equipes})}>
                                 <Text style={styles.header}>Equipes</Text>
                             </TouchableOpacity>
                             {this.renderBtnCreerEquipe()}
@@ -901,7 +990,7 @@ class ProfilJoueur extends React.Component {
                     <View style={[styles.favoris_container, styles.additional_style_container]}>
                         <TouchableOpacity
                             style={styles.header_container}
-                            onPress={() => this.props.navigation.push('ProfilJoueurMesFavorisScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil, id: this.id})}>
+                            onPress={() => this.props.navigation.push('ProfilJoueurMesFavorisScreen', {joueur: this.joueur, header: this.joueur.pseudo, monProfil: this.monProfil, id: this.id})}>
                             <Text style={styles.header}>Favoris</Text>
                         </TouchableOpacity>
                         <ScrollView
@@ -926,7 +1015,8 @@ class ProfilJoueur extends React.Component {
                         {this.displayDefis()}
                     </View>
                     {this.renderBtnDeco()}
-                    {this._renderListEquipe()}
+					{this._renderListEquipe()}
+    				{this.renderIconMessage()}
 
                 </ScrollView>
             )
@@ -1062,7 +1152,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         paddingVertical: 4
     },
-    icon_plus : {
+	
+	
+	icon_plus : {
         width : 30,
         height : 30,
         marginBottom : hp('1.5%')

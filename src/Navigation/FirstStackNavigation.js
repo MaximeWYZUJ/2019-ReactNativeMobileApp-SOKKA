@@ -74,6 +74,8 @@ const FirstStackNavigation = createStackNavigator({
         navigationOptions: { title: '', header: null }
     }
 
+}, {
+    headerLayoutPreset: 'center'
 })
 
 export default createAppContainer(FirstStackNavigation)

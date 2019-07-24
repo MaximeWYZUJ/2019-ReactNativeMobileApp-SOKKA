@@ -63,6 +63,8 @@ export default class RechercheAutour extends React.Component {
     }
 
 
+
+    // === Manipulation du lifecycle entre les onglets ===
     componentDidMount() {
         // Tri des villes par distance
         var villesTrieesAvecDoublons = Villes.sort(this.comparaisonDistanceVilles);
@@ -77,7 +79,56 @@ export default class RechercheAutour extends React.Component {
         }
 
         this.villesTriees = villesTrieesSansDoublons;
+        
+        this.willFocusSubscription = this.props.navigation.addListener('willFocus', this.willFocusAction);
+        this.willBlurSubscription = this.props.navigation.addListener('willBlur', this.willBlurAction);
     }
+
+
+    willFocusAction = () => {
+        console.log("recherche autour will mount");
+
+        this.villesTriees = [];
+        this.selfLat = LocalUser.geolocalisation.latitude;
+        this.selfLong = LocalUser.geolocalisation.longitude;
+
+        // Collection
+        this.type = this.props.navigation.getParam("type", null); // Joueurs, Equipes, Terrains, Defis
+        switch (this.type) {
+            case "Joueurs" : {this.champNomQuery = "nomQuery"; this.champNom = "nom"; break;}
+            case "Equipes" : {this.champNomQuery = "queryName"; this.champNom = "nom"; break;}
+            case "Terrains": {this.champNomQuery = "queryName"; this.champNom = "InsNom"; break;}
+        }
+
+        this.state = {
+            dataAutour: [],
+            dataAutourFiltered: [],
+            dataAutourAlphab: this.buildAlphabetique([]),
+            displayFiltres: false,
+            filtres: null,
+            sliderValue: 1
+        }
+    }
+
+    willBlurAction = () => {
+        this.setState({
+            dataAutour: [],
+            dataAutourFiltered: [],
+            dataAutourAlphab: this.buildAlphabetique([]),
+            displayFiltres: false,
+            filtres: null,
+            sliderValue: 1
+        })
+    }
+
+
+    componentWillUnmount() {
+        this.willBlurSubscription.remove();
+        this.willFocusSubscription.remove();
+    }
+
+
+    // ===================================================
 
 
     // Comparaison de deux villes en fonction de leur distance par rapport à soi

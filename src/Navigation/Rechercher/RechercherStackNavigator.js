@@ -19,6 +19,8 @@ const RechercherStackNavigator = createStackNavigator({
         screen: RechercherTabNavigatorDefi
     }
 
+}, {
+    headerLayoutPreset: 'center'
 })
 
 export default createAppContainer(RechercherStackNavigator);

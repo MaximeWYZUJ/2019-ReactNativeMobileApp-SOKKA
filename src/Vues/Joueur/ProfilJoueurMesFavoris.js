@@ -1,5 +1,5 @@
 import React from 'react'
-import {View, Image, StyleSheet, ScrollView, TouchableOpacity, FlatList, Text} from 'react-native'
+import {View, Image, StyleSheet, ScrollView, TouchableOpacity, FlatList, Text, Alert} from 'react-native'
 import JoueurIcon from "../../Components/ProfilJoueur/JoueurIcon.js"
 import ItemTerrain from '../../Components/Terrain/ItemTerrain.js'
 import Database from '../../Data/Database'
@@ -157,17 +157,81 @@ class ProfilJoueurMesFavoris extends React.Component {
     }
 
 
-    renderBtnPlus(route, navOption) {
-        if(this.monProfil) {
-            return(
-                <TouchableOpacity
-                    style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
-                    onPress={() => this.props.navigation.navigate(route, navOption)}
-                    >
-                    <Text style={styles.header}>+</Text>
-                </TouchableOpacity>
-            )
-        }
+    getPlusButtonJoueursFav() {
+        return (
+            <TouchableOpacity
+                style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
+                onPress={() => Alert.alert(
+                                '',
+                                "Tu souhaites ajouter de nouveaux joueurs à ton réseau",
+                                [
+                                    {
+                                        text: 'Confirmer',
+                                        onPress: () => this.props.navigation.navigate("OngletRecherche_Autour", {type: "Joueurs"})
+                                    },
+                                    {
+                                        text: 'Annuler',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                        )}
+                >
+                <Text style={styles.header}>+</Text>
+            </TouchableOpacity>
+        )
+    }
+
+
+    getPlusButtonEquipesFav() {
+        return (
+            <TouchableOpacity
+                style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
+                onPress={() => Alert.alert(
+                                '',
+                                "Tu souhaites ajouter de nouvelles équipes dans tes équipes favorites",
+                                [
+                                    {
+                                        text: 'Confirmer',
+                                        onPress: () => this.props.navigation.navigate("OngletRecherche_Autour", {type: "Equipes"})
+                                    },
+                                    {
+                                        text: 'Annuler',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                        )}
+                >
+                <Text style={styles.header}>+</Text>
+            </TouchableOpacity>
+        )
+    }
+
+
+    getPlusButtonTerrainsFav() {
+        return (
+            <TouchableOpacity
+                style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
+                onPress={() => Alert.alert(
+                                '',
+                                "Tu souhaites ajouter de nouveaux terrains dans tes terrains favoris",
+                                [
+                                    {
+                                        text: 'Confirmer',
+                                        onPress: () => this.props.navigation.navigate("OngletRecherche_Autour", {type: "Terrains"})
+                                    },
+                                    {
+                                        text: 'Annuler',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                        )}
+                >
+                <Text style={styles.header}>+</Text>
+            </TouchableOpacity>
+        )
     }
 
 
@@ -180,7 +244,7 @@ class ProfilJoueurMesFavoris extends React.Component {
                         onPress={() => this.props.navigation.navigate('ProfilJoueurMonReseauScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
                         {this._disp_header_reseau()}
                     </TouchableOpacity>
-                    {this.renderBtnPlus("OngletRecherche_Defaut", {type: "Joueurs"})}
+                    {this.getPlusButtonJoueursFav()}
                 </View>
                 {this._dispJoueursFlatlist(this.state.reseau)}
 
@@ -190,7 +254,7 @@ class ProfilJoueurMesFavoris extends React.Component {
                         onPress={() => this.props.navigation.navigate('ProfilJoueurMesEquipesFavScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
                         {this._disp_header_equipes()}
                     </TouchableOpacity>
-                    {this.renderBtnPlus("OngletRecherche_Defaut", {type: "Equipes"})}
+                    {this.getPlusButtonEquipesFav()}
                 </View>
                 {this._dispEquipesFlatlist(this.state.equipesFav)}
 
@@ -200,7 +264,7 @@ class ProfilJoueurMesFavoris extends React.Component {
                         onPress={() => this.props.navigation.navigate('ProfilJoueurMesTerrainsFavScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
                         {this._disp_header_terrains()}
                     </TouchableOpacity>
-                    {this.renderBtnPlus("OngletRecherche_Defaut", {type: "Terrains"})}
+                    {this.getPlusButtonTerrainsFav()}
                 </View>
                 {this._dispTerrainsFlatlist(this.state.terrainsFav)}
             </ScrollView>

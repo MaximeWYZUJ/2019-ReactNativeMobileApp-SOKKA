@@ -331,6 +331,8 @@ const stackNavigator = createStackNavigator({
   CalendrierJoueur : {
     screen : Calendrier_Joueur
   },
+}, {
+  headerLayoutPreset: 'center'
 })
 
 export default createAppContainer(stackNavigator)
