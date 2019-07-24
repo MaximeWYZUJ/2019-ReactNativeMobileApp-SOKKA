@@ -129,11 +129,11 @@ export default class Creation_Equipe_Zone extends React.Component {
         dep = Departement.filter(function (d) {
             return (d.departmentCode === depCode);
         })
-        console.log(dep[0].departmentName)
+        
         
         return (
             <TouchableOpacity
-                onPress = {() => this.setState({ville : txt, searchedVilles : [], departement : dep[0].departmentName })}
+                onPress = {() => {console.log(dep); console.log(depCode); this.setState({ville : txt, searchedVilles : [], departement : dep[0].departmentName })}}
                 style = {{backgroundColor : Colors.grayItem,  marginTop : hp('1%'), marginBottom : hp('1'),paddingVertical : hp('1%')}}
                 >
             

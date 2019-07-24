@@ -182,6 +182,7 @@ export default class FiltrerEquipe extends React.Component {
 
         if (this.state.departement.length > 0) {
             ref = ref.where('departement', '==', NormalizeString.normalize(this.state.departement));
+            bool = true;
         }
         if (this.state.ville.length > 0) {
             ref = ref.where('ville', '==', NormalizeString.normalize(this.state.ville));
