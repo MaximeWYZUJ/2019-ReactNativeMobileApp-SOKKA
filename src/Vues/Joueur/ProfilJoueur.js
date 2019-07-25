@@ -16,9 +16,11 @@ import firebase from 'firebase'
 import t from '../../Components/Conversation/Icon_Message'
 import '@firebase/firestore'
 import Icon_Message from '../../Components/Conversation/Icon_Message';
+import whyDidYouUpdate from "why-did-you-update";
 
 const latUser = 43.531486   // A suppr quand on aura les vrais coordonnées
 const longUser = 1.490306
+
 
 class ProfilJoueur extends React.Component {
 
@@ -64,6 +66,7 @@ class ProfilJoueur extends React.Component {
 
 
 
+       
 
     static navigationOptions = ({ navigation }) => {
         if(! navigation.getParam("retour_arriere_interdit",false)) {
@@ -71,9 +74,14 @@ class ProfilJoueur extends React.Component {
                 title: navigation.getParam('joueur', ' ').pseudo,
 
                 tabBarOnPress({jumpToIndex, scene}) {
-                    console.log("tab bar on pressss");
                     jumpToIndex(scene.index);
                 },
+                headerRight: (
+    
+                    <Icon_Message
+                        id = {navigation.getParam('joueur', ' ').id}
+                        nbMessagesNonLu = { navigation.getParam('joueur', ' ').nbMessagesNonLu}/>
+                ),
             }
             
         } else {
@@ -82,9 +90,13 @@ class ProfilJoueur extends React.Component {
                 title: navigation.getParam('joueur', ' ').pseudo,
                 
                 tabBarOnPress({jumpToIndex, scene}) {
-                    console.log("tab bar on press");
                     jumpToIndex(scene.index);
                 },
+                headerRight: (
+                        <Icon_Message
+                        id = {navigation.getParam('joueur', ' ').id}
+                        nbMessagesNonLu = { navigation.getParam('joueur', ' ').nbMessagesNonLu}/>
+                ),
                 headerLeft: (<View></View>),
             };
         }
@@ -359,7 +371,6 @@ class ProfilJoueur extends React.Component {
 	
 	
 	async storeNotifIntegrerInDb(idEquipe) {
-        console.log("in storeNotifIntegrerInDb", idEquipe)
         var db = Database.initialisation()
         db.collection("Notifs").add({
             emetteur : LocalUser.data.id,
@@ -373,20 +384,13 @@ class ProfilJoueur extends React.Component {
 
 
     async sendNotifIntegrerJoueur(equipeNom) {
-        console.log("in sendNotifIntegrerJoueur ", equipeNom)
         var titre = "Nouvelle Notif"
         var corps = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + equipeNom
         + " souhaite t'intégrer dans son équipe"
         var tokens = []
         if(this.joueur.tokens != undefined) tokens = this.joueur.tokens
-        console.log("before for")
         for(var i = 0; i < tokens.length; i++) {
-            console.log("in for send notif")
-            console.log(tokens[i])
-            console.log(titre)
-            console.log(corps)
             await this.sendPushNotification(tokens[i], titre,corps)
-            console.log("after send notif")
         }
     }
 
@@ -536,13 +540,10 @@ class ProfilJoueur extends React.Component {
     // ==========================================================================
 
 	async integrerJoueur(idEquipe, nomEquipe) {
-        console.log("in integrer joueur :::::::: ")
         
         await this.sendNotifIntegrerJoueur(nomEquipe)
         await this.storeNotifIntegrerInDb(idEquipe)
 
-        console.log(idEquipe)
-        console.log(this.joueur.id)
         var db = Database.initialisation()
         this.setState({equipes : [], show_equipe : false})
         await db.collection("Equipes").doc(idEquipe).update({
@@ -567,16 +568,12 @@ class ProfilJoueur extends React.Component {
 
         query.get().then(async (results) => {
             // go through all results
-            console.log("RESULT.LENGTH !!" , results.docs.length)
             for(var i = 0; i < results.docs.length ; i++) {
-                console.log(" =========== ",  results.docs[i].data().id)
                 if( ! results.docs[i].data().joueurs.includes(this.id) && ! results.docs[i].data().joueursAttentes.includes(this.id)) {
                     equipes.push(results.docs[i].data());
                 }
             }
             this.setState({equipes : equipes, isLoading : false})
-            console.log(this.state.equipes);
-            console.log(this.state.isLoading);
         })
     }
 
@@ -877,6 +874,7 @@ class ProfilJoueur extends React.Component {
 	
 
     render() {
+        console.log("RENDER PROFIL !!!!!!!!!!!!!!!")
         if (this.state.displayFullPicture) {
             return(
                 <View style= {{

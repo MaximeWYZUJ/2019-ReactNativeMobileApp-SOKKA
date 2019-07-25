@@ -96,6 +96,7 @@ export default class Accueil_Conversation extends React.Component {
             for(var i = 0; i < results.docs.length ; i++) {
                 console.log("in for convs §§§§§§§§§§")
                 var conv = results.docs[i].data()
+                console.log("CONV NOM  ====", conv.nom)
                 var joueur = undefined
                 
                 // Si deux participants alors on télécharge les données du joueur

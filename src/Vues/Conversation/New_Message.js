@@ -100,6 +100,17 @@ export default class New_Message extends React.Component {
         
         
     }
+
+
+    buildDataJoueursNav(){
+        var liste = []
+        for(var i =0; i < this.state.joueurs.length; i++){
+            if(this.state.joueursSelectiones.includes(this.state.joueurs[i].id)) {
+                liste.push(this.state.joueurs[i])
+            }
+        } 
+        return liste
+    }
     
     /**
      * Fonction qui permet de trier les joueurs en fonction de l'ordre laphabethique
@@ -288,13 +299,13 @@ export default class New_Message extends React.Component {
 
                     <View>
                         <Text style = {styles.titre}>Ajouter des participants</Text>
-                        <Text>{this.state.joueursSelectiones.length} / 100</Text>
+                        <Text>{this.state.joueursSelectiones.length} / {LocalUser.data.reseau.length}</Text>
 
                     </View>                   
                     <TouchableOpacity
                         onPress = {() => {
                             if(this.state.joueursSelectiones.length > 1) {
-                                this.props.navigation.push("NewGroupe")
+                                this.props.navigation.push("NewGroupe", {joueurs :this.buildDataJoueursNav()})
                             }
                         }}>
                         <Text style = {styles.annuler}>Suivant</Text>

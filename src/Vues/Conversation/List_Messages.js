@@ -16,6 +16,7 @@ import '@firebase/firestore'
 class List_Messages extends React.Component {
   constructor(props){
       super(props)
+      console.log("in list message !!",props.navigation.getParam('conv', undefined))
     this.state = {
         conv : this.props.navigation.getParam('conv', undefined),
         messages : [],

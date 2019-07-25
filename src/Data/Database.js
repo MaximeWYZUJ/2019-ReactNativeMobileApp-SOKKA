@@ -155,7 +155,7 @@ export default class Database {
 
             }).then(function() {
             console.log("Document successfully written!");
-            console.log(id)
+            //console.log(id)
         }).catch(function(error) {
             console.error("Error writing document: ", error);
         });
@@ -164,7 +164,7 @@ export default class Database {
 
     static async addDocToCollection(obj, id, collection) {
         var db = this.initialisation();
-        console.log(obj.id);
+        //console.log(obj.id);
 
         db.collection(collection).doc(id).set(obj)
         .then((docRef) => {return docRef;})
@@ -172,10 +172,8 @@ export default class Database {
 
 
     static async getDocumentData(id, collection) {
-        console.log("in get doc data")
         var db = Database.initialisation();
         let docRef = db.collection(collection).doc(id);
-        console.log("before docRef.get()")
         let doc = await docRef.get();
 
         if (doc.exists) {

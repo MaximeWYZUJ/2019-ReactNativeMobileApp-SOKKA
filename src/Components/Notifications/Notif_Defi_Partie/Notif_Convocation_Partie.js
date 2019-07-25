@@ -40,7 +40,6 @@ class Notif_Convocation_Partie extends React.Component {
      */
     async getData() {
 
-       console.log("IN COMPO NOTIF ", this.props.notification)
         // Données de l'émeteur 
         console.log("before  emetteur", this.props.notification.emetteur)
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")

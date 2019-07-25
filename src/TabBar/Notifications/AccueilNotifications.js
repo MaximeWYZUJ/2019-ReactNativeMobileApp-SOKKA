@@ -29,7 +29,6 @@ export default class AccueilNotifications extends React.Component {
      /** Fonction appelée au moment où l'utilisateur pull to refresh */
     _onRefresh = async () => {
         this.setState({refreshing: true});
-        console.log("REFRECHING !!!")
         await this.getNotifications()
         //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
         this.setState({refreshing : false})
@@ -73,7 +72,6 @@ export default class AccueilNotifications extends React.Component {
 
 
     render() {
-        console.log(" in acceul notif", this.state.notifications)
         return (
             <ScrollView style={styles.main_container}
                 refreshControl={

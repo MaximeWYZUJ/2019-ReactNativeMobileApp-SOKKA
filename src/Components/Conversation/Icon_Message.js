@@ -13,7 +13,7 @@ class Icon_Message extends React.Component {
 
 
     renderNbMessageNonLu(){
-        if(!this.props.nbMessagesNonLu == 0 || !this.props.nbMessagesNonLu == undefined) {
+        if( Database.isUser(this.props.id) &&( !this.props.nbMessagesNonLu == 0 || !this.props.nbMessagesNonLu == undefined) ) {
             return(
                 <View style = {{position : "absolute" , top : wp('1%'), right : wp('1%') , backgroundColor : "red", borderRadius : wp('2%'), width : wp('4%'), height : wp('4%'), justifyContent : "center", alignContent : "center"}}>
                     <Text style = {{alignSelf : "center"}}>{this.props.nbMessagesNonLu}</Text>
