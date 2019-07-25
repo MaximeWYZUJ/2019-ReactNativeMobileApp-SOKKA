@@ -101,7 +101,7 @@ class Choix_Format_Defi extends React.Component {
 				</TouchableOpacity>
 			</View>
 
-            <Text style = {{alignSelf : 'center', fontSize : RF(2.5), marginTop : hp('2%')}}>Quel type de défis souhaite-tu proposer ? </Text>
+            <Text style = {{alignSelf : 'center', fontSize : RF(2.5), marginTop : hp('2%')}}>Quel type de format souhaites-tu proposer ? </Text>
 			{/* Texte et picker */}
 			<View style = {{flexDirection : 'row',justifyContent : 'center', marginTop : hp('4%')}}>
                 <View style = {{ height : hp('4%'),justifyContent : 'center'}}>

@@ -51,7 +51,8 @@ class Choix_Equipe_Adverse extends React.Component {
         joueursSelectionnes : this.props.navigation.getParam('joueursSelectionnes', ' '),
         contreQui :this.props.navigation.getParam('contreQui', ' '), 
         equipeAdverse : this.props.equipeAdverse,
-        nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' ')
+        nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' '),
+        prix: this.props.navigation.getParam('prix', null)
     }) 
    }
 

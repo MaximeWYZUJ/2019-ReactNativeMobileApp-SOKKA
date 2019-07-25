@@ -8,6 +8,7 @@ import { connect } from 'react-redux'
 import StarRating from 'react-native-star-rating'
 import Joueur_Pseudo_Score from '../ProfilJoueur/Joueur_Pseudo_Score'
 
+
 class Joueurs_Ajout_Item extends React.PureComponent{
 
     constructor(props) {

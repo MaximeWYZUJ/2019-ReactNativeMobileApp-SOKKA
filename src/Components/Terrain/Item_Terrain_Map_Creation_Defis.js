@@ -46,7 +46,7 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
     renderCheckBox() {
         if (this.props.gotoItemOnPress) {
             return (
-                <TouchableOpacity style={{flexDirection :'row', justifyContent: 'center', alignItems: 'center'}} onPress={() => this.props.nav.navigate("ProfilTerrain", {id: this.props.id})}>
+                <TouchableOpacity style={{flexDirection :'row', justifyContent: 'center', alignItems: 'center'}} onPress={() => this.props.nav.navigate("ProfilTerrain", {id: this.props.id, header: this.props.InsNom})}>
                     <Text>GO !</Text>
                 </TouchableOpacity>
             )

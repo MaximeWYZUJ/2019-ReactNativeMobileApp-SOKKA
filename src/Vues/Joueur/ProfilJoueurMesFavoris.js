@@ -20,12 +20,15 @@ class ProfilJoueurMesFavoris extends React.Component {
         super(props)
         this.joueur = this.props.navigation.getParam('joueur', null)
         this.monProfil = this.props.navigation.getParam('monProfil', false)
-        this.id = this.props.navigation.getParam('id', null)
+        this.id = this.props.navigation.getParam('id', this.joueur.id)
 
         this.state = {
             reseau: [],
             terrainsFav: [],
             equipesFav: [],
+            gotDataReseau: false,
+            gotDataEquipesFav: false,
+            gotDataTerrainsFav: false
         }
         this.getData()
     }
@@ -44,13 +47,13 @@ class ProfilJoueurMesFavoris extends React.Component {
 
     async getData() {
         arrayJ = await Database.getArrayDocumentData(this.joueur.reseau, 'Joueurs')
-        this.setState({reseau: arrayJ})
+        this.setState({reseau: arrayJ, gotDataReseau: true})
 
         arrayE = await Database.getArrayDocumentData(this.joueur.equipesFav, 'Equipes')
-        this.setState({equipesFav: arrayE})
+        this.setState({equipesFav: arrayE, gotDataEquipesFav: true})
 
         arrayT = await Database.getArrayDocumentData(this.joueur.terrains, 'Terrains')
-        this.setState({terrainsFav: arrayT})
+        this.setState({terrainsFav: arrayT, gotDataTerrainsFav: true})
     }
 
 
@@ -158,6 +161,7 @@ class ProfilJoueurMesFavoris extends React.Component {
 
 
     getPlusButtonJoueursFav() {
+        if (this.monProfil) {
         return (
             <TouchableOpacity
                 style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
@@ -180,10 +184,12 @@ class ProfilJoueurMesFavoris extends React.Component {
                 <Text style={styles.header}>+</Text>
             </TouchableOpacity>
         )
+        }
     }
 
 
     getPlusButtonEquipesFav() {
+        if (this.monProfil) {
         return (
             <TouchableOpacity
                 style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
@@ -206,10 +212,12 @@ class ProfilJoueurMesFavoris extends React.Component {
                 <Text style={styles.header}>+</Text>
             </TouchableOpacity>
         )
+        }
     }
 
 
     getPlusButtonTerrainsFav() {
+        if (this.monProfil) {
         return (
             <TouchableOpacity
                 style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
@@ -232,6 +240,7 @@ class ProfilJoueurMesFavoris extends React.Component {
                 <Text style={styles.header}>+</Text>
             </TouchableOpacity>
         )
+        }
     }
 
 
@@ -241,7 +250,7 @@ class ProfilJoueurMesFavoris extends React.Component {
                 <View style={{flex: 1, flexDirection: 'row'}}>
                     <TouchableOpacity
                         style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}
-                        onPress={() => this.props.navigation.navigate('ProfilJoueurMonReseauScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
+                        onPress={() => {if (this.state.gotDataReseau) this.props.navigation.navigate('ProfilJoueurMonReseauScreen', {joueur: this.joueur, reseau: this.state.reseau, header: this.joueur.pseudo, monProfil: this.monProfil})}}>
                         {this._disp_header_reseau()}
                     </TouchableOpacity>
                     {this.getPlusButtonJoueursFav()}
@@ -251,7 +260,7 @@ class ProfilJoueurMesFavoris extends React.Component {
                 <View style={{flex: 1, flexDirection: 'row'}}>
                     <TouchableOpacity
                         style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}
-                        onPress={() => this.props.navigation.navigate('ProfilJoueurMesEquipesFavScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
+                        onPress={() => {if (this.state.gotDataEquipesFav) this.props.navigation.navigate('ProfilJoueurMesEquipesFavScreen', {joueur: this.joueur, equipesFav: this.state.equipesFav, header: this.joueur.pseudo, monProfil: this.monProfil})}}>
                         {this._disp_header_equipes()}
                     </TouchableOpacity>
                     {this.getPlusButtonEquipesFav()}
@@ -261,7 +270,7 @@ class ProfilJoueurMesFavoris extends React.Component {
                 <View style={{flex: 1, flexDirection: 'row'}}>
                     <TouchableOpacity
                         style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}
-                        onPress={() => this.props.navigation.navigate('ProfilJoueurMesTerrainsFavScreen', {joueur: this.joueur, header: this.joueur.nom, monProfil: this.monProfil})}>
+                        onPress={() => {if (this.state.gotDataTerrainsFav) this.props.navigation.navigate('ProfilJoueurMesTerrainsFavScreen', {joueur: this.joueur, terrains: this.state.terrainsFav, header: this.joueur.pseudo, monProfil: this.monProfil})}}>
                         {this._disp_header_terrains()}
                     </TouchableOpacity>
                     {this.getPlusButtonTerrainsFav()}

@@ -427,8 +427,12 @@ export default class Profil_Equipe extends React.Component {
      * l'équipe
      */
     buildAlertIntegerEquipe(){
+        var localAttente = LocalUser.integrerAttente;
+        if (localAttente == undefined) {
+            localAttente = [];
+        }
 
-        if (this.state.equipe.joueursAttentes.includes(LocalUser.data.id)) {
+        if (this.state.equipe.joueursAttentes.includes(LocalUser.data.id) || localAttente.includes(this.state.equipe.id)) {
             Alert.alert(
                 '',
                 "Ta demande pour intégrer l'équipe " + this.state.nom + " a déjà été envoyée",
@@ -441,7 +445,9 @@ export default class Profil_Equipe extends React.Component {
                 ],
             )
         } else {
-
+            localAttente.push(this.state.equipe.id);
+            LocalUser.integrerAttente = localAttente;
+            
             Alert.alert(
                 '',
                 "Tu souhaites faire une demande pour intégrer l'équipe " + this.state.nom ,
@@ -545,6 +551,11 @@ export default class Profil_Equipe extends React.Component {
                     </TouchableOpacity>
                 </View>
             );
+        } else {
+            return (
+                <View style = {{...styles.main_container_action, width: 30, height: 30}}>
+                </View>
+            )
         }
     }
 

@@ -3,6 +3,8 @@ import {View,Text,TouchableOpacity, Image} from 'react-native'
 import StarRating from 'react-native-star-rating'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
+import Database from '../../Data/Database'
+import LocalUser from '../../Data/LocalUser.json'
 
 /**
  * Classe permettant de définir les item pour présenter une équipe
@@ -20,16 +22,46 @@ import RF from 'react-native-responsive-fontsize';
  */
 export default class Item_Equipe extends React.Component {
 
+    constructor(props) {
+        super(props);
+
+        this.state={
+            likes: LocalUser.data.equipesFav.includes(this.props.id)
+        }
+    }
+
+
     displayCapitanat() {
         if (this.props.isCaptain) {
             return <Image source = {require('app/res/c.png')} style = {styles.c}/>;
         } 
     }
 
-    displayLike() {
-        if(! this.props.alreadyLike) {
+
+    likeEquipe() {
+        if (this.state.likes) {
+            // On like deja cette equipe, donc on la retirera des equipesFav
             return (
-                <TouchableOpacity>
+                <TouchableOpacity onPress = {() => {
+                    Database.changeSelfToOtherArray_Aiment(this.props.id, "Equipes", false);
+                    Database.changeOtherIdToSelfArray_EquipesFav(this.props.id, false);
+
+                    //LocalUser.data.equipesFav = LocalUser.data.equipesFav.filter(elmt => elmt != this.props.id);
+                    this.setState({likes: false});
+                }}>
+                    <Image source = {require('app/res/icon_already_like.png')} style = {styles.image_like}/>
+                </TouchableOpacity>
+            )
+        } else {
+            // On ne like pas encore cette equipe, donc on l'ajoutera à nos equipesFav
+            return (
+                <TouchableOpacity onPress = {() => {
+                    Database.changeSelfToOtherArray_Aiment(this.props.id, "Equipes", true);
+                    Database.changeOtherIdToSelfArray_EquipesFav(this.props.id, true);
+
+                    //LocalUser.data.equipesFav.push(this.props.id);
+                    this.setState({likes: true});
+                }}>
                     <Image source = {require('app/res/icon_like.png')} style = {styles.image_like}/>
                 </TouchableOpacity>
             )
@@ -63,7 +95,7 @@ export default class Item_Equipe extends React.Component {
 
                 {/* View contenant le pouce pour le like */}
                 <View style = {styles.view_like} >
-                    {this.displayLike()}
+                    {this.likeEquipe()}
                 </View>
                 {this.displayCapitanat()}
             </TouchableOpacity>

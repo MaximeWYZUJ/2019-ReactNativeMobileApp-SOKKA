@@ -108,7 +108,7 @@ export default class Choix_Date_Defis extends React.Component {
                     {this.buttonNext()}
                 </View>
 
-                <Text style = {{alignSelf : 'center', marginBottom : hp('5%'), fontSize : RF(3)}}>Quand souhaites-tu jouer </Text>
+                <Text style = {{alignSelf : 'center', marginBottom : hp('5%'), fontSize : RF(3)}}>Quand souhaites-tu jouer ?</Text>
                 <Image
                     source = {require('../../../../res/football.png')}
                     style = {styles.img}/>

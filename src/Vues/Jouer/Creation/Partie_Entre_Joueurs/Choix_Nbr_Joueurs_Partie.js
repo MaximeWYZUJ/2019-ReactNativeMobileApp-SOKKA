@@ -64,6 +64,7 @@ export default class Choix_Nbr_Joueurs_Partie extends React.Component {
         {
             download_All_Data_Partie : true,
             id :  this.props.navigation.getParam('id_partie', ''),
+            prix: this.props.navigation.getParam('prix', null)
         })
         
         
@@ -99,6 +100,7 @@ export default class Choix_Nbr_Joueurs_Partie extends React.Component {
                 joueurs : this.props.navigation.getParam('joueurs', ''),
                 nbrJoueurs : parseInt(this.state.nbJoueurs),
                 nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' '),
+                prix: this.props.navigation.getParam('prix', null)
             })
         }
         

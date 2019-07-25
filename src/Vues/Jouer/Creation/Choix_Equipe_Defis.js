@@ -136,8 +136,9 @@ class Choix_Equipe_Defis extends React.Component  {
             equipe : this.state.equipeSelectionnee,
             allDataEquipe : this.state.allDataEquipeSelectionnee,
             userData : this.state.userData,
-            nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' ')
-        })   
+            nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' '),
+            prix: this.props.navigation.getParam('prix', null)
+        })
         
     }
 

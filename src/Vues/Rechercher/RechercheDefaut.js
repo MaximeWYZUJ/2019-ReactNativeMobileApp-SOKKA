@@ -19,6 +19,8 @@ import FiltrerTerrains from '../../Components/Recherche/FiltrerTerrain'
 import FiltrerDefi from '../../Components/Recherche/FiltrerDefi'
 
 import allTerrains from '../../Helpers/Toulouse.json'
+import Distance from '../../Helpers/Distance'
+import LocalUser from '../../Data/LocalUser.json'
 
 
 export default class RechercheDefaut extends React.Component {
@@ -167,75 +169,79 @@ export default class RechercheDefaut extends React.Component {
 
 
     renderItem(item) {
-        switch(this.type) {
-            case "Joueurs":
-                return (
-                    <ItemJoueur
-                        id={item.id}
-                        nom={item.pseudo}
-                        photo={item.photo}
-                        score={item.score}
-                        nav={this.props.navigation}
-                        showLike={true}
-                    />
-                )
-            
-            case "Equipes":
-                return (
-                    <ItemEquipe
-                        isCaptain={false}
-                        alreadyLike={false}
-                        nom={item.nom}
-                        photo={item.photo}
-                        nbJoueurs={item.joueurs.length}
-                        score={item.score}
-                        id={item.id}
-                        nav={this.props.navigation}
-                    />
-                )
-            
-            case "Terrains":
-                return (
-                    <ItemTerrain
-                        id={item.id}
-                        distance={item.distance}
-                        InsNom={item.InsNom}
-                        EquNom={item.EquNom}
-                    />
-                )
 
-            case "Defis":
-                if(item.type == Type_Defis.partie_entre_joueurs){
-            
-                    return(
-                        <Item_Partie
-                            id = {item.id}
-                            format = {item.format}
-                            jour = {new Date(item.jour.seconds *1000)} 
-                            duree = {item.duree}
-                            joueurs = {this.buildJoueurs(item)}
-                            nbJoueursRecherche =  {item.nbJoueursRecherche}
-                            terrain=  {item.terrain}
-                            latitudeUser = {this.state.latitude}
-                            longitudeUser = {this.state.longitude}
-                            message_chauffe  = {item.message_chauffe}
+            switch(this.type) {
+                case "Joueurs":
+                    return (
+                        <ItemJoueur
+                            id={item.id}
+                            nom={item.pseudo}
+                            photo={item.photo}
+                            score={item.score}
+                            nav={this.props.navigation}
+                            showLike={true}
                         />
                     )
-                } else if(item.type == Type_Defis.defis_2_equipes) {
-                    return(
-                        <Item_Defi
-                            format = {item.format}
-                            jour = {new Date(item.jour.seconds * 1000)}
-                            duree ={item.duree}
-                            equipeOrganisatrice = {item.equipeOrganisatrice}
-                            equipeDefiee = {item.equipeDefiee}
-                            terrain = {item.terrain}
-                            allDataDefi = {item}
-                                
+                
+                case "Equipes":
+                    return (
+                        <ItemEquipe
+                            isCaptain={false}
+                            alreadyLike={false}
+                            nom={item.nom}
+                            photo={item.photo}
+                            nbJoueurs={item.joueurs.length}
+                            score={item.score}
+                            id={item.id}
+                            nav={this.props.navigation}
                         />
                     )
-                }
-        }
+                
+                case "Terrains":
+                    var distance = Distance.calculDistance(item.Latitude, item.Longitude, LocalUser.geolocalisation.latitude, LocalUser.geolocalisation.longitude);
+
+                    return (
+                        <ItemTerrain
+                            id={item.id}
+                            distance={distance}
+                            InsNom={item.InsNom}
+                            EquNom={item.EquNom}
+                        />
+                    )
+
+                case "Defis":
+                    if(item.type == Type_Defis.partie_entre_joueurs){
+                
+                        return(
+                            <Item_Partie
+                                id = {item.id}
+                                format = {item.format}
+                                jour = {new Date(item.jour.seconds *1000)} 
+                                duree = {item.duree}
+                                joueurs = {this.buildJoueurs(item)}
+                                nbJoueursRecherche =  {item.nbJoueursRecherche}
+                                terrain=  {item.terrain}
+                                latitudeUser = {LocalUser.geolocalisation.latitude}
+                                longitudeUser = {LocalUser.geolocalisation.longitude}
+                                message_chauffe  = {item.message_chauffe}
+                            />
+                        )
+                    } else if(item.type == Type_Defis.defis_2_equipes) {
+                        return(
+                            <Item_Defi
+                                format = {item.format}
+                                jour = {new Date(item.jour.seconds * 1000)}
+                                duree ={item.duree}
+                                equipeOrganisatrice = {item.equipeOrganisatrice}
+                                equipeDefiee = {item.equipeDefiee}
+                                terrain = {item.terrain}
+                                allDataDefi = {item}
+                                    
+                            />
+                        )
+                    }
+            }
+        
     }
 
 
@@ -248,6 +254,7 @@ export default class RechercheDefaut extends React.Component {
 
 
     renderSpecialButton() {
+
         if (this.type == "Joueurs") {
             return (
                 <TouchableOpacity onPress={() => Alert.alert(

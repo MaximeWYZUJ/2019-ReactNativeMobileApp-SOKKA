@@ -15,7 +15,7 @@ class SearchList extends React.Component {
 
     constructor(props) {
         super(props)
-
+        this.monProfil = this.props.monProfil != undefined && this.props.monProfil == true;
 
         this.state = {
             text: '',
@@ -217,7 +217,7 @@ class SearchList extends React.Component {
                 style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%'), width: wp('8%')}}
                 onPress={() => Alert.alert(
                                 '',
-                                "Que veux-tu faire ? CREER UNE EQUIPE ou RECHERCHER UNE EQUIPE A INTEGRER",
+                                "Que veux-tu faire ? Créer une équipe ou rechercher une équipe à intégrer ?",
                                 [
                                     {
                                         text: 'Créer',
@@ -237,11 +237,13 @@ class SearchList extends React.Component {
 
 
     renderBtnPlus() {
-        switch(this.props.type) {
-            case "Equipes": return this.getPlusButtonEquipes();
-            case "EquipesFav": return this.getPlusButtonEquipesFav();
-            case "Joueurs": return this.getPlusButtonJoueursFav();
-            case "Terrains": return this.getPlusButtonTerrainsFav();
+        if (this.monProfil) {
+            switch(this.props.type) {
+                case "Equipes": return this.getPlusButtonEquipes();
+                case "EquipesFav": return this.getPlusButtonEquipesFav();
+                case "Joueurs": return this.getPlusButtonJoueursFav();
+                case "Terrains": return this.getPlusButtonTerrainsFav();
+            }
         }
     }
 

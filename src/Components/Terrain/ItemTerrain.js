@@ -5,6 +5,8 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
 import { withNavigation } from 'react-navigation'
+import LocalUser from '../../Data/LocalUser.json'
+import Database from '../../Data/Database'
 
 
 /**
@@ -19,10 +21,13 @@ class ItemTerrain extends React.Component{
 
     constructor(props){
         super(props)
+        this.state={
+            likes: LocalUser.data.terrains.includes(this.props.id)
+        }
     }
 
     gotoProfilTerrain() {
-        this.props.navigation.push("ProfilTerrain", {id : this.props.id})
+        this.props.navigation.push("ProfilTerrain", {id : this.props.id, header: this.props.InsNom})
     }
 
     displayWordKm() {
@@ -34,6 +39,43 @@ class ItemTerrain extends React.Component{
                 let dispDistance = values[0]+","+values[1].substr(0,2);
                 return (<Text>{dispDistance} km</Text>)
             }
+        }
+    }
+
+
+    likeTerrain() {
+        if (this.state.likes) {
+            return (
+                <TouchableOpacity
+                    onPress={() => {
+                        Database.changeSelfToOtherArray_Aiment(this.props.id, "Terrains", false);
+                        Database.changeOtherIdToSelfArray_TerrainsFav(this.props.id, false);
+
+                        this.setState({
+                            likes: false
+                        })
+                    }}>
+                    <Image 
+                        source = {require('app/res/icon_already_like.png')} 
+                        style = {{width : wp('8%'), height : wp('8%'), marginLeft : wp('2%'), marginRight : wp('2%')}}/>
+                </TouchableOpacity>
+            )
+        } else {
+            return (
+                <TouchableOpacity
+                    onPress={() => {
+                        Database.changeSelfToOtherArray_Aiment(this.props.id, "Terrains", true);
+                        Database.changeOtherIdToSelfArray_TerrainsFav(this.props.id, true);
+
+                        this.setState({
+                            likes: true
+                        })
+                    }}>
+                    <Image
+                        source = {require('app/res/icon_like.png')} 
+                        style = {{width : wp('8%'), height : wp('8%'), marginLeft : wp('2%'), marginRight : wp('2%')}}/>
+                </TouchableOpacity>
+            )
         }
     }
 
@@ -64,39 +106,10 @@ class ItemTerrain extends React.Component{
                 </TouchableOpacity>
 
                 {/* ===== ICON LIKE =====*/}
-                <TouchableOpacity 
-                    style = {{backgroundColor : "white", alignContent : "center",justifyContent:'center'}}
-                    >
-                    <Image
-                        source = {require('../../../res/icon_like.png')}
-                        style = {{width : wp('9%'), height : wp('9%'),alignSelf : 'center', marginRight : wp('4%')}}/>
-                </TouchableOpacity>
+                {this.likeTerrain()}
             </View>
         )
     }
 }
-const styles = {
-    main_container : {
-        marginTop : hp('1%'),
-        marginBottom : hp('1%'),
-        marginLeft : wp('2%'),
-        marginRight : wp('2%'),
-        paddingLeft : wp('2%'),
-        paddingRight : wp('2%'),
-        borderRadius : 8,
-        flexDirection : 'row',
-        justifyContent: 'space-between',
-        backgroundColor : '#F9F9F9',
-        shadowColor: 'rgba(0,0,0, .4)', // IOS
-        shadowOffset: { height: 1, width: 1 }, // IOS
-        shadowOpacity: 1, // IOS
-        shadowRadius: 1, //IOS
-        elevation: 4, // Android
-        //paddingTop : hp('1.5%'),
-        //paddingBottom : hp('1.5%')
-    },
-    txt_container : {
-        alignSelf : 'center'
-    }
-}
+
 export default withNavigation(ItemTerrain)

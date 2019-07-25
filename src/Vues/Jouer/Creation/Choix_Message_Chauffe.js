@@ -59,7 +59,8 @@ export default class  Choix_Message_Chauffe extends React.Component {
                 contreQui :this.props.navigation.getParam('contreQui', ' '), 
                 equipeAdverse : this.props.navigation.getParam('equipeAdverse', ' '),
                 nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' '),
-                messageChauffe : this.state.message
+                messageChauffe : this.state.message,
+                prix: this.props.navigation.getParam('prix', null)
     
             }) 
         } else {
@@ -81,7 +82,7 @@ export default class  Choix_Message_Chauffe extends React.Component {
                 messageChauffe : this.state.message,
                 joueurs : this.props.navigation.getParam('joueurs', ''),
                 nbrJoueurs : this.props.navigation.getParam('nbrJoueurs', ''),
-
+                prix: this.props.navigation.getParam('prix', null)
     
             }) 
         }

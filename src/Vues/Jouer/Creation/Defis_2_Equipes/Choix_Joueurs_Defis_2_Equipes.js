@@ -416,7 +416,8 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                 allDataEquipe : this.equipe,
                 userData : this.props.navigation.getParam('userData', ' '),
                 joueursSelectionnes : this.state.joueursSelectionnes,
-                nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' ')
+                nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' '),
+                prix: this.props.navigation.getParam('prix', null)
             }
             
         )

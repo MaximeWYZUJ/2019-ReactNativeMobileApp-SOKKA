@@ -45,6 +45,24 @@ class Choix_Terrain_Defis extends React.Component {
         }
     }
 
+
+    goToNextScreenPrix() {
+        var navOps = {
+            format : this.format,
+            type : this.type,
+            jour : this.jour,
+            heure : this.heure,
+            duree : this.props.navigation.getParam('duree', ''),
+            terrain : this.props.terrainSelectionne,
+            nomsTerrains : this.props.nomsTerrainSelectionne
+        }
+        if (this.type == Type_Defs.partie_entre_joueurs) {
+            navOps = {...navOps, creationPartie: true};
+        }
+        this.props.navigation.push("Choix_Prix", navOps)
+    }
+
+
     goToNextScreen() {
         console.log("THIS TYPE" ,this.type)
         if(this.type == Type_Defs.defis_2_equipes) { 
@@ -53,21 +71,6 @@ class Choix_Terrain_Defis extends React.Component {
             console.log('------' +  this.props.navigation.getParam('duree', '')+ '---------')
             this.props.navigation.push("ChoixEquipeDefis",
             {
-                
-                format : this.format,
-                type : this.type,
-                jour : this.jour,
-                heure : this.heure,
-                duree : this.props.navigation.getParam('duree', ''),
-                terrain : this.props.terrainSelectionne,
-                nomsTerrains : this.props.nomsTerrainSelectionne
-            })
-        } else if(this.type == Type_Defs.partie_entre_joueurs) {
-
-            
-            this.props.navigation.push("ChoixJoueursPartie",
-            {
-                
                 format : this.format,
                 type : this.type,
                 jour : this.jour,
@@ -75,7 +78,22 @@ class Choix_Terrain_Defis extends React.Component {
                 duree : this.props.navigation.getParam('duree', ''),
                 terrain : this.props.terrainSelectionne,
                 nomsTerrains : this.props.nomsTerrainSelectionne,
-                creationPartie: true
+                prix: null
+            })
+        } else if(this.type == Type_Defs.partie_entre_joueurs) {
+
+            
+            this.props.navigation.push("ChoixJoueursPartie",
+            {
+                format : this.format,
+                type : this.type,
+                jour : this.jour,
+                heure : this.heure,
+                duree : this.props.navigation.getParam('duree', ''),
+                terrain : this.props.terrainSelectionne,
+                nomsTerrains : this.props.nomsTerrainSelectionne,
+                creationPartie: true,
+                prix: null
 
             })
         }
@@ -107,13 +125,26 @@ class Choix_Terrain_Defis extends React.Component {
                         onPress ={() =>  {
                             var terrain = this.findTerrainsfromId(this.props.terrainSelectionne);
                             if(terrain.Payant) {
-                                var txtBoutton = "Confimer"
-                                var msg = 'Le terrain sélectionné est un terrain payant. Je confirme avoir réservé le terrain en mon nom'
+                                var txtBoutton = "Confirmer"
+                                var msg = 'Le terrain sélectionné est un terrain payant. Je confirme avoir réservé le terrain en mon nom.'
+                            
+                                Alert.alert(
+                                '',
+                                msg,
+                                [
+                                    {text: txtBoutton, onPress: () => this.goToNextScreenPrix()},
+                                    {
+                                        text: 'Annuler',
+                                        onPress: () => console.log('Cancel Pressed'),
+                                        style: 'cancel',
+                                    },
+                                ]
+                                )
                             } else{
                                 var txtBoutton = "Continuer"
-                                var msg = 'Le terrain sélectionné est un terrain public gratuit en accès libre'
-                            }
-                            Alert.alert(
+                                var msg = 'Le terrain sélectionné est un terrain public gratuit en accès libre.'
+                            
+                                Alert.alert(
                                 '',
                                 msg,
                                 [
@@ -124,10 +155,8 @@ class Choix_Terrain_Defis extends React.Component {
                                         style: 'cancel',
                                     },
                                 ]
-                            )
-                          
-                            
-
+                                )
+                            }
                         }
                                 
                         }>

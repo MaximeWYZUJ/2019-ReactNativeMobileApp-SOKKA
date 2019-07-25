@@ -15,13 +15,12 @@ class ProfilJoueurMesTerrainsFav extends React.Component {
 
     constructor(props) {
         super(props)
-        this.terrains = this.props.navigation.getParam('terrains', ' ')
-        console.log(this.terrains)
-
+        this.terrains = this.props.navigation.getParam('terrains', ' ');
+        this.monProfil = this.props.navigation.getParam('monProfil', false);
     }
 
     _get_header_title() {
-        if (this.props.monProfil) {
+        if (this.monProfil) {
             return "Mes Terrains Favoris"
         } else {
             return "Terrains Favoris"
@@ -43,6 +42,7 @@ class ProfilJoueurMesTerrainsFav extends React.Component {
                         InsNom={item.InsNom}
                         EquNom={item.EquNom}
                     />}
+                    monProfil={this.monProfil}
                 />
             </View>
         );

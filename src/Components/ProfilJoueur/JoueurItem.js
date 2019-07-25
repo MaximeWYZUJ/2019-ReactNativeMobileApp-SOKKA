@@ -26,7 +26,7 @@ class JoueurItem extends React.Component {
              docData.naissance = new Date(docData.naissance.toDate());
  
              // Envoi
-             this.props.nav.push("ProfilJoueur", {id: docData.id, joueur : docData, reseau : arrayReseau, equipes : arrayEquipes})
+             this.props.navigation.push("ProfilJoueur", {id: docData.id, joueur : docData, reseau : arrayReseau, equipes : arrayEquipes})
          
          }).catch(function(error) {
              console.log("Error getting document:", error);

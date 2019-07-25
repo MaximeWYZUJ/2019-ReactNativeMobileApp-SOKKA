@@ -48,12 +48,12 @@ class Defis_2_Equipes_Contre_Qui extends React.Component {
                     userData : this.props.navigation.getParam('userData', ' '),
                     joueursSelectionnes : this.props.navigation.getParam('joueursSelectionnes', ' '),
                     contreQui : 'rechercher_une_equipe',
-                    nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' ')
+                    nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' '),
+                    prix: this.props.navigation.getParam('prix', null)
                 }) 
     }
 
     goToPosterUneAnnonce(){
-        console.log("okkookokokokkokgff")
         this.props.navigation.push("ChoixMessageChauffe", 
                 {
                     format : this.props.navigation.getParam('format', ' '),
@@ -66,7 +66,8 @@ class Defis_2_Equipes_Contre_Qui extends React.Component {
                     userData : this.props.navigation.getParam('userData', ' '),
                     joueursSelectionnes : this.props.navigation.getParam('joueursSelectionnes', ' '),
                     contreQui : 'poster_une_annonce',
-                    nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' ')
+                    nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' '),
+                    prix: this.props.navigation.getParam('prix', null)
                 }) 
     }
 

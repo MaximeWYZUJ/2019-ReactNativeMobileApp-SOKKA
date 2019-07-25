@@ -344,8 +344,8 @@ class Accueil_Jouer extends React.Component {
                         <TouchableOpacity 
                             style = {styles.bloc}
                             onPress = {() => this.callNextScreen(Type_Defis.defis_2_equipes)}>
-                            <Text style ={styles.txtTitre}>Proposer un défis entre deux équipes</Text>
-                            <Text style  = {styles.txt}>Avec ton équipe, propose une rencontre à une autre équipe</Text>
+                            <Text style ={styles.txtTitre}>Proposer un défi entre deux équipes</Text>
+                            <Text style  = {styles.txt}>Avec ton équipe, propose un défi à une autre équipe</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity  
@@ -353,7 +353,7 @@ class Accueil_Jouer extends React.Component {
                                 onPress = {() =>this.callNextScreen(Type_Defis.partie_entre_joueurs)}>
                                 
                             <Text style ={styles.txtTitre} >Proposer une partie entre joueurs</Text>
-                            <Text style  = {styles.txt}>Seul ou à plusieurs propose une rencontre à d'autre joueurs</Text>
+                            <Text style  = {styles.txt}>Seul ou à plusieurs, propose une partie à d'autres joueurs</Text>
                         </TouchableOpacity>
 
                         {/* Juste un test */}

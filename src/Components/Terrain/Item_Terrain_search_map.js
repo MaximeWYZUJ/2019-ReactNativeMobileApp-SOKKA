@@ -84,7 +84,7 @@ class Item_Terrain_search_map extends React.Component {
                 {/* Boutton de profil */}
                 <TouchableOpacity 
                     style = {styleBtn}
-                    onPress = {()=> this.props.navigation.push("ProfilTerrain", {id :this.props.id , distance : this.state.distance, titre : this.state.InsNom})}>
+                    onPress = {()=> this.props.navigation.push("ProfilTerrain", {id :this.props.id , distance : this.state.distance, header : this.state.InsNom})}>
                     <View style = {{ postion : "aboslute", right : 0,flexDirection : 'row'}}>
                         <Text style = {{color : 'white', fontWeight : "bold"}}>Visiter le profil</Text>
                         <Image 

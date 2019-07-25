@@ -18,10 +18,11 @@ class ProfilJoueurMesEquipesFav extends React.Component {
         super(props)
         this.joueur = this.props.navigation.getParam('joueur', null);
         this.equipesFav = this.props.navigation.getParam('equipesFav', null);
+        this.monProfil = this.props.navigation.getParam('monProfil', false);
     }
 
     _get_header_title() {
-        if (this.props.monProfil) {
+        if (this.monProfil) {
             return "Mes Equipes Favorites"
         } else {
             return "Equipes Favorites"
@@ -54,6 +55,7 @@ class ProfilJoueurMesEquipesFav extends React.Component {
                         nbJoueurs={item.joueurs.length}
                         nav={this.props.navigation}
                     />}
+                    monProfil={this.monProfil}
                 />
             </View>
         );

@@ -25,6 +25,7 @@ import Feuille_Defi_A_Venir from '../Vues/Jouer/Feuille_de_Match/Feuille_Defi_A_
 import Feuille_Defi_Passe from '../Vues/Jouer/Feuille_de_Match/Feuille_Defi_Passe'
 import StackProfil from './Navigation'
 import ProfilJoueur from '../Vues/Joueur/ProfilJoueur'
+import Choix_Prix from '../Vues/Jouer/Creation/Choix_Prix'
 
 const stackNavigator = createStackNavigator({
 
@@ -60,6 +61,10 @@ const stackNavigator = createStackNavigator({
    */
   ChoixTerrainDefis : {
     screen : Choix_Terrain_Defis
+  },
+
+  Choix_Prix : {
+    screen : Choix_Prix
   },
 
   /**

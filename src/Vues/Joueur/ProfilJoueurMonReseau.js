@@ -17,11 +17,12 @@ class ProfilJoueurMonReseau extends React.Component {
         super(props)
         this.joueur = this.props.navigation.getParam('joueur', null)
         this.reseau = this.props.navigation.getParam('reseau', null)
+        this.monProfil = this.props.navigation.getParam('monProfil', false);
     }
 
 
     _get_header_title() {
-        if (this.props.monProfil) {
+        if (this.monProfil) {
             return "Mon Réseau"
         } else {
             return "Réseau"
@@ -44,6 +45,7 @@ class ProfilJoueurMonReseau extends React.Component {
                         nav={this.props.navigation}
                         showLike={true}
                     />}
+                    monProfil={this.monProfil}
                 />
             </View>
         );

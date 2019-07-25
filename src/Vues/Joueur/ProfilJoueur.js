@@ -3,6 +3,7 @@ import { StyleSheet, Text, Image, ScrollView, Button, TouchableOpacity, View, Fl
 import StarRating from 'react-native-star-rating'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
+import Distance from '../../Helpers/Distance'
 import Database from '../../Data/Database'
 import LocalUser from '../../Data/LocalUser.json'
 import { Constants, Location, Permissions,Notifications } from 'expo';
@@ -16,9 +17,10 @@ import firebase from 'firebase'
 import t from '../../Components/Conversation/Icon_Message'
 import '@firebase/firestore'
 import Icon_Message from '../../Components/Conversation/Icon_Message';
+import Villes from '../../Components/Creation/villes.json'
+import NormalizeString from '../../Helpers/NormalizeString'
 
-const latUser = 43.531486   // A suppr quand on aura les vrais coordonnées
-const longUser = 1.490306
+
 
 class ProfilJoueur extends React.Component {
 
@@ -484,18 +486,6 @@ class ProfilJoueur extends React.Component {
     // ================ METHODES POUR LES TERRAINS FAVORIS ===========================
     // ===============================================================================
 
-    _calculDistance(lat_b,lon_b) {
-        let rad_lata = (latUser * Math.PI)/180;
-        let rad_long = ((longUser- lon_b) * Math.PI)/180;
-        let rad_latb = (lat_b * Math.PI)/180;
-
-        let d = Math.acos(Math.sin(rad_lata)*Math.sin(rad_latb)+
-        Math.cos(rad_lata)*Math.cos(rad_latb)*Math.cos(rad_long))*6371
-
-        var txtDistance = d.toString().split('.')[0];
-        txtDistance = txtDistance +','+ d.toString().split('.')[1][0]
-        return txtDistance;
-    }
 
 
     /**
@@ -503,17 +493,26 @@ class ProfilJoueur extends React.Component {
      * likent le terrains et d'afficher la vue.
      */
     async gotoTerrainsFav() {
-        terrainsFav = [];
-        for (idTerrain of this.joueur.terrains) {
-            idTerrainData = await Database.getDocumentData(idTerrain, 'Terrains');
-            t = idTerrainData.d;
-            distance = this._calculDistance(idTerrainData.d.latitude, idTerrainData.d.longitude)
-            t.distance = distance;
-
-            terrainsFav.push(t);
+        var latUser;
+        var longUser;
+        if (LocalUser.geolocalisation == undefined) {
+            villeTab = Villes.filter(elmt => NormalizeString.normalize(elmt.Nom_commune) === NormalizeString.normalize(LocalUser.data.ville));
+            var position = villeTab[0].coordonnees_gps;
+            latUser = position.split(',')[0]
+            longUser = position.split(', ')[1]
+        } else {
+            latUser = LocalUser.geolocalisation.latitude;
+            longUser = LocalUser.geolocalisation.longitude;
         }
 
-        this.props.navigation.push("ProfilJoueurMesTerrainsFavScreen", {terrains : terrainsFav, titre : this.joueur.pseudo})
+        var terrainsData = await Database.getArrayDocumentData(this.joueur.terrains, "Terrains");
+        for (var i=0; i<terrainsData.length; i++) {
+            var distance = Distance.calculDistance(latUser, longUser, terrainsData[i].Latitude, terrainsData[i].Longitude);
+            terrainsData[i].distance = distance;
+        }
+        
+
+        this.props.navigation.push("ProfilJoueurMesTerrainsFavScreen", {terrains : terrainsData, header : this.joueur.pseudo})
     }
 
     async getDocumentJoueur() {
@@ -567,16 +566,12 @@ class ProfilJoueur extends React.Component {
 
         query.get().then(async (results) => {
             // go through all results
-            console.log("RESULT.LENGTH !!" , results.docs.length)
             for(var i = 0; i < results.docs.length ; i++) {
-                console.log(" =========== ",  results.docs[i].data().id)
-                if( ! results.docs[i].data().joueurs.includes(this.id) && ! results.docs[i].data().joueursAttentes.includes(this.id)) {
+                if( !results.docs[i].data().joueurs.includes(this.id)) {// && ! results.docs[i].data().joueursAttentes.includes(this.id)) {
                     equipes.push(results.docs[i].data());
                 }
             }
             this.setState({equipes : equipes, isLoading : false})
-            console.log(this.state.equipes);
-            console.log(this.state.isLoading);
         })
     }
 
@@ -604,7 +599,7 @@ class ProfilJoueur extends React.Component {
             var equipes = query.docs;
             var pasDansToutesLesEquipes = false;
             for (var i=0; i<equipes.length; i++) {
-                if (!equipes[i].joueurs.includes(this.id) && !equipes[i].joueurs.includes(this.is)) {
+                if (!equipes[i].data().joueurs.includes(this.id)) {
                     pasDansToutesLesEquipes = true;
                 }
             }
@@ -728,7 +723,7 @@ class ProfilJoueur extends React.Component {
                 style={{...styles.header_container, backgroundColor: "#0BE220", marginLeft: wp('2%')}}
                 onPress={() => Alert.alert(
                                 '',
-                                "Que veux-tu faire ?",
+                                "Que veux-tu faire ? Créer une équipe ou rechercher une équipe à intégrer ?",
                                 [
                                     {
                                         text: 'Créer',
@@ -758,14 +753,21 @@ class ProfilJoueur extends React.Component {
 
                 <TouchableOpacity 
                     onPress = {() => {
-                       // this.chooseEquipe(item)
-                        //this.saveParticipationInDb(item.id,item.nom)
-                        this.integrerJoueur(item.id, item.nom)
-                        Alert.alert(
-                            '',
-                            "Ta demande pour intégrer " + this.joueur.pseudo  + " à l'équipe " + item.nom
-                            + " a bien été envoyéee. Tu seras informé quand le joueur aura accepté ou non"
-                        )
+                        if (item.joueursAttentes.includes(this.joueur.id)) {
+                            Alert.alert(
+                                '',
+                                this.joueur.pseudo  + " est déjà en attente pour intégrer " + item.nom
+                            )
+                        } else {
+                            // this.chooseEquipe(item)
+                            //this.saveParticipationInDb(item.id,item.nom)
+                            this.integrerJoueur(item.id, item.nom)
+                            Alert.alert(
+                                '',
+                                "Ta demande pour intégrer " + this.joueur.pseudo  + " à l'équipe " + item.nom
+                                + " a bien été envoyée. Tu seras informé quand le joueur aura accepté ou non"
+                            )
+                        }
                     }}>
                    <View style = {{flexDirection : "row"}}>
                         <Image
@@ -801,11 +803,10 @@ class ProfilJoueur extends React.Component {
      */
     _renderListEquipe() {
         if(this.state.show_equipe) {
-
             return(
                 <View style = {styles.containerListEquipe}>
                     <Text>
-                        Dans quelle équipe souhaites-tu intégrer {this.joueur.pseudo}
+                        Dans quelle équipe souhaites-tu intégrer {this.joueur.pseudo} ?
                     </Text>
 
                     {this.renderListEquipesLoading()}
@@ -815,7 +816,7 @@ class ProfilJoueur extends React.Component {
                         <Text style = {{fontWeight : "bold"}}>Annuler</Text>
                     </TouchableOpacity>
                 </View>
-            )
+            )           
         }
     }
 
@@ -931,7 +932,7 @@ class ProfilJoueur extends React.Component {
                                         />
                                     <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville}</Text>
                                 </View>
-                                <Text style={{margin: 5,  fontSize : RF(3.25)}}>{this.joueur.pseudo}</Text>
+                                {/*<Text style={{margin: 5,  fontSize : RF(3.25)}}>{this.joueur.pseudo}</Text>*/}
                                 <Text>Joueur {this.joueur.poste}</Text>
                             </TouchableOpacity>
                             {this._displayReglages()}

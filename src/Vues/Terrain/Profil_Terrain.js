@@ -1,8 +1,7 @@
 import React from 'react'
-import {View, Text,  StyleSheet, Animated,TouchableOpacity,ScrollView,FlatList, Alert} from 'react-native'
+import {View, Text,  StyleSheet, Animated,TouchableOpacity,ScrollView,FlatList, Alert, Image} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
-import { Image } from 'react-native-elements';
 import Color from '../../Components/Colors'
 import Database from '../../Data/Database'
 import Terrains from '../../Helpers/Toulouse.json'
@@ -62,17 +61,33 @@ export default class Profil_Terrain extends React.Component {
 
         this.state = {
             nbAime: 0,
-            defis: []
+            aiment: [],
+            defis: [],
+            likes: LocalUser.data.terrains.includes(this.id)
         }
 
         this.getAllDefisAndPartie();
+        this.getNbAime();
     }
 
     
     static navigationOptions = ({ navigation }) => {
         return {
-            title: navigation.getParam('titre', ' ')
+            title: navigation.getParam('header', 'Profil Terrain')
         }
+    }
+
+
+    async getNbAime() {
+        var db = Database.initialisation();
+        doc = await db.collection("Terrains").doc(this.id).get();
+
+        var aiment = [];
+        if (doc.data().aiment != undefined) {
+            aiment = doc.data().aiment;
+        }
+
+        this.setState({nbAime: aiment.length, aiment: aiment});
     }
 
 
@@ -225,20 +240,19 @@ export default class Profil_Terrain extends React.Component {
 
 
     displayDefis(){
-        if(this.state.defis == undefined || this.state.defis == []) {
+        if(this.state.defis == undefined || this.state.defis.length == 0) {
             return (
                 <View>
-                    <Text>Pas encore de défi</Text>
+                    <Text>aucun défi / partie programmé</Text>
                 </View>
             )
         }else {
-            console.log("display defi");
             return(
                 <FlatList style = {{marginLeft : wp('2%')}}
-                        data={this.state.defis}
-                        numColumns={1}
-                        keyExtractor={(item) => item.id}
-                        renderItem={this._renderItemDefi}
+                    data={this.state.defis}
+                    numColumns={1}
+                    keyExtractor={(item) => item.id}
+                    renderItem={this._renderItemDefi}
                 />
             )
         }
@@ -249,39 +263,50 @@ export default class Profil_Terrain extends React.Component {
      * Méthode qui va permettre de récuperer les joueurs qui 
      * likent le terrains et d'afficher la vue.
      */
-    gotoJoueursQuiLikent() {
-        var db = Database.initialisation();
-        var docRef = db.collection('Terrains').doc(this.id);
-        docRef.get().then(async (doc) => {
-            if (doc.exists) {
-                const collJoueurs = docRef.collection('aiment')
-                const joueursSnapshot = await collJoueurs.get()
-                this.getJoueursLike(joueursSnapshot.docs)
-            } else {
-                console.log("No such document!");
-            }
-        }).catch(function(error) {
-            console.log("Error getting document:", error);
-        });
-        
+    gotoJoueursQuiLikent() {}
 
-    }
 
-    async getJoueursLike(joueurs) {
-        var liste = [];
-        for(j of joueurs){
-            let joueurRef = j.data().joueur
-            let gotRefJoueur = await joueurRef.get()
-            
-            let j = {
-                nom  : gotRefJoueur.data().nom,
-                score : gotRefJoueur.data().score,
-                id : gotRefJoueur.data().id,
-                photo : gotRefJoueur.data().photo,
-            }
-            console.log(j)
-        }   
-        liste.push(j)
+    likeTerrain() {
+        if (this.state.likes) {
+            return (
+                <TouchableOpacity
+                    onPress={() => {
+                        Database.changeSelfToOtherArray_Aiment(this.id, "Terrains", false);
+                        Database.changeOtherIdToSelfArray_TerrainsFav(this.id, false);
+
+                        var aiment = this.state.aiment.filter(elmt => elmt != LocalUser.data.id);
+                        this.setState({
+                            aiment: aiment,
+                            nbAime: aiment.length,
+                            likes: false
+                        })
+                    }}>
+                    <Image 
+                        source = {require('app/res/icon_already_like.png')} 
+                        style = {{width : wp('8%'), height : wp('8%'), marginLeft : wp('2%'), marginRight : wp('2%')}}/>
+                </TouchableOpacity>
+            )
+        } else {
+            return (
+                <TouchableOpacity
+                    onPress={() => {
+                        Database.changeSelfToOtherArray_Aiment(this.id, "Terrains", true);
+                        Database.changeOtherIdToSelfArray_TerrainsFav(this.id, true);
+
+                        var aiment = this.state.aiment;
+                        aiment.push(LocalUser.data.id);
+                        this.setState({
+                            aiment: aiment,
+                            nbAime: aiment.length,
+                            likes: true
+                        })
+                    }}>
+                    <Image
+                        source = {require('app/res/icon_like.png')} 
+                        style = {{width : wp('8%'), height : wp('8%'), marginLeft : wp('2%'), marginRight : wp('2%')}}/>
+                </TouchableOpacity>
+            )
+        }
     }
 
 
@@ -344,11 +369,7 @@ export default class Profil_Terrain extends React.Component {
                                         <Text style = {{fontWeight : 'bold', marginLeft : wp('2%'), marginRight : wp('2%')}}>{this.state.nbAime}</Text>
 
                                     </TouchableOpacity>
-                                    <TouchableOpacity>
-                                        <Image 
-                                            source = {require(url_icon_like)} 
-                                            style = {{width : wp('8%'), height : wp('8%'), marginLeft : wp('2%'), marginRight : wp('2%')}}/>
-                                    </TouchableOpacity>
+                                    {this.likeTerrain()}
                             </View>
                             </View>
                         </View>

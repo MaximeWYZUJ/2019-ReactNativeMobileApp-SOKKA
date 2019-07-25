@@ -111,7 +111,8 @@ class Choix_Joueurs_Partie extends React.Component {
                 {
                     download_All_Data_Partie : true,
                     id :  this.props.navigation.getParam('id_partie', ''),
-                    retour_arriere_interdit : true
+                    retour_arriere_interdit : true,
+                    prix: this.props.navigation.getParam('prix', null)
                 })
             }
                         
@@ -174,7 +175,8 @@ class Choix_Joueurs_Partie extends React.Component {
                     duree : this.props.navigation.getParam('duree', ''),
                     terrain : this.props.navigation.getParam('terrain', ''),
                     nomsTerrains : this.props.navigation.getParam('nomsTerrains', ' '),
-                    joueurs : j  ,
+                    joueurs : j,
+                    prix: this.props.navigation.getParam('prix', null)
                 }
             )
         
@@ -291,7 +293,7 @@ class Choix_Joueurs_Partie extends React.Component {
                     {this._renderBtnSuivant()}
 
                 </View>
-                <Text style = {{alignSelf : "center", fontSize : RF(2.6) , marginBottom : hp('2%') , marginTop : hp('1%')}}>Quels joueurs souhaites-tu inviter</Text>
+                <Text style = {{alignSelf : "center", fontSize : RF(2.6) , marginBottom : hp('2%') , marginTop : hp('1%')}}>Quels joueurs souhaites-tu inviter ?</Text>
                 <Text style = {{fontSize :RF(2.6), marginBottom : hp('1%')}}> {this.props.joueursPartie.length} {this.props.joueursPartie.length > 1 ? "joueurs sélectionnés" : "joueur sélectionné"}</Text>
                 
                 <TabChoixJoueursDefis/>

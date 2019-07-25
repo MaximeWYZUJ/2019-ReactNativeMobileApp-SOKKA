@@ -28,7 +28,7 @@ class Item_Terrain_creation_defis extends React.Component{
     }
 
     gotoProfilTerrain() {
-        this.props.navigation.push("ProfilTerrain", {id : this.props.id})
+        this.props.navigation.push("ProfilTerrain", {id : this.props.id, header: this.props.InsNom})
     }
 
      /**
