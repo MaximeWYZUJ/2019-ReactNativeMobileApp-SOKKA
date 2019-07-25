@@ -335,6 +335,7 @@ export default class New_Groupe extends React.Component {
                             <TextInput
                                 style = {{width : wp('50%'), borderWidth : 1, borderRadius : wp('2%')}}
                                 onChangeText = {this.texteChanged}
+                                
                             />
                         </View>
 

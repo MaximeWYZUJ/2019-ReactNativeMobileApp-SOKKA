@@ -412,6 +412,10 @@ class List_Messages extends React.Component {
         
         
     }
+
+    goToModifGroupe() {
+        this.props.navigation.push("ModifierGroupe",{groupe : this.state.conv, joueurs : this.state.joueurs})
+    }
     
     /**
      * Fonction qui affiche le nom et la photo de la personne avec qui on comunique
@@ -420,7 +424,13 @@ class List_Messages extends React.Component {
 
         return(
             <TouchableOpacity style = {styles.header}
-                onPress = {() => this.buildAlertGotoProfil()}>
+                onPress = {() => {
+                    if(! this.isAgroupConv()) {
+                        this.buildAlertGotoProfil()
+                    } else {
+                        this.goToModifGroupe()
+                    }
+                }}>
                 {this._renderPhotoConv(this.state.conv)}
 
                 <View>
@@ -431,6 +441,8 @@ class List_Messages extends React.Component {
 
     }
 
+
+  
     buildAlertGotoProfil() {
         Alert.alert(
             '',
