@@ -1,6 +1,8 @@
 import React from 'react'
 import { View, Text, FlatList, TouchableOpacity, Image, Alert } from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import RF from 'react-native-responsive-fontsize';
+
 import Email from 'react-native-email'
 
 import BarreRechercheQuery from '../../Components/Recherche/Barre_Recherche_Query'
@@ -13,6 +15,7 @@ import Item_Defi from '../../Components/Defis/Item_Defi'
 import Item_Partie  from '../../Components/Defis/Item_Partie'
 import Type_Defis from '../Jouer/Type_Defis'
 
+import AlphabetListView from 'react-native-alphabetlistview'
 
 import FiltrerJoueur from '../../Components/Recherche/FiltrerJoueur'
 import FiltrerEquipes from '../../Components/Recherche/FiltrerEquipe'
@@ -35,10 +38,10 @@ export default class RechercheDefaut extends React.Component {
 
         // Champ(s) sur lequel faire la query
         switch (this.type) {
-            case "Joueurs" : this.champNom = "nomQuery"; break;
-            case "Equipes" : this.champNom = "queryName"; break;
-            case "Terrains": this.champNom = "queryName"; break;
-            case "Defis": this.champNom = "queryName"; break;
+            case "Joueurs" : {this.champNomQuery = "nomQuery"; this.champNom = "pseudo"; break;}
+            case "Equipes" : {this.champNomQuery = "queryName"; this.champNom = "nom"; break;}
+            case "Terrains": {this.champNomQuery = "queryName"; this.champNom = "InsNom"; break;}
+            case "Defis": {this.champNomQuery = "queryName"; this.champNom = "nom"; break;}
         }
 
         this.queryFiltre = null;
@@ -138,7 +141,7 @@ export default class RechercheDefaut extends React.Component {
                 <BarreRecherche
                     handleTextChange={this.validerRecherche}
                     data={allTerrains}
-                    field={this.champNom}
+                    field={this.champNomQuery}
                     filterData={(data) => FiltrerTerrains.filtrerTerrains(data, this.filtres)}
                     handleFilterButton={this.handleFilterButton}
                 />
@@ -148,7 +151,7 @@ export default class RechercheDefaut extends React.Component {
                 <BarreRechercheQuery
                     handleResults={this.validerRecherche}
                     collection={this.type}
-                    field={this.champNom}
+                    field={this.champNomQuery}
                     nbOfChar={nbChar}
                     handleFilterButton={this.handleFilterButton}
                     handleFilterQuery={this.queryFiltre}
@@ -169,7 +172,7 @@ export default class RechercheDefaut extends React.Component {
     }
 
 
-    renderItem(item) {
+    renderItem = ({item}) => {
 
             switch(this.type) {
                 case "Joueurs":
@@ -329,6 +332,46 @@ export default class RechercheDefaut extends React.Component {
     }
 
 
+    // Construit le tableau avec les donnees par ordre alphabetique
+    buildAlphabetique(donneesBrutes) {
+        let  data =  {
+            A: [],
+            B: [],
+            C: [],
+            D: [],
+            E: [],
+            F: [],
+            G: [],
+            H: [],
+            I: [],
+            J: [],
+            K: [],
+            L: [],
+            M: [],
+            N: [],
+            O: [],
+            P: [],
+            Q: [],
+            R: [],
+            S: [],
+            T: [],
+            U: [],
+            V: [],
+            W: [],
+            X: [],
+            Y: [],
+            Z: [],
+        }
+        for(var i = 0; i < donneesBrutes.length ; i ++) {
+            item = donneesBrutes[i];
+            let pseudo = item[this.champNom];
+            let lettre = pseudo[0].toUpperCase();
+            data[lettre].push(item);
+        }
+        return data
+    }
+
+
     render() {
         if (this.queryFiltre === null) {
             nbChar = 0;
@@ -346,12 +389,55 @@ export default class RechercheDefaut extends React.Component {
                     </View>
                 </View>
                 {this.displayFiltresComponents()}
-                <FlatList
-                    data={this.state.dataDefaut}
-                    renderItem={({item}) => this.renderItem(item)}
-                />
+                <View style = {{flex: 5}}>
+                    <AlphabetListView
+                        data={this.buildAlphabetique(this.state.dataDefaut)}
+                        cell={this.renderItem}
+                        cellHeight={30}
+                        sectionListItem={SectionItem}
+                        sectionHeader={SectionHeader}
+                        sectionHeaderHeight={22.5}
+                    />
+                </View>
             </View>
         )
     }
 
+}
+
+
+// Classes internes
+
+class SectionHeader extends React.Component {
+
+    render() {
+    // inline styles used for brevity, use a stylesheet when possible
+    var textStyle = {
+      color:'black',
+      fontWeight:'bold',
+      fontSize:RF(2.5),
+      marginLeft : wp('2.5%')
+    };
+
+    var viewStyle = {
+      backgroundColor: '#F7F7F7'
+    };
+  
+    return (
+        <View style={viewStyle}>
+        <Text style={textStyle}>{this.props.title}</Text>
+      </View>
+      
+    );
+  }
+}
+
+class SectionItem extends React.Component {
+  render() {
+    
+
+    return (
+        <Text style={{color:'black'}}></Text>
+    );
+  }
 }

@@ -34,7 +34,7 @@ export default class Database {
             messagingSenderId: "486777683016"
         }
 
-        /*var config2 =  {
+        var config2 =  {
             apiKey: "AIzaSyDtl0_2Zx18V5m3SwtJVAbXkMbsvMruFsI",
             authDomain: "sokka-47c20.firebaseapp.com",
             databaseURL: "https://sokka-47c20.firebaseio.com",
@@ -42,7 +42,7 @@ export default class Database {
             storageBucket: "sokka-47c20.appspot.com",
             messagingSenderId: "952597067241",
             appId: "1:952597067241:web:1f1b5c742caabbb0"
-        };*/
+        };
 
         if (!firebase.apps.length) {
             firebase.initializeApp(config);

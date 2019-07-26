@@ -13,19 +13,29 @@ var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 export default class FiltrerJoueur extends React.Component {
 
     static filtrerJoueurs = (data, f) => {
-        
-        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
-        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
-        if (f.departement !== "") {
-            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
+        if (f != null) {
+            if (f.ageMin != 0) {
+                data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
+            }
+            if (f.ageMax != 99) {
+                data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
+            }
+            if (f.departement != "") {
+                data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
+            }
+            if (f.ville != "") {
+                data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
+            }
+            if (f.score != null) {
+                data = data.filter(((elmt) => {return elmt["score"] === f.score}))
+            }
+            if (f.sexe != null) {
+                data = data.filter(((elmt) => {return elmt["sexe"] === f.sexe}))
+            }
+            if (f.poste != null) {
+                data = data.filter(((elmt) => {return elmt["poste"] === f.poste}))
+            }
         }
-        if (f.ville !== "") {
-            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
-        }
-        if (f.score !== null) {
-            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
-        }
-
         return data;
     }
 
@@ -267,6 +277,7 @@ export default class FiltrerJoueur extends React.Component {
         b5 = this.state.poste != null;
         b6 = this.state.sexe != null;
         if (b0 || b1 || b2 || b3 || b4 ||b5 || b6) {
+            console.log("on retourne le state");
             return {...this.state}
         } else {
             return null;

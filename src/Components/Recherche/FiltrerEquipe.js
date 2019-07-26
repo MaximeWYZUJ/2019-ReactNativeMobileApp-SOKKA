@@ -14,19 +14,25 @@ export default class FiltrerEquipe extends React.Component {
 
     static filtrerEquipes = (data, f) => {
         
-        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
-        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
-        if (f.departement !== "") {
-            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
-        }
-        if (f.ville !== "") {
-            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
-        }
-        if (f.score !== null) {
-            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
-        }
-        if (f.nbJoueurs != 0) {
-            data = data.filter(((elmt) => {return elmt["nbJoueurs"] === f.nbJoueurs}))
+        if (f != null) {
+            if (f.ageMin != 0) {
+                data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
+            }
+            if (f.ageMax != 99) {
+                data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
+            }
+            if (f.departement !== "") {
+                data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
+            }
+            if (f.ville !== "") {
+                data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
+            }
+            if (f.score !== null) {
+                data = data.filter(((elmt) => {return elmt["score"] === f.score}))
+            }
+            if (f.nbJoueurs != 0) {
+                data = data.filter(((elmt) => {return elmt["nbJoueurs"] === f.nbJoueurs}))
+            }
         }
 
         return data;

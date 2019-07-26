@@ -23,7 +23,6 @@ import Database from '../../Data/Database';
 import NormalizeString from '../../Helpers/NormalizeString'
 
 import RechercheTerrainJouer from '../Jouer/Creation/Terrains_Autours'
-import RechercheDefiAutour from './RechercheDefiAutour'
 
 
 const SLIDER_DISTANCE_MAX = 20;
@@ -41,7 +40,7 @@ export default class RechercheAutour extends React.Component {
         // Collection
         this.type = this.props.navigation.getParam("type", null); // Joueurs, Equipes, Terrains, Defis
         switch (this.type) {
-            case "Joueurs" : {this.champNomQuery = "nomQuery"; this.champNom = "nom"; break;}
+            case "Joueurs" : {this.champNomQuery = "nomQuery"; this.champNom = "pseudo"; break;}
             case "Equipes" : {this.champNomQuery = "queryName"; this.champNom = "nom"; break;}
             case "Terrains": {this.champNomQuery = "queryName"; this.champNom = "InsNom"; break;}
         }
@@ -86,9 +85,6 @@ export default class RechercheAutour extends React.Component {
 
 
     willFocusAction = () => {
-        console.log("recherche autour will mount");
-
-        this.villesTriees = [];
         this.selfLat = LocalUser.geolocalisation.latitude;
         this.selfLong = LocalUser.geolocalisation.longitude;
 
@@ -103,10 +99,10 @@ export default class RechercheAutour extends React.Component {
         this.state = {
             dataAutour: [],
             dataAutourFiltered: [],
-            dataAutourAlphab: this.buildAlphabetique([]),
+            dataAutourAlphab: [],
             displayFiltres: false,
             filtres: null,
-            sliderValue: 1
+            //sliderValue: 1
         }
     }
 
@@ -114,7 +110,7 @@ export default class RechercheAutour extends React.Component {
         this.setState({
             dataAutour: [],
             dataAutourFiltered: [],
-            dataAutourAlphab: this.buildAlphabetique([]),
+            dataAutourAlphab: [],
             displayFiltres: false,
             filtres: null,
             sliderValue: 1
@@ -307,53 +303,36 @@ export default class RechercheAutour extends React.Component {
 
     handleValidateFilters = (q, f) => {
         this.handleFilterButton();
-        this.setState({filtres: f});
+        var data = this.state.dataAutour;
+        var dataFiltree = this.filtrerData2(data, f);
+        var dataFiltreeAlphab = this.buildAlphabetique(dataFiltree);
+        this.setState({
+            filtres: f,
+            dataAutourFiltered: dataFiltree,
+            dataAutourAlphab: dataFiltreeAlphab
+        });
     }
 
-
-    filtrerJoueurs = (data) => {
-        f = this.state.filtres;
-        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
-        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
-        if (f.departement !== "") {
-            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
-        }
-        if (f.ville !== "") {
-            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
-        }
-        if (f.score !== null) {
-            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
-        }
-
-        return data;
-    }
-
-    filtrerEquipes = (data) => {
-        f = this.state.filtres;
-        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
-        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
-        if (f.departement !== "") {
-            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
-        }
-        if (f.ville !== "") {
-            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
-        }
-        if (f.score !== null) {
-            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
-        }
-        if (f.nbJoueurs != 0) {
-            data = data.filter(((elmt) => {return elmt["nbJoueurs"] === f.nbJoueurs}))
-        }
-
-        return data;
-    }
 
 
     filtrerData = (data) => {
         if (this.state.filtres !== null) {
             switch (this.type) {
-                case "Joueurs" : return this.filtrerJoueurs(data);
-                case "Equipes" : return this.filtrerEquipes(data);
+                case "Joueurs" : return FiltrerJoueur.filtrerJoueurs(data, this.state.filtres);
+                case "Equipes" : return FiltrerEquipes.filtrerEquipes(data, this.state.filtres);
+            }
+        
+        } else {
+            return data;
+        }
+    }
+
+
+    filtrerData2 = (data, f) => {
+        if (f !== null) {
+            switch (this.type) {
+                case "Joueurs" : return FiltrerJoueur.filtrerJoueurs(data, f);
+                case "Equipes" : return FiltrerEquipes.filtrerEquipes(data, f);
             }
         
         } else {
@@ -405,11 +384,10 @@ export default class RechercheAutour extends React.Component {
                             onSlidingComplete={(v) => {
                                 this.setState({
                                     sliderValue: v,
-                                    filtres: null,
                                     displayFiltres: false,
                                 })
+                                this.updateDataProches(v)
                             }}
-                            onSlidingComplete={(v) => this.updateDataProches(v)}
                             step={1}
                             value={this.state.sliderValue}
                             minimumTrackTintColor={Color.lightGray}
@@ -466,7 +444,7 @@ class SectionItem extends React.Component {
     
 
     return (
-        <Text style={{color:'black'}}>{this.props.title}</Text>
+        <Text style={{color:'black'}}></Text>
     );
   }
 }
