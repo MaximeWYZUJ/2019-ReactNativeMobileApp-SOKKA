@@ -50,9 +50,10 @@ class Notif_Demande_Integrer_Equipe extends React.Component {
         this.getData()
     }
 
-    goToProfilEquipe() {
-        if(this.state.equipe != undefined) {
-            this.props.navigation.navigate("Profil_Equipe", {equipeId : this.state.equipe.id})
+    async goToProfilEquipe() {
+        if(this.state.emetteur!= undefined) {
+            var equipes = Database.getArrayDocumentData(this.state.emetteur.equipes, "Equipes")
+            this.props.navigation.navigate("ProfilJoueur", {id: this.state.emetteur.id, joueur : this.state.emetteur, equipes : equipes})
         }
     }
 
@@ -302,7 +303,7 @@ class Notif_Demande_Integrer_Equipe extends React.Component {
                         <Text>{this.renderNomEquipe()}</Text>
 
                         <TouchableOpacity
-                            onPress = {() => this.goToProfilEquipe()}
+                            onPress = {() => this.goToProfilJoueur()}
                             >
                             <Text style = {styles.txtBtn}>Consulter</Text>
                         </TouchableOpacity>
