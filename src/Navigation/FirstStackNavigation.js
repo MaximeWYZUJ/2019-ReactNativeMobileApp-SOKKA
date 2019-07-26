@@ -9,6 +9,7 @@ import Inscription_Nom_Pseudo from '../Vues/Connexion_Inscription/Inscription_No
 import Inscription_Photo from '../Vues/Connexion_Inscription/Inscription_Photo';
 import Inscription_Age_Zone from '../Vues/Connexion_Inscription/Inscription_Age_Zone'
 import Confimation_Inscription from '../Vues/Connexion_Inscription/Confimation_Inscription'
+import Inscription_CGU from '../Vues/Connexion_Inscription/Inscription_CGU'
 
 // Navigation "interne" avec tab bar
 import NavigationInterne from '../Navigation/OngletsNavigator'
@@ -46,6 +47,10 @@ const FirstStackNavigation = createStackNavigator({
      */
     InscriptionNomPseudo : {
         screen : Inscription_Nom_Pseudo
+    },
+
+    InscriptionCGU : {
+        screen: Inscription_CGU
     },
 
     /**

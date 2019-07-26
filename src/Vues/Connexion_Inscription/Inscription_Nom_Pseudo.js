@@ -89,7 +89,7 @@ export default class Inscription_Nom_Pseudo extends React.Component {
                 pseudoBis = this.state.prenom + " " + this.state.nom;
             }
 
-            this.props.navigation.push("InscriptionZone", 
+            this.props.navigation.push("InscriptionZone",
             {
                 mail : this.state.mail,
                 mdp : this.state.mdp,
@@ -169,7 +169,7 @@ export default class Inscription_Nom_Pseudo extends React.Component {
 
                         {/* Pour le sexe */}
                         <View style = {styles.view_champ}>
-                            <Animated.View style={[this.inputNom.getLayout(), {borderBottomWidth : 1, flexDirection: 'row'}]}>
+                            <Animated.View style={[this.inputNom.getLayout(), {borderBottomWidth : 1, flexDirection: 'row', alignItems: 'center'}]}>
                                 <Text>Sexe : </Text>
                                 <Picker
                                     selectedValue={this.state.sexe}
@@ -187,7 +187,7 @@ export default class Inscription_Nom_Pseudo extends React.Component {
                     {/* Le txt en millieu d'écran */}
                     <View style = {{alignItems : 'center', alignContent : 'center'}}>
                         <Text style ={styles.txt_description}>Indique ton nom et ton prénom pour </Text>
-                        <Text style ={styles.txt_description}>que tes fan puissent te retrouver !!</Text>
+                        <Text style ={styles.txt_description}>que tes fans puissent te retrouver !</Text>
                     </View>
 
                 

@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, FlatList, TouchableOpacity, Image, Alert } from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import Email from 'react-native-email'
 
 import BarreRechercheQuery from '../../Components/Recherche/Barre_Recherche_Query'
 import BarreRecherche from '../../Components/Recherche/Barre_Recherche'
@@ -253,6 +254,15 @@ export default class RechercheDefaut extends React.Component {
     }
 
 
+    handleProposerTerrain = () => {
+        const to = "email@email.com"
+        Email(to, {
+            subject : "Proposition de terrain",
+            body : "Bla bla"
+        }).catch(console.error)
+    }
+
+
     renderSpecialButton() {
 
         if (this.type == "Joueurs") {
@@ -299,13 +309,17 @@ export default class RechercheDefaut extends React.Component {
             return (
                 <TouchableOpacity onPress={() => Alert.alert(
                     '',
-                    "Ajout d'un terrain dans la BDD : pas de JEH associée",
+                    "Votre terrain n'est pas dans la base SOKKA ?\n\nPas de soucis, vous pouvez proposer d'ajouter votre terrain !",
                     [
                         {
-                            text: 'OK',
+                            text: 'Annuler',
                             onPress: () => {},
                             style: 'cancel'
-                        }
+                        },
+                        {
+                            text: 'Continuer',
+                            onPress: this.handleProposerTerrain,
+                        },
                     ],
                     )}>
                     <Image source={require('../../../res/icon_terrain.png')} style={{width: wp('15%'), height: wp('15%')}}/>

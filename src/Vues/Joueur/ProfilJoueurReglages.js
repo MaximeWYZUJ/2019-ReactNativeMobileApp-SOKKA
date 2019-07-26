@@ -11,6 +11,7 @@ import Simple_Loader from '../../Components/Loading/Simple_Loading'
 import NormalizeString from '../../Helpers/NormalizeString';
 import * as firebase from 'firebase';
 import '@firebase/firestore'
+import Email from 'react-native-email'
 
 
 var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -519,6 +520,16 @@ class ProfilJoueurReglages extends React.Component {
 
                     <View style={styles.validate}>
                         <Button title="Valider" onPress={() => this._validate()}/>
+                    </View>
+
+                    <View style={styles.validate}>
+                        <Button title="Contacter SOKKA" onPress={() => {
+                            const to = "email@email.com"
+                            Email(to, {
+                                subject : "Contacter SOKKA",
+                                body : "Bla bla"
+                            }).catch(console.error)
+                        }}/>
                     </View>
 
                     {/* Blank space pour pouvoir scroller assez et eviter d'etre masqué par le clavier */}

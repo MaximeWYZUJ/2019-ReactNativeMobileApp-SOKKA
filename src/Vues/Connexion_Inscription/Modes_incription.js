@@ -150,7 +150,7 @@ export default class Modes_incription extends React.Component {
                     })
 
                     this.props.navigation.push(
-                        "InscriptionNomPseudo", {
+                        "InscriptionCGU", {
                             mail : this.state.mail,
                             mdp : this.state.mdp
                     })
