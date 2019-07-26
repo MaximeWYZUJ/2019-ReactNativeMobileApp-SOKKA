@@ -16,6 +16,7 @@ import '@firebase/firestore'
 class List_Messages extends React.Component {
   constructor(props){
       super(props)
+      console.log("in list message !!",props.navigation.getParam('conv', undefined))
     this.state = {
         conv : this.props.navigation.getParam('conv', undefined),
         messages : [],
@@ -360,7 +361,7 @@ class List_Messages extends React.Component {
      * True si c'est une conv à plus de deux personnes
      */
     isAgroupConv(){
-        return this.state.conv.participants.length  >2
+        return this.state.conv.estUnGroupe;
     }
 
 
@@ -397,6 +398,8 @@ class List_Messages extends React.Component {
         }
     }
 
+   
+    
 
     async gotoToProfilJoueur(){
         var joueur = this.state.conv.joueur
@@ -411,6 +414,27 @@ class List_Messages extends React.Component {
         
         
     }
+
+    async goToModifGroupe() {
+        this.setState({isLoading : true})
+        var joueurs = await this.buildListOfParticipants()
+        this.setState({isLoading  : false})
+        this.props.navigation.push("ModifierGroupe",{groupe : this.state.conv, joueurs : joueurs})
+    }
+
+
+    async buildListOfParticipants() {
+        var db = Database.initialisation()
+        var gData = await Database.getDocumentData(this.state.conv.id, "Conversations")
+        var j = []
+        for(var i = 0; i < this.state.joueurs.length ; i++){
+            var joueur = this.state.joueurs[i]
+            if(gData.participants.includes(joueur.id)) {
+                j.push(joueur)
+            }
+        }
+        return j
+    }
     
     /**
      * Fonction qui affiche le nom et la photo de la personne avec qui on comunique
@@ -419,7 +443,13 @@ class List_Messages extends React.Component {
 
         return(
             <TouchableOpacity style = {styles.header}
-                onPress = {() => this.buildAlertGotoProfil()}>
+                onPress = {() => {
+                    if(! this.isAgroupConv()) {
+                        this.buildAlertGotoProfil()
+                    } else {
+                        this.goToModifGroupe()
+                    }
+                }}>
                 {this._renderPhotoConv(this.state.conv)}
 
                 <View>
@@ -430,6 +460,8 @@ class List_Messages extends React.Component {
 
     }
 
+
+  
     buildAlertGotoProfil() {
         Alert.alert(
             '',

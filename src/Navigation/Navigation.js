@@ -29,6 +29,7 @@ import Accueil_Conversation from "../Vues/Conversation/Accueil_Conversation"
 import List_Messages from '../Vues/Conversation/List_Messages'
 import New_Message from '../Vues/Conversation/New_Message'
 import New_Groupe from '../Vues/Conversation/New_Groupe'
+import Modifier_Groupe from '../Vues/Conversation/Modifier_Groupe'
 /*import Accueil_Jouer from '../Vues/Jouer/Accueil_Jouer'
 import Choix_Format_Defi from '../Vues/Jouer/Creation/Choix_Format_Defi'
 import Choix_Terrain_Defis from '../Vues/Jouer/Creation/Choix_Terrain_Defis'
@@ -165,6 +166,10 @@ const stackNavigator = createStackNavigator({
 
   NewGroupe : {
     screen : New_Groupe
+  },
+
+  ModifierGroupe : {
+    screen : Modifier_Groupe
   },
   /**
    * Page d'acceuil pour jouer

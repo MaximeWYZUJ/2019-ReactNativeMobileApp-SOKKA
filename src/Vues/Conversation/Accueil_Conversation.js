@@ -27,6 +27,7 @@ export default class Accueil_Conversation extends React.Component {
         super(props)
         this.state = {
             isLoading : true,
+            refreshing : false,
             conversations : [],
             participants : []   // array où chaque elt est de la forme {id_conv : String, joueur :any}  pour optimiser l'acces au donée
                                 // On ne stocke que les données où il y'a que deux participants et ça permettra de passer les données en 
@@ -79,6 +80,15 @@ export default class Accueil_Conversation extends React.Component {
     };
 
 
+     /** Fonction appelée au moment où l'utilisateur pull to refresh */
+     _onRefresh = async () => {
+        this.setState({refreshing: true});
+        console.log("REFRESHING ....")
+        this.getConversations()
+
+        this.setState({refreshing : false})
+    }
+
   
     componentDidMount(){
         this.getConversations()
@@ -96,6 +106,7 @@ export default class Accueil_Conversation extends React.Component {
             for(var i = 0; i < results.docs.length ; i++) {
                 console.log("in for convs §§§§§§§§§§")
                 var conv = results.docs[i].data()
+                console.log("CONV NOM  ====", conv.nom)
                 var joueur = undefined
                 
                 // Si deux participants alors on télécharge les données du joueur
@@ -266,11 +277,20 @@ export default class Accueil_Conversation extends React.Component {
         } else {
             return(
                 <View>
+                    <ScrollView style = {{paddingBottom : hp('20%')}}
+                    refreshControl={
+                        <RefreshControl
+                          refreshing={this.state.refreshing}
+                          onRefresh={this._onRefresh}
+                        />
+                      }
+                    >
                     <FlatList
                         data = {this.state.conversations}
                         renderItem = {this._renderItem}
                         style = {{marginTop : hp('2%'), marginHorizontal : wp('3.5%')}}
                         />
+                    </ScrollView>
                         
                 </View>
             )
