@@ -21,7 +21,9 @@ export default class Modifier_Groupe extends React.Component {
         super(props)
         this.state = {
             groupe : this.props.navigation.getParam('groupe', undefined),
-            joueurs : [LocalUser.data].concat(this.props.navigation.getParam('joueurs', []))
+            joueurs : [LocalUser.data].concat(this.props.navigation.getParam('joueurs', [])),
+            isLoading : false,
+            newNom : ""
 
         }
     
@@ -29,7 +31,10 @@ export default class Modifier_Groupe extends React.Component {
 
     static navigationOptions = ({ navigation }) => {
 
-    return { title:"Discussions", 
+        
+        return { title:"Discussions", 
+            
+    
         headerRight: (
 
             <TouchableOpacity
@@ -41,12 +46,105 @@ export default class Modifier_Groupe extends React.Component {
             </TouchableOpacity>
         ),
 
+            headerLeft : (
+                <TouchableOpacity
+                onPress = {() =>navigation.push("AccueilConversation", {retour_arriere_interdit : true})} >
+                   <Image
+                    style = {{width : 20, height : 20, marginLeft :15}}
+                    source = {require('../../../res/right-arrow-nav.png')}
+                   />
+               </TouchableOpacity>
+            )
+    
+        
+        };     
+    };
 
+     /**
+     * Fonction qui permet d'ouvrir la galerie et de permettre à l'utilisateur
+     * de choisir une photo de profil
+     */
+    pickImageGallerie = async () => {
+
+        
+        /* Obtenir les permissions. */
+        const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+
+        if (status === "granted") {
+            /* Ouvrir la galerie. */
+            let result = await ImagePicker.launchImageLibraryAsync({
+            });
+
+            /* Si l'utilisateur à choisis une image. */
+            if (!result.cancelled) {
+                this.setState({ 
+                photo: {uri : result.uri },
+                image_changed : true
+                });
+            }
+        }
+    };
+
+
+    uploadImage = async (uri, imageName) => {
+        const blob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+              resolve(xhr.response);
+            };
+            xhr.onerror = function() {
+              reject(new TypeError('Network request failed'));
+            };
+            xhr.responseType = 'blob';
+            xhr.open('GET', uri, true);
+            xhr.send(null);
+        });
+        var ref = firebase.storage().ref().child("Photos_profil_Joueurs/test/" + imageName);
+        ref.put(blob);
+
+        return ref.getDownloadURL();
+    }
+
+     /**
+     * Fonction qui permet de prendre une photo depuis la camera
+     */
+    pickImageCamera = async () => {
+        /* Obtenir les permissions. */
+        const { status } = await Permissions.askAsync(Permissions.CAMERA);
+
+        if (status === "granted") {
+            this.setState({usingCamera: true})
+        }
+    };
+
+    snapPhoto = async () => {
+        let photo = await this.camera.takePictureAsync();
+        this.setState({
+            photo: {uri: photo.uri},
+            txt_btn: 'SUIVANT',
+            image_changed: true,
+            usingCamera: false
+        })
+    }
     
 
-    
-    };     
-};
+    texteChanged = (searchedText) => {
+        this.setState({newNom : searchedText})
+    };
+
+     onSubmit = () => {
+        console.log("in submit")
+        var newNom = this.state.newNom
+        console.log(newNom)
+        console.log(this.state.groupe.id)
+        var db = Database.initialisation()
+        db.collection("Conversations").doc(this.state.groupe.id).update({
+            nom :newNom
+        }).catch(function(error) {
+            console.log(error)
+        })
+    }
+
 
 
     _renderPhotoConv() {
@@ -65,18 +163,98 @@ export default class Modifier_Groupe extends React.Component {
             )
         }
     }
-    alertAdmin(pseudo) {
+    alertAdmin(joueur) {
         Alert.alert(
+            joueur.pseudo,
             '',
-            pseudo,
             [
-                {text: 'Voir le profil', onPress: () => console.log('Cancel Pressed')},
-                {text: 'Envoyer un message', onPress: () => console.log('Cancel Pressed')},
-                {text: 'Supprimer du groupe', onPress: () => console.log('Cancel Pressed')},
+                {text: 'Voir le profil', onPress: () => this.voirProfil(joueur.id)},
+                {text: 'Envoyer un message', onPress: () => this.envoyerUnMessage(joueur)},
+                {text: 'Supprimer du groupe', onPress: () => this.supprDuGroupe(joueur.includesid)},
                 {text: 'Annuler', onPress: () => console.log('Cancel Pressed')},
 
             ],
         ) 
+    }
+
+    envoyerUnMessage(joueur) {
+        this.setState({isLoading : true})
+        // Verifier si la conv existe pas déja 
+        var db = Database.initialisation()
+        var refConv  = db.collection("Conversations");
+        var query = refConv.where("participants", 'array-contains' , LocalUser.data.id).where("estUnGroupe", "==",false)
+        query.get().then(async (results) => {
+            console.log("query ok !!!")
+            var pasResultat = results.docs.length == 0
+            var existePas = true
+            for( var i  = 0 ; i < results.docs.length; i++) {
+                existePas = existePas && !results.docs[i].data().participants.includes(joueur.id)
+                if(results.docs[i].data().participants.includes(joueur.id)) {
+                    var conv = results.docs[i].data()
+                    conv.joueur = joueur
+                }
+            }
+            console.log("==== pseudo  §§§ ====", joueur.pseudo)
+           if(pasResultat || existePas) {
+               var ref = db.collection("Conversations").doc()
+                await ref.set({
+                    aLue : false,
+                    id : ref.id,
+                    lecteurs : [],
+                    participants : [joueur.id, LocalUser.data.id],
+                    estUnGroupe : false
+                })
+                var conv = {
+                    aLue : false,
+                    id : ref.id,
+                    lecteurs:[],
+                    participants : [id, LocalUser.data.id],
+                    estUnGroupe : false,
+                    joueur : joueur
+                }
+                this.props.navigation.push("ListMessages", {conv : conv})
+           } else {
+                this.props.navigation.push("ListMessages", {conv : conv})
+           }
+        })
+        
+        
+    
+
+    }
+    ajouterJoueurs(){
+        this.props.navigation.push("NewMessage", {ajoutGroupeExistant : true, groupe : this.state.groupe})
+    }
+    trouverJoueur(id) {
+        for(var i = 0; i < this.state.joueurs.length; i ++){
+            if(this.state.joueurs[i].id == id) return this.state.joueurs[i]
+        }
+    }
+    async voirProfil(id) {
+        this.setState({isLoading : true})
+        var joueur = this.trouverJoueur(id);
+        var equipes = await Database.getArrayDocumentData(joueur.equipes, "Equipes")
+        var reseau = await Database.getArrayDocumentData(joueur.reseau , "Joueurs")
+        joueur.naissance = new Date(joueur.naissance.toDate());
+        this.setState({isLoading : false})
+        this.props.navigation.push("ProfilJoueur", {id: joueur.id, joueur : joueur, reseau : reseau, equipes : equipes})
+
+    }
+    async supprDuGroupe(id){
+        if(this.state.groupe.admin == LocalUser.data.id) {
+            var db  = Database.initialisation()
+            db.collection("Conversations").doc(this.state.groupe.id).update({
+                participants : firebase.firestore.FieldValue.arrayRemove(id)
+            })
+
+            var newParticipants = []
+            for(var i = 0; i < this.state.joueurs.length ; i++){
+                var j = this.state.joueurs[i] 
+                if(j.id != id) newParticipants.push(j)
+            }
+            
+            this.setState({joueurs : newParticipants})
+        }
     }
 
     renderItem = ({item}) => {
@@ -87,7 +265,7 @@ export default class Modifier_Groupe extends React.Component {
         return(
             <View style = {{marginRight : wp('8%'), flexDirection : "row"}}>
                 <TouchableOpacity style = {[styles.containerItemJoueur]}
-                    onPress = {() => this.alertAdmin()}
+                    onPress = {() => this.alertAdmin(item)}
                    >
 
                     <Image
@@ -123,36 +301,48 @@ export default class Modifier_Groupe extends React.Component {
     
 
     render() {
-        return(
-            <ScrollView>
-                <View style = {{flex : 1}}>
-                <View style = {{width :wp('100%'), paddingVertical : hp('1%'), backgroundColor : Color.grayItem, marginTop : hp('2%')}}>
-                        <Text style = {{color : "black", marginLeft : wp('4%')}}>Infos du groupe</Text>
+        if(this.state.isLoading) {
+            return(
+                <Simple_Loading
+                    taille = {hp('5%')}
+                />
+            )
+        } else {
+            return(
+                <ScrollView>
+                    <View style = {{flex : 1}}>
+                    <View style = {{width :wp('100%'), paddingVertical : hp('1%'), backgroundColor : Color.grayItem, marginTop : hp('2%')}}>
+                            <Text style = {{color : "black", marginLeft : wp('4%')}}>Infos du groupe</Text>
+                    </View>
+
+                    {this._renderPhotoConv()}
+
+                    <TextInput
+                        placeholder = {this.state.groupe.nom}
+                        placeholderTextColor = {"black"}
+                        style = {styles.txtInput}
+                        onChangeText = {this.texteChanged}
+                        onSubmitEditing= {this.onSubmit}
+                    />
+
+                    <Text style = {{marginLeft : wp('2%'), marginTop : hp('1%')}}>{this.state.joueurs.length} participant(s)</Text>
+                    <TouchableOpacity
+                        onPress = {() => this.ajouterJoueurs()}
+                        style = {{marginTop : hp('2%')}}>
+                        <Text style = {{marginLeft : wp('2%')}}>Ajouter des participants au groupe</Text>
+                    </TouchableOpacity>
+
+                    <FlatList
+                        data = {this.state.joueurs}
+                        keyExtractor={(item) => item.id}
+                        renderItem = {this.renderItem}
+                        extraData = {this.state.joueurs}
+                    />
                 </View>
-
-                {this._renderPhotoConv()}
-
-                <TextInput
-                    placeholder = {this.state.groupe.nom}
-                    placeholderTextColor = {"black"}
-                    style = {styles.txtInput}
-                />
-
-                <Text style = {{marginLeft : wp('2%'), marginTop : hp('1%')}}>{this.state.joueurs.length} participant(s)</Text>
-                <TouchableOpacity
-                    style = {{marginTop : hp('2%')}}>
-                    <Text style = {{marginLeft : wp('2%')}}>Ajouter des participants au groupe</Text>
-                </TouchableOpacity>
-
-                <FlatList
-                    data = {this.state.joueurs}
-                    keyExtractor={(item) => item.id}
-                    renderItem = {this.renderItem}
-                />
-            </View>
-            </ScrollView>
-            
-        )
+                </ScrollView>
+                
+            )
+        }
     }
 }
 

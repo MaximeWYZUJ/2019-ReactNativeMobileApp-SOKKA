@@ -78,7 +78,7 @@ export default class New_Groupe extends React.Component {
 
         /* Uploader la photo de profil et enregister l'utilisateur. */
         if(image_changed){
-            this.uploadImageFinal(this.state.photo.uri, this.state.txt)
+            this.uploadImageFinal(this.state.photo.uri, this.state.txt + LocalUser.data.pseudo)
                 .then(() => {
 
                     this.uploadUser(image_changed).then((groupe) => {

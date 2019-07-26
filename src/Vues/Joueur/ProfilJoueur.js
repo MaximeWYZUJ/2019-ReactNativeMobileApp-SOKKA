@@ -1014,7 +1014,6 @@ class ProfilJoueur extends React.Component {
                     </View>
                     {this.renderBtnDeco()}
 					{this._renderListEquipe()}
-    				{this.renderIconMessage()}
 
                 </ScrollView>
             )

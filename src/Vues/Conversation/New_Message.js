@@ -25,7 +25,9 @@ export default class New_Message extends React.Component {
             joueurs : [],
             newGroupe : false,
             joueursSelectiones : [],
-            joueursFiltres : []
+            joueursFiltres : [],
+            ajoutGroupeExistant: this.props.navigation.getParam('ajoutGroupeExistant', false),
+            groupe : this.props.navigation.getParam('groupe', undefined),
         }
     }
 
@@ -176,6 +178,28 @@ export default class New_Message extends React.Component {
         this.setState({joueursSelectiones : newJoueurs})
     }
 
+    async ajoutGroupeExistant(){
+        console.log("in ajout groupe existant")
+        this.setState({isLoading : true})
+        console.log("after set state")
+        var db = Database.initialisation()
+        console.log(this.state.joueursSelectiones)
+        console.log(this.state.groupe.id)
+        for(var i = 0; i < this.state.joueursSelectiones.length; i++){
+            await db.collection("Conversations").doc(this.state.groupe.id).update({
+                participants : firebase.firestore.FieldValue.arrayUnion(this.state.joueursSelectiones[i])
+            }).catch(function(error){
+                console.log(error)
+            })
+        }
+        this.setState({isLoading : false})
+
+        console.log("update donne")
+        var groupe = this.state.groupe
+        groupe.participants = groupe.participants.concat(this.state.joueursSelectiones)
+        this.props.navigation.push("ListMessages", {conv : groupe})
+    }
+
     _renderCell= ({item}) => {
         return(
             <View style = {{marginRight : wp('8%'), flexDirection : "row"}}>
@@ -217,7 +241,24 @@ export default class New_Message extends React.Component {
 
 
     renderCheckBox(id){
-        if(this.state.newGroupe) {
+        if(this.state.ajoutGroupeExistant) {
+            var checked = this.state.groupe.participants.includes(id) || this.state.joueursSelectiones.includes(id)
+            return(
+                <CheckBox
+                right
+                title=' '
+                checkedColor = {Color.agOOraBlue}
+                containerStyle={{backgroundColor: 'white', borderWidth :0,alignSelf : "center"}}                    
+                checked={checked}
+                onPress={() => {
+                    if(! this.state.groupe.participants.includes(id)) {
+                        this.selectionnerUnJoueur(id)
+                    }
+                }}
+            />
+            )
+        } else if(this.state.newGroupe) {
+            
             return(
                 <CheckBox
                 right
@@ -279,17 +320,7 @@ export default class New_Message extends React.Component {
 
 
     renderHeader(){
-        if(! this.state.newGroupe){
-            return(
-                <View style = {{flexDirection : "row", justifyContent : "space-between"}}>
-                    <View style = {{width : wp('2%')}}></View>
-                    <Text style = {styles.titre}>Nouv. Discussion</Text>
-                    <TouchableOpacity>
-                        <Text style = {styles.annuler}>Annuler</Text>
-                    </TouchableOpacity>
-                </View>
-            )
-        } else {
+        if(this.state.newGroupe || this.state.ajoutGroupeExistant) {
             return(
                 <View style = {{flexDirection : "row", justifyContent : "space-between"}}>
                     <TouchableOpacity 
@@ -305,7 +336,12 @@ export default class New_Message extends React.Component {
                     <TouchableOpacity
                         onPress = {() => {
                             if(this.state.joueursSelectiones.length > 1) {
-                                this.props.navigation.push("NewGroupe", {joueurs :this.buildDataJoueursNav()})
+                                if(this.state.ajoutGroupeExistant) {
+                                    console.log("in if")
+                                    this.ajoutGroupeExistant()
+                                } else {
+                                    this.props.navigation.push("NewGroupe", {joueurs :this.buildDataJoueursNav()})
+                                }
                             }
                         }}>
                         <Text style = {styles.annuler}>Suivant</Text>
@@ -313,7 +349,17 @@ export default class New_Message extends React.Component {
                    
                 </View>
             )
-        }
+        } else  if(! this.state.newGroupe){
+            return(
+                <View style = {{flexDirection : "row", justifyContent : "space-between"}}>
+                    <View style = {{width : wp('2%')}}></View>
+                    <Text style = {styles.titre}>Nouv. Discussion</Text>
+                    <TouchableOpacity>
+                        <Text style = {styles.annuler}>Annuler</Text>
+                    </TouchableOpacity>
+                </View>
+            )
+        } 
     }
 
     render() {

@@ -361,7 +361,7 @@ class List_Messages extends React.Component {
      * True si c'est une conv à plus de deux personnes
      */
     isAgroupConv(){
-        return this.state.conv.participants.length  >2
+        return this.state.conv.estUnGroupe;
     }
 
 
@@ -398,6 +398,8 @@ class List_Messages extends React.Component {
         }
     }
 
+   
+    
 
     async gotoToProfilJoueur(){
         var joueur = this.state.conv.joueur
@@ -413,8 +415,25 @@ class List_Messages extends React.Component {
         
     }
 
-    goToModifGroupe() {
-        this.props.navigation.push("ModifierGroupe",{groupe : this.state.conv, joueurs : this.state.joueurs})
+    async goToModifGroupe() {
+        this.setState({isLoading : true})
+        var joueurs = await this.buildListOfParticipants()
+        this.setState({isLoading  : false})
+        this.props.navigation.push("ModifierGroupe",{groupe : this.state.conv, joueurs : joueurs})
+    }
+
+
+    async buildListOfParticipants() {
+        var db = Database.initialisation()
+        var gData = await Database.getDocumentData(this.state.conv.id, "Conversations")
+        var j = []
+        for(var i = 0; i < this.state.joueurs.length ; i++){
+            var joueur = this.state.joueurs[i]
+            if(gData.participants.includes(joueur.id)) {
+                j.push(joueur)
+            }
+        }
+        return j
     }
     
     /**
