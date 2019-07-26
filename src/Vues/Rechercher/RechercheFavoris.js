@@ -34,7 +34,7 @@ export default class RechercheFavoris extends React.Component {
 
         // Champ(s) sur lequel faire la query
         switch (this.type) {
-            case "Joueurs" : {this.champNomQuery = "nomQuery"; this.champNom = "pseudo"; break;}
+            case "Joueurs" : {this.champNomQuery = "pseudoQuery"; this.champNom = "pseudo"; break;}
             case "Equipes" : {this.champNomQuery = "queryName"; this.champNom = "nom"; break;}
             case "Terrains": {this.champNomQuery = "queryName"; this.champNom = "InsNom"; break;}
         }
