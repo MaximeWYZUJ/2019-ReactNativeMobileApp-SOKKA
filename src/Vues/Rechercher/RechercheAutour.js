@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, Button } from 'react-native'
 import Slider from 'react-native-slider'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
@@ -31,9 +31,7 @@ export default class RechercheAutour extends React.Component {
 
 
     constructor(props) {
-        console.log("recherche autour");
         super(props);
-        this.villesTriees = [];
         this.selfLat = LocalUser.geolocalisation.latitude;
         this.selfLong = LocalUser.geolocalisation.longitude;
 
@@ -46,13 +44,16 @@ export default class RechercheAutour extends React.Component {
         }
 
         this.state = {
+            //villesTriees: [],
+
             dataAutour: [],
             dataAutourFiltered: [],
-            dataAutourAlphab: this.buildAlphabetique([]),
+            dataAutourAlphab: [],
             displayFiltres: false,
             filtres: null,
             sliderValue: 1
         }
+        console.log("constructeur");
     }
 
     static navigationOptions = ({ navigation }) => {
@@ -65,20 +66,9 @@ export default class RechercheAutour extends React.Component {
 
     // === Manipulation du lifecycle entre les onglets ===
     componentDidMount() {
-        // Tri des villes par distance
-        var villesTrieesAvecDoublons = Villes.sort(this.comparaisonDistanceVilles);
+        console.log("did mount");
+        //this.triVilles();
 
-        // Suppression des doublons
-        var villesTrieesSansDoublons = [];
-        villesTrieesSansDoublons.push(villesTrieesAvecDoublons[0]);
-        for (var i=1; i<villesTrieesAvecDoublons.length; i++) {
-            if (!(villesTrieesAvecDoublons[i].Nom_commune === villesTrieesAvecDoublons[i-1].Nom_commune)) {
-                villesTrieesSansDoublons.push(villesTrieesAvecDoublons[i]);
-            }
-        }
-
-        this.villesTriees = villesTrieesSansDoublons;
-        
         this.willFocusSubscription = this.props.navigation.addListener('willFocus', this.willFocusAction);
         this.willBlurSubscription = this.props.navigation.addListener('willBlur', this.willBlurAction);
     }
@@ -124,7 +114,31 @@ export default class RechercheAutour extends React.Component {
     }
 
 
+    componentWillReceiveProps() {
+        console.log("will receive props")
+        this.triVilles();
+    }
+
     // ===================================================
+
+
+    async triVilles() {
+        // Tri des villes par distance
+        var villesTrieesAvecDoublons = Villes.sort(this.comparaisonDistanceVilles);
+
+        // Suppression des doublons
+        var villesTrieesSansDoublons = [];
+        villesTrieesSansDoublons.push(villesTrieesAvecDoublons[0]);
+        for (var i=1; i<villesTrieesAvecDoublons.length; i++) {
+            if (!(villesTrieesAvecDoublons[i].Nom_commune === villesTrieesAvecDoublons[i-1].Nom_commune)) {
+                villesTrieesSansDoublons.push(villesTrieesAvecDoublons[i]);
+            }
+        }
+
+        this.setState({
+            villesTriees: villesTrieesSansDoublons,
+        })
+    }
 
 
     // Comparaison de deux villes en fonction de leur distance par rapport à soi
@@ -150,8 +164,9 @@ export default class RechercheAutour extends React.Component {
 
     // Renvoie la liste des villes proches de notre position
     getVillesProches(distanceMax) {
+        if (this.state.villesTriees != undefined) {
         villesProches = [];
-        for (v of this.villesTriees) {
+        for (v of this.state.villesTriees) {
             vLat = v.coordonnees_gps.split(',')[0];
             vLong = v.coordonnees_gps.split(',')[1];
             d = Distance.calculDistance(this.selfLat, this.selfLong, vLat, vLong);
@@ -164,6 +179,7 @@ export default class RechercheAutour extends React.Component {
         }
 
         return villesProches;
+        }
     }
 
     // Renvoie la liste des joueurs habitant dans une ville proche de notre position
@@ -355,6 +371,8 @@ export default class RechercheAutour extends React.Component {
     // === RENDER ===
     // ==============
     render() {
+        console.log("render");
+
         if (this.type === "Terrains") {
             return (<RechercheTerrainJouer
                         gotoItemOnPress={true}
@@ -363,7 +381,6 @@ export default class RechercheAutour extends React.Component {
                 />)
         }
         else {
-
             return (
                 <View style={{flex: 1}}>
                     <BarreRecherche

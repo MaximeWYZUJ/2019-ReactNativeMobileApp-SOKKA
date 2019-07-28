@@ -82,6 +82,27 @@ export default class Inscription_Photo extends React.Component {
     }
 
 
+    /**
+     * Fonction qui renvoie la position de la ville à partir de son nom
+     * @param {String} Name : Nom de la ville 
+     */
+    findPositionVilleFromName(name) {
+        for(var i  =  0 ; i < villes.length; i++) {
+            if(name.toLocaleLowerCase() == villes[i].Nom_commune.toLocaleLowerCase()) {
+                var position = villes[i].coordonnees_gps
+                var latitude = position.split(',')[0]
+                var longitude = position.split(', ')[1]
+                 var pos = {
+                    latitude : parseFloat(latitude),
+                    longitude : parseFloat(longitude)
+                }
+               return pos
+
+            }
+        }
+    }
+
+
     //***************************************************************************
     //********************** CHOIX DE LA PHOTO DE PROFIL ************************
     //***************************************************************************
@@ -186,18 +207,9 @@ export default class Inscription_Photo extends React.Component {
      * image_change : bool : true si l'user renseigne une image 
      */
     async uploadUser(image_changed) {
-        console.log("in uploadUser")
-        //var db  = Database.initialisation()
-        //var urlPhoto = 'erreur'
         var fileName = this.state.pseudo
-        /*var nom = this.state.prenom + ' ' + this.state.nom
-        var mail = this.state.mail
-        var age = this.state.age
-        var naissance = this.state.naissance
-        var ville = this.state.ville
-        var zone = this.state.zone*/
         const oldState = this.state;
-
+        
         firebase.auth().createUserWithEmailAndPassword(this.state.mail, this.state.mdp)
         .then(function(data){
             var id = data.user.uid
@@ -228,6 +240,7 @@ export default class Inscription_Photo extends React.Component {
                             position: null,
                             pseudo: oldState.pseudo,
                             queryPseudo: NormalizeString.normalize(oldState.pseudo),
+                            pseudoQuery: NormalizeString.decompose(oldState.pseudo),
                             sexe: oldState.sexe,
                             reseau: [],
                             score: 0,
@@ -245,6 +258,8 @@ export default class Inscription_Photo extends React.Component {
                         LocalUser.exists = true;
                         LocalUser.data = user;
                         LocalUser.data.naissance = new Date(user.naissance.toDate());
+                        var villePos = this.findPositionVilleFromName(docData.ville);
+                        LocalUser.geolocalisation = villePos;
     
                         // Stockage dans la DB
                         Database.addDocToCollection(user, id, 'Joueurs')
@@ -273,6 +288,7 @@ export default class Inscription_Photo extends React.Component {
                         position: null,
                         pseudo: oldState.pseudo,
                         queryPseudo: NormalizeString.normalize(oldState.pseudo),
+                        pseudoQuery: NormalizeString.decompose(oldState.pseudo),
                         sexe: oldState.sexe,
                         reseau: [],
                         score: 0,
@@ -288,6 +304,8 @@ export default class Inscription_Photo extends React.Component {
                     LocalUser.exists = true;
                     LocalUser.data = user;
                     LocalUser.data.naissance = new Date(user.naissance.toDate());
+                    var villePos = this.findPositionVilleFromName(docData.ville);
+                    LocalUser.geolocalisation = villePos;
 
                     // Stockage dans la DB
                     Database.addDocToCollection(user, id, 'Joueurs')

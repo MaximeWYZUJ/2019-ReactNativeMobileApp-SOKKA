@@ -20,8 +20,8 @@ import Database from '../../Data/Database'
 export default class RechercheFavoris extends React.Component {
 
     constructor(props) {
-        console.log("recherche fav");
         super(props)
+
         // Collection
         this.type = this.props.navigation.getParam("type", null); // Joueurs, Equipes, Terrains, Defis
         

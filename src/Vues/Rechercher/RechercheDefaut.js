@@ -30,7 +30,6 @@ import LocalUser from '../../Data/LocalUser.json'
 export default class RechercheDefaut extends React.Component {
 
     constructor(props) {
-        console.log("recherche defaut");
         super(props)
 
         // Collection

@@ -193,7 +193,7 @@ class First_screen extends React.Component {
         }
     }
 
-
+ 
     gotoProfilJoueur(id) {
        Database.getDocumentData(id, 'Joueurs').then(async (docData) => {
             // Traitement de la collection Equipes
