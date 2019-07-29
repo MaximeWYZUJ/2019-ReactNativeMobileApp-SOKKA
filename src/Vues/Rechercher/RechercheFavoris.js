@@ -1,5 +1,9 @@
 import React from 'react'
 import { View, Text, FlatList } from 'react-native'
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import RF from 'react-native-responsive-fontsize';
+
+import AlphabetListView from 'react-native-alphabetlistview'
 
 import BarreRecherche from '../../Components/Recherche/Barre_Recherche'
 import ItemJoueur from '../../Components/ProfilJoueur/JoueurItem'
@@ -16,8 +20,8 @@ import Database from '../../Data/Database'
 export default class RechercheFavoris extends React.Component {
 
     constructor(props) {
-        console.log("recherche fav");
         super(props)
+
         // Collection
         this.type = this.props.navigation.getParam("type", null); // Joueurs, Equipes, Terrains, Defis
         
@@ -30,14 +34,16 @@ export default class RechercheFavoris extends React.Component {
 
         // Champ(s) sur lequel faire la query
         switch (this.type) {
-            case "Joueurs" : this.champNom = "nomQuery"; break;
-            case "Equipes" : this.champNom = "queryName"; break;
-            case "Terrains": this.champNom = "queryName"; break;
+            case "Joueurs" : {this.champNomQuery = "pseudoQuery"; this.champNom = "pseudo"; break;}
+            case "Equipes" : {this.champNomQuery = "queryName"; this.champNom = "nom"; break;}
+            case "Terrains": {this.champNomQuery = "queryName"; this.champNom = "InsNom"; break;}
         }
         
         // State
         this.state = {
             dataFav: [],
+            dataFavFiltered: [],
+            dataFavAlphab: [],
             displayFiltres: false,
             filtres: null
         }
@@ -55,7 +61,13 @@ export default class RechercheFavoris extends React.Component {
     componentDidMount() {
         Database.getArrayDocumentData(this.allFavId, this.type).then(data => {
             this.allFav = data;
-            this.setState({dataFav: data})
+            var dataF = this.filtrerData(data);
+            var dataFA = this.buildAlphabetique(dataF);
+            this.setState({
+                dataFav: data,
+                dataFavFiltered: dataF,
+                dataFavAlphab: dataFA
+            })
         })
 
         this.willBlurSubscription = this.props.navigation.addListener('willBlur', this.willBlurAction);
@@ -76,7 +88,7 @@ export default class RechercheFavoris extends React.Component {
     // ====================================================
 
 
-    renderItem(item) {
+    renderItem = ({item}) => {
         switch(this.type) {
             case "Joueurs":
                 return (
@@ -138,7 +150,13 @@ export default class RechercheFavoris extends React.Component {
 
     handleValidateFilters = (q, f) => {
         this.handleFilterButton();
-        this.setState({filtres: f});
+        var dataF = this.filtrerData2(this.allFav, f);
+        var dataFA = this.buildAlphabetique(dataF);
+        this.setState({
+                dataFavFiltered: dataF,
+                dataFavAlphab: dataFA,
+                filtres: f
+            })
     }
 
 
@@ -156,10 +174,68 @@ export default class RechercheFavoris extends React.Component {
     }
 
 
+    filtrerData2 = (data, f) => {
+        if (f !== null) {
+            switch (this.type) {
+                case "Joueurs" : return FiltrerJoueur.filtrerJoueurs(data, f);
+                case "Equipes" : return FiltrerEquipe.filtrerEquipes(data, f);
+                case "Terrains": return FiltrerTerrain.filtrerTerrains(data, f)
+            }
+        
+        } else {
+            return data;
+        }
+    }
+
+
     validerRecherche = (data) => {
+        var dataF = this.filtrerData(data);
+        var dataFA = this.buildAlphabetique(dataF);
         this.setState({
-            dataFav: data
+            dataFav: data,
+            dataFavFiltered: dataF,
+            dataFavAlphab: dataFA
         })
+    }
+
+
+    // Construit le tableau avec les donnees par ordre alphabetique
+    buildAlphabetique(donneesBrutes) {
+        let  data =  {
+            A: [],
+            B: [],
+            C: [],
+            D: [],
+            E: [],
+            F: [],
+            G: [],
+            H: [],
+            I: [],
+            J: [],
+            K: [],
+            L: [],
+            M: [],
+            N: [],
+            O: [],
+            P: [],
+            Q: [],
+            R: [],
+            S: [],
+            T: [],
+            U: [],
+            V: [],
+            W: [],
+            X: [],
+            Y: [],
+            Z: [],
+        }
+        for(var i = 0; i < donneesBrutes.length ; i ++) {
+            item = donneesBrutes[i];
+            let pseudo = item[this.champNom];
+            let lettre = pseudo[0].toUpperCase();
+            data[lettre].push(item);
+        }
+        return data
     }
 
 
@@ -169,18 +245,61 @@ export default class RechercheFavoris extends React.Component {
                 <BarreRecherche
                     handleTextChange={this.validerRecherche}
                     data={this.allFav}
-                    field={this.champNom}
+                    field={this.champNomQuery}
                     filterData={this.filtrerData}
                     handleFilterButton={this.handleFilterButton}
                 />
                 {this.displayFiltresComponents()}
-                <FlatList
-                    data={this.state.dataFav}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({item}) => this.renderItem(item)}
-                />
+                <View style = {{flex: 5}}>
+                    <AlphabetListView
+                        data={this.state.dataFavAlphab}
+                        cell={this.renderItem}
+                        cellHeight={30}
+                        sectionListItem={SectionItem}
+                        sectionHeader={SectionHeader}
+                        sectionHeaderHeight={22.5}
+                    />
+                </View>
             </View>
         )
     }
 
+}
+
+
+
+// Classes internes
+
+class SectionHeader extends React.Component {
+
+    render() {
+    // inline styles used for brevity, use a stylesheet when possible
+    var textStyle = {
+      color:'black',
+      fontWeight:'bold',
+      fontSize:RF(2.5),
+      marginLeft : wp('2.5%')
+    };
+
+    var viewStyle = {
+      backgroundColor: '#F7F7F7'
+    };
+  
+    return (
+        <View style={viewStyle}>
+            <Text style={textStyle}>{this.props.title}</Text>
+        </View>
+      
+    );
+  }
+}
+
+class SectionItem extends React.Component {
+  render() {
+    
+
+    return (
+        <Text style={{color:'black'}}></Text>
+    );
+  }
 }

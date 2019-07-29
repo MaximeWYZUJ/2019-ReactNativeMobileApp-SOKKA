@@ -3,13 +3,14 @@ import {View, Text,Image, FlatList, ImageBackground,  StyleSheet, Animated,Touch
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Barre_Recherche from '../../../../Components/Recherche/Barre_Recherche'
-import  Database from '../../../../Data/Database'
+import Database from '../../../../Data/Database'
 import Joueur_item_Creation_Partie from '../../../../Components/ProfilJoueur/Joueur_item_Creation_Partie'
 import { connect } from 'react-redux'
 import AlphabetListView from 'react-native-alphabetlistview'
 import LocalUser from '../../../../Data/LocalUser.json'
+import FiltrerJoueur from '../../../../Components/Recherche/FiltrerJoueur'
 
-// A SUPPR QUAND ACCES FICHIER LOCAL
+
 
 /**
  * Classe qui permet à l'utilisateur de choisir des joueurs de son réseau lors
@@ -21,7 +22,8 @@ class Joueurs_Reseau_Partie extends React.Component {
         super(props)
         this.reseau = LocalUser.data.reseau
         this.state = {
-            
+            displayFiltres: false,
+            filtres: null,
             joueurs : [],
             joueursFiltres : []
         }
@@ -36,37 +38,43 @@ class Joueurs_Reseau_Partie extends React.Component {
 
     async getJoueursFromDB() {
         var joueursArray = await Database.getArrayDocumentData(this.reseau, "Joueurs")
-        var j = this.buildJoueurs(joueursArray)
-        this.setState({joueurs : joueursArray , joueursFiltres : j})
+        this.setState({joueurs : joueursArray , joueursFiltres : joueursArray})
     }
 
 
-    /**
-	 * Fonction qui va être passé en props du componant
-	 * BareRecherche et qui va permettre de filtrer les joueurs 
-	 * en fonction de ce que tappe l'utilisateur
-	 */
-    recherche = (data)  => {
-		this.setState({
-			joueursFiltres : this.buildJoueurs(data)
-		})
-    }
-
-    isJoueurPresent(liste, joueur) {
-        for(var i = 0; i < liste.length ; i++) {
-            if(liste[i].id == joueur.id){
-                return true 
-            }
+    displayFiltresComponents() {
+        if (this.state.displayFiltres) {
+            return (<FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
         }
-        return false
     }
 
-    /**
-     * Fonction qui permet de trier les joueurs en fonction de l'ordre laphabethique
-     * de leur pseudo.
-     * @param {*} joueurs 
-     */
-    buildJoueurs(joueurs) {
+
+    handleFilterButton = () => {
+        this.setState({
+            displayFiltres: !this.state.displayFiltres
+        })
+    }
+
+
+    handleValidateFilters = (q, f) => {
+        var dataF = FiltrerJoueur.filtrerJoueurs(this.state.joueurs, f);
+        this.setState({
+            joueursFiltres: dataF,
+            filtres: f,
+            displayFiltres: false
+        })
+    }
+
+    validerRecherche = (data) => {
+        var dataF = FiltrerJoueur.filtrerJoueurs(data, this.state.filtres);
+        this.setState({
+            joueursFiltres: dataF,
+        })
+    }
+
+
+    // Construit le tableau avec les donnees par ordre alphabetique
+    buildAlphabetique(donneesBrutes) {
         let  data =  {
             A: [],
             B: [],
@@ -95,24 +103,24 @@ class Joueurs_Reseau_Partie extends React.Component {
             Y: [],
             Z: [],
         }
-        
-        for(var i = 0; i < joueurs.length ; i ++) {
-            joueur = joueurs[i]
-            let lettre = joueur.pseudo[0].toUpperCase()
-            let arrayj = data[lettre]
-            let j = {
-                pseudo : joueur.pseudo,
-                photo : joueur.photo,
-                score : joueur.score,
-                id : joueur.id,
-                tokens : joueur.tokens
-            }
-            arrayj.push(j)
-            data[lettre] = arrayj
+        for(var i = 0; i < donneesBrutes.length ; i ++) {
+            item = donneesBrutes[i];
+            let pseudo = item["pseudo"];
+            let lettre = pseudo[0].toUpperCase();
+            data[lettre].push(item);
         }
         return data
     }
 
+
+    isJoueurPresent(liste, joueur) {
+        for(var i = 0; i < liste.length ; i++) {
+            if(liste[i].id == joueur.id){
+                return true 
+            }
+        }
+        return false
+    }
 
 
     _renderItem = ({item}) => {       
@@ -133,14 +141,13 @@ class Joueurs_Reseau_Partie extends React.Component {
             if( !this.state.joueursFiltres == 0){
                 return(
                     <AlphabetListView
-                        data = {this.state.joueursFiltres}
-                        cell={this._renderCell}
+                        data = {this.buildAlphabetique(this.state.joueursFiltres)}
+                        cell={this._renderItem}
                         cellHeight={30}
                         sectionListItem={SectionItem}
                         sectionHeader={SectionHeader}
                         sectionHeaderHeight={22.5}
                     />
-
                     
                 )
             } else {
@@ -155,28 +162,20 @@ class Joueurs_Reseau_Partie extends React.Component {
         }
     }
 
-    _renderCell= ({item}) => {
-        return(
-            <Cell
-                item = {item}
-                isChecked= {this.isJoueurPresent(this.props.joueursPartie , item)}
-            />
-        )
-    }
 
     render() {
         return (
-            <View style = {{flex :1}}>
+            <ScrollView>
                 <Barre_Recherche
-                    handleTextChange ={this.recherche}
+                    handleTextChange ={this.validerRecherche}
                     data = {this.state.joueurs}
-                    field = "pseudo"
+                    field = {"pseudoQuery"}
+                    filtrerData = {(data) => FiltrerJoueur.filtrerJoueurs(data, this.state.filtres)}
+                    handleFilterButton = {this.handleFilterButton}
                 />
-                
+                {this.displayFiltresComponents()}
                 {this.renderList()}
-
-                
-            </View>
+            </ScrollView>
 
          
                 
@@ -215,30 +214,11 @@ class SectionItem extends React.Component {
       
   
       return (
-          <Text style={{color:'black'}}>{this.props.title}</Text>
+          <Text></Text>
       );
     }
 }
 
-class Cell extends React.Component {
-  
-    render() {
-    return (
-        <View style = {{marginRight : wp('8%')}}>
-            <Joueur_item_Creation_Partie
-                pseudo = {this.props.item.pseudo}
-                id = {this.props.item.id}
-                photo = {this.props.item.photo}
-                score = {this.props.item.score}
-                isChecked = {this.props.isChecked}
-                tokens = {this.props.item.tokens}
-
-
-            />
-      </View>
-    );
-  }
-}
 
 const mapStateToProps = (state) => {
     return{ 

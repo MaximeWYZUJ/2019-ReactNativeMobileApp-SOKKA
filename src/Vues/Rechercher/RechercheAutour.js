@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, Button } from 'react-native'
 import Slider from 'react-native-slider'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
@@ -23,7 +23,6 @@ import Database from '../../Data/Database';
 import NormalizeString from '../../Helpers/NormalizeString'
 
 import RechercheTerrainJouer from '../Jouer/Creation/Terrains_Autours'
-import RechercheDefiAutour from './RechercheDefiAutour'
 
 
 const SLIDER_DISTANCE_MAX = 20;
@@ -32,28 +31,29 @@ export default class RechercheAutour extends React.Component {
 
 
     constructor(props) {
-        console.log("recherche autour");
         super(props);
-        this.villesTriees = [];
         this.selfLat = LocalUser.geolocalisation.latitude;
         this.selfLong = LocalUser.geolocalisation.longitude;
 
         // Collection
         this.type = this.props.navigation.getParam("type", null); // Joueurs, Equipes, Terrains, Defis
         switch (this.type) {
-            case "Joueurs" : {this.champNomQuery = "nomQuery"; this.champNom = "nom"; break;}
+            case "Joueurs" : {this.champNomQuery = "pseudoQuery"; this.champNom = "pseudo"; break;}
             case "Equipes" : {this.champNomQuery = "queryName"; this.champNom = "nom"; break;}
             case "Terrains": {this.champNomQuery = "queryName"; this.champNom = "InsNom"; break;}
         }
 
         this.state = {
+            //villesTriees: [],
+
             dataAutour: [],
             dataAutourFiltered: [],
-            dataAutourAlphab: this.buildAlphabetique([]),
+            dataAutourAlphab: [],
             displayFiltres: false,
             filtres: null,
             sliderValue: 1
         }
+        console.log("constructeur");
     }
 
     static navigationOptions = ({ navigation }) => {
@@ -66,36 +66,22 @@ export default class RechercheAutour extends React.Component {
 
     // === Manipulation du lifecycle entre les onglets ===
     componentDidMount() {
-        // Tri des villes par distance
-        var villesTrieesAvecDoublons = Villes.sort(this.comparaisonDistanceVilles);
+        console.log("did mount");
+        this.triVilles();
 
-        // Suppression des doublons
-        var villesTrieesSansDoublons = [];
-        villesTrieesSansDoublons.push(villesTrieesAvecDoublons[0]);
-        for (var i=1; i<villesTrieesAvecDoublons.length; i++) {
-            if (!(villesTrieesAvecDoublons[i].Nom_commune === villesTrieesAvecDoublons[i-1].Nom_commune)) {
-                villesTrieesSansDoublons.push(villesTrieesAvecDoublons[i]);
-            }
-        }
-
-        this.villesTriees = villesTrieesSansDoublons;
-        
         this.willFocusSubscription = this.props.navigation.addListener('willFocus', this.willFocusAction);
         this.willBlurSubscription = this.props.navigation.addListener('willBlur', this.willBlurAction);
     }
 
 
     willFocusAction = () => {
-        console.log("recherche autour will mount");
-
-        this.villesTriees = [];
         this.selfLat = LocalUser.geolocalisation.latitude;
         this.selfLong = LocalUser.geolocalisation.longitude;
 
         // Collection
         this.type = this.props.navigation.getParam("type", null); // Joueurs, Equipes, Terrains, Defis
         switch (this.type) {
-            case "Joueurs" : {this.champNomQuery = "nomQuery"; this.champNom = "nom"; break;}
+            case "Joueurs" : {this.champNomQuery = "nomQuery"; this.champNom = "pseudo"; break;}
             case "Equipes" : {this.champNomQuery = "queryName"; this.champNom = "nom"; break;}
             case "Terrains": {this.champNomQuery = "queryName"; this.champNom = "InsNom"; break;}
         }
@@ -103,10 +89,10 @@ export default class RechercheAutour extends React.Component {
         this.state = {
             dataAutour: [],
             dataAutourFiltered: [],
-            dataAutourAlphab: this.buildAlphabetique([]),
+            dataAutourAlphab: [],
             displayFiltres: false,
             filtres: null,
-            sliderValue: 1
+            //sliderValue: 1
         }
     }
 
@@ -114,7 +100,7 @@ export default class RechercheAutour extends React.Component {
         this.setState({
             dataAutour: [],
             dataAutourFiltered: [],
-            dataAutourAlphab: this.buildAlphabetique([]),
+            dataAutourAlphab: [],
             displayFiltres: false,
             filtres: null,
             sliderValue: 1
@@ -128,7 +114,31 @@ export default class RechercheAutour extends React.Component {
     }
 
 
+    componentWillReceiveProps() {
+        console.log("will receive props")
+        //this.triVilles();
+    }
+
     // ===================================================
+
+
+    async triVilles() {
+        // Tri des villes par distance
+        var villesTrieesAvecDoublons = Villes.sort(this.comparaisonDistanceVilles);
+
+        // Suppression des doublons
+        var villesTrieesSansDoublons = [];
+        villesTrieesSansDoublons.push(villesTrieesAvecDoublons[0]);
+        for (var i=1; i<villesTrieesAvecDoublons.length; i++) {
+            if (!(villesTrieesAvecDoublons[i].Nom_commune === villesTrieesAvecDoublons[i-1].Nom_commune)) {
+                villesTrieesSansDoublons.push(villesTrieesAvecDoublons[i]);
+            }
+        }
+
+        this.setState({
+            villesTriees: villesTrieesSansDoublons,
+        })
+    }
 
 
     // Comparaison de deux villes en fonction de leur distance par rapport à soi
@@ -154,8 +164,9 @@ export default class RechercheAutour extends React.Component {
 
     // Renvoie la liste des villes proches de notre position
     getVillesProches(distanceMax) {
+        if (this.state.villesTriees != undefined) {
         villesProches = [];
-        for (v of this.villesTriees) {
+        for (v of this.state.villesTriees) {
             vLat = v.coordonnees_gps.split(',')[0];
             vLong = v.coordonnees_gps.split(',')[1];
             d = Distance.calculDistance(this.selfLat, this.selfLong, vLat, vLong);
@@ -168,6 +179,7 @@ export default class RechercheAutour extends React.Component {
         }
 
         return villesProches;
+        }
     }
 
     // Renvoie la liste des joueurs habitant dans une ville proche de notre position
@@ -307,53 +319,36 @@ export default class RechercheAutour extends React.Component {
 
     handleValidateFilters = (q, f) => {
         this.handleFilterButton();
-        this.setState({filtres: f});
+        var data = this.state.dataAutour;
+        var dataFiltree = this.filtrerData2(data, f);
+        var dataFiltreeAlphab = this.buildAlphabetique(dataFiltree);
+        this.setState({
+            filtres: f,
+            dataAutourFiltered: dataFiltree,
+            dataAutourAlphab: dataFiltreeAlphab
+        });
     }
 
-
-    filtrerJoueurs = (data) => {
-        f = this.state.filtres;
-        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
-        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
-        if (f.departement !== "") {
-            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
-        }
-        if (f.ville !== "") {
-            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
-        }
-        if (f.score !== null) {
-            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
-        }
-
-        return data;
-    }
-
-    filtrerEquipes = (data) => {
-        f = this.state.filtres;
-        data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
-        data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
-        if (f.departement !== "") {
-            data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
-        }
-        if (f.ville !== "") {
-            data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
-        }
-        if (f.score !== null) {
-            data = data.filter(((elmt) => {return elmt["score"] === f.score}))
-        }
-        if (f.nbJoueurs != 0) {
-            data = data.filter(((elmt) => {return elmt["nbJoueurs"] === f.nbJoueurs}))
-        }
-
-        return data;
-    }
 
 
     filtrerData = (data) => {
         if (this.state.filtres !== null) {
             switch (this.type) {
-                case "Joueurs" : return this.filtrerJoueurs(data);
-                case "Equipes" : return this.filtrerEquipes(data);
+                case "Joueurs" : return FiltrerJoueur.filtrerJoueurs(data, this.state.filtres);
+                case "Equipes" : return FiltrerEquipes.filtrerEquipes(data, this.state.filtres);
+            }
+        
+        } else {
+            return data;
+        }
+    }
+
+
+    filtrerData2 = (data, f) => {
+        if (f !== null) {
+            switch (this.type) {
+                case "Joueurs" : return FiltrerJoueur.filtrerJoueurs(data, f);
+                case "Equipes" : return FiltrerEquipes.filtrerEquipes(data, f);
             }
         
         } else {
@@ -376,6 +371,8 @@ export default class RechercheAutour extends React.Component {
     // === RENDER ===
     // ==============
     render() {
+        console.log("render");
+
         if (this.type === "Terrains") {
             return (<RechercheTerrainJouer
                         gotoItemOnPress={true}
@@ -384,7 +381,6 @@ export default class RechercheAutour extends React.Component {
                 />)
         }
         else {
-
             return (
                 <View style={{flex: 1}}>
                     <BarreRecherche
@@ -405,11 +401,10 @@ export default class RechercheAutour extends React.Component {
                             onSlidingComplete={(v) => {
                                 this.setState({
                                     sliderValue: v,
-                                    filtres: null,
                                     displayFiltres: false,
                                 })
+                                this.updateDataProches(v)
                             }}
-                            onSlidingComplete={(v) => this.updateDataProches(v)}
                             step={1}
                             value={this.state.sliderValue}
                             minimumTrackTintColor={Color.lightGray}
@@ -466,7 +461,7 @@ class SectionItem extends React.Component {
     
 
     return (
-        <Text style={{color:'black'}}>{this.props.title}</Text>
+        <Text style={{color:'black'}}></Text>
     );
   }
 }

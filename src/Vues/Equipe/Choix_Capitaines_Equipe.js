@@ -3,19 +3,15 @@ import React from 'react'
 import { Text, ScrollView, TouchableOpacity, View, FlatList, Alert } from 'react-native'
 import { CheckBox } from 'react-native-elements'
 
-import StarRating from 'react-native-star-rating'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Database from '../../Data/Database'
 import LocalUser from '../../Data/LocalUser.json'
-import { Constants, Location, Permissions,Notifications } from 'expo';
-import Type_Defis from '../Jouer/Type_Defis'
+
 import Types_Notification from '../../Helpers/Notifications/Types_Notification'
 import Color from '../../Components/Colors';
-import Barre_Recherche from '../../Components/Recherche/Barre_Recherche'
 import Joueur_Pseudo_Score from '../../Components/ProfilJoueur/Joueur_Pseudo_Score'
 import Simple_Loading from '../../Components/Loading/Simple_Loading'
-import { initializeApp } from 'firebase';
 import firebase from 'firebase'
 import '@firebase/firestore'
 

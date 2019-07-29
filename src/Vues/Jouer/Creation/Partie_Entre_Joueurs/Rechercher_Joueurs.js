@@ -7,6 +7,8 @@ import Barre_Recherche_Query from '../../../../Components/Recherche/Barre_Recher
 import Joueur_item_Creation_Partie from '../../../../Components/ProfilJoueur/Joueur_item_Creation_Partie'
 import { connect } from 'react-redux'
 import LocalUser from '../../../../Data/LocalUser.json'
+import FiltrerJoueur from '../../../../Components/Recherche/FiltrerJoueur'
+import AlphabetListView from 'react-native-alphabetlistview'
 
 
 class Rechercher_Joueurs extends React.Component {
@@ -16,20 +18,79 @@ class Rechercher_Joueurs extends React.Component {
         this.id  = LocalUser.data.id 
         this.state = {
             searchedText : 'm',
-            joueurs : []
+            joueurs : [],
+            query: null,
+            displayFiltres: false,
+            filtres: null
         }
     }
 
-    /**
-	 * Fonction qui va être passé en props du componant
-	 * Bare_Recherche_Query et qui va permettre de mettre à jour le 
-     * state en fonction des résultats renvoyés par Bare_Recherche_Query
-	 */
-    handleResults = (data)  => {
-		this.setState({
-			joueurs : data
-		})
+
+    handleFilterButton = () => {
+        this.setState({
+            displayFiltres: !this.state.displayFiltres
+        })
     }
+
+
+    handleValidateFilters = (q, f) => {
+        this.setState({query: q, filtres: f, displayFiltres: false});
+    }
+
+
+    displayFiltresComponents() {
+        if (this.state.displayFiltres) {
+            return (<FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+        }
+    }
+
+
+    validerRecherche = (data) => {
+        this.setState({
+            joueurs: data
+        })
+    }
+
+
+    // Construit le tableau avec les donnees par ordre alphabetique
+    buildAlphabetique(donneesBrutes) {
+        let  data =  {
+            A: [],
+            B: [],
+            C: [],
+            D: [],
+            E: [],
+            F: [],
+            G: [],
+            H: [],
+            I: [],
+            J: [],
+            K: [],
+            L: [],
+            M: [],
+            N: [],
+            O: [],
+            P: [],
+            Q: [],
+            R: [],
+            S: [],
+            T: [],
+            U: [],
+            V: [],
+            W: [],
+            X: [],
+            Y: [],
+            Z: [],
+        }
+        for(var i = 0; i < donneesBrutes.length ; i ++) {
+            item = donneesBrutes[i];
+            let pseudo = item["pseudo"];
+            let lettre = pseudo[0].toUpperCase();
+            data[lettre].push(item);
+        }
+        return data
+    }
+
 
     isJoueurPresent(liste, joueur) {
         for(var i = 0; i < liste.length ; i++) {
@@ -59,12 +120,13 @@ class Rechercher_Joueurs extends React.Component {
     renderList() {
         if(! this.state.joueurs.length == 0) {
                 return(
-                    <FlatList
-                            data = {this.state.joueurs}
-                            keyExtractor={(item) => item.id}
-                            renderItem={this._renderItem}
-                            extraData = {this.props.joueursPartie}
-                            contentContainerStyle={{ paddingBottom: 20}}
+                    <AlphabetListView
+                        data = {this.buildAlphabetique(this.state.joueurs)}
+                        cell={this._renderItem}
+                        cellHeight={30}
+                        sectionListItem={SectionItem}
+                        sectionHeader={SectionHeader}
+                        sectionHeaderHeight={22.5}
                     />
                 )
         } else {
@@ -77,22 +139,58 @@ class Rechercher_Joueurs extends React.Component {
 
     render() {
         return(
-            <View>
+            <ScrollView>
                 <Barre_Recherche_Query
                     collection = {"Joueurs"}
-                    field = {"queryPseudo"}
-                    nbOfChar = {3}
-                    handleResults = {this.handleResults}
-                    non_pris_en_compte = {this.id}
-                    handleFilterQuery = {null}
+                    field = {"pseudoQuery"}
+                    nbOfChar = {0}
+                    handleResults = {this.validerRecherche}
+                    handleFilterQuery = {this.state.query}
+                    handleFilterButton = {this.handleFilterButton}
                 />
-                <ScrollView>
-                    {this.renderList()}
-                </ScrollView>
-            </View>
+                {this.displayFiltresComponents()}
+                {this.renderList()}
+            </ScrollView>
         )
     }
 }
+
+
+class SectionHeader extends React.Component {
+
+    render() {
+    // inline styles used for brevity, use a stylesheet when possible
+    var textStyle = {
+      color:'black',
+      fontWeight:'bold',
+      fontSize:RF(2.5),
+      marginLeft : wp('2.5%')
+    };
+
+    var viewStyle = {
+      backgroundColor: '#F7F7F7'
+    };
+  
+    return (
+        <View style={viewStyle}>
+        <Text style={textStyle}>{this.props.title}</Text>
+      </View>
+      
+    );
+  }
+}
+
+
+class SectionItem extends React.Component {
+    render() {
+      
+  
+      return (
+          <Text></Text>
+      );
+    }
+}
+
 
 const mapStateToProps = (state) => {
     return{ 

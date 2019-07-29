@@ -26,7 +26,6 @@ export default class Barre_Recherche extends React.Component {
     
     constructor(props) {
         super(props)
-        this.DataDepart = this.props.data;
         this.field = this.props.field;
         this.state = {
             data :this.props.data
@@ -45,10 +44,10 @@ export default class Barre_Recherche extends React.Component {
 
         if (searchedText === "") {
             if(this.props.filterData != undefined && this.props.filterData != null) {
-                var fData = this.props.filterData(this.DataDepart);
+                var fData = this.props.filterData(this.props.data);
                 this.props.handleTextChange(fData);
             } else {
-                this.props.handleTextChange(this.DataDepart)
+                this.props.handleTextChange(this.props.data)
             }
 
         } else {

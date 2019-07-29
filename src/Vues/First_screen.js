@@ -9,6 +9,7 @@ import {SkypeIndicator} from 'react-native-indicators';
 import { Constants, Location, Permissions, Notifications } from 'expo';
 import LocalUser from '../Data/LocalUser.json'
 import villes from '../Components/Creation/villes.json'
+import NormalizeString from '../Helpers/NormalizeString';
 
 
 /** Pour afficher 5sec faire deux fonction qui affiche qqchose et en fonction du state appeler une ou l'autre */
@@ -20,9 +21,22 @@ class First_screen extends React.Component {
 
     static navigationOptions = { title: '', header: null };
 
+    async fonction() {
+        /*var db = Database.initialisation();
+        var coll = await db.collection("Joueurs").get();
+        for (var i=0; i<coll.docs.length; i++) {
+            var data = coll.docs[i].data();
+            db.collection("Joueurs").doc(data.id).set({
+                ...data,
+                pseudoQuery: NormalizeString.decompose(data.pseudo)
+            })
+        }*/
+    }
+
     constructor(props) {
         super(props)
-        console.log("ulululul")
+
+
         this.state = {
             timePassed : false,
             isLoading : false,
@@ -179,7 +193,7 @@ class First_screen extends React.Component {
         }
     }
 
-
+ 
     gotoProfilJoueur(id) {
        Database.getDocumentData(id, 'Joueurs').then(async (docData) => {
             // Traitement de la collection Equipes

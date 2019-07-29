@@ -264,7 +264,7 @@ class ProfilJoueurReglages extends React.Component {
 
 
     async _validate() {
-        console.log(this.ville);
+
         if (this.naissance) {
             var naissanceTimestamp = firebase.firestore.Timestamp.fromMillis(Date.parse(this.naissance));
             this.joueur.naissance = naissanceTimestamp
@@ -281,6 +281,7 @@ class ProfilJoueurReglages extends React.Component {
         if (this.pseudo) {
             this.joueur.pseudo = this.pseudo
             this.joueur.queryPseudo = NormalizeString.normalize(this.pseudo);
+            this.joueur.pseudoQuery = NormalizeString.decompose(this.pseudo);
         }
         
         this.joueur.score = this.score;
@@ -316,6 +317,7 @@ class ProfilJoueurReglages extends React.Component {
             zone : this.joueur.zone,
             pseudo: this.joueur.pseudo,
             queryPseudo: this.joueur.queryPseudo,
+            pseudoQuery: this.joueur.pseudoQuery,
             ville: this.joueur.ville,
             photo: this.joueur.photo,
             score: this.joueur.score,
