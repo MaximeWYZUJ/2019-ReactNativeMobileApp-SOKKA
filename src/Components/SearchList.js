@@ -26,7 +26,7 @@ class SearchList extends React.Component {
 
         // Champ(s) sur lequel faire la query
         switch (this.props.type) {
-            case "Joueurs" : this.champNom = "nomQuery"; break;
+            case "Joueurs" : this.champNom = "pseudoQuery"; break;
             case "Equipes" : this.champNom = "queryName"; break;
             case "EquipesFav" : this.champNom = "queryName"; break;
             case "Terrains": this.champNom = "queryName"; break;

@@ -1,13 +1,17 @@
 
 import React from 'react'
 
-import {View, Text,Image,TouchableOpacity, TextInput,ListView, ScrollView,Dimensions,Animated, SectionList,FlatList} from 'react-native'
+import {View, ScrollView, Text} from 'react-native'
+import AlphabetListView from 'react-native-alphabetlistview'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
-import Joueurs from '../../Helpers/JoueursForAjout'
-import Colors from '../../Components/Colors'
-import StarRating from 'react-native-star-rating'
 import { connect } from 'react-redux'
+
+import FiltrerJoueur from '../../Components/Recherche/FiltrerJoueur'
+import BarreRechercheQuery from '../../Components/Recherche/Barre_Recherche_Query'
+import Joueurs_Ajout_Item from '../../Components/Creation/Joueurs_Ajout_Item'
+
+
 
 
 /**
@@ -21,21 +25,13 @@ class Joueurs_Rechercher extends React.Component {
         super(props)
 
         this.state = {
-            joueurs : [],
-            allJoueurs : Joueurs,
+            joueursFiltres: [],
+            displayFiltres: false,
+            filtres: null,
+            query: null,
         }
     }
 
-
-    /**
-     * Permet de filter les joueurs en fonction du texte recherché
-     */
-    searchedJoueurs = (searchedText) => {
-        let searchedJoueurs = Joueurs.filter(function(joueur) {
-            return joueur.nom.toLowerCase().startsWith(searchedText.toLowerCase()) ;
-        });
-        this.setState({allJoueurs: searchedJoueurs});
-    }
 
     /**
      * Permet d'ajouter un joueur à la liste des joueurs à ajouter si 
@@ -50,45 +46,113 @@ class Joueurs_Rechercher extends React.Component {
             const action = { type: "AJOUTER_JOUEUR_EQUIPE_CREATION", value: idJoueur}
             this.props.dispatch(action)
         }
+    }
 
-      
+
+    renderItem = ({item}) => {
+        return (
+        <Joueurs_Ajout_Item 
+            joueur = {item}
+            isShown = {this.props.joueursSelectionnes.includes(item.id)}
+            txtDistance = ' '
+        />)
+    }
+
+
+    validerRecherche = (data)  => {
+		this.setState({
+            joueursFiltres : data,
+		})
+    }
+
+    handleValidateFilters = (q, f) => {
+        this.setState({
+            filtres: f,
+            query: q,
+            displayFiltres: false
+        })
+    }
+
+    handleFilterButton = () => {
+        this.setState({displayFiltres: !this.state.displayFiltres})
+    }
+
+    displayFiltresComponents() {
+        if (this.state.displayFiltres) {
+            return (
+                <FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>
+            )
+        }
+    }
+
+
+    buildJoueurs(joueurs) {
+        let  data =  {
+            A: [],
+            B: [],
+            C: [],
+            D: [],
+            E: [],
+            F: [],
+            G: [],
+            H: [],
+            I: [],
+            J: [],
+            K: [],
+            L: [],
+            M: [],
+            N: [],
+            O: [],
+            P: [],
+            Q: [],
+            R: [],
+            S: [],
+            T: [],
+            U: [],
+            V: [],
+            W: [],
+            X: [],
+            Y: [],
+            Z: [],
+        }
+        for(var i = 0; i < joueurs.length ; i ++) {
+            joueur = joueurs[i]
+            let lettre = joueur.pseudo[0].toUpperCase()
+            let arrayj = data[lettre]
+            arrayj.push(joueur)
+            data[lettre] = arrayj
+        }
+        return data
     }
 
    
     render() {
+
         return(
 
-            <View>
-                 {/* View contenant la bare de recherche */}
-                 <View style = {{flexDirection : 'row', marginTop : hp('2%'), marginLeft : wp('5%'), marginRight : wp('5%')}}>
-                    <Image style={styles.search_image}
-                        source = {require('app/res/search.png')} />
-                     <TextInput
-                        style={{flex: 1, borderWidth: 1, marginHorizontal: 15, borderRadius : 10, width : wp('10%')}}
-                        onChangeText={this.searchedJoueurs}
-
-                    />
-                    <TouchableOpacity onPress={() => this.setState({text: ''})}>
-                        <Image style={styles.search_image}
-                                source = {require('app/res/cross.png')}/>
-                    </TouchableOpacity>
+            <ScrollView style={{flex: 1}}>
+                <View style={{flexDirection: 'row'}}>
+                    <View style={{flex: 4}}>
+                        <BarreRechercheQuery
+                            handleResults={this.validerRecherche}
+                            collection={"Joueurs"}
+                            field={"pseudoQuery"}
+                            nbOfChar={0}
+                            handleFilterButton={this.handleFilterButton}
+                            handleFilterQuery={this.state.query}
+                        />
+                    </View>
                 </View>
-                <ScrollView>
-                <FlatList
-                
-                removeClippedSubviews = {true}
-    
-                data = {this.state.allJoueurs}
-                keyExtractor={(item) => item.id}
-                extraData = {this.props.joueursSelectionnes}
-    
-                renderItem={this.renderItem}
+                {this.displayFiltresComponents()}
+                <AlphabetListView
+                    data={this.buildJoueurs(this.state.joueursFiltres)}
+                    cell={this.renderItem}
+                    cellHeight={30}
+                    sectionListItem={SectionItem}
+                    sectionHeader={SectionHeader}
+                    sectionHeaderHeight={22.5}
                 />
-               
-            
-               </ScrollView>
-               <Text> </Text>
-            </View>
+            </ScrollView>
     
         )
     }
@@ -104,9 +168,45 @@ const styles = {
     },
 }
 
+
+class SectionHeader extends React.Component {
+
+    render() {
+    // inline styles used for brevity, use a stylesheet when possible
+    var textStyle = {
+      color:'black',
+      fontWeight:'bold',
+      fontSize:RF(2.5),
+      marginLeft : wp('2.5%')
+    };
+
+    var viewStyle = {
+      backgroundColor: '#F7F7F7'
+    };
+  
+    return (
+        <View style={viewStyle}>
+        <Text style={textStyle}>{this.props.title}</Text>
+      </View>
+      
+    );
+  }
+}
+
+class SectionItem extends React.Component {
+  render() {
+    
+
+    return (
+        <Text></Text>
+    );
+  }
+}
+
+
 const mapStateToProps = (state) => {
     return{ 
-        joueurs : state.joueurs
+        joueursSelectionnes : state.joueursSelectionnes
     } 
 }
 

@@ -1,12 +1,10 @@
 import React from 'react'
-import {View, Text,Image,TouchableOpacity, TextInput, ScrollView,FlatList} from 'react-native'
+import {View, Text } from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import Colors from '../../Components/Colors'
 import RF from 'react-native-responsive-fontsize';
-
-import Joueurs from '../../Helpers/JoueursForAjout'
-import Joueurs_Ajout_Item from '../../Components/Creation/Joueurs_Ajout_Item'
 import { connect } from 'react-redux'
+
+import Joueurs_Ajout_Item from '../../Components/Creation/Joueurs_Ajout_Item'
 import AlphabetListView from 'react-native-alphabetlistview'
 import LocalUser from '../../Data/LocalUser.json'
 import DataBase from '../../Data/Database'
@@ -116,13 +114,7 @@ class Joueurs_Autours_De_Moi_Final extends React.Component {
             joueur = joueurs[i]
             let lettre = joueur.pseudo[0].toUpperCase()
             let arrayj = data[lettre]
-            let j = {
-                pseudo : joueur.pseudo,
-                photo : joueur.photo,
-                score : joueur.score,
-                id : joueur.id
-            }
-            arrayj.push(j)
+            arrayj.push(joueur)
             data[lettre] = arrayj
         }
         return data
@@ -186,7 +178,7 @@ class SectionItem extends React.Component {
     
 
     return (
-        <Text style={{color:'black'}}>{this.props.title}</Text>
+        <Text></Text>
     );
   }
 }
@@ -213,7 +205,6 @@ class Cell extends React.Component {
 
 const mapStateToProps = (state) => {
     return{ 
-        joueurs : state.joueurs,
         joueursSelectionnes : state.joueursSelectionnes
     } 
 }

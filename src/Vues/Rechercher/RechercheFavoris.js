@@ -245,7 +245,7 @@ export default class RechercheFavoris extends React.Component {
                 <BarreRecherche
                     handleTextChange={this.validerRecherche}
                     data={this.allFav}
-                    field={this.champNom}
+                    field={this.champNomQuery}
                     filterData={this.filtrerData}
                     handleFilterButton={this.handleFilterButton}
                 />

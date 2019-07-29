@@ -67,7 +67,7 @@ export default class RechercheAutour extends React.Component {
     // === Manipulation du lifecycle entre les onglets ===
     componentDidMount() {
         console.log("did mount");
-        //this.triVilles();
+        this.triVilles();
 
         this.willFocusSubscription = this.props.navigation.addListener('willFocus', this.willFocusAction);
         this.willBlurSubscription = this.props.navigation.addListener('willBlur', this.willBlurAction);
@@ -116,7 +116,7 @@ export default class RechercheAutour extends React.Component {
 
     componentWillReceiveProps() {
         console.log("will receive props")
-        this.triVilles();
+        //this.triVilles();
     }
 
     // ===================================================

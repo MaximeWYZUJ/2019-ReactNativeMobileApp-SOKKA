@@ -4,12 +4,11 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../.././../../Components/Colors'
 import Barre_Recherche from '../../../../Components/Recherche/Barre_Recherche'
-import StarRating from 'react-native-star-rating'
 import { CheckBox } from 'react-native-elements'
 import Joueur_Item_Creation_Defis from '../../../../Components/ProfilJoueur/Joueur_Item_Creation_Defis'
 import Database from '../../../../Data/Database'
-import Item_Equipe_Creation_Defis from '../../../../Components/Profil_Equipe/Item_Equipe_Creation_Defis';
 import LocalUser from '../../../../Data/LocalUser.json'
+import FiltrerJoueur from '../../../../Components/Recherche/FiltrerJoueur'
 
 import { connect } from 'react-redux'
 
@@ -40,7 +39,9 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
             selectedAllCapitnaines : false,
             selectedAllPlayer : false,
             selectedEveryone : false,
-            nbCaptainsSelected : 0
+            nbCaptainsSelected : 0,
+            displayFiltres: false,
+            filtres: null
         }
         this.goBackToFiche = this.goBackToFiche.bind(this)
 
@@ -153,6 +154,31 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
 		this.setState({
             joueurFiltres : data,
 		})
+    }
+
+
+    handleFilterButton = () => {
+        this.setState({
+            displayFiltres: !this.state.displayFiltres
+        })
+    }
+
+
+    handleValidateFilters = (q, f) => {
+        var data = this.state.joueurFiltres;
+        var dataF = FiltrerJoueur.filtrerJoueurs(data, f);
+        this.setState({
+            joueurFiltres: dataF,
+            filtres: f,
+            displayFiltres: false
+        })
+    }
+
+
+    displayFiltresComponents() {
+        if (this.state.displayFiltres) {
+            return (<FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)    
+        }
     }
 
 
@@ -680,7 +706,7 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
     }
 
     render() {
-      
+        console.log(this.state.joueurFiltres.length);
         return(
             <View style = {{ flex: 1}}>
 
@@ -719,27 +745,29 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                     <Text>{this.state.joueursSelectionnes.length}/{this.format.split("x")[0]}</Text>
                 </View>
 
-                <Barre_Recherche
-                    handleTextChange ={this.recherche}
-					data = {this.state.allJoueurs}
-					field = "pseudo"
-                />
-
-                {/* Tout selectionner*/}
-                <View style = {{flexDirection : 'row', justifyContent : "space-between"}}>
-                    <Text>Tout sélectionner</Text>
-                    <CheckBox
-                        title=' '
-                        checkedColor = {Colors.agOOraBlue}
-                        right
-                        containerStyle={styles.checkBox}                    
-                        checked={this.state.selectedEveryone}
-                        onPress = {() => this.handleToutSelectionner()}
-
+                <ScrollView>
+                    <Barre_Recherche
+                        handleTextChange ={this.recherche}
+                        data = {this.state.allJoueurs}
+                        field = {"pseudoQuery"}
+                        filterData = {(data) => FiltrerJoueur.filtrerJoueurs(data)}
+                        handleFilterButton = {this.handleFilterButton}
                     />
-                </View>
+                    {this.displayFiltresComponents()}
 
-                    <ScrollView>
+                    {/* Tout selectionner*/}
+                    <View style = {{flexDirection : 'row', justifyContent : "space-between"}}>
+                        <Text>Tout sélectionner</Text>
+                        <CheckBox
+                            title=' '
+                            checkedColor = {Colors.agOOraBlue}
+                            right
+                            containerStyle={styles.checkBox}                    
+                            checked={this.state.selectedEveryone}
+                            onPress = {() => this.handleToutSelectionner()}
+
+                        />
+                    </View>
 
                         {/* View contenant la liste des capitaines */}
                         <View>

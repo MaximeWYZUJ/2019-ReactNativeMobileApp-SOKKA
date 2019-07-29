@@ -1,15 +1,19 @@
 
 import React from 'react'
 
-import {View, Text,Image,TouchableOpacity, TextInput, ScrollView,FlatList} from 'react-native'
+import {View, Text, ScrollView} from 'react-native'
+import AlphabetListView from 'react-native-alphabetlistview'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import Joueurs from '../../Helpers/JoueursForAjout'
+import RF from 'react-native-responsive-fontsize';
 import { connect } from 'react-redux'
-import Joueurs_Ajout_Item from '../../Components/Creation/Joueurs_Ajout_Item'
+import {SkypeIndicator} from 'react-native-indicators';
+
 import LocalUser from '../../Data/LocalUser.json'
 import Database from '../../Data/Database'
-import {SkypeIndicator} from 'react-native-indicators';
 import Barre_Recherche from '../../Components/Recherche/Barre_Recherche'
+import FiltrerJoueur from '../../Components/Recherche/FiltrerJoueur'
+import Joueurs_Ajout_Item from '../../Components/Creation/Joueurs_Ajout_Item'
+
 
 /**
  * Classe qui va permettre à l'utilisateur permettre de choisir les joueurs de son 
@@ -25,7 +29,9 @@ class Joueurs_Reseau_Final extends React.Component {
             allJoueurs : [],
             joueurFiltres : [],
             distanceMax : 50,
-            isLoading : true
+            isLoading : true,
+            filtres: null,
+            displayFiltres: false
         }
         this.reseau = LocalUser.data.reseau
     }
@@ -117,9 +123,32 @@ class Joueurs_Reseau_Final extends React.Component {
 	 * en fonction de ce que tappe l'utilisateur
 	 */
     recherche = (data)  => {
+        var dataF = FiltrerJoueur.filtrerJoueurs(data, this.state.filtres);
 		this.setState({
-            joueurFiltres : data,
+            joueurFiltres : dataF,
 		})
+    }
+
+    handleValidateFilters = (q, f) => {
+        var data = this.state.allJoueurs;
+        var dataF = FiltrerJoueur.filtrerJoueurs(data, f);
+        this.setState({
+            joueurFiltres: dataF,
+            filtres: f,
+            displayFiltres: false
+        })
+    }
+
+    handleFilterButton = () => {
+        this.setState({displayFiltres: !this.state.displayFiltres})
+    }
+
+    displayFiltresComponents() {
+        if (this.state.displayFiltres) {
+            return (
+                <FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>
+            )
+        }
     }
 
     renderItem = ({item}) => {
@@ -131,14 +160,47 @@ class Joueurs_Reseau_Final extends React.Component {
         />)
     }
 
-    _renderCell= ({item}) => {
-        return(
-            <Cell
-                item = {item}
-                isShown = {this.props.joueursSelectionnes.includes(item.id)}
-            />
-        )
+
+    buildJoueurs(joueurs) {
+        let  data =  {
+            A: [],
+            B: [],
+            C: [],
+            D: [],
+            E: [],
+            F: [],
+            G: [],
+            H: [],
+            I: [],
+            J: [],
+            K: [],
+            L: [],
+            M: [],
+            N: [],
+            O: [],
+            P: [],
+            Q: [],
+            R: [],
+            S: [],
+            T: [],
+            U: [],
+            V: [],
+            W: [],
+            X: [],
+            Y: [],
+            Z: [],
+        }
+        for(var i = 0; i < joueurs.length ; i ++) {
+            joueur = joueurs[i]
+            let lettre = joueur.pseudo[0].toUpperCase()
+            let arrayj = data[lettre]
+            arrayj.push(joueur)
+            data[lettre] = arrayj
+        }
+        return data
     }
+
+
     render() {
        // const joueursSelectionnes = this.props.joueursSelectionnes;
        // const renderItem = ({ item }) => ( <Joueurs_Ajout_Item 
@@ -150,29 +212,25 @@ class Joueurs_Reseau_Final extends React.Component {
        if(! this.state.isLoading) {
 
             return(
-                <View>
+                <ScrollView>
                     {/* View contenant la bare de recherche */}
                     <Barre_Recherche
                         handleTextChange ={this.recherche}
                         data = {this.state.allJoueurs}
-                        field = "pseudo"
-                     />
-                    <ScrollView style = {{marginBottom : hp('7%')}}>
-                            <FlatList
-                                style = {{flex : 1}}
-                                removeClippedSubviews = {true}
-                                data = {this.state.joueurFiltres}
-                                keyExtractor={(item) => item.id}
-                                extraData = {this.props.joueursSelectionnes}
-                                renderItem={this.renderItem}
-                            />
-                
-                        
-                
+                        field = "pseudoQuery"
+                        filtrerData = {(data) => FiltrerJoueur.filtrerJoueurs(data, this.state.filtres)}
+                        handleFilterButton = {this.handleFilterButton}
+                    />
+                    {this.displayFiltresComponents()}
+                    <AlphabetListView
+                        data={this.buildJoueurs(this.state.joueurFiltres)}
+                        cell={this.renderItem}
+                        cellHeight={30}
+                        sectionListItem={SectionItem}
+                        sectionHeader={SectionHeader}
+                        sectionHeaderHeight={22.5}
+                    />
                 </ScrollView>
-                <Text> </Text>
-
-                </View>
 
             )
         } else {
@@ -194,12 +252,47 @@ const styles = {
 }
 
 
+class SectionHeader extends React.Component {
+
+    render() {
+    // inline styles used for brevity, use a stylesheet when possible
+    var textStyle = {
+      color:'black',
+      fontWeight:'bold',
+      fontSize:RF(2.5),
+      marginLeft : wp('2.5%')
+    };
+
+    var viewStyle = {
+      backgroundColor: '#F7F7F7'
+    };
+  
+    return (
+        <View style={viewStyle}>
+        <Text style={textStyle}>{this.props.title}</Text>
+      </View>
+      
+    );
+  }
+}
+
+class SectionItem extends React.Component {
+  render() {
+    
+
+    return (
+        <Text></Text>
+    );
+  }
+}
+
+
+
 const mapStateToProps = (state) => {
     return{ 
-        joueurs : state.joueurs,
         joueursSelectionnes : state.joueursSelectionnes
 
-    } 
+    }
 }
   
 export default connect(mapStateToProps)(Joueurs_Reseau_Final)
