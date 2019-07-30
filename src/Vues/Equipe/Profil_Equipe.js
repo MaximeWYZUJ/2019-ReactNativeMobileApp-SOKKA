@@ -269,8 +269,9 @@ export default class Profil_Equipe extends React.Component {
      * Pour aller sur la vue présentant les joueurs de l'équipe
      */
     goToJoueursEquipes() {
-        this.props.navigation.navigate("JoueursEquipe",{equipe : this.state.equipe, joueurs : this.state.joueurs})
-
+        if (!this.state.isLoadingJoueurs) {
+            this.props.navigation.navigate("JoueursEquipe",{equipe : this.state.equipe, joueurs : this.state.joueurs})
+        }
     }
     
     /*******************************************************************************
@@ -735,23 +736,6 @@ export default class Profil_Equipe extends React.Component {
         }
     }
 
-    renderIconMessage(){
-        return(
-            <TouchableOpacity
-            style = {{position : "absolute", top  : hp('1%'), right : wp('1.3%')}}
-                onPress = {() =>this.newGroupe()} >
-                <Image
-                    style = {{width : 30, height : 30, marginRight :15}}
-                    source = {require('../../../res/write.png')}
-                />
-            </TouchableOpacity>
-        )
-    }
-
-    newGroupe() {
-        this.props.navigation.push("NewGroupe",{joueurs :this.state.joueurs})
-    }
-
     /**
      * Fonction qui nous permet d'afficher la vue du profil de l'équipe
      */
@@ -761,7 +745,6 @@ export default class Profil_Equipe extends React.Component {
                 <ScrollView>
                     <View style = {styles.info_equipe}>
 
-                        {this.renderIconMessage()}
                         {/* BLOC INFOS DE L'EQUIPE */}
                         <View style = {styles.bloc_identite}>
 

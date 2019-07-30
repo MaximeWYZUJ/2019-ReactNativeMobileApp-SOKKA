@@ -118,7 +118,7 @@ class JoueurItem extends React.Component {
      */
     async sendNotifAjoutReseau() {
         var titre = "Nouvelle notif"
-        var corps = LocalUser.data.pseudo + " t'a ajouté à son réseau"
+        var corps = LocalUser.data.pseudo + " t'as ajouté à son réseau"
 
         var tokens = [];
         if(this.LocalUser.data.tokens != undefined) tokens = this.LocalUser.data.tokens

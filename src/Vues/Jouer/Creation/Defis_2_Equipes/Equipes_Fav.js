@@ -4,14 +4,12 @@ import {View,TouchableOpacity,FlatList, Image,Dimensions,StyleSheet,Text,ScrollV
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../.././../../Components/Colors'
-import Barre_Recherche from '../../../../Components/Recherche/Barre_Recherche'
+import BarreRecherche from '../../../../Components/Recherche/Barre_Recherche'
+import FiltrerEquipe from '../../../../Components/Recherche/FiltrerEquipe'
 import DataBase from '../../../../Data/Database'
 import Item_Equipe_Creation_Defis from '../../../../Components/Profil_Equipe/Item_Equipe_Creation_Defis'
 
 import { connect } from 'react-redux'
-
-// A SUPPR
-const Equipes_Fav_User = ["aY4wyLhI9yLX814YxNXmx","aQQmVdJUXOrp56Hr9BDpP","anqLEuxIZRRodemdRPdpi"]
 
 
 /**
@@ -26,10 +24,11 @@ class Equipes_Fav extends React.Component {
         this.monEquipe = this.props.monEquipe
         this.mesEquipesFav = this.props.equipesFav //Equipes_Fav_User
         this.state = {
-            equipesFav : [{nom : "mon_equipe", id : "1", joueurs : ["1"]}] ,      // Obligé de l'initialiser à quelque chose
-            equipeFiltrees : [{nom : "mon_equipe", id : "1", joueurs : ["1"]}]
-
-        }    
+            equipesFav : [],
+            equipeFiltrees : [],
+            filtres: null,
+            displayFiltres: false
+        }
     }
 
     /**
@@ -60,15 +59,35 @@ class Equipes_Fav extends React.Component {
 
     }
 
-    /**
-	 * Fonction qui va être passé en props du componant
-	 * BareRecherche et qui va permettre de filtrer les equipes 
-	 * en fonction de ce que tappe l'utilisateur
-	 */
-    recherche = (data)  => {
-		this.setState({
-			equipeFiltrees : data
-		})
+    validerRecherche = (data) => {
+        var dataF = FiltrerEquipe.filtrerEquipes(data, this.state.filtres);
+        this.setState({
+            equipeFiltrees: dataF,
+        })
+    }
+
+
+    displayFiltresComponents() {
+        if (this.state.displayFiltres) {
+            return (<FiltrerEquipe handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
+        }
+    }
+
+
+    handleFilterButton = () => {
+        this.setState({
+            displayFiltres: !this.state.displayFiltres
+        })
+    }
+
+
+    handleValidateFilters = (q, f) => {
+        var dataF = FiltrerEquipe.filtrerEquipes(this.state.equipesFav, f);
+        this.setState({
+                equipeFiltrees: dataF,
+                filtres: f,
+                displayFiltres: false
+            })
     }
 
     _renderItem = ({item}) => {
@@ -90,18 +109,20 @@ class Equipes_Fav extends React.Component {
         return(
             <View style = {{marginTop : hp('1%')}}>
                 
-                <Barre_Recherche
-                     handleTextChange ={this.recherche}
-                     data = {this.state.equipesFav}
-                     field = "nom"
+                <BarreRecherche
+                    handleTextChange={this.validerRecherche}
+                    data={this.state.equipesFav}
+                    field={"queryName"}
+                    filterData={(data) => FiltrerEquipe.filtrerEquipes(data, this.state.filtres)}
+                    handleFilterButton={this.handleFilterButton}
                 />
+                {this.displayFiltresComponents()}
 
                 <FlatList
                     data = {this.state.equipeFiltrees}
                     keyExtractor={(item) => item.id}
                     renderItem={this._renderItem}
                     extraData = {this.props.equipeAdverse}
-
                 />
             </View>
         )
