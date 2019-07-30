@@ -9,7 +9,6 @@ import Item_Equipe_Creation_Defis from '../../../../Components/Profil_Equipe/Ite
 import { connect } from 'react-redux'
 
 import Barre_Recherche_Query from '../../../../Components/Recherche/Barre_Recherche_Query'
-import FiltrerEquipe from '../../../../Components/Recherche/FiltrerEquipe'
 
 /**
  * Classe qui va permettre à l'utilisateur de faire une recherche (par nom ) d'une équipe
@@ -22,45 +21,23 @@ class Rechercher_Equipe extends React.Component {
         super(props)
         this.monEquipe = this.props.monEquipe
         this.state = {
-            searchedText : '',
-            equipes : [],
-            query: null,
-            displayFiltres: false,
-            filtres: null
+            searchedText : 'm',
+            equipes : []
         }
     }
     
   
 
-    validerRecherche = (data) => {
-        this.setState({
-            equipes: data
-        })
+    /**
+	 * Fonction qui va être passé en props du componant
+	 * Bare_Recherche_Query et qui va permettre de mettre à jour le 
+     * state en fonction des résultats renvoyés par Bare_Recherche_Query
+	 */
+    handleResults = (data)  => {
+		this.setState({
+			equipes : data
+		})
     }
-
-
-    handleFilterButton = () => {
-        this.setState({
-            displayFiltres: !this.state.displayFiltres
-        })
-    }
-
-
-    handleValidateFilters = (q, f) => {
-        this.setState({
-            query: q,
-            filtres: f,
-            displayFiltres: false
-        })
-    }
-
-
-    displayFiltresComponents() {
-        if (this.state.displayFiltres) {
-            return (<FiltrerEquipes handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
-        }
-    }
-
 
     _renderItem = ({item}) => {
         return(
@@ -105,12 +82,10 @@ class Rechercher_Equipe extends React.Component {
                <Barre_Recherche_Query
                     collection = {"Equipes"}
                     field = {"queryName"}
-                    nbOfChar = {0}
-                    handleResults = {this.validerRecherche}
-                    handleFilterButton={this.handleFilterButton}
-                    handleFilterQuery={this.state.query}
+                    nbOfChar = {4}
+                    handleResults = {this.handleResults}
+                    non_pris_en_compte = {this.monEquipe}
                />
-               {this.displayFiltresComponents()}
 
                 {/* View contenant la liste des équipes */}
                 <View>

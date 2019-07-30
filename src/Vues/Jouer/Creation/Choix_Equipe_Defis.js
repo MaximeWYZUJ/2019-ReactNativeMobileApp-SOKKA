@@ -1,5 +1,5 @@
 import React from 'react'
-import {View, ScrollView,TouchableOpacity,FlatList, Image,Dimensions,StyleSheet,Text,Alert} from 'react-native'
+import {View, Animated,TouchableOpacity,FlatList, Image,Dimensions,StyleSheet,Text,Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../../Components/Colors';
@@ -7,7 +7,6 @@ import Database from '../../../Data/Database'
 import StarRating from 'react-native-star-rating'
 import { CheckBox } from 'react-native-elements'
 import Barre_Recherche from '../../../Components/Recherche/Barre_Recherche'
-import FiltrerEquipe from '../../../Components/Recherche/FiltrerEquipe'
 import { connect } from 'react-redux'
 import actions from '../../../Store/Reducers/actions'
 import LocalUser from '../../../Data/LocalUser.json'
@@ -33,8 +32,6 @@ class Choix_Equipe_Defis extends React.Component  {
         this.state = {
             mesEquipes : [],
             equipesFiltrees : [],
-            filtres: null,
-            displayFiltres: false,
             equipeSelectionnee : undefined,
             allDataEquipeSelectionnee : undefined,
             userData : undefined
@@ -98,35 +95,15 @@ class Choix_Equipe_Defis extends React.Component  {
     }
 
 
-    validerRecherche = (data) => {
-        var dataF = FiltrerEquipe.filtrerEquipes(data, this.state.filtres);
-        this.setState({
-            equipesFiltrees: dataF,
-        })
-    }
-
-
-    displayFiltresComponents() {
-        if (this.state.displayFiltres) {
-            return (<FiltrerEquipe handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)
-        }
-    }
-
-
-    handleFilterButton = () => {
-        this.setState({
-            displayFiltres: !this.state.displayFiltres
-        })
-    }
-
-
-    handleValidateFilters = (q, f) => {
-        this.handleFilterButton();
-        var dataF = FiltrerEquipe.filtrerEquipes(this.state.mesEquipes, f);
-        this.setState({
-                equipesFiltrees: dataF,
-                filtres: f
-            })
+    /**
+	 * Fonction qui va être passé en props du componant
+	 * BareRecherche et qui va permettre de filtrer les equipes 
+	 * en fonction de ce que tappe l'utilisateur
+	 */
+    recherche = (data)  => {
+		this.setState({
+			equipesFiltrees : data
+		})
     }
 
 
@@ -257,7 +234,7 @@ class Choix_Equipe_Defis extends React.Component  {
         
     render() {
         return(
-            <ScrollView>
+            <View>
                 
                 {/* Bandeau superieur */}
                 <View style = {{backgroundColor : Colors.grayItem, flexDirection : 'row', justifyContent: 'space-between',paddingVertical : hp('2%'),paddingHorizontal : wp('3%')}}>
@@ -288,15 +265,12 @@ class Choix_Equipe_Defis extends React.Component  {
 
                 <Text style = {{fontSize : RF(2.4), alignSelf : "center", paddingVertical : hp('2%')}}>Avec quelle équipe souhaites-tu jouer ?</Text>
 
-                {/* Barre de recherche */}
+                {/* Bare de recherche */}
                 <Barre_Recherche
-                    handleTextChange={this.validerRecherche}
-                    data={this.state.mesEquipes}
-                    field={"queryName"}
-                    filterData={(data) => FiltrerEquipe.filtrerEquipes(data, this.state.filtres)}
-                    handleFilterButton={this.handleFilterButton}
+                    handleTextChange ={this.recherche}
+					data = {this.state.mesEquipes}
+					field = "nom"
                 />
-                {this.displayFiltresComponents()}
 
                 <View
                     style={styles.header_container}>
@@ -312,7 +286,7 @@ class Choix_Equipe_Defis extends React.Component  {
 
                     />
                 </View>
-            </ScrollView>
+            </View>
         )
     }
 }

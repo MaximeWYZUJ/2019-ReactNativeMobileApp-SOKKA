@@ -53,6 +53,7 @@ export default class RechercheAutour extends React.Component {
             filtres: null,
             sliderValue: 1
         }
+        console.log("constructeur");
     }
 
     static navigationOptions = ({ navigation }) => {
@@ -65,6 +66,7 @@ export default class RechercheAutour extends React.Component {
 
     // === Manipulation du lifecycle entre les onglets ===
     componentDidMount() {
+        console.log("did mount");
         this.triVilles();
 
         this.willFocusSubscription = this.props.navigation.addListener('willFocus', this.willFocusAction);
@@ -112,15 +114,17 @@ export default class RechercheAutour extends React.Component {
     }
 
 
+    componentWillReceiveProps() {
+        console.log("will receive props")
+        //this.triVilles();
+    }
+
     // ===================================================
 
 
     async triVilles() {
-        // On ne prend pas en compte les villes trop loin (> 20km)
-        var villesProches = this.getVillesProches(SLIDER_DISTANCE_MAX, Villes, false);
-
         // Tri des villes par distance
-        var villesTrieesAvecDoublons = villesProches.sort(this.comparaisonDistanceVilles);
+        var villesTrieesAvecDoublons = Villes.sort(this.comparaisonDistanceVilles);
 
         // Suppression des doublons
         var villesTrieesSansDoublons = [];
@@ -132,7 +136,7 @@ export default class RechercheAutour extends React.Component {
         }
 
         this.setState({
-            villesProches: villesTrieesSansDoublons,
+            villesTriees: villesTrieesSansDoublons,
         })
     }
 
@@ -159,10 +163,10 @@ export default class RechercheAutour extends React.Component {
     }
 
     // Renvoie la liste des villes proches de notre position
-    getVillesProches(distanceMax, tableau, doBreak) {
+    getVillesProches(distanceMax) {
+        if (this.state.villesTriees != undefined) {
         villesProches = [];
-
-        for (v of tableau) {
+        for (v of this.state.villesTriees) {
             vLat = v.coordonnees_gps.split(',')[0];
             vLong = v.coordonnees_gps.split(',')[1];
             d = Distance.calculDistance(this.selfLat, this.selfLong, vLat, vLong);
@@ -170,48 +174,45 @@ export default class RechercheAutour extends React.Component {
             if (d < distanceMax) {
                 villesProches.push(v);
             } else {
-                if (doBreak) {
-                    break;
-                }
+                break;
             }
         }
 
         return villesProches;
+        }
     }
 
     // Renvoie la liste des joueurs habitant dans une ville proche de notre position
     async updateDataProches(distanceMax) {
-        if (this.state.villesProches != undefined) {
-            villesProches = this.getVillesProches(distanceMax, this.state.villesProches, true);
+        villesProches = this.getVillesProches(distanceMax);
 
-            let db = Database.initialisation();
-            let coll = db.collection(this.type);
+        let db = Database.initialisation();
+        let coll = db.collection(this.type);
 
-            let dataProches = [];
-            for (v of villesProches) {
-                let nomVilleBDD = NormalizeString.normalize(v.Nom_commune);
-                let firstLettre = nomVilleBDD[0].toUpperCase();
-                nomVilleBDD = firstLettre + nomVilleBDD.substring(1, nomVilleBDD.length);
+        let dataProches = [];
+        for (v of villesProches) {
+            let nomVilleBDD = NormalizeString.normalize(v.Nom_commune);
+            let firstLettre = nomVilleBDD[0].toUpperCase();
+            nomVilleBDD = firstLettre + nomVilleBDD.substring(1, nomVilleBDD.length);
 
-                let dataRef = coll.where('ville', '==', nomVilleBDD);
-                let data = await dataRef.get();
+            let dataRef = coll.where('ville', '==', nomVilleBDD);
+            let data = await dataRef.get();
 
-                for (item of data.docs) {
-                    dataProches.push(item.data());
-                }
+            for (item of data.docs) {
+                dataProches.push(item.data());
             }
-
-
-            // Tri des donnees par ordre alphabetique
-            dataFiltrees = this.filtrerData(dataProches);
-            dataProchesAlphab = this.buildAlphabetique(dataFiltrees);
-
-            this.setState({
-                dataAutour: dataProches,
-                dataAutourFiltered: dataFiltrees,
-                dataAutourAlphab : dataProchesAlphab
-            })
         }
+
+
+        // Tri des donnees par ordre alphabetique
+        dataFiltrees = this.filtrerData(dataProches);
+        dataProchesAlphab = this.buildAlphabetique(dataFiltrees);
+
+        this.setState({
+            dataAutour: dataProches,
+            dataAutourFiltered: dataFiltrees,
+            dataAutourAlphab : dataProchesAlphab
+        })
     }
 
     // Construit le tableau avec les donnees par ordre alphabetique
@@ -370,6 +371,8 @@ export default class RechercheAutour extends React.Component {
     // === RENDER ===
     // ==============
     render() {
+        console.log("render");
+
         if (this.type === "Terrains") {
             return (<RechercheTerrainJouer
                         gotoItemOnPress={true}

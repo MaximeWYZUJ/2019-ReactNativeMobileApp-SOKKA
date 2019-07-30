@@ -345,7 +345,7 @@ class ProfilJoueur extends React.Component {
      */
     async sendNotifAjoutReseau() {
         var titre = "Nouvelle notif"
-        var corps = LocalUser.data.pseudo + " t'as ajouté à son réseau"
+        var corps = LocalUser.data.pseudo + " t'a ajouté à son réseau"
 
         var tokens = []
         if(this.joueur.tokens != undefined) tokens = this.joueur.tokens
@@ -874,7 +874,70 @@ class ProfilJoueur extends React.Component {
             )
         }
     }
-	
+    
+    renderIconMessage(){
+        if(! this.monProfil) {
+            return(
+                <TouchableOpacity
+                style = {{position : "absolute", top  : hp('0.7%'), right : wp('1%')}}
+                    onPress = {() =>this.creerSimpleConv(this.joueur)} >
+                    <Image
+                        style = {{width : 30, height : 30, marginRight :15}}
+                        source = {require('../../../res/write.png')}
+                    />
+                </TouchableOpacity>
+            )
+        }
+    }
+
+
+    async creerSimpleConv(joueur){
+        this.setState({isLoading : true})
+        // Verifier si la conv existe pas déja 
+        var db = Database.initialisation()
+        var refConv  = db.collection("Conversations");
+        var query = refConv.where("participants", 'array-contains' , LocalUser.data.id).where("estUnGroupe", "==",false)
+        query.get().then(async (results) => {
+            console.log("query ok !!!")
+            var pasResultat = results.docs.length == 0
+            var existePas = true
+            for( var i  = 0 ; i < results.docs.length; i++) {
+                existePas = existePas && !results.docs[i].data().participants.includes(joueur.id)
+                if(results.docs[i].data().participants.includes(joueur.id)) {
+                    var conv = results.docs[i].data()
+                    conv.joueur = joueur
+                }
+            }
+            console.log("==== pseudo  §§§ ====", joueur.pseudo)
+           if(pasResultat || existePas) {
+               var ref = db.collection("Conversations").doc()
+                await ref.set({
+                    aLue : false,
+                    id : ref.id,
+                    lecteurs : [],
+                    participants : [joueur.id, LocalUser.data.id],
+                    estUnGroupe : false
+                })
+                var conv = {
+                    aLue : false,
+                    id : ref.id,
+                    lecteurs:[],
+                    participants : [id, LocalUser.data.id],
+                    estUnGroupe : false,
+                    joueur : joueur
+                }
+                this.props.navigation.push("ListMessages", {conv : conv})
+           } else {
+                this.props.navigation.push("ListMessages", {conv : conv})
+           }
+        })
+        
+        
+    }
+
+    newMessage(){
+
+    }
 	
 
     render() {
@@ -911,6 +974,7 @@ class ProfilJoueur extends React.Component {
 							
                     {/* Caracteristiques du joueur */}
                     <View style={[styles.perso_container]}>
+                        {this.renderIconMessage()}
                         <View style={styles.top_infos_container}>
                             <TouchableOpacity
                                 style={{justifyContent: 'center', alignItems: 'center'}}

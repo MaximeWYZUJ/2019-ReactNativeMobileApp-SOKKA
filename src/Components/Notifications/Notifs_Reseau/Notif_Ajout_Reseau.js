@@ -93,7 +93,7 @@ class Notif_Ajout_Reseau extends React.Component {
 
                     </View>
                     <View>
-                        <Text>{this.renderPseudoEmetteur()} t'as ajouté à son réseau</Text>
+                        <Text>{this.renderPseudoEmetteur()} t'a ajouté à son réseau</Text>
          
                         
                         <TouchableOpacity
