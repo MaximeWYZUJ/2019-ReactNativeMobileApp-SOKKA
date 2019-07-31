@@ -2,16 +2,12 @@
 import React from 'react'
 
 import {View, ScrollView, Text} from 'react-native'
-import AlphabetListView from 'react-native-alphabetlistview'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import { connect } from 'react-redux'
 
-import FiltrerJoueur from '../../Components/Recherche/FiltrerJoueur'
-import BarreRechercheQuery from '../../Components/Recherche/Barre_Recherche_Query'
 import Joueurs_Ajout_Item from '../../Components/Creation/Joueurs_Ajout_Item'
-
-
+import ComposantRechercheBDD from '../../Components/Recherche/ComposantRechercheBDD'
 
 
 /**
@@ -59,71 +55,6 @@ class Joueurs_Rechercher extends React.Component {
     }
 
 
-    validerRecherche = (data)  => {
-		this.setState({
-            joueursFiltres : data,
-		})
-    }
-
-    handleValidateFilters = (q, f) => {
-        this.setState({
-            filtres: f,
-            query: q,
-            displayFiltres: false
-        })
-    }
-
-    handleFilterButton = () => {
-        this.setState({displayFiltres: !this.state.displayFiltres})
-    }
-
-    displayFiltresComponents() {
-        if (this.state.displayFiltres) {
-            return (
-                <FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>
-            )
-        }
-    }
-
-
-    buildJoueurs(joueurs) {
-        let  data =  {
-            A: [],
-            B: [],
-            C: [],
-            D: [],
-            E: [],
-            F: [],
-            G: [],
-            H: [],
-            I: [],
-            J: [],
-            K: [],
-            L: [],
-            M: [],
-            N: [],
-            O: [],
-            P: [],
-            Q: [],
-            R: [],
-            S: [],
-            T: [],
-            U: [],
-            V: [],
-            W: [],
-            X: [],
-            Y: [],
-            Z: [],
-        }
-        for(var i = 0; i < joueurs.length ; i ++) {
-            joueur = joueurs[i]
-            let lettre = joueur.pseudo[0].toUpperCase()
-            let arrayj = data[lettre]
-            arrayj.push(joueur)
-            data[lettre] = arrayj
-        }
-        return data
-    }
 
    
     render() {
@@ -131,26 +62,9 @@ class Joueurs_Rechercher extends React.Component {
         return(
 
             <ScrollView style={{flex: 1}}>
-                <View style={{flexDirection: 'row'}}>
-                    <View style={{flex: 4}}>
-                        <BarreRechercheQuery
-                            handleResults={this.validerRecherche}
-                            collection={"Joueurs"}
-                            field={"pseudoQuery"}
-                            nbOfChar={0}
-                            handleFilterButton={this.handleFilterButton}
-                            handleFilterQuery={this.state.query}
-                        />
-                    </View>
-                </View>
-                {this.displayFiltresComponents()}
-                <AlphabetListView
-                    data={this.buildJoueurs(this.state.joueursFiltres)}
-                    cell={this.renderItem}
-                    cellHeight={30}
-                    sectionListItem={SectionItem}
-                    sectionHeader={SectionHeader}
-                    sectionHeaderHeight={22.5}
+                <ComposantRechercheBDD
+                    type={"Joueurs"}
+                    renderItem={this.renderItem}
                 />
             </ScrollView>
     

@@ -3,10 +3,8 @@ import { View, Text, FlatList, TouchableOpacity, Image, Alert } from 'react-nati
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 
-import Email from 'react-native-email'
-
-import BarreRechercheQuery from '../../Components/Recherche/Barre_Recherche_Query'
-import BarreRecherche from '../../Components/Recherche/Barre_Recherche'
+import ComposantRechercheBDD from '../../Components/Recherche/ComposantRechercheBDD'
+import ComposantRechercheTableau from '../../Components/Recherche/ComposantRechercheTableau'
 
 import ItemJoueur from '../../Components/ProfilJoueur/JoueurItem'
 import ItemEquipe from '../../Components/Profil_Equipe/Item_Equipe'
@@ -14,13 +12,6 @@ import ItemTerrain from '../../Components/Terrain/ItemTerrain'
 import Item_Defi from '../../Components/Defis/Item_Defi'
 import Item_Partie  from '../../Components/Defis/Item_Partie'
 import Type_Defis from '../Jouer/Type_Defis'
-
-import AlphabetListView from 'react-native-alphabetlistview'
-
-import FiltrerJoueur from '../../Components/Recherche/FiltrerJoueur'
-import FiltrerEquipes from '../../Components/Recherche/FiltrerEquipe'
-import FiltrerTerrains from '../../Components/Recherche/FiltrerTerrain'
-import FiltrerDefi from '../../Components/Recherche/FiltrerDefi'
 
 import allTerrains from '../../Helpers/Toulouse.json'
 import Distance from '../../Helpers/Distance'
@@ -80,84 +71,6 @@ export default class RechercheDefaut extends React.Component {
 
 
     // ====================================================
-
-
-
-    handleFilterButton = () => {
-        this.setState({
-            displayFiltres: !this.state.displayFiltres
-        })
-    }
-
-
-    handleValidateFilters = (q, f) => {
-        this.handleFilterButton();
-        this.queryFiltre = q;
-        this.filtres = f;
-    
-        if (this.type === "Defis" && q != null) {
-            q.get().then((results) => {
-                var data = [];
-                for (var i=0; i<results.docs.length; i++) {
-                    data.push(results.docs[i].data());
-                }
-                this.setState({dataDefaut: data})
-            })
-        }
-    }
-
-
-    displayFiltresComponents() {
-        if (this.state.displayFiltres) {
-            switch(this.type) {
-                case "Joueurs": return (<FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.filtres}/>)
-                case "Equipes": return (<FiltrerEquipes handleValidate={this.handleValidateFilters} init={this.filtres}/>)
-                case "Terrains": return (<FiltrerTerrains handleValidate={this.handleValidateFilters} init={this.filtres}/>)
-                case "Defis": return (<FiltrerDefi handleValidate={this.handleValidateFilters} init={this.filtres}/>)
-            }
-        }
-    }
-    
-
-
-    renderSearchbar() {
-        if (this.type === "Defis") {
-            return (
-                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <Text>Appuie sur le bouton à droite pour faire une recherche</Text>
-                    <TouchableOpacity
-                        style = {{backgroundColor : 'white', flexDirection : 'row', marginLeft : wp('3%'),paddingVertical : hp('1%'), paddingHorizontal :wp('3%')}}
-                        onPress={() => {this.handleFilterButton()}}
-                        >
-                            <Image
-                                style={{width : wp('7%'), height : wp('7%'), alignSelf : 'center'}}
-                                source = {require('app/res/controls.png')} />
-                    </TouchableOpacity>
-                </View>
-            )
-        } else if (this.type === "Terrains") {
-            return (
-                <BarreRecherche
-                    handleTextChange={this.validerRecherche}
-                    data={allTerrains}
-                    field={this.champNomQuery}
-                    filterData={(data) => FiltrerTerrains.filtrerTerrains(data, this.filtres)}
-                    handleFilterButton={this.handleFilterButton}
-                />
-            )
-        } else {
-            return (
-                <BarreRechercheQuery
-                    handleResults={this.validerRecherche}
-                    collection={this.type}
-                    field={this.champNomQuery}
-                    nbOfChar={nbChar}
-                    handleFilterButton={this.handleFilterButton}
-                    handleFilterQuery={this.queryFiltre}
-                />
-            )
-        }
-    }
 
 
     buildJoueurs(partie) {
@@ -248,30 +161,13 @@ export default class RechercheDefaut extends React.Component {
     }
 
 
-    validerRecherche = (data) => {
-        console.log("valider recherche")
-        this.setState({
-            dataDefaut: data
-        })
-    }
-
-
-    handleProposerTerrain = () => {
-        const to = "email@email.com"
-        Email(to, {
-            subject : "Proposition de terrain",
-            body : "Bla bla"
-        }).catch(console.error)
-    }
-
-
     renderSpecialButton() {
 
         if (this.type == "Joueurs") {
             return (
                 <TouchableOpacity onPress={() => Alert.alert(
                     '',
-                    "Partage sur FB : Fonctionnalité pas encore implémentée\nPartage au répertoire : pas de JEH associée",
+                    "Partage au répertoire : Fonctionnalité pas encore implémentée",
                     [
                         {
                             text: 'OK',
@@ -331,112 +227,29 @@ export default class RechercheDefaut extends React.Component {
     }
 
 
-    // Construit le tableau avec les donnees par ordre alphabetique
-    buildAlphabetique(donneesBrutes) {
-        let  data =  {
-            A: [],
-            B: [],
-            C: [],
-            D: [],
-            E: [],
-            F: [],
-            G: [],
-            H: [],
-            I: [],
-            J: [],
-            K: [],
-            L: [],
-            M: [],
-            N: [],
-            O: [],
-            P: [],
-            Q: [],
-            R: [],
-            S: [],
-            T: [],
-            U: [],
-            V: [],
-            W: [],
-            X: [],
-            Y: [],
-            Z: [],
-        }
-        for(var i = 0; i < donneesBrutes.length ; i ++) {
-            item = donneesBrutes[i];
-            let pseudo = item[this.champNom];
-            let lettre = pseudo[0].toUpperCase();
-            data[lettre].push(item);
-        }
-        return data
-    }
-
 
     render() {
-        if (this.queryFiltre === null) {
-            nbChar = 0;
+        console.log(this.type)
+        if (this.type == "Terrains") {
+            return (
+                <ComposantRechercheTableau
+                    type={this.type}
+                    renderItem={this.renderItem}
+                    donnees={allTerrains}
+                    renderSpecialButton={this.renderSpecialButton}
+                />
+            )
+
         } else {
-            nbChar = 0;
+
+            return (
+                <ComposantRechercheBDD
+                    type={this.type}
+                    renderItem={this.renderItem}
+                    renderSpecialButton={this.renderSpecialButton}
+                />
+            )
         }
-        return (
-            <View style={{flex: 1}}>
-                <View style={{flexDirection: 'row'}}>
-                    <View style={{flex: 4}}>
-                        {this.renderSearchbar()}
-                    </View>
-                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                        {this.renderSpecialButton()}
-                    </View>
-                </View>
-                {this.displayFiltresComponents()}
-                <View style = {{flex: 5}}>
-                    <AlphabetListView
-                        data={this.buildAlphabetique(this.state.dataDefaut)}
-                        cell={this.renderItem}
-                        cellHeight={30}
-                        sectionListItem={SectionItem}
-                        sectionHeader={SectionHeader}
-                        sectionHeaderHeight={22.5}
-                    />
-                </View>
-            </View>
-        )
     }
 
-}
-
-
-// Classes internes
-
-class SectionHeader extends React.Component {
-
-    render() {
-    // inline styles used for brevity, use a stylesheet when possible
-    var textStyle = {
-      color:'black',
-      fontWeight:'bold',
-      fontSize:RF(2.5),
-      marginLeft : wp('2.5%')
-    };
-
-    var viewStyle = {
-      backgroundColor: '#F7F7F7'
-    };
-  
-    return (
-        <View style={viewStyle}>
-        <Text style={textStyle}>{this.props.title}</Text>
-      </View>
-      
-    );
-  }
-}
-
-class SectionItem extends React.Component {
-  render() {
-    
-
-    return (
-        <Text style={{color:'black'}}></Text>
-    );
-  }
 }

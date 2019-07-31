@@ -53,6 +53,7 @@ export default class Barre_Recherche extends React.Component {
         } else {
             let field = this.field
             let searchData = this.props.data.filter(function(data) {
+                console.log(data);
                 return data[field].includes(NormalizeString.normalize(searchedText)) // toLowerCase().startsWith(searchedText.toLowerCase()) ;
             });
 

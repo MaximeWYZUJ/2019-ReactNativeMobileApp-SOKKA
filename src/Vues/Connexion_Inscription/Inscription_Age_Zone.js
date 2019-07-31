@@ -8,6 +8,8 @@ import DatePicker from 'react-native-datepicker'
 import villes from '../../Components/Creation/villes.json'
 import departements from '../../Components/Creation/departements.json'
 import Colors from '../../Components/Colors'
+import NormalizeString from '../../Helpers/NormalizeString'
+
 
 var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 
@@ -137,7 +139,8 @@ export default class Inscription_Age_Zone extends React.Component {
                 prenom : this.state.prenom,
                 pseudo : this.state.pseudo,
                 sexe: this.state.sexe,
-                ville : this.state.ville,
+                ville : NormalizeString.normalize(this.state.ville),
+                departement : NormalizeString.normalize(this.getDepartement(this.state.ville)),
                 zone : this.state.zone,
                 naissance : this.state.today,
                 age : this.calculAge()

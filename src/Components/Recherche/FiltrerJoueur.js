@@ -15,19 +15,19 @@ export default class FiltrerJoueur extends React.Component {
     static filtrerJoueurs = (data, f) => {
         if (f != null) {
             if (f.ageMin != 0) {
-                data = data.filter(((elmt) => {return elmt["age"] > f.ageMin}));
+                data = data.filter(((elmt) => {return parseInt(elmt["age"], 10) > parseInt(f.ageMin, 10)}));
             }
             if (f.ageMax != 99) {
-                data = data.filter(((elmt) => {return elmt["age"] < f.ageMax}));
+                data = data.filter(((elmt) => {return parseInt(elmt["age"], 10) < parseInt(f.ageMax, 10)}));
             }
             if (f.departement != "") {
-                data = data.filter(((elmt) => {return elmt["departement"] === f.departement}))
+                data = data.filter(((elmt) => {return NormalizeString.normalize(elmt["departement"]) == NormalizeString.normalize(f.departement)}))
             }
             if (f.ville != "") {
-                data = data.filter(((elmt) => {return elmt["ville"] === f.ville}))
+                data = data.filter(((elmt) => {return NormalizeString.normalize(elmt["ville"]) == NormalizeString.normalize(f.ville)}))
             }
             if (f.score != null) {
-                data = data.filter(((elmt) => {return elmt["score"] === f.score}))
+                data = data.filter(((elmt) => {return parseInt(elmt["score"], 10) == parseInt(f.score, 10)}))
             }
             if (f.sexe != null) {
                 data = data.filter(((elmt) => {return elmt["sexe"] === f.sexe}))
@@ -236,10 +236,10 @@ export default class FiltrerJoueur extends React.Component {
         var bool = false;
 
         if (this.state.departement.length > 0) {
-            ref = ref.where('departement', '==', this.state.departement);
+            ref = ref.where('departement', '==', NormalizeString.normalize(this.state.departement));
         }
         if (this.state.ville.length > 0) {
-            ref = ref.where('ville', '==', this.state.ville);
+            ref = ref.where('ville', '==', NormalizeString.normalize(this.state.ville));
             bool = true;
         }
         if (this.state.ageMin > 0) {

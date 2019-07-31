@@ -50,23 +50,21 @@ export default class Barre_Recherche extends React.Component {
     };
 
     runQuery() {
-        console.log("in run query")
+        if (this.props.handleSearchStart != undefined) {
+            this.props.handleSearchStart();
+        }
+
         if(this.state.texte.length >= this.props.nbOfChar || !(this.props.handleFilterQuery===null)) {
-            console.log("in if RUN QUERY")
             var array = []
             var db = DataBase.initialisation()
 
             var ref;
             var query;
-            console.log("CONDITION : ",this.props.handleFilterQuery === null )
             if (this.props.handleFilterQuery === null ) {
-                console.log("before ref ")
                 ref = db.collection(this.props.collection);
-                console.log("after ref")
                 query = ref.where(this.props.field, 'array-contains', NormalizeString.normalize(this.state.texte))
                     .limit(15);
             } else {
-                console.log("in else marque")
                 // Si on applique des filtres, on peut faire une recherche sans nom dans la barre de recherche
                 // et il n'y a pas de limite basse au nombre de caractères
                 ref = this.props.handleFilterQuery;
@@ -74,22 +72,13 @@ export default class Barre_Recherche extends React.Component {
                     query = ref.where(this.props.field, 'array-contains', NormalizeString.normalize(this.state.texte))
                         .limit(15);
                 } else {
-                    console.log("in ELSE recherche")
                     query = ref;
                 }
             }
-            /*var query = ref.orderBy(this.props.field).startAt(NormalizeString.normalize(this.state.texte))
-                                .endAt(this.state.texte.toLocaleLowerCase() + '\uf8ff')
-                                .limit(15);*/
-            
-            
             
             query.get().then(async (results) => {
             if(results.empty) {
                 console.log("No documents found!");
-                console.log("Collection : " + this.props.collection);
-                console.log("Field : " + this.props.field);
-                console.log("Texte de recherche : " + this.state.texte);
                 this.props.handleResults(array)
             } else {
                 // go through all results
@@ -111,6 +100,10 @@ export default class Barre_Recherche extends React.Component {
             Alert.alert(
                 "Tu dois rechercher au moins " + this.props.nbOfChar +" caractères"
             )
+        }
+
+        if (this.props.handleSearchEnd != undefined) {
+            this.props.handleSearchEnd();
         }
     }
     
