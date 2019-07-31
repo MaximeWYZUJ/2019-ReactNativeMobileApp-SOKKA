@@ -47,7 +47,8 @@ class Item_Terrain_creation_defis extends React.Component{
                     N_Voie : this.props.N_Voie,
                     Voie : this.props.Voie,
                     CodePostal : this.props.CodePostal,
-                    Ville : this.props.Ville
+                    Ville : this.props.Ville,
+                    distance : this.props.distance
                 }
             }
             this.props.dispatch(action2)

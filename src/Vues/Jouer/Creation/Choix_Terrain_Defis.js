@@ -64,6 +64,7 @@ class Choix_Terrain_Defis extends React.Component {
 
 
     goToNextScreen() {
+        console.log("eeeeeeeeeeeeeeeeee",  this.props.nomsTerrainSelectionne)
         console.log("THIS TYPE" ,this.type)
         if(this.type == Type_Defs.defis_2_equipes) { 
             
@@ -216,6 +217,7 @@ const styles = {
     
 }
 const mapStateToProps = (state) => {
+    console.log("zzzzzzzzzzzzzz", state.nomsTerrainSelectionne)
     return{ 
         terrainSelectionne : state.terrainSelectionne,
         nomsTerrainSelectionne : state.nomsTerrainSelectionne

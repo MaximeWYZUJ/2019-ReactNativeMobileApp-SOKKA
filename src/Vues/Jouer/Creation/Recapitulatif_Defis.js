@@ -35,7 +35,7 @@ export default class Recapitulatif_Defis extends React.Component {
         this.userData = this.props.navigation.getParam('userData', ' '),
         this.terrain = this.props.navigation.getParam('terrain', ' '),
         this.messageChauffe =  this.props.navigation.getParam('messageChauffe', ' '),
-
+        this.prix = this.props.navigation.getParam('prix', null)
         this.nomsTerrain = this.props.navigation.getParam('nomsTerrains', ' '),
 
         this.state = {
@@ -259,7 +259,7 @@ export default class Recapitulatif_Defis extends React.Component {
             terrain :this.terrain,
             recherche : cherche_adverssaire,
             commentaires : [],
-            prix_par_equipe : 0,
+            prix_par_equipe : this.prix,
             dateParse : Date.parse(date),
             absents : [],
             joueursEquipeOrga : this.props.navigation.getParam('joueursSelectionnes', ' '),
@@ -456,6 +456,7 @@ export default class Recapitulatif_Defis extends React.Component {
 
     render() {
 
+        console.log("=========", this.nomsTerrain)
         return (
             <View>
 
@@ -527,6 +528,8 @@ export default class Recapitulatif_Defis extends React.Component {
                             {/* Equipe adverse */}
                             {this.renderEquipeAdverse()}
                         </View>
+
+                        <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par équipe = {this.prix} (à regler sur place)</Text>
 
                         {/* Message de chauffe*/}
                         <Text style = {styles.txt_message_chauffe}>{this.messageChauffe}</Text>

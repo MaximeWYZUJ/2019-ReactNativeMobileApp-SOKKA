@@ -11,6 +11,9 @@ import { connect } from 'react-redux'
 import actions from '../../../Store/Reducers/actions'
 import LocalUser from '../../../Data/LocalUser.json'
 
+import firebase from 'firebase'
+import '@firebase/firestore'
+
 /* A VOIR COMMENT ON RECUPRERE LES IDS DES EQUIPES */
 
 /**
@@ -34,7 +37,7 @@ class Choix_Equipe_Defis extends React.Component  {
             equipesFiltrees : [],
             equipeSelectionnee : undefined,
             allDataEquipeSelectionnee : undefined,
-            userData : undefined
+            userData : LocalUser.data
         }
         this.MON_ID =  LocalUser.data.id
     }
@@ -52,8 +55,20 @@ class Choix_Equipe_Defis extends React.Component  {
         let equipesArray = []
         var db = Database.initialisation();
 
+        var ref = db.collection("Equipes")
+        var query = ref.where("capitaines", 'array-contains' , LocalUser.data.id)
+        query.get().then(async (results) => {
+            for(var i = 0; i < results.docs.length; i ++) {
+                equipesArray.push(results.docs[i].data())
+            }
+            this.setState({mesEquipes : equipesArray, equipesFiltrees : equipesArray})
+            
+        })
+
+
+
         // Récuperer la liste des equipes de l'utilisateur
-        var docRef = db.collection('Joueurs').doc(this.MON_ID);
+        /*var docRef = db.collection('Joueurs').doc(this.MON_ID);
         docRef.get().then(async (doc) => {
             if (doc.exists) {
 
@@ -91,7 +106,7 @@ class Choix_Equipe_Defis extends React.Component  {
             }
         }).catch(function(error) {
                 console.log("Error getting document:", error);
-        });
+        });*/
     }
 
 

@@ -128,15 +128,17 @@ function handleGlobalStetChange(state = initialiserState(Joueurs), action) {
          * Pour sauvegarder le InsNom et EquNom d'un terrain
          */
         case actions.SAVE_NOM_TERRAIN : 
+            console.log("ACTION !!!" , action.value)
             nextState = {
                 ...state,
                 nomsTerrainSelectionne : {
                     InsNom :  action.value.InsNom,
                     EquNom : action.value.EquNom,
-                    N_Voie : action.N_Voie,
-                    Voie : action.Voie,
-                    CodePostal : action.CodePostal,
-                    Ville : action.Ville
+                    N_Voie : action.value.N_Voie,
+                    Voie : action.value.Voie,
+                    CodePostal : action.value.CodePostal,
+                    Ville : action.value.Ville,
+                    distance : action.value.distance
                 }
             }
 

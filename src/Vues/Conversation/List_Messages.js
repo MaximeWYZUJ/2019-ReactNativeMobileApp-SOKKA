@@ -24,6 +24,10 @@ class List_Messages extends React.Component {
         joueurs : [],
         lastMessageId  : undefined
     }
+    this.addMessage = this.addMessage.bind(this)
+    this.addMessageGroupe = this.addMessageGroupe.bind(this)
+
+
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -56,16 +60,37 @@ class List_Messages extends React.Component {
     };     
 };
 
+    addMessage(){
+
+        this.getMessage()
+        
+    }
+
+    addMessageGroupe(){
+        this.getMessageGroupConv()
+    }
+
     componentDidMount(){
         if(! this.isAgroupConv()){
             this.getMessage()
+            var db = Database.initialisation()
+
+            db.collection("Conversations").doc(this.state.conv.id).collection("Messages")
+            .onSnapshot(this.addMessage);   
         } else {
             this.getMessageGroupConv()
+            var db = Database.initialisation()
+            db.collection("Conversations").doc(this.state.conv.id).collection("Messages")
+            .onSnapshot(this.addMessageGroupe);   
         }
+
+       
     }
 
+    /**
+     * PP
+     */
     async getMessage() {
-        console.log("in get message")
         var messages = []
         var id = this.state.conv.id 
         var lastMessageId = undefined
@@ -99,7 +124,6 @@ class List_Messages extends React.Component {
                 joueursToGetData.push(this.state.conv.participants[i])
             }
         }
-        console.log(joueursToGetData)
         joueurs = await Database.getArrayDocumentData( joueursToGetData, "Joueurs")
         return joueurs
     }
@@ -107,24 +131,19 @@ class List_Messages extends React.Component {
 
 
     async getMoreMessage(){
-        console.log("in get more message")
-        console.log(this.state.lastMessageId)
+        
         var messages =[]
         for(var i = 0 ; i < this.state.messages.length ; i++){
             messages.push(this.state.messages[i])
         }
         var id = this.state.conv.id 
         var db = Database.initialisation()
-        console.log("after init")
-        console.log(id)
+      
         nbMessages = this.state.nbMessages
         lastEnvoie = this.state.messages[this.state.nbMessages].dateEnvoie
         var lastMessageId = undefined
-        console.log("before write query")
         var query =  db.collection("Conversations").doc(id).collection("Messages").orderBy("dateEnvoie","desc" ).limit(10).startAfter(lastEnvoie)
-        console.log("before get query")
         query.get().then(async (results) => {
-            console.log("LENGTH RESULT  ",results.docs.length)
             for(var i = 0; i < results.docs.length ; i++) {
                 var index  = this.state.nbMessages +1
                 if(this.isAgroupConv()){
@@ -138,26 +157,21 @@ class List_Messages extends React.Component {
            
             }
             this.setState({messages : messages, nbMessages : nbMessages, lastMessageId : lastMessageId})
-            console.log(this.state.messages)
         }).catch(function(error) {console.log(error)}).then(console.log("ok more message"));
     }
 
     async getMessageGroupConv() {
-        console.log("in get message")
         var messages = []
 
         var joueurs = await this.getJoueursGroupeData()
         var lastMessageId = undefined
         var nbMessages = 0
-        console.log("after joueur")
         var id = this.state.conv.id 
         var db = Database.initialisation()
-        console.log(id)
         await db.collection("Conversations").doc(id).collection("Messages").orderBy("dateEnvoie","desc" ).limit(10).get()
         .then(querySnapshot => {
         
             var i  = 0
-            console.log("i ===", i)
             querySnapshot.docs.forEach(doc => {
                     var msg = this.buildMsgForChatGroup(doc.data(), i, joueurs)
                     lastMessageId = doc.id
@@ -166,7 +180,6 @@ class List_Messages extends React.Component {
                 i++
             });
         }).catch(function(errro) {console.log(errro)});
-        console.log(messages)
         
         this.setState({messages : messages, isLoading : false, joueurs : joueurs,lastMessageId :lastMessageId, nbMessages : nbMessages})
     }
@@ -176,7 +189,6 @@ class List_Messages extends React.Component {
 
 
     buildMsgForChat(msg, id) {
-        console.log("in build mesg")
         msg._id = id
         msg.createdAt = new Date(msg.dateEnvoie)
         if(msg.emetteur == LocalUser.data.id){
@@ -224,13 +236,12 @@ class List_Messages extends React.Component {
 
     async sendMsg(msg){
         console.log("in send msg", this.state.conv.lecteurs)
-        console.log(LocalUser.data.id)
-        console.log( Date.parse(new Date()))
         var db = Database.initialisation()
         if(this.state.conv.lecteurs != undefined){
             await this.incrementeNbMsgNonLu()
         }
 
+        console.log("after increment")
         await db.collection("Conversations").doc(this.state.conv.id).collection("Messages").add({
             aLue : false,
             dateEnvoie : Date.parse(new Date()),
@@ -239,12 +250,14 @@ class List_Messages extends React.Component {
         }).catch(function(error){console.log(error)})
         .then(console.log("msg send"))
 
+        console.log("apres anout doc dans collection message")
         await db.collection("Conversations").doc(this.state.conv.id).update({
             txtDernierMsg : msg.text,
             dateDernierMessage : Date.parse(new Date()),
             aLue : false,
             lecteurs : [LocalUser.data.id]
         })
+        console.log("apres maj doc conv")
         conv = this.state.conv
         conv.txtDernierMsg = msg.text,
         conv.dateDernierMessage = Date.parse(new Date()),
@@ -317,6 +330,7 @@ class List_Messages extends React.Component {
             for(var i = 0 ; i < this.state.joueurs.length; i++) {
                 var joueur = this.state.joueurs[i]
                 console.log("in boucle", joueur.pseudo)
+                console.log(this.state.conv)
                 if( this.state.conv.lecteurs.includes(joueur.id)){
                     console.log("in increment",joueur.id)
                     var db = Database.initialisation()
@@ -331,6 +345,7 @@ class List_Messages extends React.Component {
                     })
                
                 }
+                console.log("okokoko")
             }
             
         } else {
@@ -504,6 +519,7 @@ class List_Messages extends React.Component {
     for(var i = 0; i < messages.length ; i++) {
         await this.sendMsg(messages[i])
     }
+    cpnsole.log("everithing good !!!!!!!!!!")
     
     
   }

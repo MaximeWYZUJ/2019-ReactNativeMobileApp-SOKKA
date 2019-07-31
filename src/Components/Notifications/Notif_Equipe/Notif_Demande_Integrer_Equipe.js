@@ -50,10 +50,14 @@ class Notif_Demande_Integrer_Equipe extends React.Component {
         this.getData()
     }
 
-    async goToProfilEquipe() {
+    async goToProfilJoueur() {
         if(this.state.emetteur!= undefined) {
-            var equipes = Database.getArrayDocumentData(this.state.emetteur.equipes, "Equipes")
-            this.props.navigation.navigate("ProfilJoueur", {id: this.state.emetteur.id, joueur : this.state.emetteur, equipes : equipes})
+            var emetteur = this.state.emetteur
+
+            emetteur.naissance = new Date(emetteur.naissance.toDate());
+
+            var equipes = await Database.getArrayDocumentData(emetteur.equipes, "Equipes")
+            this.props.navigation.push("ProfilJoueur", {id: this.state.emetteur.id, joueur : emetteur, equipes : equipes, reseau : []})
         }
     }
 
@@ -352,7 +356,7 @@ class Notif_Demande_Integrer_Equipe extends React.Component {
             )
         } else {
             return(
-                <View style = {{flexDirection : 'row', borderWidth : 1, marginTop : hp('2%')}}>
+                <View style = {{flexDirection : 'row', marginTop : hp('2%')}}>
                     <View>
                         {this.renderPhotoEmetteur()}
                     </View>

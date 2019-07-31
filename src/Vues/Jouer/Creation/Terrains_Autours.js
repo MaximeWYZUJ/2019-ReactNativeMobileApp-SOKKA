@@ -356,7 +356,10 @@ class Terrains_Autours extends React.Component {
                     id={item.id}
                     distance={distance}
                     InsNom={item.InsNom}
-                    EquNom={item.EquNom}
+					EquNom={item.EquNom}
+					N_Voie = {item.N_Voie}
+					Voie = {item.Voie}
+					Ville = {item.Ville}
 					Ville={item.Ville}
                 />
 			)

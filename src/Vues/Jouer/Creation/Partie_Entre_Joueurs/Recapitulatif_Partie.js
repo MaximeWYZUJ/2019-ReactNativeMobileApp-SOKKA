@@ -37,6 +37,7 @@ export default class Recapitulatif_Partie extends React.Component {
         this.messageChauffe =this.props.navigation.getParam('messageChauffe', ''),
         this.joueurAnimation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
         this.goToFichePartie = this.goToFichePartie.bind(this)
+        this.prix =  this.props.navigation.getParam('prix', null)
 
     }
 
@@ -174,13 +175,16 @@ export default class Recapitulatif_Partie extends React.Component {
 
 
     goToFichePartie(id,date) {
-        msg = "Les joueurs peuvent s'inscrire"
-        if(this.nbJoueursRecherche == 0) {
-            msg = "Ta partie a bien été créée et publiée. Les joueurs te confirmeront leur participation"
+        if(this.nbJoueursRecherche > 0 && this.joueurs.length > 0) {
+            msg = "Les joueurs qui le souhaitent peuvent s’inscrire et les joueurs invités vont recevoir une notification pour confirmer leur participation."
+        } else if(this.joueurs.length > 0 && this.nbJoueursRecherche == 0 ) {
+            msg = "Les joueurs invités vont recevoir une notification pour confirmer leur participation."
+        } else if(this.joueurs.length == 0 && this.nbJoueursRecherche > 0) {
+            msg = "Les joueurs qui le souhaitent peuvent s’inscrire."
         }
 
         Alert.alert(
-            'Ta partie a bien été créée et publiée',
+            'Ta partie sera publiée quand tu appuieras sur ok',
             msg,
             [
               {text: 'Ok',  onPress: () => {
@@ -242,7 +246,7 @@ export default class Recapitulatif_Partie extends React.Component {
             terrain : this.props.navigation.getParam('terrain', ''),
             nbJoueursRecherche : this.nbJoueursRecherche,
             commentaires : [],
-            prix_par_joueurs : 0,
+            prix_par_joueurs : this.prix,
             attente : this.buildListOfJoueurWithoutUser(this.joueurs),
             confirme : [this.userData.id],
             indisponibles  : [],
@@ -292,6 +296,13 @@ export default class Recapitulatif_Partie extends React.Component {
 
     }
 
+    renderPrix(){
+        if(this.prix != null && this.prix > 0) {
+            return(                    
+                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par joueur = {this.prix} (à regler sur place)</Text>
+            )
+        }
+    }
     render() {
 
         if(this.nbJoueursRecherche >1) {
@@ -354,6 +365,9 @@ export default class Recapitulatif_Partie extends React.Component {
 
                         <Text style = {{alignSelf : "center", marginTop : hp('3%'), fontSize : RF(2.5)}}> {this.nbJoueursRecherche} joueurs {recheche}</Text>
                     </View>
+
+                            
+                    {this.renderPrix()}
 
                     {/* Message de chauffe*/}
                     <Text style = {styles.txt_message_chauffe}>{this.messageChauffe}</Text>

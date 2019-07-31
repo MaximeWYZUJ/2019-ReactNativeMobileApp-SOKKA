@@ -58,16 +58,17 @@ export default class Information_Recapitulatif extends React.Component {
                     <Text style = {styles.separateur}>_____________________________________</Text>
 
                     {/* View contenant l'icon terrain et son nom*/}
-                    <View style = {{flexDirection : 'row', marginTop : hp('2%'), marginLeft : wp('8%')}}>
+                    <View style = {{flexDirection : 'row', marginTop : hp('2%'), marginLeft : wp('8%'),alignItems:'center'}}>
                         <Image
                             source = {require('../../../../res/terrain1.jpg')}
                             style = {styles.photo_terrain}
                         />
                         {/* InsNom et EquNom du terrain */}
-                        <View style = {{width : wp('70%'), justifyContent:'center'}}>
+                        <View style = {{width : wp('70%'), justifyContent:'center', alignSelf : "center"}}>
                             <Text style = {styles.nomTerrains}>{this.props.nomsTerrain.InsNom}</Text>
                             <Text style = {styles.nomTerrains}>{this.props.nomsTerrain.N_Voie} {this.props.nomsTerrain.Voie}</Text>
                             <Text style = {styles.nomTerrains}>{this.props.nomsTerrain.Ville}</Text>
+                            <Text style = {styles.nomTerrains}>{this.props.nomsTerrain.distance} km</Text>
 
                         </View>
                     </View>

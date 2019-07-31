@@ -24,7 +24,9 @@ class Notif_Convocation_Partie extends React.Component {
         this.state = {
             isLoading : true,
             emetteur : undefined,
-            partie : undefined
+            partie : undefined,
+            arefuse : false,
+            aconfirmer : false
         }
     }
 
@@ -40,13 +42,20 @@ class Notif_Convocation_Partie extends React.Component {
      */
     async getData() {
 
+        var arefuse = false
+        var aconfirmer = false
         // Données de l'émeteur 
         console.log("before  emetteur", this.props.notification.emetteur)
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 
         // Données du défi 
         var partie = await Database.getDocumentData(this.props.notification.partie, "Defis")
-        this.setState({emetteur : emetteur, partie : partie,isLoading : false})
+
+        if(partie.indisponibles.includes(LocalUser.data.id)) arefuse = true
+        if(partie.confirme.includes(LocalUser.data.id)) aconfirmer = true
+
+        this.setState({emetteur : emetteur, partie : partie,isLoading : false, aconfirmer : aconfirmer, arefuse : arefuse})
+
     }
 
 
@@ -158,9 +167,9 @@ class Notif_Convocation_Partie extends React.Component {
         console.log("in handle confirmer non")
         Alert.alert(
             '',
-            "Tu souhaite annuler ta présence pour ce défi ? ",
+            "Tu n'es pas disponible pour cette partie",
             [
-                {text: 'Oui', onPress: () => this.annulerJoueurPresence()},
+                {text: 'Confirmer', onPress: () => this.annulerJoueurPresence()},
                 {
                   text: 'Non',
                   onPress: () => console.log('Cancel Pressed'),
@@ -178,7 +187,7 @@ class Notif_Convocation_Partie extends React.Component {
     handleConfirmerOui() {
         Alert.alert(
             '',
-            "Tu souhaite confirmer ta présence pour ce Defi ? ",
+            "Tu souhaites confirmer ta présence pour cette partie ? ",
             [
                 {text: 'Oui', onPress: () => this.confirmerJoueurPresence()},
                 {
@@ -198,6 +207,8 @@ class Notif_Convocation_Partie extends React.Component {
     async confirmerJoueurPresence()  {
 
         console.log("IN CONFIRM ER JOUEUR PRESENCE")
+
+        this.setState({aconfirmer  : true})
         await this.sendNotifConfirmer(this.state.partie.jour.seconds*1000)
 
         // Ajouter l'id de l'utilisateur dans la liste des confirme (Creation d'un new array pour le re render)
@@ -234,7 +245,12 @@ class Notif_Convocation_Partie extends React.Component {
             confirme : j,
             attente : att,
             indisponibles : indispo,
-        }).then(
+        }).then(function(){
+            Alert.alert(
+                '',
+                'Tu as confirmé ta présence pour cette partie'
+            )
+        }
             
         )
         .catch(function(error) {
@@ -246,6 +262,7 @@ class Notif_Convocation_Partie extends React.Component {
 
 
     }
+
 
 
     /**
@@ -305,6 +322,7 @@ class Notif_Convocation_Partie extends React.Component {
      * Ainsi que  d'enregistrer la partie mise à jour dans la DB.
      */
     async annulerJoueurPresence() {
+        this.setState({arefuse  : true})
 
         await this.sendNotifIndispo(new Date(this.state.partie.jour.seconds * 1000))
 
@@ -350,7 +368,12 @@ class Notif_Convocation_Partie extends React.Component {
             confirme : confirme,
             attente : attente,
             indisponibles : indispo,
-        }).then()
+        }).then(function(){
+            Alert.alert(
+                '',
+                'Tu es indisponible pour cette partie'
+            )
+        })
         .catch(function(error) {
             // The document probably doesn't exist.
             console.error("Error updating document: ", error);
@@ -416,6 +439,44 @@ class Notif_Convocation_Partie extends React.Component {
 
     }
 
+
+    chooseOptionToRender(){
+        if(! this.state.aconfirmer && ! this.state.arefuse) {
+            return(
+                <View style = {{alignSelf : "center"}}>
+                        <Text>{this.renderNomEmetteur()}  t'as invité / relancé pour </Text>
+
+                        {/* Date et btn consulter */}
+                        <View style = {{flexDirection : "row"}}>
+                            <Text>une partie le {this.renderDatePartie()} </Text>
+                            
+                            <TouchableOpacity
+                                onPress = {() => this.goToFichePartie()}
+                                >
+                                <Text style = {styles.txtBtn}>Consulter</Text>
+                            </TouchableOpacity>
+                        </View>
+                        
+                        {this.renderBtnConfirmer()}
+                </View>
+            )
+        } else if(this.state.aconfirmer){
+            return(
+                <View style = {{marginTop : hp('0.5%')}}>
+                    <Text>Tu as confirmé ta présence pour cette partie</Text>
+                        
+                            
+                </View>
+            )
+        } else {
+            return(
+                <View style = {{marginTop : hp('0.5%')}}>
+                    <Text>Tu es indisponible pour cette partie</Text>
+                     
+                </View>
+            )
+        }
+    }
     
     render() {
         if(this.state.isLoading) {
@@ -432,22 +493,7 @@ class Notif_Convocation_Partie extends React.Component {
                     <View>
                         {this.renderPhotoEmetteur()}
                     </View>
-                    <View style = {{marginTop : hp('0.5%')}}>
-                        <Text>{this.renderNomEmetteur()}  t'as convoqué / relancé pour </Text>
-
-                        {/* Date et btn consulter */}
-                        <View style = {{flexDirection : "row"}}>
-                            <Text>une partie le {this.renderDatePartie()} </Text>
-                            
-                            <TouchableOpacity
-                                onPress = {() => this.goToFichePartie()}
-                                >
-                                <Text style = {styles.txtBtn}>Consulter</Text>
-                            </TouchableOpacity>
-                        </View>
-                        
-                        {this.renderBtnConfirmer()}
-                    </View>
+                    {this.chooseOptionToRender()}
                 </View>
             )
         }

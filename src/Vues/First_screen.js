@@ -230,7 +230,7 @@ class First_screen extends React.Component {
 
                         {/* Vue contenant le text en bas de l'écran */}
                         <View style = {styles.View_txt_regle}>
-                            <Text>Règles de base</Text>
+                            <Text>Règles de basellll</Text>
                             <Text>10 Minutes ou 2 buts</Text>
                             <Text>Le vainqueur engage</Text>
                             <Text>Victoire : Seul le vainqueur reste</Text>

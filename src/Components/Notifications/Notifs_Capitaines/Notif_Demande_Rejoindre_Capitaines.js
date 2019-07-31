@@ -326,7 +326,7 @@ class Notif_Demande_Rejoindre_Capitaines extends React.Component {
                     <View style = {{flexDirection : "row"}}>
                         <TouchableOpacity
                             onPress = {() => this.alertAccepterRefuser(ACCEPTER)}>
-                            <Text style = {styles.txtBtn}>Accpeter</Text>
+                            <Text style = {styles.txtBtn}>Accepter</Text>
                         </TouchableOpacity>
 
                         <Text>   /   </Text>

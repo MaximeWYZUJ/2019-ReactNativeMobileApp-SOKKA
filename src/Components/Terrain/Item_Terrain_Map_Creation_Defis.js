@@ -35,8 +35,14 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
 
         const action2 = {type : actions.SAVE_NOM_TERRAIN , 
             value : {
-                InsNom : this.props.InsNom,
-                EquNom : this.props.EquNom
+                    InsNom : this.props.InsNom,
+                    EquNom : this.props.EquNom,
+                    N_Voie : this.props.N_Voie,
+                    Voie : this.props.Voie,
+                    CodePostal : this.props.CodePostal,
+                    Ville : this.props.Ville,
+                    distance : this.props.distance
+
             }
         }
         this.props.dispatch(action2)

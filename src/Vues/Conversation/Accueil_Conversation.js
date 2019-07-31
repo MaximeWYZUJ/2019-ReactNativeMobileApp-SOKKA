@@ -209,6 +209,7 @@ export default class Accueil_Conversation extends React.Component {
 
     _renderItem = ({item}) => {
         if(item.lecteurs != undefined){
+            console.log("+++++++++++++++++", item.lecteurs)
             var aLue = item.lecteurs.includes(LocalUser.data.id)
         } else {
             aLue = true
@@ -220,7 +221,12 @@ export default class Accueil_Conversation extends React.Component {
                 style = {{flexDirection : "row", marginBottom : hp('1.5%'), justifyContent : "space-between", backgroundColor : color}}
                 onPress = {async () => {
                     await this.updateLecteur(aLue,item.id)
-                    if(! aLue) item.lecteurs = item.lecteurs.push(LocalUser.data.id)
+                    if(! aLue) {
+                        var lecteurs = item.lecteurs
+                        lecteurs.push(LocalUser.data.id)
+                       item.lecteurs = lecteurs 
+                    }
+                    console.log("before go to list message")
                     this.props.navigation.push("ListMessages", {conv : item})}}>
                 <View  style = {{flexDirection : "row" , justifyContent : "center"}}>
                     {this._renderPhotoConv(item)}
