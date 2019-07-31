@@ -155,7 +155,7 @@ export default class Profil_Equipe extends React.Component {
                 isaMember : doc.joueurs.some(elmt => elmt === LocalUser.data.id),
                 id: id,
                 equipeData: doc,
-                txt_identite : doc.age + ' ans, ' + doc.ville,
+                txt_identite : doc.age + ' ans, ' + doc.ville.charAt(0).toUpperCase() + doc.ville.slice(1),
                 citation : doc.citation,
                 sexe : doc.sexe,
                 nbJoueur : nbJ,
@@ -269,8 +269,9 @@ export default class Profil_Equipe extends React.Component {
      * Pour aller sur la vue présentant les joueurs de l'équipe
      */
     goToJoueursEquipes() {
-        this.props.navigation.navigate("JoueursEquipe",{equipe : this.state.equipe, joueurs : this.state.joueurs})
-
+        if (!this.state.isLoadingJoueurs) {
+            this.props.navigation.navigate("JoueursEquipe",{equipe : this.state.equipe, joueurs : this.state.joueurs})
+        }
     }
     
     /*******************************************************************************

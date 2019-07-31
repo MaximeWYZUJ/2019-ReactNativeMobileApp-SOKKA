@@ -20,7 +20,7 @@ export default class NormalizeString {
         s = s.replace("ô", "o");
         s = s.replace("ö", "o");
         
-        s = s.replace("Ê", "E");
+        s = s.replace("Ë", "E");
         s = s.replace("Ê", "E");
         s = s.replace("Ï", "I");
         s = s.replace("Î", "I");

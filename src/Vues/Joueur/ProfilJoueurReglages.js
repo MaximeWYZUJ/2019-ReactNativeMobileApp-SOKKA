@@ -182,6 +182,25 @@ class ProfilJoueurReglages extends React.Component {
     };
 
 
+    getDepartement(nomVille) {
+        for (var i=0; i<villes.length; i++) {
+            if (nomVille === villes[i].Nom_commune) {
+                var cp = villes[i].Code_postal+"";
+                if (cp.length < 5) {
+                    cp = "0" + cp;
+                }
+                var depCode = cp.substr(0, 2);
+                for (var j=0; j<departements.length; j++) {
+                    if (departements[j].departmentCode === depCode) {
+                        return departements[j].departmentName;
+                    }
+                }
+            }
+        }
+        return "erreur"
+    }
+
+
     /**
      * Pour mettre la première lettre en capitale
      * @param {} string 
@@ -273,7 +292,8 @@ class ProfilJoueurReglages extends React.Component {
             this.joueur.age = this.age
         }
         if (this.isVilleOk(this.ville)) {
-            this.joueur.ville = this.ville
+            this.joueur.ville = NormalizeString.normalize(this.ville);
+            this.joueur.departement = NormalizeString.normalize(this.getDepartement(this.ville));
         }
         if (this.zone) {
             this.joueur.zone = this.zone
@@ -319,6 +339,7 @@ class ProfilJoueurReglages extends React.Component {
             queryPseudo: this.joueur.queryPseudo,
             pseudoQuery: this.joueur.pseudoQuery,
             ville: this.joueur.ville,
+            departement: this.joueur.departement,
             photo: this.joueur.photo,
             score: this.joueur.score,
             sexe: this.joueur.sexe,

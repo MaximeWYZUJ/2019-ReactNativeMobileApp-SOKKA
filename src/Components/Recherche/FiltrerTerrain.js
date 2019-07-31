@@ -15,37 +15,28 @@ export default class FiltrerTerrain extends React.Component {
 
 
     static filtrerTerrains = (data, f) => {
-        console.log("very start");
         if (f != null) {
-            console.log("start")
             if (f.departement !== "") {
-                data = data.filter(((elmt) => {return elmt["Departement"] === f.departement}))
+                data = data.filter(((elmt) => {return NormalizeString.normalize(elmt["Departement"]) == NormalizeString.normalize(f.departement)}))
             }
-            console.log("dep OK");
             if (f.ville !== "") {
-                data = data.filter(((elmt) => {return elmt["Ville"] === f.ville}))
+                data = data.filter(((elmt) => {return NormalizeString.normalize(elmt["Ville"]) === NormalizeString.normalize(f.ville)}))
             }
-            console.log("ville OK");
             if (f.sanitaires) {
                 data = data.filter(((elmt) => {return elmt["EquSanitairePublic"] === "-1"}))
             }
-            console.log("san OK");
             if (f.eclairage) {
                 data = data.filter(((elmt) => {return elmt["EquEclairage"] === "-1"}))
             }
-            console.log("eclairage OK");
             if (f.handicap) {
                 data = data.filter(((elmt) => {return elmt["EquAccesHandimAire"] === "Oui"}))
             }
-            console.log("handicap OK");
             if (f.decouvert) {
                 data = data.filter(((elmt) => {return elmt["Decouvert_Couvert"] === "Découvert"}))
             }
-            console.log("decouv OK");
             if (f.gratuit) {
                 data = data.filter(((elmt) => {return elmt["Payant"] === false}))
             }
-            console.log("gratuit OK")
             if (f.surface != null) {
                 if (f.surface === "Gazon naturel") {
                     data = data.filter(((elmt) => {return elmt["TypeSol"] === "Gazon naturel"}))
@@ -60,7 +51,6 @@ export default class FiltrerTerrain extends React.Component {
                     data = data.filter(((elmt) => {return elmt["TypeSol"] === "Synthétique (hors gazon)"}))
                 }        
             }
-            console.log("surface OK");
         }
 
         return data;
@@ -277,8 +267,6 @@ export default class FiltrerTerrain extends React.Component {
 
 
     render() {
-        console.log(this.state.ville);
-        console.log(this.state.departement);
         return (
             <View>
                 {/* Filtrer sur le lieu */}

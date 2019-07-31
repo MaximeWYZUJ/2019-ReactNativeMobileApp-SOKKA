@@ -995,7 +995,7 @@ class ProfilJoueur extends React.Component {
                                         style={{width: 15, height: 15, marginHorizontal: 2}}
                                         source={this.sexeIcon}
                                         />
-                                    <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville}</Text>
+                                    <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville.charAt(0).toUpperCase() + this.joueur.ville.slice(1)}</Text>
                                 </View>
                                 {/*<Text style={{margin: 5,  fontSize : RF(3.25)}}>{this.joueur.pseudo}</Text>*/}
                                 <Text>Joueur {this.joueur.poste}</Text>

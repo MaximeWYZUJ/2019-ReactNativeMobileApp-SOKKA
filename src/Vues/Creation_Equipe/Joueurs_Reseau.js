@@ -1,19 +1,16 @@
 
 import React from 'react'
 
-import {View, Text, ScrollView} from 'react-native'
-import AlphabetListView from 'react-native-alphabetlistview'
+import {View, Text} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import { connect } from 'react-redux'
 import {SkypeIndicator} from 'react-native-indicators';
 
 import LocalUser from '../../Data/LocalUser.json'
-import Database from '../../Data/Database'
-import Barre_Recherche from '../../Components/Recherche/Barre_Recherche'
-import FiltrerJoueur from '../../Components/Recherche/FiltrerJoueur'
 import Joueurs_Ajout_Item from '../../Components/Creation/Joueurs_Ajout_Item'
 
+import ComposantRechercheTableau from '../../Components/Recherche/ComposantRechercheTableau'
 
 /**
  * Classe qui va permettre à l'utilisateur permettre de choisir les joueurs de son 
@@ -36,120 +33,6 @@ class Joueurs_Reseau_Final extends React.Component {
         this.reseau = LocalUser.data.reseau
     }
 
-    testAppartient(x,e) {
-        var ok = false;
-        for(var i = 0; i < x.length; i ++) {
-            if(e == x[i]) {
-                ok =  true
-            }
-        }
-        
-        return ok
-    }
-
-    componentDidMount() {
-        this.downloadDataJoueur()
-    }
-
-    /**
-     * Fonction qui permet de trier les joueurs en fonction de l'ordre laphabethique
-     * de leur pseudo.
-     * @param {*} joueurs 
-     */
-    buildJoueurs(joueurs) {
-        let  data =  {
-            A: [],
-            B: [],
-            C: [],
-            D: [],
-            E: [],
-            F: [],
-            G: [],
-            H: [],
-            I: [],
-            J: [],
-            K: [],
-            L: [],
-            M: [],
-            N: [],
-            O: [],
-            P: [],
-            Q: [],
-            R: [],
-            S: [],
-            T: [],
-            U: [],
-            V: [],
-            W: [],
-            X: [],
-            Y: [],
-            Z: [],
-        }
-        for(var i = 0; i < joueurs.length ; i ++) {
-            joueur = joueurs[i]
-            let lettre = joueur.pseudo[0].toUpperCase()
-            let arrayj = data[lettre]
-            let j = {
-                pseudo : joueur.pseudo,
-                photo : joueur.photo,
-                score : joueur.score,
-                id : joueur.id
-            }
-            arrayj.push(j)
-            data[lettre] = arrayj
-        }
-        return data
-    }
-
-
-
-    /**
-     * Fonction qui permet de télécharger les données des joueurs du réseau 
-     * de l'utilisateur
-     */
-    async downloadDataJoueur() {
-        var liste = []
-        for(var i = 0 ; i < this.reseau.length; i++) {
-            var joueur = await Database.getDocumentData(this.reseau[i], "Joueurs")
-            liste.push(joueur)
-        }
-
-        this.setState({allJoueurs : liste, joueurFiltres : liste, isLoading : false})
-    }
-
-    /**
-	 * Fonction qui va être passé en props du componant
-	 * BareRecherche et qui va permettre de filtrer les equipes 
-	 * en fonction de ce que tappe l'utilisateur
-	 */
-    recherche = (data)  => {
-        var dataF = FiltrerJoueur.filtrerJoueurs(data, this.state.filtres);
-		this.setState({
-            joueurFiltres : dataF,
-		})
-    }
-
-    handleValidateFilters = (q, f) => {
-        var data = this.state.allJoueurs;
-        var dataF = FiltrerJoueur.filtrerJoueurs(data, f);
-        this.setState({
-            joueurFiltres: dataF,
-            filtres: f,
-            displayFiltres: false
-        })
-    }
-
-    handleFilterButton = () => {
-        this.setState({displayFiltres: !this.state.displayFiltres})
-    }
-
-    displayFiltresComponents() {
-        if (this.state.displayFiltres) {
-            return (
-                <FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>
-            )
-        }
-    }
 
     renderItem = ({item}) => {
         return (
@@ -161,87 +44,17 @@ class Joueurs_Reseau_Final extends React.Component {
     }
 
 
-    buildJoueurs(joueurs) {
-        let  data =  {
-            A: [],
-            B: [],
-            C: [],
-            D: [],
-            E: [],
-            F: [],
-            G: [],
-            H: [],
-            I: [],
-            J: [],
-            K: [],
-            L: [],
-            M: [],
-            N: [],
-            O: [],
-            P: [],
-            Q: [],
-            R: [],
-            S: [],
-            T: [],
-            U: [],
-            V: [],
-            W: [],
-            X: [],
-            Y: [],
-            Z: [],
-        }
-        for(var i = 0; i < joueurs.length ; i ++) {
-            joueur = joueurs[i]
-            let lettre = joueur.pseudo[0].toUpperCase()
-            let arrayj = data[lettre]
-            arrayj.push(joueur)
-            data[lettre] = arrayj
-        }
-        return data
-    }
-
 
     render() {
-       // const joueursSelectionnes = this.props.joueursSelectionnes;
-       // const renderItem = ({ item }) => ( <Joueurs_Ajout_Item 
-           // joueur = {item}
-           // isShown = {this.testAppartient(joueursSelectionnes,item.id)}
-        
-
-       // />);
-       if(! this.state.isLoading) {
 
             return(
-                <ScrollView>
-                    {/* View contenant la bare de recherche */}
-                    <Barre_Recherche
-                        handleTextChange ={this.recherche}
-                        data = {this.state.allJoueurs}
-                        field = "pseudoQuery"
-                        filtrerData = {(data) => FiltrerJoueur.filtrerJoueurs(data, this.state.filtres)}
-                        handleFilterButton = {this.handleFilterButton}
-                    />
-                    {this.displayFiltresComponents()}
-                    <AlphabetListView
-                        data={this.buildJoueurs(this.state.joueurFiltres)}
-                        cell={this.renderItem}
-                        cellHeight={30}
-                        sectionListItem={SectionItem}
-                        sectionHeader={SectionHeader}
-                        sectionHeaderHeight={22.5}
-                    />
-                </ScrollView>
+                <ComposantRechercheTableau
+                    type={"Joueurs"}
+                    renderItem={this.renderItem}
+                    donneesID={this.reseau}
+                />
 
             )
-        } else {
-            return(
-                <View style = {{marginTop : hp('15%')}}>
-                    <SkypeIndicator 
-                     color='#52C7FD'
-                     size = {hp('10%')} />
-                 </View>
-            )
-        }
     }
 }
 const styles = {
