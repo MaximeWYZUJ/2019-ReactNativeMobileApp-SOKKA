@@ -11,6 +11,7 @@ import Simple_Loading from '../../Components/Loading/Simple_Loading'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import StarRating from 'react-native-star-rating'
+import { Camera, ImagePicker, Permissions } from 'expo';
 
 import firebase from 'firebase'
 import '@firebase/firestore'
@@ -23,12 +24,22 @@ export default class Modifier_Groupe extends React.Component {
             groupe : this.props.navigation.getParam('groupe', undefined),
             joueurs : [LocalUser.data].concat(this.props.navigation.getParam('joueurs', [])),
             isLoading : false,
-            newNom : ""
+            newNom : "",
+            usingCamera : false,
+            image : require('../../../res/group.png')
+
 
         }
     
     }
 
+    componentDidMount(){
+        if(this.state.groupe.photo != undefined) { 
+            this.setState({image : {uri : this.state.groupe.photo}})
+        }
+
+
+    }
     static navigationOptions = ({ navigation }) => {
 
         
@@ -78,15 +89,44 @@ export default class Modifier_Groupe extends React.Component {
             /* Si l'utilisateur à choisis une image. */
             if (!result.cancelled) {
                 this.setState({ 
-                photo: {uri : result.uri },
-                image_changed : true
+                image: {uri : result.uri },
+                isLoading : true
                 });
+
+                var url = await this.uploadImage(result.uri, this.state.groupe.nom)
+                console.log("after upload")
+                var db = Database.initialisation()
+               await  db.collection("Conversations").doc(this.state.groupe.id).update({
+                    photo : url
+                })
+                console.log('after update')
+                this.setState({isLoading : false})
+                Alert.alert('','La photo a bien été changée')
             }
         }
     };
 
+    alertImage(){
+        Alert.alert(
+            '',
+            "Comment veux-tu prendre la photo ?",
+            [
+                {
+                    text: 'Caméra',
+                    onPress: () => this.pickImageCamera(),
+                },
+                {
+                    text: 'Gallerie',
+                    onPress: () => this.pickImageGallerie(),
+                    style: 'cancel',
+                },
+            ],
+            )
+    }
+    
 
     uploadImage = async (uri, imageName) => {
+        console.log("in upload image")
         const blob = await new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.onload = function() {
@@ -99,7 +139,8 @@ export default class Modifier_Groupe extends React.Component {
             xhr.open('GET', uri, true);
             xhr.send(null);
         });
-        var ref = firebase.storage().ref().child("Photos_profil_Joueurs/test/" + imageName);
+        var ref = firebase.storage().ref().child("Photos_Groupes//test/" + imageName);
+        console.log("after ref")
         ref.put(blob);
 
         return ref.getDownloadURL();
@@ -120,12 +161,20 @@ export default class Modifier_Groupe extends React.Component {
     snapPhoto = async () => {
         let photo = await this.camera.takePictureAsync();
         this.setState({
-            photo: {uri: photo.uri},
-            txt_btn: 'SUIVANT',
-            image_changed: true,
-            usingCamera: false
+            image: {uri: photo.uri},
+            usingCamera: false,
+            isLoading : true
         })
-    }
+        var url = await this.uploadImage(photo.uri, this.state.groupe.nom)
+        console.log("after upload")
+        var db = Database.initialisation()
+       await  db.collection("Conversations").doc(this.state.groupe.id).update({
+            photo : url
+        })
+        console.log('after update')
+        this.setState({isLoading : false})
+        Alert.alert('','La photo a bien été changée')
+        }
     
 
     texteChanged = (searchedText) => {
@@ -133,10 +182,7 @@ export default class Modifier_Groupe extends React.Component {
     };
 
      onSubmit = () => {
-        console.log("in submit")
         var newNom = this.state.newNom
-        console.log(newNom)
-        console.log(this.state.groupe.id)
         var db = Database.initialisation()
         db.collection("Conversations").doc(this.state.groupe.id).update({
             nom :newNom
@@ -148,20 +194,17 @@ export default class Modifier_Groupe extends React.Component {
 
 
     _renderPhotoConv() {
-        if(this.state.groupe.photo == undefined) { 
-            return(
+        
+        return(
+
+            <TouchableOpacity
+                onPress = {() => this.alertImage()}>
                 <Image
-                    source = {require('../../../res/group.png')}
+                    source = {this.state.image}
                     style = {styles.image_conv}/>
-            )
+            </TouchableOpacity>
+        )
            
-        } else {
-            return(
-                <Image
-                    source = {{uri : this.state.groupe.photo }}
-                    style = {styles.image_conv}/>
-            )
-        }
     }
     alertAdmin(joueur) {
         Alert.alert(
@@ -307,6 +350,43 @@ export default class Modifier_Groupe extends React.Component {
                     taille = {hp('5%')}
                 />
             )
+        } else  if (this.state.usingCamera) {
+                return (
+                    <View style={{ flex: 1 }}>
+                        <Camera style={{ flex: 1 }} type={this.state.type} ref={ref => {this.camera = ref}}>
+                            <View
+                            style={{
+                                flex: 1,
+                                backgroundColor: 'transparent',
+                                flexDirection: 'row',
+                            }}>
+                                <TouchableOpacity
+                                    style={{
+                                    flex: 1,
+                                    alignSelf: 'flex-end',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-around'
+                                    }}
+                                    onPress={() => {
+                                        this.setState({
+                                            type: this.state.type === Camera.Constants.Type.back ? Camera.Constants.Type.front : Camera.Constants.Type.back,
+                                        });
+                                    }}>
+                                    <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> FLIP </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{
+                                    flex: 1,
+                                    alignSelf: 'flex-end',
+                                    alignItems: 'center',
+                                    }}
+                                    onPress={this.snapPhoto}>
+                                    <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> SNAP </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </Camera>
+                    </View>
+                )
         } else {
             return(
                 <ScrollView>

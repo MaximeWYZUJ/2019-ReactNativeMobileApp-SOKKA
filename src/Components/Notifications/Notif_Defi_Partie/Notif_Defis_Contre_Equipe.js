@@ -189,7 +189,7 @@ class Notif_Defis_Contre_Equipe extends React.Component {
         console.log("in handle confirmer non")
         Alert.alert(
             '',
-            "Tu souhaite refuser le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
+            "Tu souhaites refuser le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
             [
                 {text: 'Oui', onPress: () => this.refuserDefis()},
                 {
@@ -209,7 +209,7 @@ class Notif_Defis_Contre_Equipe extends React.Component {
     handleConfirmerOui() {
         Alert.alert(
             '',
-            "Tu souhaite accepter le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
+            "Tu souhaites accepter le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
             [
                 {text: 'Oui', onPress: () => this.accepterDefis()},
                 {

@@ -59,16 +59,19 @@ export default class Calendrier_Joueur extends React.Component {
         query.get().then(async (results) => {
             console.log("CALENDRIER :",results.docs.length )
             for(var i = 0; i < results.docs.length ; i++) {
-                var dateDefi = new Date(  results.docs[i].data().jour.seconds*1000)
+                var dateDefi = new Date(  results.docs[i].data().jour.seconds*1000 - 7200000)
 
+                var defi = results.docs[i].data()
+                defi.jour.seconds = defi.jour.seconds -7200
                 // Si le defi ou la partie est passés
                 if(dateDefi < now) {
-                    defisPasses.push(results.docs[i].data())
+                    var def
+                    defisPasses.push(defi)
                     index ++
                 }else {
-                    defisaVenir.push(results.docs[i].data())
+                    defisaVenir.push(defi)
                 }
-                allDefis.push(results.docs[i].data())
+                allDefis.push(defi)
                 //defisArray.push(results.docs[i].data())
             }
             this.setState({
@@ -94,14 +97,17 @@ export default class Calendrier_Joueur extends React.Component {
                         for(var i = 0; i < resultsDefiOrga.docs.length ; i++) {
                             var dateDefi = new Date(  resultsDefiOrga.docs[i].data().jour.seconds*1000)
                             if(! this.allreaddyDownloadDefi(allDefis, resultsDefiOrga.docs[i].data())) {
+
+                                var defi = resultsDefiOrga.docs[i].data()
+                                defi.jour.seconds = defi.jour.seconds -7200
                                 // Si le defi ou la partie est passés
                                 if(dateDefi < now) {
-                                    defisPasses.push(resultsDefiOrga.docs[i].data())
+                                    defisPasses.push(defi)
                                     index ++
                                 }else {
-                                    defisaVenir.push(resultsDefiOrga.docs[i].data())
+                                    defisaVenir.push(defi)
                                 }
-                                allDefis.push(resultsDefiOrga.docs[i].data())
+                                allDefis.push(defi)
                             }
                             
                         }
@@ -116,14 +122,16 @@ export default class Calendrier_Joueur extends React.Component {
                             var dateDefi = new Date(  resultsDefiDefiee.docs[i].data().jour.seconds*1000)
                             if(! this.allreaddyDownloadDefi(allDefis, resultsDefiDefiee.docs[i].data())) {
 
+                                var defi = resultsDefiDefiee.docs[i].data()
+                                defi.jour.seconds =defi.jour.seconds - 7200 
                                 // Si le defi ou la partie est passés
                                 if(dateDefi < now) {
-                                    defisPasses.push(resultsDefiDefiee.docs[i].data())
+                                    defisPasses.push(defi)
                                     index ++
                                 }else {
-                                    defisaVenir.push(resultsDefiDefiee.docs[i].data())
+                                    defisaVenir.push(defi)
                                 }
-                                allDefis.push(resultsDefiDefiee.docs[i].data())
+                                allDefis.push(defi)
                             }
                         }
 
@@ -240,7 +248,7 @@ export default class Calendrier_Joueur extends React.Component {
     renderListDefiPartie() {
         if(this.state.allDefis != 0 ) {
             return(
-                <View style = {{backgroundColor : Colors.grayItem}} >
+                <View style = {{backgroundColor : Colors.grayItem, marginBottom : hp('10%')}} >
                     <Text style = {{fontSize : RF(2.5), alignSelf : "center", marginBottom : hp('2%'), marginTop : hp('2%')}}>Calendrier</Text>
                    
                     <SectionList

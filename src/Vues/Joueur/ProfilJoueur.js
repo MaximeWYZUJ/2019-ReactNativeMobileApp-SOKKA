@@ -234,8 +234,9 @@ class ProfilJoueur extends React.Component {
         // On regarde si l'utilisateur participe à un defi
         query.get().then(async (results) => {
             for(var i = 0; i < results.docs.length ; i++) {
-                
-                allDefis.push(results.docs[i].data())
+                var defi = results.docs[i].data()
+                defi.jour.seconds = defi.jour.seconds -7200 
+                allDefis.push(defi)
 
             }
             this.setState({allDefis : allDefis})
@@ -253,8 +254,10 @@ class ProfilJoueur extends React.Component {
                                         .where("dateParse", ">=",Date.parse(now))
                     queryEqOrga.get().then(async (resultsDefiOrga) => {
                         for(var i = 0; i < resultsDefiOrga.docs.length ; i++) {
-                            if(! this.allreaddyDownloadDefi(allDefis, resultsDefiOrga.docs[i].data())) {
-                                allDefis.push(resultsDefiOrga.docs[i].data())
+                            var defi =resultsDefiOrga.docs[i].data()
+                            defi.jour.seconds = defi.jour.seconds -7200 
+                            if(! this.allreaddyDownloadDefi(allDefis, defi )) {
+                                allDefis.push(defi)
                             }
                             
                         }
@@ -266,8 +269,10 @@ class ProfilJoueur extends React.Component {
                     queryEqDefiee.get().then(async (resultsDefiDefiee) => {
 
                         for(var i = 0; i < resultsDefiDefiee.docs.length ; i++) {
-                            if(! this.allreaddyDownloadDefi(allDefis, resultsDefiDefiee.docs[i].data())) { 
-                                allDefis.push(resultsDefiDefiee.docs[i].data())
+                            var defi =resultsDefiDefiee.docs[i].data()
+                            defi.jour.seconds = defi.jour.seconds -7200 
+                            if(! this.allreaddyDownloadDefi(allDefis,defi )) { 
+                                allDefis.push(defi)
                             }
                         }
                     })

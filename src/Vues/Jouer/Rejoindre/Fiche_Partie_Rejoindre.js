@@ -178,6 +178,9 @@ class Fiche_Partie_Rejoindre extends React.Component {
 
         var id = this.props.navigation.getParam('id', 'erreur')
         var partie = await Database.getDocumentData(id,"Defis")
+
+    
+        partie.jour.seconds = partie.jour.seconds - 7200    // Pour mettre en heure francaise
         this.findTerrain(partie.terrain)
         var joueursData = await Database.getArrayDocumentData(partie.participants, "Joueurs")
         
@@ -391,8 +394,24 @@ class Fiche_Partie_Rejoindre extends React.Component {
         return false
     }
 
+    async goToFicheJoueur(joueur){
+        this.setState({isLoading : true})
+        var db = Database.initialisation()
+        var equipes = await Database.getArrayDocumentData(joueur.equipes, "Equipes")
+        this.setState({isLoading : false})
+        this.props.navigation.push("ProfilJoueur", {id: joueur.id, joueur :joueur, equipes : equipes})
+    }
+
+
+    goToFicheTerrain(){
+        this.props.navigation.push("ProfilTerrain", {id: this.state.partie.terrain, header: this.state.InsNom})
+    }
+
+    
+
     
     _renderItem = ({item}) => {
+
 
         var color  = "white"
         if(this.state.partie.confirme.includes(item.id)) {
@@ -403,9 +422,12 @@ class Fiche_Partie_Rejoindre extends React.Component {
         if(! this.state.partie.indisponibles.includes(item.id)) {
             return(
                 <Animated.View style = {this.joueurAnimation.getLayout()}>
+                    <TouchableOpacity
+                        onPress = {() => this.goToFicheJoueur(item)}>
                     <Image
                         source = {{uri : item.photo}}
                         style = {{width : wp('15%'), height : wp('15%'), borderRadius : wp('7%'), marginRight : wp('2%'), marginTop : hp('1%'), marginLeft : wp('1%'), borderWidth : 3, borderColor : color}}/>
+                    </TouchableOpacity>
                 </Animated.View>
               
             )
@@ -675,6 +697,17 @@ class Fiche_Partie_Rejoindre extends React.Component {
         }
     }
 
+    renderPrix(){
+        if(this.state.partie.prix_par_joueurs != null) {
+            return(
+                <Text style = {{marginLeft : wp('3%')}}>Prix par joueur : {this.state.partie.prix_par_joueurs} (à régler sur place) </Text>
+            )
+        } else {
+            return (
+                <Text style = {{marginLeft : wp('3%')}}>Gratuit</Text>
+            )
+        }
+    }
 
     displayRender() {
         if(this.state.isLoading) {
@@ -700,7 +733,9 @@ class Fiche_Partie_Rejoindre extends React.Component {
                                 <Text style = {styles.separateur}>_____________________________________</Text>
 
                                 {/* View contenant l'icon terrain et son nom*/}
-                                <View style = {{flexDirection : 'row', marginTop : hp('2%'), marginLeft : wp('8%')}}>
+                                <TouchableOpacity
+                                     style = {{flexDirection : 'row', marginTop : hp('2%'), marginLeft : wp('8%')}}
+                                     onPress = {() => this.goToFicheTerrain()}>
                                     <Image
                                         source = {require('../../../../res/terrain1.jpg')}
                                         style = {styles.photo_terrain}
@@ -712,7 +747,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
                                         <Text style = {styles.nomTerrains}>{this.state.CodePostal} {this.state.Ville}</Text>
 
                                     </View>
-                                </View>
+                                </TouchableOpacity>
                             </View>
 
                             <View style = {styles.containerJoueurs}>
@@ -732,7 +767,9 @@ class Fiche_Partie_Rejoindre extends React.Component {
                                 {/*Bouton pour rejoindre la partie */}
                                 {this._renderBtnRejoindre()}
                             </View>
+
                                 
+                            {this.renderPrix()}
                             {/* Les buteurs */}
                             {this._renderListButeurs()}
 

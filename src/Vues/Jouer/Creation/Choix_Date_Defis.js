@@ -43,7 +43,7 @@ export default class Choix_Date_Defis extends React.Component {
     }
     
     goToRechercherTerrain() {
-        console.log('------' + this.state.duree + '---------')
+        console.log('------' + this.state.day + '---------')
         this.props.navigation.push("ChoixTerrainDefis", 
                 {
                     format : this.format,
@@ -51,6 +51,7 @@ export default class Choix_Date_Defis extends React.Component {
                     jour : this.state.day,
                     duree : this.state.duree,
                     heure : this.state.hours,
+                    date : this.state.day
                 })        
     }
 

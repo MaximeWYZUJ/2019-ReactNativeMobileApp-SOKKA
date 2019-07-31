@@ -69,7 +69,7 @@ class Item_Partie extends React.Component {
 
         var minute = (date.getMinutes()).toString()
         if(minute.length == 1) {
-            minute = '0' + mois 
+            minute = '0' + minute
         }
         var heureFin = this.calculHeureFin(heure,minute,this.props.duree)
 

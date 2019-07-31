@@ -83,7 +83,7 @@ class Notif_Accepter_Releve_Defi extends React.Component {
         if(new Date(this.state.defi.jour.seconds *1000) > new Date())  {
             Alert.alert(
                 '',
-                "Tu souhaite refuser le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
+                "Tu souhaites refuser le défi relevé par l'équipe " + this.state.equipeEmettrice.nom,
                 [
                     {text: 'Oui', onPress: () => this.refuserDefis()},
                     {
@@ -112,7 +112,7 @@ class Notif_Accepter_Releve_Defi extends React.Component {
 
             Alert.alert(
                 '',
-                "Tu souhaite accepter le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
+                "Tu souhaites accepter le défi relevé par l'équipe " + this.state.equipeEmettrice.nom,
                 [
                     {text: 'Oui', onPress: () => this.accepterDefis()},
                     {
