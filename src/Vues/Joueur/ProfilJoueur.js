@@ -421,13 +421,7 @@ class ProfilJoueur extends React.Component {
      * likent le joueur et d'afficher la vue.
      */
     async gotoJoueursQuiLikent() {
-        joueursLike = [];
-        for (idLike of this.joueur.aiment) {
-            idLikeData = await Database.getDocumentData(idLike, 'Joueurs');
-            joueursLike.push(idLikeData);
-        }
-
-        this.props.navigation.push("JoueursQuiLikent", {joueurs: joueursLike, titre: this.joueur.nom});
+        this.props.navigation.push("JoueursQuiLikent", {joueurs: this.joueur.aiment, titre: this.joueur.pseudo});
     }
 
     /**
@@ -1075,7 +1069,7 @@ class ProfilJoueur extends React.Component {
 
                     {/* Defis */}
                     <View style = {[styles.defis_container, styles.additional_style_container]}>
-                        <TouchableOpacity style={styles.header_container} onPress={() => {this.props.navigation.push("CalendrierJoueur", {id: this.id, pseudo: this.joueur.pseudo})}}>
+                        <TouchableOpacity style={styles.header_container} onPress={() => {this.props.navigation.push("CalendrierJoueur", {id: this.id, header: this.joueur.pseudo})}}>
                             <Text style={styles.header}>Calendrier</Text>
                         </TouchableOpacity>
                         {this.displayDefis()}

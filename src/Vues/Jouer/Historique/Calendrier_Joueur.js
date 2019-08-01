@@ -20,25 +20,28 @@ export default class Calendrier_Joueur extends React.Component {
     constructor(props) {
         super(props)
         this.monId = this.props.navigation.getParam('id', LocalUser.data.id);
-        this.monPseudo = this.props.navigation.getParam('pseudo', LocalUser.data.pseudo);
         this.state  = {
             defisPasses : [],
             defisaVenir : [],
             latitude : 0,
             longitude : 0,
-            allDefis : [], 
+            allDefis : [],
             isLoading : true,
             index : 0
-            
         }
 
     }
 
     componentDidMount() {
         this.getAllDefisAndPartie()
-      
     }
 
+
+    static navigationOptions = ({navigation}) => {
+        return { 
+            title: navigation.getParam('header', 'pas de header = erreur'),
+        };
+    }
     
 
 

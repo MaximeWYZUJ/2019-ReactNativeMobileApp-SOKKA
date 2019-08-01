@@ -35,6 +35,7 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
             //capitainesSelectionnes : [],        // Liste des capit
             allJoueurs : [],
             joueurFiltres : [],
+            capitaineFiltres: [],
             capitaines : [],
             selectedAllCapitnaines : false,
             selectedAllPlayer : false,
@@ -133,7 +134,7 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
             
                     capitainesArray.push(joueur)
                     
-                    this.setState({capitaines : capitainesArray})
+                    this.setState({capitaines : capitainesArray, capitaineFiltres: capitainesArray})
                 } else {
                     console.log("No such document!");
                 }
@@ -151,8 +152,27 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
 	 * en fonction de ce que tappe l'utilisateur
 	 */
     recherche = (data)  => {
+        // on separe les joueurs et les capitaines
+        var capitaines = [];
+        var joueurs = [];
+        for (var i=0; i<data.length; i++) {
+            var d = data[i];
+            var isCaptain = false;
+            for (c of this.state.capitaines) {
+                if (c.id == d.id) {
+                    capitaines.push(d);
+                    isCaptain = true;
+                    break;
+                }
+            }
+            if (!isCaptain) {
+                joueurs.push(d);
+            }
+        }
+
 		this.setState({
-            joueurFiltres : data,
+            joueurFiltres : joueurs,
+            capitaineFiltres : capitaines
 		})
     }
 
@@ -165,10 +185,14 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
 
 
     handleValidateFilters = (q, f) => {
-        var data = this.state.joueurFiltres;
-        var dataF = FiltrerJoueur.filtrerJoueurs(data, f);
+        var dataJ = this.state.allJoueurs;
+        var dataC = this.state.capitaines;
+        var dataJF = FiltrerJoueur.filtrerJoueurs(dataJ, f);
+        var dataCF = FiltrerJoueur.filtrerJoueurs(dataC, f);
+
         this.setState({
-            joueurFiltres: dataF,
+            joueurFiltres: dataJF,
+            capitaineFiltres: dataCF,
             filtres: f,
             displayFiltres: false
         })
@@ -257,9 +281,9 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                 }
 
                 // Selectionner les capitaines
-                for(var i = 0 ; i <this.state.capitaines.length; i++) {
-                    var participe = this.participants.includes(this.state.capitaines[i].id)
-                    if(!participe) j.push(this.state.capitaines[i].id)
+                for(var i = 0 ; i <this.state.capitaineFiltres.length; i++) {
+                    var participe = this.participants.includes(this.state.capitaineFiltres[i].id)
+                    if(!participe) j.push(this.state.capitaineFiltres[i].id)
                 }
                 this.setState({joueursSelectionnes : j,selectedAllCapitnaines : true, selectedAllPlayer : true, selectedEveryone : true})
             
@@ -280,9 +304,9 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
             var j = []
 
             // Ajouter les capitaines à j
-            for(var i = 0 ; i <this.state.capitaines.length; i++) {
-                var participe = this.participants.includes(this.state.capitaines[i].id)
-                if(! participe) j.push(this.state.capitaines[i].id)
+            for(var i = 0 ; i <this.state.capitaineFiltres.length; i++) {
+                var participe = this.participants.includes(this.state.capitaineFiltres[i].id)
+                if(! participe) j.push(this.state.capitaineFiltres[i].id)
             }
 
             // Ajouter les joueurs déja sélectionnées
@@ -706,7 +730,15 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
     }
 
     render() {
-        console.log(this.state.joueurFiltres.length);
+        // Fusion des joueurs et capitaines pour la recherche
+        var unionJC = [];
+        for (d of this.state.allJoueurs) {
+            unionJC.push(d);
+        }
+        for (d of this.state.capitaines) {
+            unionJC.push(d);
+        }
+
         return(
             <View style = {{ flex: 1}}>
 
@@ -748,7 +780,7 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                 <ScrollView>
                     <Barre_Recherche
                         handleTextChange ={this.recherche}
-                        data = {this.state.allJoueurs}
+                        data = {unionJC}
                         field = {"pseudoQuery"}
                         filterData = {(data) => FiltrerJoueur.filtrerJoueurs(data)}
                         handleFilterButton = {this.handleFilterButton}
@@ -785,7 +817,7 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                                 
                             </View>
                             <FlatList
-                                data = {this.state.capitaines}
+                                data = {this.state.capitaineFiltres}
                                 keyExtractor={(item) => item.id}
                                 extraData = {this.state.joueursSelectionnes}
                                 renderItem = {this._renderItem}

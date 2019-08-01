@@ -856,7 +856,7 @@ export default class Profil_Equipe extends React.Component {
                     <View style = {styles.main_container_defis}>
                         <View style = {styles.view_txt_defis}>
                             <TouchableOpacity>
-                                <Text style = {styles.txt_defis}>Parties de l'équipe</Text>
+                                <Text style = {styles.txt_defis}>Défis de l'équipe</Text>
                             </TouchableOpacity>
 
                         </View>
