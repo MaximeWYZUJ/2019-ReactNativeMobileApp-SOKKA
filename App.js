@@ -1,19 +1,13 @@
 // branche null
 import React from 'react';
-import { StyleSheet, Text, View ,Alert} from 'react-native';
 //import Navigation from './src/Navigation/Navigation'
 import FirstStack from './src/Navigation/FirstStackNavigation'
 
-import {createStackNavigator, createAppContainer, StackNavigator } from 'react-navigation'
 import { Provider } from 'react-redux'
 import Store from './src/Store/ConfigureStore'
-import DataBase from './src/Data/Database'
 //import Defis_Equipe from './src/Components/Profil_Equipe/Defis_Equipe'
-import Calendrier_Joueur from './src/Vues/Jouer/Historique/Calendrier_Joueur'
 import { Permissions, Notifications} from 'expo'
-import Fiche_Defi_Rejoindre from './src/Vues/Jouer/Rejoindre/Fiche_Defi_Rejoindre'
 import firebase from 'firebase'
-import { AsyncStorage } from 'react-native';
 
 export default class App extends React.Component {
 

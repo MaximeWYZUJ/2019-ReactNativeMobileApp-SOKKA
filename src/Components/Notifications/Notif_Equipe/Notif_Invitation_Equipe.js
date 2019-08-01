@@ -50,7 +50,7 @@ class Notif_Invitation_Equipe extends React.Component {
         var equipe = await Database.getDocumentData(this.props.notification.equipe, "Equipes")
         console.log(':::::::::::', equipe.joueurs)
         this.setState({emetteur : emetteur, equipe : equipe,isLoading : false, 
-            a_refuse : ! equipe.joueursAttentes.includes(LocalUser.data.id),
+            a_refuse : ! equipe.joueursAttentes.includes(LocalUser.data.id) && !equipe.joueurs.includes(LocalUser.data.id),
             a_accepte :  equipe.joueurs.includes(LocalUser.data.id)})
     }
 

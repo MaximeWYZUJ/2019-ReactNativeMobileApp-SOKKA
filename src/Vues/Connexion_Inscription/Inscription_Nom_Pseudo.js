@@ -4,7 +4,8 @@ import {Picker, View, Text,Image, Animated,TouchableOpacity,TextInput, Alert} fr
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
 import RF from 'react-native-responsive-fontsize';
-
+import Database from '../../Data/Database';
+import Simple_Loading from '../../Components/Loading/Simple_Loading'
 /**
  * Classe qui va permettre à l'utilisateur de renseigner son nom 
  * son prénom et son pseudo lors de l'incription 
@@ -27,6 +28,7 @@ export default class Inscription_Nom_Pseudo extends React.Component {
             sexe: 'masculin',
             mail : mail,
             mdp : mdp,
+            isLoading : false,
         }
         this.cadre = new Animated.ValueXY({ x: wp('0%'), y:hp('0%') })
         this.inputNom =  new Animated.ValueXY({ x: wp('100%'), y:hp('-8%') })
@@ -69,7 +71,7 @@ export default class Inscription_Nom_Pseudo extends React.Component {
          })
     }
 
-    callNextScreen() {
+    async callNextScreen() {
         if (this.state.prenom.length == 0 || this.state.nom.length == 0) {
             Alert.alert(
                 '',
@@ -83,23 +85,43 @@ export default class Inscription_Nom_Pseudo extends React.Component {
                 ],
             )
         } else {
+            this.setState({isLoading :true})
 
             var pseudoBis = this.state.pseudo;
+            console.log("after psedo")
             if (pseudoBis.length == 0) {
                 pseudoBis = this.state.prenom + " " + this.state.nom;
             }
+            console.log("before ref")
+            var db = Database.initialisation()
+            var  ref = db.collection("Joueurs");
+            console.log("after get ref")
+            var query = ref.where("pseudo", '==' , pseudoBis)
+            console.log("after write query")
+            query.get().then(async (results) => {
+                console.log("in result")
+                if(results.docs.length == 0) {
+                    this.setState({isLoading : false})
+                    console.log("in elese")
+                    this.props.navigation.push("InscriptionZone",
+                    {
+                        mail : this.state.mail,
+                        mdp : this.state.mdp,
+                        nom : this.state.nom,
+                        prenom : this.state.prenom,
+                        pseudo : pseudoBis,
+                        sexe: this.state.sexe
+                    })
+                } else {
+                    this.setState({isLoading : false})
+                    Alert.alert("", "Le pseudo " + pseudoBis + " est déjà pris")
+                }
+            }) 
 
-            this.props.navigation.push("InscriptionZone",
-            {
-                mail : this.state.mail,
-                mdp : this.state.mdp,
-                nom : this.state.nom,
-                prenom : this.state.prenom,
-                pseudo : pseudoBis,
-                sexe: this.state.sexe
-            })
-
+           
         }
+
+    
 
     }
 
@@ -107,101 +129,110 @@ export default class Inscription_Nom_Pseudo extends React.Component {
 
     render() {
 
-        return(
-            <View style = {styles.main_container}>
-
-                {/* View contenant le text Agoora */}
-                <View style = {styles.view_agoora}>
-                    <Text style = {styles.txt_agoora}>SOKKA</Text>
+        if(this.state.isLoading) {
+            return (
+                <View>
+                    <Simple_Loading
+                        taille = {hp('5%')}/>
                 </View>
+            )
+        } else {
+            return(
+                <View style = {styles.main_container}>
 
-                {/* Image de l'herbre */}
-                <View style = {styles.View_grass}>
-                    <Image 
-                        source = {require('app/res/grass.jpg')}
-                        style = {styles.grass}
-                    />
-                </View>
-
-                {/* View contenant les champs */}
-                
-               
-                    <Animated.View style={[this.cadre.getLayout(), styles.container_champs]}>
-
-
-                        {/* Pour le nom */}
-                        <View style = {styles.view_champ}>
-                            <Animated.View style={[this.inputNom.getLayout(), {borderBottomWidth : 1}]}>
-                                <TextInput 
-                                    placeholder = "Nom"
-                                    style = {styles.txt_input}
-                                    onChangeText ={(text) => this.changeNom(text)} 
-
-                                />
-                            </Animated.View>
-
-                        </View>
-
-                        {/* Pour le prénom */}
-                        <View style = {styles.view_champ}>
-                            <Animated.View style={[this.inputNom.getLayout(), {borderBottomWidth : 1}]}>
-                                <TextInput 
-                                    placeholder = "Prénom"
-                                    style = {styles.txt_input}
-                                    onChangeText ={(text) => this.changePrenom(text)} 
-                                />
-                            </Animated.View>
-
-                        </View>
-
-                        {/* Pour le pseudo */}
-                        <View style = {styles.view_champ}>
-                            <Animated.View style={[this.inputNom.getLayout(), {borderBottomWidth : 1}]}>
-                                <TextInput 
-                                    placeholder = "Pseudo"
-                                    style = {styles.txt_input}
-                                    onChangeText ={(text) => this.changePseudo(text)} 
-
-                                />
-                            </Animated.View>
-
-                        </View>
-
-                        {/* Pour le sexe */}
-                        <View style = {styles.view_champ}>
-                            <Animated.View style={[this.inputNom.getLayout(), {borderBottomWidth : 1, flexDirection: 'row', alignItems: 'center'}]}>
-                                <Text>Sexe : </Text>
-                                <Picker
-                                    selectedValue={this.state.sexe}
-                                    style={{width: wp('60%'), marginRight: wp('5%')}}
-                                    onValueChange={(itemValue, itemIndex) => {this.setState({sexe: itemValue})}}
-                                    >
-                                    <Picker.Item label={"Masculin"} key={1} value={"masculin"}/>
-                                    <Picker.Item label={"Féminin"} key={2} value={"feminin"}/>
-                                </Picker>
-                            </Animated.View>
-
-                        </View>
-
-                    </Animated.View>
-                    {/* Le txt en millieu d'écran */}
-                    <View style = {{alignItems : 'center', alignContent : 'center'}}>
-                        <Text style ={styles.txt_description}>Indique ton nom et ton prénom pour </Text>
-                        <Text style ={styles.txt_description}>que tes fans puissent te retrouver !</Text>
+                    {/* View contenant le text Agoora */}
+                    <View style = {styles.view_agoora}>
+                        <Text style = {styles.txt_agoora}>SOKKA</Text>
                     </View>
 
-                
-
-                 
-                    {/* Bouton suivant */}
-                    <View style = {{marginTop : hp('4%')}}>
-                        <TouchableOpacity style = {styles.btn_Connexion}
-                            onPress = {() => this.callNextScreen()}>
-                                <Text style = {styles.txt_btn}>SUIVANT</Text>
-                        </TouchableOpacity>
+                    {/* Image de l'herbre */}
+                    <View style = {styles.View_grass}>
+                        <Image 
+                            source = {require('app/res/grass.jpg')}
+                            style = {styles.grass}
+                        />
                     </View>
-            </View>
-        )
+
+                    {/* View contenant les champs */}
+                    
+                
+                        <Animated.View style={[this.cadre.getLayout(), styles.container_champs]}>
+
+
+                            {/* Pour le nom */}
+                            <View style = {styles.view_champ}>
+                                <Animated.View style={[this.inputNom.getLayout(), {borderBottomWidth : 1}]}>
+                                    <TextInput 
+                                        placeholder = "Nom"
+                                        style = {styles.txt_input}
+                                        onChangeText ={(text) => this.changeNom(text)} 
+
+                                    />
+                                </Animated.View>
+
+                            </View>
+
+                            {/* Pour le prénom */}
+                            <View style = {styles.view_champ}>
+                                <Animated.View style={[this.inputNom.getLayout(), {borderBottomWidth : 1}]}>
+                                    <TextInput 
+                                        placeholder = "Prénom"
+                                        style = {styles.txt_input}
+                                        onChangeText ={(text) => this.changePrenom(text)} 
+                                    />
+                                </Animated.View>
+
+                            </View>
+
+                            {/* Pour le pseudo */}
+                            <View style = {styles.view_champ}>
+                                <Animated.View style={[this.inputNom.getLayout(), {borderBottomWidth : 1}]}>
+                                    <TextInput 
+                                        placeholder = "Pseudo"
+                                        style = {styles.txt_input}
+                                        onChangeText ={(text) => this.changePseudo(text)} 
+
+                                    />
+                                </Animated.View>
+
+                            </View>
+
+                            {/* Pour le sexe */}
+                            <View style = {styles.view_champ}>
+                                <Animated.View style={[this.inputNom.getLayout(), {borderBottomWidth : 1, flexDirection: 'row', alignItems: 'center'}]}>
+                                    <Text>Sexe : </Text>
+                                    <Picker
+                                        selectedValue={this.state.sexe}
+                                        style={{width: wp('60%'), marginRight: wp('5%')}}
+                                        onValueChange={(itemValue, itemIndex) => {this.setState({sexe: itemValue})}}
+                                        >
+                                        <Picker.Item label={"Masculin"} key={1} value={"masculin"}/>
+                                        <Picker.Item label={"Féminin"} key={2} value={"feminin"}/>
+                                    </Picker>
+                                </Animated.View>
+
+                            </View>
+
+                        </Animated.View>
+                        {/* Le txt en millieu d'écran */}
+                        <View style = {{alignItems : 'center', alignContent : 'center'}}>
+                            <Text style ={styles.txt_description}>Indique ton nom et ton prénom pour </Text>
+                            <Text style ={styles.txt_description}>que tes fans puissent te retrouver !</Text>
+                        </View>
+
+                    
+
+                    
+                        {/* Bouton suivant */}
+                        <View style = {{marginTop : hp('4%')}}>
+                            <TouchableOpacity style = {styles.btn_Connexion}
+                                onPress = {() => this.callNextScreen()}>
+                                    <Text style = {styles.txt_btn}>SUIVANT</Text>
+                            </TouchableOpacity>
+                        </View>
+                </View>
+            )
+        }
     }
 }
 

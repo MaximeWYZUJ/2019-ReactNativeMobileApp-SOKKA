@@ -45,11 +45,11 @@ class Notif_New_Cap extends React.Component {
 
 
     renderPhotoEquipe() {
-        if(this.state.equipe != undefined) {
+        if(this.state.emetteur != undefined) {
             return(
                     <View style = {{justifyContent : "center", paddingTop : hp('1%')}}>
                         <Image
-                        source = {{uri : this.state.equipe.photo}} 
+                        source = {{uri : this.state.emetteur.photo}} 
                         style = {{height : hp('8%'), width : hp('8%'), borderRadius : hp('4%'), marginRight : wp('3%'), marginLeft: wp('3%')}}   
                     />
                     </View>

@@ -1,10 +1,11 @@
 import React from 'react'
 
-import {KeyboardAvoidingView, View, Text,Image, ImageBackground,  StyleSheet,TouchableWithoutFeedback,TouchableOpacity, TextInput} from 'react-native'
+import {KeyboardAvoidingView, View, Text,Image, ImageBackground,Alert,  StyleSheet,TouchableWithoutFeedback,TouchableOpacity, TextInput} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
-
+import Simple_Loading from '../../Components/Loading/Simple_Loading'
+import Database from '../../Data/Database'
 /**
  * Vue qui va permettre à l'utilisateur de renseigner le nom d'une équipe qu'il est
  * en train de créer.
@@ -17,7 +18,8 @@ export default class Creation_Equipe_Nom extends React.Component {
         console.log("CREATION EQUIPE NON : in CONSTRUCTOR")
         super(props) 
         this.state = {
-            nom : ''
+            nom : '',
+            isLoading : false
         }
     }
 
@@ -25,50 +27,86 @@ export default class Creation_Equipe_Nom extends React.Component {
         this.setState({nom : txt})
     }
 
+    async goToNextScreen(){
+        this.setState({isLoading : true}) 
+
+        console.log("before ref")
+        var db = Database.initialisation()
+        var  ref = db.collection("Equipes");
+        console.log("after get ref")
+        var query = ref.where("nom", '==' , this.state.nom)
+        console.log("after write query")
+        query.get().then(async (results) => {
+            console.log("in result")
+            if(results.docs.length == 0) {
+                this.setState({isLoading : false})
+                console.log("in elese")
+                this.props.navigation.push("CreationEquipeZone", {nom : this.state.nom})
+            } else {
+                this.setState({isLoading : false})
+                Alert.alert("", "Le nom " + this.state.nom + " est déjà pris")
+            }
+        }) 
+
+       
+    }
+
+
     render(){
-        console.log("IN RENDER !!")
-        return(
-            <View style = {styles.main_container}>
-
-                {/* Bandeau superieur */}
-                <View style = {styles.bandeau}>
-                    <Text style= {{ alignSelf : "center", marginLeft : wp('22%'), marginRight : wp('13%'), fontSize : RF(3.1)}}>Nom de l'équipe</Text>
-                    <TouchableOpacity
-                        onPress = {()=> this.props.navigation.push("CreationEquipeZone", {nom : this.state.nom})}
-                    >
-                        <Text style = {{fontSize : RF(3.1), color : Colors.agOOraBlue}}>Suivant</Text>
-                    </TouchableOpacity>
+        if(this.state.isLoading) {
+            return(
+                <View>
+                    <Simple_Loading
+                        taille = {hp('5%')}/>
                 </View>
+            )
+        } else {
 
-                {/* View contenant l'image du ballon */}
-                <View style = {{alignItems : 'center', alignContent : 'center', marginTop : hp('5%')}  }>
-                    <Image
-                        source = {require('app/res/football_shoe.png')}
-                        style = {{width : wp('35%'), height : wp('35%')}}/>
-                </View>
+        
+            console.log("IN RENDER !!")
+            return(
+                <View style = {styles.main_container}>
 
-                 {/* Champs pour écrire le nom de l'équipe */}
-                <KeyboardAvoidingView style = {{alignItems : 'center', alignContent : 'center'}}>
-                    <TextInput
-                        placeholder = "Nom de l'équipe"
-                        style = {styles.txt_input}
-                        onChangeText = {(txt) => this.changeNom(txt)}
-                    />
-                </KeyboardAvoidingView>
+                    {/* Bandeau superieur */}
+                    <View style = {styles.bandeau}>
+                        <Text style= {{ alignSelf : "center", marginLeft : wp('22%'), marginRight : wp('13%'), fontSize : RF(3.1)}}>Nom de l'équipe</Text>
+                        <TouchableOpacity
+                            onPress = {()=> this.goToNextScreen()}
+                        >
+                            <Text style = {{fontSize : RF(3.1), color : Colors.agOOraBlue}}>Suivant</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                {/* View contenant les "compteur d'etape de creation"*/}
-                <View style ={{alignItems : 'center', alignContent : 'center'}}>
-                    <View style = {{flexDirection : 'row', marginTop :hp('5%')}}>
-                        <View  style = {[styles.step, styles.curent_step]}></View>
-                        <View style = {styles.step}></View>
-                        <View style = {styles.step}></View>
-                        <View style = {styles.step}></View>
-                        <View style = {styles.step}></View>
+                    {/* View contenant l'image du ballon */}
+                    <View style = {{alignItems : 'center', alignContent : 'center', marginTop : hp('5%')}  }>
+                        <Image
+                            source = {require('app/res/football_shoe.png')}
+                            style = {{width : wp('35%'), height : wp('35%')}}/>
+                    </View>
 
+                    {/* Champs pour écrire le nom de l'équipe */}
+                    <KeyboardAvoidingView style = {{alignItems : 'center', alignContent : 'center'}}>
+                        <TextInput
+                            placeholder = "Nom de l'équipe"
+                            style = {styles.txt_input}
+                            onChangeText = {(txt) => this.changeNom(txt)}
+                        />
+                    </KeyboardAvoidingView>
+
+                    {/* View contenant les "compteur d'etape de creation"*/}
+                    <View style ={{alignItems : 'center', alignContent : 'center'}}>
+                        <View style = {{flexDirection : 'row', marginTop :hp('5%')}}>
+                            <View  style = {[styles.step, styles.curent_step]}></View>
+                            <View style = {styles.step}></View>
+                            <View style = {styles.step}></View>
+                            <View style = {styles.step}></View>
+                            <View style = {styles.step}></View>
+
+                        </View>
                     </View>
                 </View>
-            </View>
-        )
+            )
+        }
     }
 
 }

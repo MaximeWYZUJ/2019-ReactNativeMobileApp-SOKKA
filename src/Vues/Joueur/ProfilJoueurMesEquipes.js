@@ -11,6 +11,7 @@ class ProfilJoueurMesEquipes extends React.Component {
     static navigationOptions = ({ navigation }) => {
         return {
             title: navigation.getParam('header', 'Mes Equipes')
+            
         }
     }
 

@@ -49,7 +49,8 @@ class ProfilJoueur extends React.Component {
             displayFullPicture: false,
 			show_equipe : false,
             equipesCap : [],
-            isLoading : false
+            isLoading : false,
+            nbMessagesNonLu : this.joueur.nbMessagesNonLu
         }
 
         if (this.joueur.sexe === "masculin") {
@@ -234,8 +235,9 @@ class ProfilJoueur extends React.Component {
         // On regarde si l'utilisateur participe à un defi
         query.get().then(async (results) => {
             for(var i = 0; i < results.docs.length ; i++) {
-                
-                allDefis.push(results.docs[i].data())
+                var defi = results.docs[i].data()
+                defi.jour.seconds = defi.jour.seconds -7200 
+                allDefis.push(defi)
 
             }
             this.setState({allDefis : allDefis})
@@ -253,8 +255,10 @@ class ProfilJoueur extends React.Component {
                                         .where("dateParse", ">=",Date.parse(now))
                     queryEqOrga.get().then(async (resultsDefiOrga) => {
                         for(var i = 0; i < resultsDefiOrga.docs.length ; i++) {
-                            if(! this.allreaddyDownloadDefi(allDefis, resultsDefiOrga.docs[i].data())) {
-                                allDefis.push(resultsDefiOrga.docs[i].data())
+                            var defi =resultsDefiOrga.docs[i].data()
+                            defi.jour.seconds = defi.jour.seconds -7200 
+                            if(! this.allreaddyDownloadDefi(allDefis, defi )) {
+                                allDefis.push(defi)
                             }
                             
                         }
@@ -266,8 +270,10 @@ class ProfilJoueur extends React.Component {
                     queryEqDefiee.get().then(async (resultsDefiDefiee) => {
 
                         for(var i = 0; i < resultsDefiDefiee.docs.length ; i++) {
-                            if(! this.allreaddyDownloadDefi(allDefis, resultsDefiDefiee.docs[i].data())) { 
-                                allDefis.push(resultsDefiDefiee.docs[i].data())
+                            var defi =resultsDefiDefiee.docs[i].data()
+                            defi.jour.seconds = defi.jour.seconds -7200 
+                            if(! this.allreaddyDownloadDefi(allDefis,defi )) { 
+                                allDefis.push(defi)
                             }
                         }
                     })
@@ -521,11 +527,19 @@ class ProfilJoueur extends React.Component {
     /** Fonction appelée au moment où l'utilisateur pull to refresh */
     _onRefresh = async () => {
         this.setState({refreshing: true});
-        this.joueur =  await this.getDocumentJoueur()
+        var j = await this.getDocumentJoueur()
+        this.joueur = j 
+        
         this.getAllDefisAndPartie()
         //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
 		this.equipes = await Database.getArrayDocumentData(this.joueur.equipes, "Equipes")
-        this.setState({refreshing : false})
+
+        
+       
+        this.setState({refreshing: false});
+       
+        
+
     }
     
 
@@ -844,7 +858,7 @@ class ProfilJoueur extends React.Component {
             return(
                 <View style = {{position : "absolute" , right : wp('1%')}}>
                     <Icon_Message
-                        nbMessagesNonLu = {this.joueur.nbMessagesNonLu}/>
+                        nbMessagesNonLu = {this.state.nbMessagesNonLu}/>
                 </View>
             )
         }

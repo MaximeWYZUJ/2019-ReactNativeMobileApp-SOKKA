@@ -10,7 +10,8 @@ import Database from '../../../../Data/Database'
 import LocalUser from '../../../../Data/LocalUser.json'
 import actions from '../../../../Store/Reducers/actions';
 import DatesHelpers from '../../../../Helpers/DatesHelpers'
-
+import firebase from 'firebase'
+import '@firebase/firestore'
 /**
  * Classe qui va permettre à l'utilisateur de choisir des joueurs lors 
  * de la création d'une partie
@@ -99,7 +100,7 @@ class Choix_Joueurs_Partie extends React.Component {
         d =this.props.navigation.getParam("date", new Date())
         Alert.alert(
             '',
-            'Tu as bien rejoins cette partie, les joueurs avec qui tu seras vont recevoir une notification pour confirmer leur participation',
+            'Tu as bien rejoins cette partie, Les joueurs invités vont recevoir une notification pour confirmer leur participation ',
             [
               {text: 'Ok',  onPress: async () => {
                
@@ -220,7 +221,7 @@ class Choix_Joueurs_Partie extends React.Component {
         // Si c'est pas le créateur qui invite des joueurs 
         if(! this.props.navigation.getParam('invite',  false)) {
             array.push(this.monId)        
-            enAttente.push(this.monId)
+            //enAttente.push(this.monId)
             inscris.push(this.monId)
         } 
         
@@ -228,13 +229,18 @@ class Choix_Joueurs_Partie extends React.Component {
         var recherche = ( (this.props.nbJoueursRecherchesPartie - joueursEnPlus) != 0)
         var defisRef = db.collection("Defis").doc(id);
         
-        
+        var nbRecherche = this.props.nbJoueursRecherchesPartie - joueursEnPlus
+        if(nbRecherche < 0) {
+            nbRecherche =  0,
+            recherche = false
+        }
         defisRef.update({
             participants: array,
-            nbJoueursRecherche : this.props.nbJoueursRecherchesPartie - joueursEnPlus ,
+            nbJoueursRecherche : nbRecherche ,
             attente : enAttente,
             inscris : inscris,
-            recherche : recherche
+            recherche : recherche,
+            confirme : firebase.firestore.FieldValue.arrayUnion(this.monId)
         })
         .then(this.goToFichePartie)
         .catch(function(error) {
@@ -253,12 +259,18 @@ class Choix_Joueurs_Partie extends React.Component {
                 </TouchableOpacity>
             )
         } else {
-            return(
-                <TouchableOpacity
-                    onPress ={() =>{this.goToNextScreen()}}>
-                    <Text style = {styles.txtBoutton}>Je suis seul</Text>
-                </TouchableOpacity>
-            )   
+            if(!this.props.navigation.getParam('ajout_Partie_existante', '')) {
+                return(
+                    <TouchableOpacity
+                        onPress ={() =>{this.goToNextScreen()}}>
+                        <Text style = {styles.txtBoutton}>Je suis seul</Text>
+                    </TouchableOpacity>
+                )
+            }   else {
+                return (
+                    <Text>Suivant</Text>
+                )
+            }
         }
     }
    

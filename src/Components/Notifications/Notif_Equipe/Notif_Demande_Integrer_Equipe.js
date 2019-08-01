@@ -18,7 +18,6 @@ class Notif_Demande_Integrer_Equipe extends React.Component {
 
     constructor(props) {
         super(props)
-        console.log("MMMMMMMMMMMAAAAAAAAAAAAAJJJJJJJJJJJJJJ§§§§§§§§§§§§§§§§§")
         this.state = {
             emetteur: undefined,
             equipe : undefined, 
