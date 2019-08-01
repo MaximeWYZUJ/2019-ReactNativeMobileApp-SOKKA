@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity,FlatList,Alert} from 'react-native'
+import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity,FlatList,Alert,KeyboardAvoidingView} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Database from '../../../Data/Database';
@@ -10,10 +10,12 @@ import Terrains from '../../../Helpers/Toulouse.json'
 import actions from '../../../Store/Reducers/actions'
 import Color from '../../../Components/Colors';
 import StarRating from 'react-native-star-rating'
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import Joueur_Pseudo_Score from '../../../Components/ProfilJoueur/Joueur_Pseudo_Score'
 import LocalUser from '../../../Data/LocalUser.json'
 import { StackActions, NavigationActions } from 'react-navigation';
+import firebase from 'firebase'
+import '@firebase/firestore'
 
 
 // Rememttre à Zéro le stack navigator pour empecher le retour en arriere
@@ -59,7 +61,9 @@ class Fiche_Partie_Rejoindre extends React.Component {
             Voie : "inconu",
             CodePostal : "inconu",
             Ville : "inconu",
-            joueursData : []
+            joueursData : [],
+            commentaires  :[], 
+            currentCommentaire : ""
             // Infos du défis qu'on va obtenir quand on reviens de la page ajout de joueur
             /*pseudo = "inconu",
             format = "inconu",
@@ -110,6 +114,28 @@ class Fiche_Partie_Rejoindre extends React.Component {
             // this.rechecherJoueurManquant()
         this.downloadAllDataPartie()  
         this._moveJoueur()
+        this.getCommentaire()
+
+    }
+
+
+    async getCommentaire(partie){
+        var liste = []
+        console.log("in get commentaire", partie.commentaires)
+        for(var i = 0 ; i <partie.commentaires.length; i++) {
+            var id = partie.commentaires[i].id
+            var txt = partie.commentaires[i].txt
+            var j = await Database.getDocumentData(id,"Joueurs")
+            var com = {
+                id : id,
+                photo : j.photo,
+                pseudo : j.pseudo,
+                txt : txt
+            }
+            liste.push(com)
+        }  
+        console.log(liste)
+        this.setState({commentaires : liste}) 
     }
 
     buildDateString(datetoChange) {
@@ -188,6 +214,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
 
         this.setState({partie : partie , isLoading : false,joueursData :joueursData })
         
+        this.getCommentaire(partie)
         this.ChangeThisTitle('Partie ' + this.buildDate(new Date(this.state.partie.jour.seconds * 1000)))
 
     }
@@ -211,7 +238,6 @@ class Fiche_Partie_Rejoindre extends React.Component {
      * @param {list d'objet {id : String , presence : String}} arrayParticipation 
      */
     buildListforFlatList(arrayJoueur, arrayParticipation) {
-        console.log("arrayParticipation.length : ", arrayParticipation.length)
         var j = []
         for(var i = 0; i <arrayJoueur.length; i++) {
             var joueur = arrayJoueur[i]
@@ -249,7 +275,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
         
         Alert.alert(
             '',
-            'Tu souhaites rejoindre cette partie',
+            'Tu souhaites t’inscrire cette partie',
             [
               {text: 'Confirmer', 
                     onPress: () => {
@@ -314,6 +340,30 @@ class Fiche_Partie_Rejoindre extends React.Component {
 
 
     
+    async saveCommentaire() {
+        console.log("in save commentaire", this.state.currentCommentaire)
+        if(this.state.currentCommentaire.length > 0) {
+            console.log("in if")
+            var com = {id : LocalUser.data.id, txt : this.state.currentCommentaire}
+            var db = Database.initialisation()
+            db.collection("Defis").doc(this.state.partie.id).update({
+                commentaires : firebase.firestore.FieldValue.arrayUnion(com)
+            })
+            var liste = []
+            for(var i =0; i < this.state.commentaires.length; i++) {
+                liste.push(this.state.commentaires[i])
+            }
+            var obj = {
+                id : LocalUser.data.id,
+                photo : LocalUser.data.photo,
+                pseudo : LocalUser.data.pseudo,
+                txt : this.state.currentCommentaire
+            }
+            liste.push(obj)
+            console.log(liste)
+            this.setState({commentaires : liste, currentCommentaire : ""})
+        }
+    }
 
 
     /**
@@ -363,18 +413,15 @@ class Fiche_Partie_Rejoindre extends React.Component {
     findHommeDuMatch() {
         
         var joueursVotes = []
-        console.log(this.state.partie.votes)
         for(var i = 0; i < this.state.partie.votes.length ; i++) {
             var vote = this.state.partie.votes[i]
             console.log("vote = ", vote)
             joueursVotes.push(vote.idVote)
         }
-        console.log("Joueur vote = ", joueursVotes)
 
         // id qui a le plus d'occurence (donc celui ayant le plus de vote)
         var idHommeMatch =  this.maxOccurence(joueursVotes);
         
-        console.log("id homme match = ", idHommeMatch)
         // Trouver le joueur associé à l'id
         return this.findPlayerFromId(idHommeMatch)
         
@@ -435,6 +482,28 @@ class Fiche_Partie_Rejoindre extends React.Component {
     }
 
     
+    /**
+     * Item de la forme  :
+     *      {
+     *          photo : String
+     *          id : Stirng
+     *          pseudo : String 
+     *          txt : String
+     *      }
+     */
+    _renderItemCommentaire= ({item}) => {
+
+        return(
+            <View style=  {{flexDirection : "row", justifyContent  : "center"  , alignContent : "center",marginBottom : hp('1.5%')}}>
+                <Image
+                    source  = {{uri : item.photo}}
+                    style = {{ alignSelf : "center",width : wp('10%'), height : wp('10%'), borderRadius : wp('5%'), marginRight : wp('3%')}} />
+
+                <Text style = {{width : wp('75%'), alignSelf : "center"}}>{item.txt} </Text>
+
+            </View>
+        )
+    }
 
     _renderBtnRejoindre(){
         if(! this.state.partie.participants.includes(this.monId))  {
@@ -779,7 +848,26 @@ class Fiche_Partie_Rejoindre extends React.Component {
 
                              <Text style = {styles.txt_message_chauffe}>{this.state.partie.message_chauffe}</Text>
                         </View>
+
+                        <FlatList
+
+                            data = {this.state.commentaires}
+                            renderItem ={this._renderItemCommentaire}
+
+                        />
+
+                        <TextInput
+                            placeholder = {"commentaire"}
+                            value = {this.state.currentCommentaire}
+                            style = {{marginLeft : wp('3%'),width : wp('75%') , borderBottomWidth : 1, marginBottom : hp('70%')}}
+                            onChangeText={(t) =>  this.setState({currentCommentaire : t})}
+                            onSubmitEditing = {() =>  this.saveCommentaire()}/>
+
+
+
                     </ScrollView>
+
+                     <KeyboardAvoidingView behavior={'padding'} keyboardVerticalOffset={80}/>
 
                 </View>
             )

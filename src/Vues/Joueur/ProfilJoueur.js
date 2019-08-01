@@ -49,7 +49,8 @@ class ProfilJoueur extends React.Component {
             displayFullPicture: false,
 			show_equipe : false,
             equipesCap : [],
-            isLoading : false
+            isLoading : false,
+            nbMessagesNonLu : this.joueur.nbMessagesNonLu
         }
 
         if (this.joueur.sexe === "masculin") {
@@ -532,11 +533,19 @@ class ProfilJoueur extends React.Component {
     /** Fonction appelée au moment où l'utilisateur pull to refresh */
     _onRefresh = async () => {
         this.setState({refreshing: true});
-        this.joueur =  await this.getDocumentJoueur()
+        var j = await this.getDocumentJoueur()
+        this.joueur = j 
+        
         this.getAllDefisAndPartie()
         //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
 		this.equipes = await Database.getArrayDocumentData(this.joueur.equipes, "Equipes")
-        this.setState({refreshing : false})
+
+        
+       
+        this.setState({refreshing: false});
+       
+        
+
     }
     
 
@@ -855,7 +864,7 @@ class ProfilJoueur extends React.Component {
             return(
                 <View style = {{position : "absolute" , right : wp('1%')}}>
                     <Icon_Message
-                        nbMessagesNonLu = {this.joueur.nbMessagesNonLu}/>
+                        nbMessagesNonLu = {this.state.nbMessagesNonLu}/>
                 </View>
             )
         }

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity,FlatList,Alert,ScrollView,Picker} from 'react-native'
+import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity,FlatList,Alert,ScrollView,Picker,TextInput} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Database from '../../../Data/Database'
@@ -17,6 +17,8 @@ import Joueur_Pseudo_Score from '../../../Components/ProfilJoueur/Joueur_Pseudo_
 import LocalUser from '../../../Data/LocalUser.json'
 import { StackActions, NavigationActions } from 'react-navigation';
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
+import firebase from 'firebase'
+import '@firebase/firestore'
 
 // Rememttre à Zéro le stack navigator pour empecher le retour en arriere
 const resetAction = StackActions.reset({
@@ -64,7 +66,9 @@ class Fiche_Defi_Rejoindre extends React.Component {
             hommeOgra : undefined,
             hommeDefiee: undefined,
             nbVotantOrga : 0,
-            nbVotantDefiee : 0
+            nbVotantDefiee : 0,
+            commentaires : [],
+            currentCommentaire : ""
         }
     }
 
@@ -79,6 +83,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
         this._moveEquipe2()
         this.getButeurs()
         this.getHommeMatch()
+        this.getCommentaire(this.state.defi)
         this.setState({isLoading : false})
     }
 
@@ -468,6 +473,25 @@ class Fiche_Defi_Rejoindre extends React.Component {
     }
 
 
+    async getCommentaire(partie){
+        var liste = []
+        console.log("in get commentaire", partie.commentaires)
+        for(var i = 0 ; i <partie.commentaires.length; i++) {
+            var id = partie.commentaires[i].id
+            var txt = partie.commentaires[i].txt
+            var j = await Database.getDocumentData(id,"Joueurs")
+            var com = {
+                id : id,
+                photo : j.photo,
+                pseudo : j.pseudo,
+                txt : txt
+            }
+            liste.push(com)
+        }  
+        console.log(liste)
+        this.setState({commentaires : liste}) 
+    }
+
     /**
      * Fonction qui va permettre de se rendre sur la feuille de match du défi
      * si il est passé. La fonction va de plus sauvegarder la liste des joueurs
@@ -509,9 +533,35 @@ class Fiche_Defi_Rejoindre extends React.Component {
             defi : this.state.defi,
             equipeOrganisatrice : this.state.equipeOrganisatrice,
             equipeDefiee : this.state.equipeDefiee
-        })    }
+        })    
+    }
     
 
+
+        async saveCommentaire() {
+            console.log("in save commentaire", this.state.currentCommentaire)
+            if(this.state.currentCommentaire.length > 0) {
+                console.log("in if")
+                var com = {id : LocalUser.data.id, txt : this.state.currentCommentaire}
+                var db = Database.initialisation()
+                db.collection("Defis").doc(this.state.defi.id).update({
+                    commentaires : firebase.firestore.FieldValue.arrayUnion(com)
+                })
+                var liste = []
+                for(var i =0; i < this.state.commentaires.length; i++) {
+                    liste.push(this.state.commentaires[i])
+                }
+                var obj = {
+                    id : LocalUser.data.id,
+                    photo : LocalUser.data.photo,
+                    pseudo : LocalUser.data.pseudo,
+                    txt : this.state.currentCommentaire
+                }
+                liste.push(obj)
+                console.log(liste)
+                this.setState({commentaires : liste, currentCommentaire : ""})
+            }
+        }
         
         
     /**
@@ -651,6 +701,31 @@ class Fiche_Defi_Rejoindre extends React.Component {
             )
         }
     }
+
+        
+    /**
+     * Item de la forme  :
+     *      {
+     *          photo : String
+     *          id : Stirng
+     *          pseudo : String 
+     *          txt : String
+     *      }
+     */
+    _renderItemCommentaire= ({item}) => {
+
+        return(
+            <View style=  {{flexDirection : "row", justifyContent  : "center"  , alignContent : "center",marginBottom : hp('1.5%')}}>
+                <Image
+                    source  = {{uri : item.photo}}
+                    style = {{ alignSelf : "center",width : wp('10%'), height : wp('10%'), borderRadius : wp('5%'), marginRight : wp('3%')}} />
+
+                <Text style = {{width : wp('75%'), alignSelf : "center"}}>{item.txt} </Text>
+
+            </View>
+        )
+    }
+
 
 
 
@@ -1082,6 +1157,23 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
                     {this._renderListEquipe()}
                     
+
+                      <FlatList
+
+                        data = {this.state.commentaires}
+                        renderItem ={this._renderItemCommentaire}
+
+                        />
+
+                        <TextInput
+                            placeholder = {"commentaire"}
+                            value = {this.state.currentCommentaire}
+                            style = {{marginLeft : wp('3%'),width : wp('75%') , borderBottomWidth : 1, marginBottom : hp('70%')}}
+                            onChangeText={(t) =>  this.setState({currentCommentaire : t})}
+                            onSubmitEditing = {() =>  this.saveCommentaire()}/>
+
+
+
                     
                 </View>
             </ScrollView>

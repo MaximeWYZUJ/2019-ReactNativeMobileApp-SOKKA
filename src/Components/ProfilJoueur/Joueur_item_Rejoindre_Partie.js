@@ -35,7 +35,7 @@ class Joueur_item_Rejoindre_Partie extends React.PureComponent{
             if(this.props.joueursPartie.length  >= this.props.nbJoueursRecherchesPartie ) {
                 Alert.alert(
                     '',
-                    "Seulement " + this.props.nbJoueursRecherchesPartie +  " sont recherchés pour cette partie"
+                    "Seulement " + this.props.nbJoueursRecherchesPartie +  " joueur(s) sont recherché(s) pour cette partie"
                 )
             } else {
                 if(! this.props.JoueursParticipantsPartie.includes(idJoueur)) {

@@ -11,7 +11,7 @@ import LocalUser from '../Data/LocalUser.json'
 import villes from '../Components/Creation/villes.json'
 import departements from '../Components/Creation/departements.json'
 import NormalizeString from '../Helpers/NormalizeString';
-
+import Simple_Loading from '../Components/Loading/Simple_Loading'
 
 /** Pour afficher 5sec faire deux fonction qui affiche qqchose et en fonction du state appeler une ou l'autre */
 /**
@@ -65,7 +65,7 @@ class First_screen extends React.Component {
 
         this.state = {
             timePassed : false,
-            isLoading : false,
+            isLoading : true,
             locationResult: null
         }
 
@@ -146,6 +146,7 @@ class First_screen extends React.Component {
      * ce téléphone, si c'est le cas alors on vas directement sur son profil.
      */
     async checkIfUserISConnected() {
+        console.log("in check token")
         var token =  await this.registerForPushNotifications()
 
         var doc = await Database.getDocumentData(token, "Login")
@@ -155,6 +156,7 @@ class First_screen extends React.Component {
             this.storeToken(doc, token);
             //var joueur = await Database.getDocumentData(doc.id, "Joueurs")
         } else {
+            console.log("IN ELSE !!!!")
             this.setState({isLoading : false})
         }
 
@@ -235,7 +237,7 @@ class First_screen extends React.Component {
             LocalUser.geolocalisation = villePos;
 
             // Envoi
-            //this.setState({isLoading : false})
+            this.setState({isLoading : false})
             this.props.navigation.navigate("ProfilJoueur", {id: docData.id, joueur : docData, equipes : arrayEquipes})
 
         }).catch(function(error) {
@@ -247,16 +249,20 @@ class First_screen extends React.Component {
 
     displayScreen() {
 
-        if(this.props.navigation.getParam("deconexion", false)) {
+        if(this.state.isLoading) {
             return (
                 <View style = {styles.main_container}>
                     <ImageBackground source = {require('app/res/first_screen.jpg')}
                         style = {styles.image_background}>
 
+                       
+                        <Simple_Loading
+                            taille  = {hp('7%')}
+                            style = {{marginTop : hp('2%')}}/>
 
                         {/* Vue contenant le text en bas de l'écran */}
                         <View style = {styles.View_txt_regle}>
-                            <Text>Règles de basellll</Text>
+                            <Text>Règles de base</Text>
                             <Text>10 Minutes ou 2 buts</Text>
                             <Text>Le vainqueur engage</Text>
                             <Text>Victoire : Seul le vainqueur reste</Text>
@@ -272,38 +278,13 @@ class First_screen extends React.Component {
                         </View>
 
 
-                        {/*View contenant le txt Agoora */}
-                         <Animated.View style={[styles.animatedConnexion,this.agorraAnimation.getLayout()]}>
-                                <Text style = {styles.txt}>SOKKA</Text>
-                        </Animated.View>
-
-                        {/* View contenant le boutton se connecter */}
-                        <Animated.View style={this.connexionAnimation.getLayout()}>
-                                <TouchableOpacity
-                                    style = {styles.animatedConnexion}
-                                    onPress = {() => this.gotoInscription()}
-                                    >
-                                    <Text style = {styles.txt}>Inscription</Text>
-                                </TouchableOpacity>
-                        </Animated.View>
-
-                        {/* View contenant le boutton s'inscrire */}
-                         <Animated.View style={this.InscriptionAnimation.getLayout()}>
-                                <TouchableOpacity
-                                    style = {styles.animatedConnexion}
-                                    onPress={() => this.gotoConnexion()}
-                                    >
-                                    <Text style = {styles.txt}>Connexion</Text>
-
-                                </TouchableOpacity>
-                        </Animated.View>
+                        
 
                     </ImageBackground>
 
                 </View>
             )
         } else {
-            if(! this.state.isLoading) {
                 return (
                     <View style = {styles.main_container}>
                         <ImageBackground source = {require('app/res/first_screen.jpg')}
@@ -358,34 +339,7 @@ class First_screen extends React.Component {
 
                     </View>
                 )
-            } else {
-                return(
-                    <View style = {styles.main_container}>
-                        {/* Image de l'herbre */}
-                        <View style = {styles.View_grass}>
-                            <Image
-                                source = {require('app/res/grass.jpg')}
-                                style = {styles.grass}
-                            />
-                        </View>
-
-                        {/* View contenant le text Agoora */}
-                        <View style = {styles.view_agoora}>
-                            <Text style = {styles.txt_agoora}>SOKKA</Text>
-                        </View>
-
-                        {/* View contenant le texte */}
-                        <View style = {{marginTop :hp('30%')}}>
-                            <Text style = {{fontSize : RF(2.5)}}>Chargement</Text>
-                        </View>
-
-                        {/* Indicateur de chargement */}
-                        <SkypeIndicator
-                        color='#52C7FD'
-                        size = {hp('10%')} />
-                    </View>
-                )
-            }
+           
         }
 
     }

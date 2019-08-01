@@ -41,6 +41,17 @@ export default class Calendrier_Joueur extends React.Component {
 
     
 
+    static navigationOptions = ({ navigation }) => {
+            return {
+                title: LocalUser.data.pseudo,
+
+                tabBarOnPress({jumpToIndex, scene}) {
+                    jumpToIndex(scene.index);
+                },
+                
+            }
+        
+    }
 
     /** Fonction qui va permettre de trouver tous les défis et parties auxquels 
      * participes l'utilisateur

@@ -214,6 +214,8 @@ class Feuille_Partie_A_Venir extends React.Component {
                 ) 
             }
         }
+        Alert.alert('', "Les joueurs en attente ont été relancés")
+
 
     }
 
@@ -370,6 +372,7 @@ class Feuille_Partie_A_Venir extends React.Component {
      */
     async annulerJoueurPresence() {
 
+        nbJoueursRecherche = this.state.partie.nbJoueursRecherche
         await this.sendNotifIndispoToOrganisateur(new Date(this.state.partie.jour.seconds * 1000))
 
         // Ajouter l'utilisateur a la liste des joueurs indisponibles (new objet pour maj state)
@@ -379,7 +382,9 @@ class Feuille_Partie_A_Venir extends React.Component {
         }
         if(! indispo.includes(this.monId)) {
             indispo.push(this.monId)
+            nbJoueursRecherche = nbJoueursRecherche +1
         }
+        
 
         
 
@@ -404,7 +409,9 @@ class Feuille_Partie_A_Venir extends React.Component {
         partie.confirme = confirme
         partie.attente = attente
         partie.indisponibles = indispo
+        partie.nbJoueursRecherche =nbJoueursRecherche
 
+        console.log("NB JOUEURS RECHERHCHE ", partie.nbJoueursRecherche)
         this.setState({partie, partie})
 
         // Enregistrer dans la db
@@ -414,6 +421,8 @@ class Feuille_Partie_A_Venir extends React.Component {
             confirme : confirme,
             attente : attente,
             indisponibles : indispo,
+            nbJoueursRecherche : partie.nbJoueursRecherche
+
         }).then()
         .catch(function(error) {
             // The document probably doesn't exist.

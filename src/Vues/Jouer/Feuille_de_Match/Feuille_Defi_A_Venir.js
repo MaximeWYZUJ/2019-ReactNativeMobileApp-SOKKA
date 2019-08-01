@@ -892,6 +892,8 @@ class Feuille_Defi_A_Venir extends React.Component {
                 }
             }
         }
+
+        Alert.alert('', "Les joueurs en attente ont été relancés")
     }
 
    
