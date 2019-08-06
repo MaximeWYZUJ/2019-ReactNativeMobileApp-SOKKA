@@ -195,11 +195,11 @@ export default class FiltrerEquipe extends React.Component {
             bool = true;
         }
         if (this.state.ageMin > 0) {
-            ref = ref.where('age', '>=', this.state.ageMin);
+            ref = ref.where('age', '>=', parseInt(this.state.ageMin, 10));
             bool = true;
         }
         if (this.state.ageMax < 99) {
-            ref = ref.where('age', '<=', this.state.ageMax);
+            ref = ref.where('age', '<=', parseInt(this.state.ageMax, 10));
             bool = true;
         }
         if (this.state.score != null) {
@@ -277,7 +277,7 @@ export default class FiltrerEquipe extends React.Component {
 
                 {/* Filtrer sur le score */}
                 <View style={styles.rowFilter}>
-                    <Text style={{width: wp('30%')}}>Score : </Text>
+                    <Text style={{width: wp('30%')}}>Niveau : </Text>
                     {this.renderPickerScore(true)}
                 </View>
 

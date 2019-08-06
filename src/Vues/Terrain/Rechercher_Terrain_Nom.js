@@ -141,16 +141,19 @@ export default class Rechercher_Terrain_Nom extends React.Component {
 	}
 
 	_renderItem = ({item}) => {
-        var distance = item.distance
-        var txtDistance = distance.toString().split('.')[0];
-        txtDistance = txtDistance +','+ distance.toString().split('.')[1][0]
+        var distance = Distance.calculDistance(item.Latitude, item.Longitude, LocalUser.geolocalisation.latitude, LocalUser.geolocalisation.longitude);
+
         return (
 			<ItemTerrain
-				InsNom = {item.InsNom}
-				EquNom = {item.EquNom}
-				distance = {txtDistance}
-				id = {item.id}
-		/>)
+                id={item.id}
+                distance={distance}
+                InsNom={item.InsNom}
+				EquNom={item.EquNom}
+				N_Voie = {item.N_Voie}
+				Voie = {item.Voie}
+				Ville = {item.Ville}
+				Payant = {item.Payant}
+            />)
 	}
 
 	goToMapTerrains() {

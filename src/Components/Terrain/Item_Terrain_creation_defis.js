@@ -64,9 +64,8 @@ class Item_Terrain_creation_defis extends React.Component{
         return (
             <View style = {{flexDirection : 'row',marginBottom : hp('2%'), backgroundColor : "white", paddingBottom : hp('2%'),paddingTop : hp('2%')}}>
                
-                <TouchableOpacity 
-                    style = {{backgroundColor : "white",flexDirection : 'row', flex : 1, marginLeft : wp('4%'), borderWidth : borderWidth , borderColor : Color.agOOraBlue}}
-                    >
+                <View 
+                    style = {{backgroundColor : "white",flexDirection : 'row', flex : 1, marginLeft : wp('4%'), borderWidth : borderWidth , borderColor : Color.agOOraBlue}}>
                     
                     {/* ==== ICONE TERRRAIN ET DISTANCE ====*/}
                     <View>
@@ -83,7 +82,7 @@ class Item_Terrain_creation_defis extends React.Component{
                         <Text>{this.props.N_Voie} {this.props.Voie}</Text>
                         <Text>{this.props.Ville}</Text>
                     </View>
-                </TouchableOpacity>
+                </View>
 
                 {/* ===== ICON LIKE =====*/}
                 <CheckBox

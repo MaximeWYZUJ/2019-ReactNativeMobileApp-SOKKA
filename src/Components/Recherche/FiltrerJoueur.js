@@ -343,7 +343,7 @@ export default class FiltrerJoueur extends React.Component {
 
                 {/* Filtrer sur le score */}
                 <View style={styles.rowFilter}>
-                    <Text style={{width: wp('30%')}}>Score : </Text>
+                    <Text style={{width: wp('30%')}}>Niveau : </Text>
                     {this.renderPickerScore()}
                 </View>
 

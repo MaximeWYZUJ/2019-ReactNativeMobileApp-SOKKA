@@ -122,6 +122,10 @@ export default class RechercheDefaut extends React.Component {
                             distance={distance}
                             InsNom={item.InsNom}
                             EquNom={item.EquNom}
+                            N_Voie = {item.N_Voie}
+                            Voie = {item.Voie}
+                            Ville = {item.Ville}
+                            Payant = {item.Payant}
                         />
                     )
 
@@ -229,7 +233,6 @@ export default class RechercheDefaut extends React.Component {
 
 
     render() {
-        console.log(this.type)
         if (this.type == "Terrains") {
             return (
                 <ComposantRechercheTableau

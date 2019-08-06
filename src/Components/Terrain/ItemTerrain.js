@@ -7,6 +7,7 @@ import Colors from '../../Components/Colors'
 import { withNavigation } from 'react-navigation'
 import LocalUser from '../../Data/LocalUser.json'
 import Database from '../../Data/Database'
+import Color from '../../Components/Colors';
 
 
 /**
@@ -81,11 +82,15 @@ class ItemTerrain extends React.Component{
 
 
     render() {
+        var borderwidth = 0;
+        if (this.props.Payant) {
+            borderwidth = 1;
+        }
         return (
             <View style = {{flexDirection : 'row',marginBottom : hp('2%'), backgroundColor : "white", paddingBottom : hp('2%'),paddingTop : hp('2%')}}>
                
                 <TouchableOpacity 
-                    style = {{backgroundColor : "white",flexDirection : 'row', flex : 1, marginLeft : wp('4%')}}
+                    style = {{backgroundColor : "white",flexDirection : 'row', flex : 1, marginLeft : wp('4%'), borderWidth: borderwidth, borderColor: Color.agOOraBlue}}
                     onPress = {() => this.gotoProfilTerrain()}>
                     
                     {/* ==== ICONE TERRRAIN ET DISTANCE ====*/}

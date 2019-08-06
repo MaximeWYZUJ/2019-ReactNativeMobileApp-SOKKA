@@ -361,8 +361,6 @@ class SectionItem extends React.Component {
   render() {
     
 
-    return (<View></View>);/* (
-        <Text style={{color:'black'}}>{this.props.title}</Text>
-    );*/
+    return (<View></View>);
   }
 }
