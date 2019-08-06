@@ -4,6 +4,7 @@ import { Camera, ImagePicker, Permissions } from 'expo';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from "react-native-responsive-fontsize"
 import Database from '../../Data/Database';
+import NormalizeString from '../../Helpers/NormalizeString'
 import * as firebase from 'firebase';
 import '@firebase/firestore'
 
@@ -191,7 +192,7 @@ export default class Reglages_Equipe extends React.Component {
         modifs = {};
 
         if (this.ville) {
-            modifs["ville"] = this.ville;
+            modifs["ville"] = NormalizeString.normalize(this.ville);
         }
 
         if (this.citation) {

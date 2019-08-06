@@ -195,11 +195,11 @@ export default class FiltrerEquipe extends React.Component {
             bool = true;
         }
         if (this.state.ageMin > 0) {
-            ref = ref.where('age', '>=', this.state.ageMin);
+            ref = ref.where('age', '>=', parseInt(this.state.ageMin, 10));
             bool = true;
         }
         if (this.state.ageMax < 99) {
-            ref = ref.where('age', '<=', this.state.ageMax);
+            ref = ref.where('age', '<=', parseInt(this.state.ageMax, 10));
             bool = true;
         }
         if (this.state.score != null) {

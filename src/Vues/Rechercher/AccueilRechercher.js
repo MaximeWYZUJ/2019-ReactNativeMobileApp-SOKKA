@@ -156,7 +156,7 @@ export default class AccueilRechercher extends React.Component {
                 <TouchableOpacity
                     style={styles.header_container}
                     onPress={() => this.rechercheDefi()}>
-                    <Text style={styles.header}>Rechercher un défi</Text>
+                    <Text style={styles.header}>Rechercher un défi / une partie</Text>
                 </TouchableOpacity>
             </View>
         )
