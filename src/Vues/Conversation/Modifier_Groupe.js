@@ -107,21 +107,27 @@ export default class Modifier_Groupe extends React.Component {
     };
 
     alertImage(){
-        Alert.alert(
-            '',
-            "Comment veux-tu prendre la photo ?",
-            [
-                {
-                    text: 'Caméra',
-                    onPress: () => this.pickImageCamera(),
-                },
-                {
-                    text: 'Gallerie',
-                    onPress: () => this.pickImageGallerie(),
-                    style: 'cancel',
-                },
-            ],
-            )
+        if(this.state.groupe.admin == LocalUser.data.id){
+
+        
+            Alert.alert(
+                '',
+                "Comment veux-tu prendre la photo ?",
+                [
+                    {
+                        text: 'Caméra',
+                        onPress: () => this.pickImageCamera(),
+                    },
+                    {
+                        text: 'Gallerie',
+                        onPress: () => this.pickImageGallerie(),
+                        style: 'cancel',
+                    },
+                ],
+                )
+        } else {
+            Alert.alert('',"Seul l'administrateur peut changer la photo du groupe")
+        }
     }
     
 

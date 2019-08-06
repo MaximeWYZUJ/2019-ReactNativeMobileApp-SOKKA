@@ -7,8 +7,8 @@ import Database from '../../Data/Database'
 import StarRating from 'react-native-star-rating'
 import Terrains from '../../Helpers/Toulouse.json'
 import { withNavigation } from 'react-navigation'
-
-
+import Distance from '../../Helpers/Distance'
+import LocalUser from '../../Data/LocalUser.json'
 const DAY = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
 
 
@@ -217,6 +217,38 @@ class Item_Defi extends React.Component {
         
     }
 
+    renderDistance(terrain) {
+        
+        console.log(LocalUser)
+        if( LocalUser.data.position._lat!= undefined && LocalUser.data.position._long != undefined) {
+            console.log(terrain)
+            var distance = Distance.calculDistance(LocalUser.data.position._lat,LocalUser.data.position._long, terrain.Longitude, terrain.Latitude);
+            var distString = distance+"";
+            let values = distString.split(".");
+                
+            if (values.length > 1) {
+               dispDistance = "  -  " +values[0]+","+values[1].substr(0,2)+" km";
+            } else {
+               dispDistance = "";
+            }
+            return(
+                <Text>{dispDistance}</Text>
+            )
+        } 
+    }
+
+    _renderItem = ({item}) => {
+            return(
+                <Image
+                    source = {{uri : item.photo}}
+                    style = {styles.photoJoueur}
+                />
+            )
+            
+        
+    }
+
+
     render() {
         var color = '#FFFFFF' 
         if(this.props.jour < new Date())  color = "#E1E1E1"
@@ -243,7 +275,9 @@ class Item_Defi extends React.Component {
                         source = {require('../../../res/terrain1.jpg')}
                         style = {{width : wp('13%'), height : wp('13%'), marginRight : wp('2%')}}/>
                     <View  style = {{width : wp('63%')}}>
-                        <Text style = {styles.nomTerrains}>{terrain.InsNom}</Text>
+                        <Text style = {styles.nomTerrains}>{terrain.InsNom} {this.renderDistance(terrain)}</Text>
+                        <Text style = {styles.nomTerrains}> {terrain.N_Voie} {terrain.Voie}</Text>
+                        <Text style = {styles.nomTerrains}> {terrain.Ville}</Text>
                     </View>
                 </View>
             </TouchableOpacity>

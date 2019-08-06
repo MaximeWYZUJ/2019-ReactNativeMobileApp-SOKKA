@@ -45,7 +45,7 @@ export default class Database {
         };
 
         if (!firebase.apps.length) {
-            firebase.initializeApp(config2);
+            firebase.initializeApp(config);
         };
         var db = firebase.firestore();
         return db;

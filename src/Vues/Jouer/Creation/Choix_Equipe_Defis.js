@@ -205,7 +205,7 @@ class Choix_Equipe_Defis extends React.Component  {
                 {/* Image de l'équipe */}
                 <TouchableOpacity
                     style = {{flexDirection : 'row'}}
-                    onPress = {() => this.props.navigation.push("Profil_Equipe", {equipeId : item.id})}>
+                    onPress = {() =>    this.HandleSelectionEquipe(item)   }>
                     <Image
                         source = {{uri : item.photo}}
                         style = {{width : wp('15%'), height : wp('15%'), marginLeft : wp('2%'), marginRight : wp('2%')}}

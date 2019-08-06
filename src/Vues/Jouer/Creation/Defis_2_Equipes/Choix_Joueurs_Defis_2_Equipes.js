@@ -672,7 +672,26 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
         var joueursEquipe = this.props.navigation.getParam("joueursEquipe", [])
         var nbJoueurs = this.state.joueursSelectionnes.length +joueursEquipe.length
         
-        if( this.state.joueursSelectionnes.length > 0 && (nbAtteint || nbJoueurs >= parseInt(this.format.split("x")[0])) ) {
+        if(this.state.joueursSelectionnes.length == 0  ) {
+            return(
+                <TouchableOpacity
+                onPress ={() => {
+                    // Si on convoque des joueurs à un défi existant               
+                    if(this.props.navigation.getParam("convocation", false)) {
+                        this.alertConvocation()
+                    // Si on crée un nouveau défi
+                    } else {
+                        this.gotoNextScreen()
+                    }
+                }}
+                >
+                <Text style = {styles.txtBoutton}>Plus tard</Text>
+            </TouchableOpacity>  
+            )
+        } 
+        //else if( this.state.joueursSelectionnes.length > 0 && (nbAtteint || nbJoueurs >= parseInt(this.format.split("x")[0])) ) {
+
+         else if( this.state.joueursSelectionnes.length > 0 ) {
             return( 
                 <TouchableOpacity
                     onPress ={() => {
