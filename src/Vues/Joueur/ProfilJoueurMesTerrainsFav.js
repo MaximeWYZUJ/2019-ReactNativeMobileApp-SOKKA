@@ -9,7 +9,7 @@ class ProfilJoueurMesTerrainsFav extends React.Component {
 
     static navigationOptions = ({ navigation }) => {
         return {
-            title: navigation.getParam('titre', 'Mes Terrains Fav')
+            title: navigation.getParam('header', 'Terrains Fav')
         }
     }
 
@@ -20,7 +20,7 @@ class ProfilJoueurMesTerrainsFav extends React.Component {
     }
 
     _get_header_title() {
-        if (this.monProfil) {
+        if (this.props.navigation.getParam("monProfil", false)) {
             return "Mes Terrains Favoris"
         } else {
             return "Terrains Favoris"
@@ -41,6 +41,8 @@ class ProfilJoueurMesTerrainsFav extends React.Component {
                         distance={item.distance}
                         InsNom={item.InsNom}
                         EquNom={item.EquNom}
+                        Ville = {item.Ville}
+                        Payant = {item.Payant}
                     />}
                     monProfil={this.monProfil}
                 />

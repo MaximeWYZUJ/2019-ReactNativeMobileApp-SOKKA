@@ -437,23 +437,18 @@ export default class Profil_Equipe extends React.Component {
             Alert.alert(
                 '',
                 "Ta demande pour intégrer l'équipe " + this.state.nom + " a déjà été envoyée",
-                [
-                    {
-                    text: "D'accord",
-                    onPress: () => {},
-                    style: 'cancel',
-                    },
-                ],
             )
         } else {
-            localAttente.push(this.state.equipe.id);
-            LocalUser.integrerAttente = localAttente;
-            
             Alert.alert(
                 '',
                 "Tu souhaites faire une demande pour intégrer l'équipe " + this.state.nom ,
                 [
-                    {text: 'Confirmer', onPress: () =>this.joinEquipe()},
+                    {text: 'Confirmer', onPress: () => {
+                        this.joinEquipe().then(() => {
+                            localAttente.push(this.state.equipe.id);
+                            LocalUser.integrerAttente = localAttente;
+                        });
+                    }},
                     {
                     text: 'Annuler',
                     onPress: () => console.log('Cancel Pressed'),

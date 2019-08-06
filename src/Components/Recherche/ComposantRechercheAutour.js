@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, ScrollView } from 'react-native'
+import { View, Text, ScrollView, Alert, FlatList } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import Slider from 'react-native-slider'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -30,8 +30,6 @@ class ComposantRechercheAutour extends React.Component {
 
     constructor(props) {
         super(props);
-        this.selfLat = LocalUser.geolocalisation.latitude;
-        this.selfLong = LocalUser.geolocalisation.longitude;
 
         // Collection
         this.type = this.props.type; // Joueurs, Equipes, Defis
@@ -41,11 +39,14 @@ class ComposantRechercheAutour extends React.Component {
         }
 
         this.state = {
+            selfLat: LocalUser.geolocalisation.latitude,
+            selfLong: LocalUser.geolocalisation.longitude,
+
             isLoading: false,
 
             dataAutour: [],
             dataAutourFiltered: [],
-            dataAutourAlphab: [],
+            dataAutourAlphab: this.buildAlphabetique([]),
 
             displayFiltres: false,
             filtres: null,
@@ -63,16 +64,18 @@ class ComposantRechercheAutour extends React.Component {
 
     // === Manipulation du lifecycle entre les onglets ===
     componentDidMount() {
-        this.triVilles();
-
         this.willFocusSubscription = this.props.navigation.addListener('willFocus', this.willFocusAction);
         this.willBlurSubscription = this.props.navigation.addListener('willBlur', this.willBlurAction);
+        this.didFocusSubscription = this.props.navigation.addListener('didFocus', this.didFocusAction);
+    }
+
+
+    didFocusAction = () => {
+        this.demanderGeolocalisation();
     }
 
 
     willFocusAction = () => {
-        this.selfLat = LocalUser.geolocalisation.latitude;
-        this.selfLong = LocalUser.geolocalisation.longitude;
 
         // Collection
         this.type = this.props.type; // Joueurs, Equipes, Defis
@@ -81,17 +84,17 @@ class ComposantRechercheAutour extends React.Component {
             case "Equipes" : {this.champNomQuery = "queryName"; this.champNom = "nom"; break;}
         }
 
-        this.state = {
+        this.setState({
             isLoading: false,
 
             dataAutour: [],
             dataAutourFiltered: [],
-            dataAutourAlphab: [],
+            dataAutourAlphab: this.buildAlphabetique([]),
 
             displayFiltres: false,
             filtres: null,
             sliderValue: 1
-        }
+        })
     }
 
     willBlurAction = () => {
@@ -100,7 +103,7 @@ class ComposantRechercheAutour extends React.Component {
 
             dataAutour: [],
             dataAutourFiltered: [],
-            dataAutourAlphab: [],
+            dataAutourAlphab: this.buildAlphabetique([]),
 
             displayFiltres: false,
             filtres: null,
@@ -110,6 +113,7 @@ class ComposantRechercheAutour extends React.Component {
 
 
     componentWillUnmount() {
+        this.didFocusSubscription.remove();
         this.willBlurSubscription.remove();
         this.willFocusSubscription.remove();
     }
@@ -117,6 +121,60 @@ class ComposantRechercheAutour extends React.Component {
 
     // ===================================================
 
+
+    findPositionVilleFromName(name) {
+        for(var i  =  0 ; i < Villes.length; i++) {
+            if(name.toLocaleLowerCase() == Villes[i].Nom_commune.toLocaleLowerCase()) {
+                var position = Villes[i].coordonnees_gps
+                var latitude = position.split(',')[0]
+                var longitude = position.split(', ')[1]
+                 var pos = {
+                    latitude : parseFloat(latitude),
+                    longitude : parseFloat(longitude)
+                }
+               return pos
+
+            }
+        }
+    }
+
+
+    demanderGeolocalisation() {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                let latUser = position.coords.latitude
+                let longUser = position.coords.longitude
+                let pos = {
+                    latitude : latUser,
+                    longitude : longUser
+                }
+                LocalUser.geolocalisation = pos;
+                this.setState({
+                    selfLat: pos.latitude,
+                    selfLong: pos.longitude
+                })
+                this.triVilles();
+        },
+        (error) => {
+            
+            Alert.alert(
+                '',
+                "Nous ne parvenons pas à capter votre position. Nous utiliserons celle de " + LocalUser.data.ville.charAt(0).toUpperCase() + LocalUser.data.ville.slice(1),
+            )
+            var pos = this.findPositionVilleFromName(LocalUser.data.ville)
+            LocalUser.geolocalisation = pos;
+            this.setState({
+                selfLat: pos.latitude,
+                selfLong: pos.longitude
+            })
+            this.triVilles();
+        },
+        { enableHighAccuracy: true, timeout:    5000, maximumAge :300000}
+        )
+    }
+
+
+    // ===================================================
 
     async triVilles() {
         this.setState({isLoading: true});
@@ -140,7 +198,7 @@ class ComposantRechercheAutour extends React.Component {
             villesTriees: villesTrieesSansDoublons,
             isLoading: false,
         })
-        //this.updateDataProches(1);
+        //this.updateDataProches(1, villesTrieesSansDoublons); // fait planter l'appli si on decommente
     }
 
 
@@ -149,12 +207,12 @@ class ComposantRechercheAutour extends React.Component {
         coos1 = ville1.coordonnees_gps.split(',');
         latitude1 = parseFloat(coos1[0]);
         longitude1 = parseFloat(coos1[1]);
-        distance1 = Distance.calculDistance(latitude1, longitude1, this.selfLat, this.selfLong);
+        distance1 = Distance.calculDistance(latitude1, longitude1, this.state.selfLat, this.state.selfLong);
 
         coos2 = ville2.coordonnees_gps.split(',');
         latitude2 = parseFloat(coos2[0]);
         longitude2 = parseFloat(coos2[1]);
-        distance2 = Distance.calculDistance(latitude2, longitude2, this.selfLat, this.selfLong);
+        distance2 = Distance.calculDistance(latitude2, longitude2, this.state.selfLat, this.state.selfLong);
 
         if (distance1 < distance2) {
             return -1;
@@ -172,7 +230,7 @@ class ComposantRechercheAutour extends React.Component {
             for (v of tableau) {
                 vLat = v.coordonnees_gps.split(',')[0];
                 vLong = v.coordonnees_gps.split(',')[1];
-                d = Distance.calculDistance(this.selfLat, this.selfLong, vLat, vLong);
+                d = Distance.calculDistance(this.state.selfLat, this.state.selfLong, vLat, vLong);
                 
                 if (d < distanceMax) {
                     villesProches.push(v);
@@ -188,14 +246,13 @@ class ComposantRechercheAutour extends React.Component {
     }
 
     // Renvoie la liste des joueurs habitant dans une ville proche de notre position
-    async updateDataProches(distanceMax) {
-        if (this.state.villesTriees != undefined) {
+    async updateDataProches(distanceMax, tableauVilles) {
+        if (tableauVilles != undefined) {
             this.setState({isLoading: true});
 
-            villesProches = this.getVillesProches(distanceMax, this.state.villesTriees, true);
-
-            let db = Database.initialisation();
-            let coll = db.collection(this.type);
+            villesProches = this.getVillesProches(distanceMax, tableauVilles, true);
+            var db = Database.initialisation();
+            var coll = db.collection(this.type);
 
             let dataProches = [];
             for (v of villesProches) {
@@ -208,7 +265,6 @@ class ComposantRechercheAutour extends React.Component {
                     dataProches.push(item.data());
                 }
             }
-
             // Tri des donnees par ordre alphabetique
             dataFiltrees = this.filtrerData(dataProches);
             dataProchesAlphab = this.buildAlphabetique(dataFiltrees);
@@ -371,7 +427,6 @@ class ComposantRechercheAutour extends React.Component {
             )
 
         } else {
-        
             return (
                 <ScrollView>
                     <BarreRecherche
@@ -395,7 +450,7 @@ class ComposantRechercheAutour extends React.Component {
                                     sliderValue: v,
                                     displayFiltres: false,
                                 })
-                                this.updateDataProches(v)
+                                this.updateDataProches(v, this.state.villesTriees)
                             }}
                             step={1}
                             value={this.state.sliderValue}
@@ -405,16 +460,14 @@ class ComposantRechercheAutour extends React.Component {
                         />
                     </View>
                     {this.displayHeader()}
-                    <View style = {{flex: 5}}>
-                        <AlphabetListView
-                            data={this.state.dataAutourAlphab}
-                            cell={this.props.renderItem}
-                            cellHeight={30}
-                            sectionListItem={SectionItem}
-                            sectionHeader={SectionHeader}
-                            sectionHeaderHeight={22.5}
-                        />
-                    </View>
+                    <AlphabetListView
+                        data={this.state.dataAutourAlphab}
+                        cell={this.props.renderItem}
+                        cellHeight={30}
+                        sectionListItem={SectionItem}
+                        sectionHeader={SectionHeader}
+                        sectionHeaderHeight={22.5}
+                    />
                 </ScrollView>
             )
         }

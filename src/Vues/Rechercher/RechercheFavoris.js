@@ -10,6 +10,7 @@ import ItemTerrain from '../../Components/Terrain/ItemTerrain'
 
 import LocalUser from '../../Data/LocalUser.json'
 import ComposantRechercheTableau from '../../Components/Recherche/ComposantRechercheTableau';
+import Distance from '../../Helpers/Distance'
 
 
 export default class RechercheFavoris extends React.Component {
@@ -88,12 +89,18 @@ export default class RechercheFavoris extends React.Component {
                 )
             
             case "Terrains":
+            var distance = Distance.calculDistance(item.Latitude, item.Longitude, LocalUser.geolocalisation.latitude, LocalUser.geolocalisation.longitude);
+                
                 return (
                     <ItemTerrain
                         id={item.id}
-                        distance={item.distance}
+                        distance={distance}
                         InsNom={item.InsNom}
                         EquNom={item.EquNom}
+                        N_Voie = {item.N_Voie}
+                        Voie = {item.Voie}
+                        Ville = {item.Ville}
+                        Payant = {item.Payant}
                     />
                 )
         }

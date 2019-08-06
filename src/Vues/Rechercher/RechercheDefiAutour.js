@@ -1,9 +1,10 @@
 import React from 'react'
-import {View, Animated,TouchableOpacity,FlatList, Image,Dimensions,StyleSheet,Text} from 'react-native'
+import {View, Alert,TouchableOpacity,FlatList, Image,Dimensions,StyleSheet,Text} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import MapView, { MAP_TYPES, ProviderPropType } from 'react-native-maps';
 import Terrains from '../../Helpers/Toulouse.json'
+import Villes from '../../Components/Creation/villes.json'
 import Simple_Loading from '../../Components/Loading/Simple_Loading'
 
 import Item_Defi from '../../Components/Defis/Item_Defi'
@@ -40,26 +41,29 @@ class RechercheDefiAutour extends React.Component {
 
     constructor(props) {
 		super(props)
-		this.latitude =	LocalUser.geolocalisation.latitude;//this.props.latitude
-		this.longitude =  LocalUser.geolocalisation.longitude;
-		this.allTerrains = this.fetchClosestTerrains(this.buildTerrains())
 
+		var latitude = LocalUser.geolocalisation.latitude;
+		var longitude = LocalUser.geolocalisation.longitude; 
+
+		var allTerrains = this.fetchClosestTerrains(this.buildTerrains(latitude, longitude))
 		
         this.state = {
+			latitude: latitude,
+			longitude: longitude,
+
             isLoading: false,
-			allTerrains :   this.allTerrains,
-			terrainFiltres : this.allTerrains,
-			terrainsFiltresEtDistance : this.allTerrains,
+			terrainFiltres : allTerrains,
+			terrainsFiltresEtDistance : allTerrains,
 			sliderValue : DISTANCE_MAX, 
 			typeDisplay : LISTE,
 			markers: [],
-			sliderValueList : SLIDER_DISTANCE_MAX,
+			sliderValueList : 1,
 			displayFiltres: false,
             filtres: null,
             query: null,
 			region : {
-				latitude: this.latitude,
-				longitude: this.longitude,
+				latitude: latitude,
+				longitude: longitude,
 				latitudeDelta: 0.0922,
 				longitudeDelta: 0.0421,
             },
@@ -91,15 +95,83 @@ class RechercheDefiAutour extends React.Component {
 			markers.push(t)
 		}
 		this.setState({markers : markers, selectedTerrain : markers[0]})
+
+		this.didFocusSubscription = this.props.navigation.addListener('didFocus', this.didFocusAction);
+	}
+
+
+	didFocusAction = () => {
+        this.demanderGeolocalisation();
 	}
 	
+
+	componentWillUnmount() {
+        this.didFocusSubscription.remove();
+    }
+	
+	
+	demanderGeolocalisation() {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                let latUser = position.coords.latitude
+                let longUser = position.coords.longitude
+                let pos = {
+                    latitude : latUser,
+                    longitude : longUser
+                }
+                LocalUser.geolocalisation = pos;
+				
+				var terrainList = this.fetchClosestTerrains(this.buildTerrains(pos.latitude, pos.longitude));
+				this.setState({
+					latitude: pos.latitude,
+                    longitude: pos.longitude,
+					terrainFiltres : terrainList,
+					terrainsFiltresEtDistance : terrainList,
+				})
+			},
+			(error) => {
+				
+				Alert.alert(
+					'',
+					"Nous ne parvenons pas à capter votre position. Nous utiliserons celle de " + LocalUser.data.ville.charAt(0).toUpperCase() + LocalUser.data.ville.slice(1),
+				)
+				var pos = this.findPositionVilleFromName(LocalUser.data.ville);
+				LocalUser.geolocalisation = pos;
+				
+				var terrainList = this.fetchClosestTerrains(this.buildTerrains(pos.latitude, pos.longitude));
+				this.setState({
+					latitude: pos.latitude,
+					longitude: pos.longitude,
+					terrainFiltres : terrainList,
+					terrainsFiltresEtDistance : terrainList,
+				})
+			},
+			{ enableHighAccuracy: true, timeout:    5000, maximumAge :300000}
+        )
+	}
 	
 
+	findPositionVilleFromName(name) {
+        for(var i  =  0 ; i < Villes.length; i++) {
+            if(name.toLocaleLowerCase() == Villes[i].Nom_commune.toLocaleLowerCase()) {
+                var position = Villes[i].coordonnees_gps
+                var latitude = position.split(',')[0]
+                var longitude = position.split(', ')[1]
+                 var pos = {
+                    latitude : parseFloat(latitude),
+                    longitude : parseFloat(longitude)
+                }
+               return pos
 
-    buildTerrains() {
+            }
+        }
+    }
+
+
+    buildTerrains(latitude, longitude) {
 		let liste = []
 		for(var i =0 ; i < Terrains.length ; i++) {
-			let distance =  Distance.calculDistance(this.latitude,this.longitude, Terrains[i].Latitude,Terrains[i].Longitude)
+			let distance =  Distance.calculDistance(latitude, longitude, Terrains[i].Latitude,Terrains[i].Longitude)
 			
 			if(distance <= DISTANCE_MAX) {
 				let t = {
@@ -193,12 +265,12 @@ class RechercheDefiAutour extends React.Component {
 	handleValidateFilters = (q, f) => {
 		this.handleFilterButton();
         this.setState({filtres: f, query: q, isLoading: true})
-        this.rechercheDefis(this.state.terrainsFiltresEtDistance);
+        this.rechercheDefis(this.state.terrainsFiltresEtDistance, q);
 	}
 
 	displayFiltres() {
 		if (this.state.displayFiltres) {
-			return (<FiltrerDefi handleValidate={this.handleValidateFilters} init={this.filtres}/>);
+			return (<FiltrerDefi handleValidate={this.handleValidateFilters} init={this.state.filtres}/>);
 		}
 	}
 
@@ -212,7 +284,6 @@ class RechercheDefiAutour extends React.Component {
 		let liste = []
 		let terrain = null
         let newListe = Terrains 
-        // A suppr
         
 		for(var i = 0; i< Terrains.length; i++) {
 			var x = this.closestTerrain(newListe)
@@ -236,7 +307,7 @@ class RechercheDefiAutour extends React.Component {
 		var newListe = this.fetchClosestTerrains(this.buildTerrainsWithRegionChanged());
 		this.setState({terrainFiltres: newListe});
 
-		this.rechercheDefis(newListe).then(() => {
+		this.rechercheDefis(newListe, this.state.query).then(() => {
 
 			var markers = []
 			for(var i =0 ; i < Math.min(10, this.state.defis.length); i ++) {
@@ -319,17 +390,16 @@ class RechercheDefiAutour extends React.Component {
     };
     
 
-    async rechercheDefis(terrainList) {
-        console.log("Debut recherche defis");
+    async rechercheDefis(terrainList, query) {
         var db = Database.initialisation();
         let listeDefis = [];
         for (var i=0; i<terrainList.length; i++) {
 
-            if (this.state.query == null) {
+            if (query == null) {
                 defisTerrain = await db.collection("Defis").where("terrain", "==", terrainList[i].id).get();
 
             } else {
-                defisTerrain = await this.state.query.where("terrain", "==", terrainList[i].id).get();
+                defisTerrain = await query.where("terrain", "==", terrainList[i].id).get();
             }
 
             for (var d=0; d<defisTerrain.docs.length; d++) {
@@ -345,7 +415,6 @@ class RechercheDefiAutour extends React.Component {
             defis: listeDefis,
             isLoading: false
         });
-        console.log("Fin recherche defis");
     }
 
 
@@ -458,7 +527,6 @@ class RechercheDefiAutour extends React.Component {
 					<TouchableOpacity
 						style={{flexDirection :'row', justifyContent: 'center', alignItems: 'center'}}
 						onPress={() => {
-							console.log("press carrousel");
 							this.gotoItemCarrousel(item.data);
 						}}
 						>
@@ -527,7 +595,7 @@ class RechercheDefiAutour extends React.Component {
                                             terrainsFiltresEtDistance: t,
                                             isLoading: true
                                         });
-                                        this.rechercheDefis(t);
+                                        this.rechercheDefis(t, this.state.query);
                                     }}
                                     step={1}
                                     value={this.state.sliderValueList}
@@ -575,8 +643,8 @@ class RechercheDefiAutour extends React.Component {
 							
 							style={styles.map}
 							initialRegion = {
-									{latitude: this.latitude,
-									longitude: this.longitude,
+									{latitude: this.state.latitude,
+									longitude: this.state.longitude,
 									latitudeDelta: LATITUDE_DELTA,
 									longitudeDelta: LONGITUDE_DELTA}
 							}
@@ -588,8 +656,8 @@ class RechercheDefiAutour extends React.Component {
 							{/* Marker pour la position de l'utilisateur */}
 							<MapView.Marker
 								coordinate={
-									{latitude: this.latitude,
-									longitude:  this.longitude}
+									{latitude: this.state.latitude,
+									longitude:  this.state.longitude}
 								}
 								title={"title"}
 								description={"description"}>
