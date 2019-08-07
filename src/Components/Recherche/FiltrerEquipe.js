@@ -218,12 +218,13 @@ export default class FiltrerEquipe extends React.Component {
 
 
     returnFilter() {
+        b0 = this.state.departement.length > 0;
         b1 = this.state.ville.length > 0;
         b2 = this.state.ageMin > 0;
         b3 = this.state.ageMax < 99;
         b4 = this.state.score != null;
         b5 = this.state.nbJoueurs > 0;
-        if (b1 || b2 || b3 || b4 || b5) {
+        if (b0 || b1 || b2 || b3 || b4 || b5) {
             return {...this.state}
         } else {
             return null;

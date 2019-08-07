@@ -898,13 +898,6 @@ class Fiche_Defi_Rejoindre extends React.Component {
             )
 
         
-        }else if( ! this.state.defi.defis_valide) {
-            return(
-                <View>
-                    <Text>Attente de validation du défi</Text>
-                </View>
-            )
-
         // Si il est capitaine de l'équipe defiee et le défi à été validé
         } else if(cap2 && this.state.defi.defis_valide) {
             return(
@@ -959,7 +952,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
         } else {
             return(
                 <View>
-                    <Text></Text>
+                    <Text>Attente de validation du défi</Text>
                 </View>
             )
         }
@@ -1112,9 +1105,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
                     </View>
 
                     {/* View contenant l'icon terrain et son nom*/}
-                    <TouchableOpacity 
-                        onPress = {() =>                            this.props.navigation.push("ProfilTerrain", {id : this.state.defi.terrain, header: this.state.InsNom})}
-                        style = {{flexDirection : 'row', marginTop : hp('2%'), marginLeft : wp('8%')}}>
+                    <View style = {{flexDirection : 'row', marginTop : hp('2%'), marginLeft : wp('8%')}}>
                             <Image
                                 source = {require('../../../../res/terrain1.jpg')}
                                 style = {styles.photo_terrain}
@@ -1125,7 +1116,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
                                 <Text style = {styles.nomTerrains}>{this.state.N_Voie} {this.state.Voie}</Text>
                                 <Text style = {styles.nomTerrains}>{this.state.CodePostal} {this.state.Ville}</Text>
                             </View>
-                    </TouchableOpacity>
+                    </View>
 
                     {/* Bloc contenant les équipes */}
                     <View style = {styles.containerEquipe}>

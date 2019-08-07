@@ -80,7 +80,7 @@ class ComposantRechercheAutour extends React.Component {
         // Collection
         this.type = this.props.type; // Joueurs, Equipes, Defis
         switch (this.type) {
-            case "Joueurs" : {this.champNomQuery = "nomQuery"; this.champNom = "pseudo"; break;}
+            case "Joueurs" : {this.champNomQuery = "pseudoQuery"; this.champNom = "pseudo"; break;}
             case "Equipes" : {this.champNomQuery = "queryName"; this.champNom = "nom"; break;}
         }
 

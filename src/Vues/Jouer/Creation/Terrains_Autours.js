@@ -203,12 +203,12 @@ class Terrains_Autours extends React.Component {
 		}
 		return liste
     }
-
-/**
-* Fonction qui va être passé en props du componant
-* BareRecherche et qui va permettre de filtrer les terrains 
-* en fonction de ce que tappe l'utilisateur
-*/
+	
+	/**
+	 * Fonction qui va être passé en props du componant
+	 * BareRecherche et qui va permettre de filtrer les terrains 
+	 * en fonction de ce que tappe l'utilisateur
+	 */
     recherche = (data)  => {
 		this.setState({
 			terrainFiltres : data,
@@ -381,14 +381,15 @@ class Terrains_Autours extends React.Component {
 	}
 	  
 
-onRegionChange = (region) => {
-oldRegion = this.state.region
-distance = Distance.calculDistance(oldRegion.latitude, oldRegion.longitude, region.latitude, region.longitude)
-if(distance >= 0.8) {
-this.setState({ region : region })
-}
 
-};
+	onRegionChange = (region) => {
+		oldRegion = this.state.region
+		distance = Distance.calculDistance(oldRegion.latitude, oldRegion.longitude, region.latitude, region.longitude)
+		if(distance >= 0.8) {
+			this.setState({ region : region })
+		}
+	
+	};
 
 
 	// =============================================================================================
@@ -396,14 +397,14 @@ this.setState({ region : region })
 	// =============================================================================================
 
 
-_renderItem = ({item}) => {
+	_renderItem = ({item}) => {
         var distance = item.distance
         var txtDistance = distance.toString().split('.')[0];
-txtDistance = txtDistance +','+ distance.toString().split('.')[1][0]
-
-if (this.props.gotoItemOnPress != undefined && this.props.gotoItemOnPress != null && this.props.gotoItemOnPress) {
-return (
-<ItemTerrain
+		txtDistance = txtDistance +','+ distance.toString().split('.')[1][0]
+		
+		if (this.props.gotoItemOnPress != undefined && this.props.gotoItemOnPress != null && this.props.gotoItemOnPress) {
+			return (
+				<ItemTerrain
                     id={item.id}
                     distance={distance}
                     InsNom={item.InsNom}
@@ -413,32 +414,32 @@ return (
 					Ville = {item.Ville}
 					Payant = {item.Payant}
                 />
-)
-} else {
-return (
-<Item_Terrain_creation_defis
-InsNom = {item.InsNom}
-EquNom = {item.EquNom}
-distance = {txtDistance}
-id = {item.id}
-isShown = {this.props.terrainSelectionne == item.id}
-payant = {item.Payant}
-N_Voie = {item.N_Voie}
-Voie = {item.Voie}
-Ville = {item.Ville}
-/>)
-}
-}
+			)
+		} else {
+			return (
+				<Item_Terrain_creation_defis
+					InsNom = {item.InsNom}
+					EquNom = {item.EquNom}
+					distance = {txtDistance}
+					id = {item.id}
+					isShown = {this.props.terrainSelectionne == item.id}
+					payant = {item.Payant}
+					N_Voie = {item.N_Voie}
+					Voie = {item.Voie}
+					Ville = {item.Ville}
+				/>)
+		}
+	}
 
 
 
-  /**
-  * Fonction qui permet d'appeller un item pour le caroussel
-  * @param {*} param0 
-*/
+  	/**
+	   * Fonction qui permet d'appeller un item pour le caroussel
+	   * @param {*} param0 
+	*/
     _renderItemCarrousel = ({item,index}) => {
 
-var distance = item.distance
+		var distance = item.distance
         var txtDistance = distance.toString().split('.')[0];
 		txtDistance = txtDistance +','+ distance.toString().split('.')[1][0]
 
@@ -450,6 +451,7 @@ var distance = item.distance
 				EquNom = {item.EquNom}
 				Voie = {item.Voie}
 				N_Voie = {item.N_Voie}
+				Ville = {item.Ville}
 				id = {item.id}
 				isShown = {this.props.terrainSelectionne == item.id}
 				distance = {txtDistance}
@@ -635,34 +637,34 @@ var distance = item.distance
 
 
 Terrains_Autours.propTypes = {
-provider: ProviderPropType,
+	provider: ProviderPropType,
   }; 
 
 const mapStateToProps = (state) => {
     return{ 
-latitude : state.latitude,
-longitude : state.longitude,
-terrainSelectionne :state.terrainSelectionne
+		latitude : state.latitude,
+		longitude : state.longitude,
+		terrainSelectionne :state.terrainSelectionne
     } 
 }
 
 const styles = StyleSheet.create({
 
-map: {
- flex: 1,
- alignItems: 'center'
-},
+	map: {
+	  flex: 1,
+	  alignItems: 'center'
+	},
 
-slider: {
+	slider: {
         marginTop: hp('2%'),
         overflow: 'visible' // for custom animations
-},
+	},
 
-sliderContentContainer: {
+	sliderContentContainer: {
         paddingVertical: 10 // for custom animation
     },
 
-
+	
 })
 
 export default connect(mapStateToProps) (withNavigation(Terrains_Autours))

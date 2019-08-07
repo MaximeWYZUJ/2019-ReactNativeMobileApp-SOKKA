@@ -225,11 +225,7 @@ export default class Recapitulatif_Defis extends React.Component {
             msg =  "Le capitaine de l'équipe \n"
             + nomEquipeAdverse + "\n recevra une notification pour \n accepter ou non le defi"
         }else {
-            msg = "Tu seras informé(e) dès  qu'une équipe aura relevé ton défi."
-        }
-
-        if(this.props.navigation.getParam('joueursSelectionnes', ' ').length > 1) {
-            msg = msg + " Les joueurs convoqués vont recevoir une notification pour confirmer leur participation."
+            msg = "Tu seras informé dès qu'une équipe aura \n relevé ton défi"
         }
         
         var jour = this.day.split('-')[0]

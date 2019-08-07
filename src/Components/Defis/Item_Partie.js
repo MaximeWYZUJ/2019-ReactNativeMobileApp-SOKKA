@@ -6,7 +6,7 @@ import RF from 'react-native-responsive-fontsize';
 import Terrains from '../../Helpers/Toulouse.json'
 import Database from '../../Data/Database'
 import { withNavigation } from 'react-navigation'
-import Distance from '../../Helpers/Distance'
+
 
 const DAY = ['Dimanche','Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
 
@@ -141,21 +141,10 @@ class Item_Partie extends React.Component {
     }
     
 
-    renderDistance(terrain) {
-        
+    renderDistance() {
         if(this.props.latitudeUser != undefined && this.props.longitudeUser != undefined) {
-            console.log(terrain)
-            var distance = Distance.calculDistance(this.props.latitudeUser, this.props.longitudeUser, terrain.Longitude, terrain.Latitude);
-            var distString = distance+"";
-            let values = distString.split(".");
-                
-            if (values.length > 1) {
-               dispDistance = values[0]+","+values[1].substr(0,2)+" km";
-            } else {
-               dispDistance = "";
-            }
             return(
-                <Text>{dispDistance}</Text>
+                <Text> - okokok</Text>
             )
         } 
     }
@@ -248,10 +237,7 @@ class Item_Partie extends React.Component {
                         source = {require('../../../res/terrain1.jpg')}
                         style = {{width : wp('13%'), height : wp('13%'), marginRight : wp('2%')}}/>
                     <View style = {{width : wp('63%')}}>
-                        <Text style = {styles.nomTerrains}>{terrain.InsNom}  {this.renderDistance(terrain)}</Text>
-                        <Text style = {styles.nomTerrains}> {terrain.N_Voie} {terrain.Voie}</Text>
-                        <Text style = {styles.nomTerrains}> {terrain.Ville}</Text>
-
+                        <Text style = {styles.nomTerrains}>{terrain.InsNom}  {this.renderDistance()}</Text>
                     </View>
                 </View>
                                

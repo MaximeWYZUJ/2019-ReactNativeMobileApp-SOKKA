@@ -263,7 +263,9 @@ export default class Profil_Terrain extends React.Component {
      * Méthode qui va permettre de récuperer les joueurs qui 
      * likent le terrains et d'afficher la vue.
      */
-    gotoJoueursQuiLikent() {}
+    gotoJoueursQuiLikent() {
+        this.props.navigation.push("JoueursQuiLikent", {joueurs: this.state.aiment, titre: this.localData.InsNom});
+    }
 
 
     likeTerrain() {

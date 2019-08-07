@@ -17,6 +17,9 @@ import allTerrains from '../../Helpers/Toulouse.json'
 import Distance from '../../Helpers/Distance'
 import LocalUser from '../../Data/LocalUser.json'
 
+import Email from 'react-native-email'
+
+
 
 export default class RechercheDefaut extends React.Component {
 
@@ -220,7 +223,13 @@ export default class RechercheDefaut extends React.Component {
                         },
                         {
                             text: 'Continuer',
-                            onPress: this.handleProposerTerrain,
+                            onPress: () => {
+                                const to = "contact@sokka.app"
+                                Email(to, {
+                                    subject : "Proposer un terrain",
+                                    body : "Indique ici les informations sur ton terrain (adresse, équipements disponibles, etc.)"
+                                }).catch(console.error)
+                            },
                         },
                     ],
                     )}>

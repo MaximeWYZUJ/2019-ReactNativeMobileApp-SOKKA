@@ -116,7 +116,7 @@ class Defis_2_Equipes_Contre_Qui extends React.Component {
                     style = {styles.bloc}
                     onPress = {() => {this.goToPosterUneAnnonce()}}>
                    <Text style ={styles.txtTitre}>Poster une annonce</Text>
-                   <Text style  = {styles.txt}>Poste une annonce, tu seras informé(e) dès qu'une équipe aura accepté le défi 😉</Text>
+                   <Text style  = {styles.txt}>Poste une annonce, tu seras informé dès qu'une équipe aura accepté le défi 😉</Text>
                </TouchableOpacity>
             </View>
         )

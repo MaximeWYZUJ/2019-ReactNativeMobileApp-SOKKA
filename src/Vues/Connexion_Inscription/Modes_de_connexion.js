@@ -1,7 +1,7 @@
 
 import React from 'react'
 
-import {KeyboardAvoidingView, View, Text,Image, Animated,TouchableOpacity,TextInput} from 'react-native'
+import {KeyboardAvoidingView, View, Text,Image, Animated,TouchableOpacity,TextInput, Button, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import PasswordInputText from 'react-native-hide-show-password-input';
 import RF from 'react-native-responsive-fontsize';
@@ -25,7 +25,7 @@ export default class Modes_de_connexion extends React.Component {
         super(props)
         this.state = {
             txt :'',
-            mail : ' ',
+            mail : '',
             mdp : '',
             coReussie : false,
             isLoading : false
@@ -119,28 +119,37 @@ export default class Modes_de_connexion extends React.Component {
     /**
      * Fonction qui va permettre d'authentifier un utilisateur
      */
-    checkConnexion(){
+    checkConnexion(checkEmailVerifie){
         this.setState({isLoading : true})
         var db = Database.initialisation()
 
         firebase.auth().signInWithEmailAndPassword(this.state.mail, this.state.mdp)
-        .then(async (user) => {
-         
-            // Récupérations des données de la DB
-            j = await Database.getDocumentData(firebase.auth().currentUser.uid, "Joueurs");
-            jEquipes = await Database.getArrayDocumentData(j.equipes, 'Equipes');
+        .then(async (userCred) => {
+            if (userCred.user.emailVerified || !checkEmailVerifie) {
+                console.log("email verifie")
+                // Récupérations des données de la DB
+                j = await Database.getDocumentData(firebase.auth().currentUser.uid, "Joueurs");
+                jEquipes = await Database.getArrayDocumentData(j.equipes, 'Equipes');
 
-            // Update des données locales
-            LocalUser.exists = true;
-            LocalUser.data = j;
-            var villePos = this.findPositionVilleFromName(j.ville);
-            LocalUser.geolocalisation = villePos;
+                // Update des données locales
+                LocalUser.exists = true;
+                LocalUser.data = j;
+                var villePos = this.findPositionVilleFromName(j.ville);
+                LocalUser.geolocalisation = villePos;
 
-            // Enregistrement du token
-            this.storeToken(j);
+                // Enregistrement du token
+                this.storeToken(j);
 
-            // Passage à la vue suivante
-            this.props.navigation.navigate("ProfilJoueur", {id: j.id, joueur: j, equipes: jEquipes});
+                // Passage à la vue suivante
+                this.props.navigation.navigate("ProfilJoueur", {id: j.id, joueur: j, equipes: jEquipes});
+                this.setState({isLoading: false});
+            } else {
+                Alert.alert("", "Ce compte n'est pas activé. Si tu n'as pas reçu le mail d'activation, appuie sur le bouton ci-dessous",
+                [
+                    {text: "Renvoyer le mail d'activation", onPress: () => this.renvoyerMail()}
+                ]);
+                this.setState({isLoading: false})
+            }
         })
         .catch((error) => {
           const { code, message } = error;
@@ -186,10 +195,34 @@ export default class Modes_de_connexion extends React.Component {
         }
         console.log("okook")
         var token = await Notifications.getExpoPushTokenAsync();
-        console.log("after await token")
-        //this.subscription = Notifications.addListener(this.handleNotification);
-    
+        console.log("after await token")    
         return (token)
+    }
+
+
+    forgotPassword() {
+        if (this.state.mail == "") {
+            Alert.alert('', "Inscris ton adresse mail dans le champ ci-dessus.")
+        } else {
+            firebase.auth().sendPasswordResetEmail(this.state.mail).then(() => {
+                Alert.alert('', "Un mail vient de t'être envoyé avec ton nouveau mot de passe. Tu pourras le modifier dans les réglages de ton profil.")
+            })
+        }
+    }
+
+
+    renvoyerMail() {
+        if (this.state.mail == "" || this.state.mdp == "") {
+            Alert.alert('', "Entre ton adresse mail et ton mot de passe dans les champs ci-dessus");
+        } else {
+            firebase.auth().signInWithEmailAndPassword(this.state.mail, this.state.mdp)
+            .then((userCred) => {
+                userCred.user.sendEmailVerification();
+                Alert.alert("", "Le mail d'activation vient de t'être envoyé")
+            }, (error) => {
+                Alert.alert("", "L'adresse mail et le mot de passe indiqués ne correspondent à aucun compte connu. Impossible d'envoyer le mail d'activation");
+            })
+        }
     }
 
 
@@ -240,12 +273,12 @@ export default class Modes_de_connexion extends React.Component {
                                     placeholder = "mot de passe"
                                     secureTextEntry ={true}
                                     onChangeText ={(text) => this.passwordTextInputChanged(text)} 
-                                    onSubmitEditing={() => this.checkConnexion()}
+                                    onSubmitEditing={() => this.checkConnexion(true)}
                                 />
                             </View>
                         
                             <TouchableOpacity style = {styles.btn_Connexion}
-                                onPress = {()=> this.checkConnexion()}>
+                                onPress = {()=> this.checkConnexion(true)}>
                                 <Text style = {styles.txt_btn}>Connexion</Text>
 
                             </TouchableOpacity>
@@ -274,7 +307,10 @@ export default class Modes_de_connexion extends React.Component {
                         </TouchableOpacity>
                     </Animated.View>
 
-                
+                    <Button title="Mot de passe oublié" onPress={() => this.forgotPassword()}/>
+                    <Button title="Renvoyer un mail d'activation" onPress={() => this.renvoyerMail()}/>
+                    <Button title="connexion email fake" onPress={() => this.checkConnexion(false)}/>
+
                 </View>
 
             )

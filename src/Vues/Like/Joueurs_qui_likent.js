@@ -39,11 +39,11 @@ import ComposantRechercheTableau from '../../Components/Recherche/ComposantReche
   
     render() {
         return (
-          <ScrollView style = {{flex : 1}}>
+          <View style = {{flex : 1}}>
             
             {/* Indication du nombre de j'aime */}
             <View style = {{backgroundColor : Color.lightGray, alignItems : 'center', justifyContent: 'center', paddingHorizontal: hp('2%')}}>
-              <Text style = {{alignSelf : 'center', fontSize : RF(2.5)}}>{this.joueurs.length} joueurs ont liké ton profil</Text>
+              <Text style = {{alignSelf : 'center', fontSize : RF(2.5)}}>{this.joueurs.length == 0 ? "" : this.joueurs.length + " "}{this.joueurs.length > 1 ? "joueurs ont" : (this.joueurs.length == 0 ? "aucun joueur n'a" : "joueur a")} aimé ce profil</Text>
             </View>
 
             <ComposantRechercheTableau
@@ -51,7 +51,7 @@ import ComposantRechercheTableau from '../../Components/Recherche/ComposantReche
               donneesID={this.joueurs}
               renderItem={this.renderItem}
             />
-          </ScrollView>          
+          </View>          
       );
     }
 }

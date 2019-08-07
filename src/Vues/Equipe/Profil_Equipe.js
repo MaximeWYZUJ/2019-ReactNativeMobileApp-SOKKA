@@ -283,10 +283,7 @@ export default class Profil_Equipe extends React.Component {
      * likent le terrains et d'afficher la vue.
      */
     gotoJoueursQuiLikent() {
-        Database.getArrayDocumentData(this.state.equipeData.aiment, 'Joueurs')
-        .then(arrayJ => {
-            this.props.navigation.push("JoueursQuiLikent", {joueurs: arrayJ, titre: this.state.nom});
-        })
+        this.props.navigation.push("JoueursQuiLikent", {joueurs: this.state.equipeData.aiment, titre: this.state.equipeData.nom});
     }
 
 
@@ -533,14 +530,14 @@ export default class Profil_Equipe extends React.Component {
         if (!this.state.isaMember) {
             return (
                 <View style = {styles.main_container_action}>
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                        onPress = {() => this.newGroupe()}>
                         <Image
-                            source = {require('app/res/icon_message.png')}
+                            source = {require('app/res/write.png')}
                             style = {styles.icon_message} />
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress = {() => this.buildAlertIntegerEquipe()}>
-                            
                         <Image
                             source = {require('app/res/icon_plus.png')}
                             style = {styles.icon_plus} />
@@ -549,7 +546,13 @@ export default class Profil_Equipe extends React.Component {
             );
         } else {
             return (
-                <View style = {{...styles.main_container_action, width: 30, height: 30}}>
+                <View style = {{...styles.main_container_action}}>
+                    <TouchableOpacity
+                        onPress = {() => this.newGroupe()}>
+                        <Image
+                            source = {require('app/res/write.png')}
+                            style = {styles.icon_message} />
+                    </TouchableOpacity>
                 </View>
             )
         }
@@ -731,18 +734,6 @@ export default class Profil_Equipe extends React.Component {
         }
     }
 
-    renderIconMessage(){
-        return(
-            <TouchableOpacity
-            style = {{position : "absolute", top  : hp('1%'), right : wp('1.3%')}}
-                onPress = {() =>this.newGroupe()} >
-                <Image
-                    style = {{width : 30, height : 30, marginRight :15}}
-                    source = {require('../../../res/write.png')}
-                />
-            </TouchableOpacity>
-        )
-    }
 
     newGroupe() {
         this.props.navigation.push("NewGroupe",{joueurs :this.state.joueurs})
@@ -757,7 +748,6 @@ export default class Profil_Equipe extends React.Component {
                 <ScrollView>
                     <View style = {styles.info_equipe}>
 
-                        {this.renderIconMessage()}
                         {/* BLOC INFOS DE L'EQUIPE */}
                         <View style = {styles.bloc_identite}>
 

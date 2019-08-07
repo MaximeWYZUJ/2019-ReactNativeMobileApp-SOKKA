@@ -80,14 +80,14 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
     render() {
 
         const  isShown  = this.props.isShown
-
+        console.log(this.props.Ville);
         return(
                 <View style = {styles.slide}>
 
                     {/* View contenant les informations sur le terrain*/}
                     <View style={{flex: 5}}>
                         <Text style = {styles.InsNomStyle}>{this.props.InsNom}</Text>
-                        <Text style={styles.title}>{this.props.N_Voie} {this.props.Voie} </Text>
+                        <Text style={styles.title}>{this.props.N_Voie} {this.props.Voie}, {this.props.Ville} </Text>
 
                         {/* View contenant le txt de la distance et l'image*/}
                         <View style = {{flexDirection : 'row'}}>

@@ -426,7 +426,7 @@ class ProfilJoueur extends React.Component {
      * Méthode qui va permettre de récuperer les joueurs qui 
      * likent le joueur et d'afficher la vue.
      */
-    async gotoJoueursQuiLikent() {
+    async gotoJoueursQuiLikent() { 
         this.props.navigation.push("JoueursQuiLikent", {joueurs: this.joueur.aiment, titre: this.joueur.pseudo});
     }
 
@@ -946,6 +946,27 @@ class ProfilJoueur extends React.Component {
     newMessage(){
 
     }
+
+
+    getTextePoste() {
+        if (this.joueur.sexe == "feminin") {
+            switch(this.joueur.poste) {
+                case "offensif" : return "Joueuse offensive";
+                case "defensif" : return "Joueuse défensive";
+                case "mixte" : return "Joueuse mixte";
+                case "gardien" : return "Gardienne";
+                default : return "Poste non renseigné"
+            }
+        } else {
+            switch(this.joueur.poste) {
+                case "offensif" : return "Joueur offensif";
+                case "defensif" : return "Joueur défensif";
+                case "mixte" : return "Joueur mixte";
+                case "gardien" : return "Gardien";
+                default : return "Poste non renseigné"
+            }
+        }
+    }
 	
 
     render() {
@@ -1005,7 +1026,7 @@ class ProfilJoueur extends React.Component {
                                     <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville.charAt(0).toUpperCase() + this.joueur.ville.slice(1)}</Text>
                                 </View>
                                 {/*<Text style={{margin: 5,  fontSize : RF(3.25)}}>{this.joueur.pseudo}</Text>*/}
-                                <Text>{this.joueur.poste == "gardien" ? "Gardien" : "Joueur " + this.joueur.poste}</Text>
+                                <Text>{this.getTextePoste()}</Text>
                             </TouchableOpacity>
                             {this._displayReglages()}
                         </View>

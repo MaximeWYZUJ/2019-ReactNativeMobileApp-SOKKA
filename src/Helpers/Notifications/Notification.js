@@ -34,9 +34,8 @@ export default class Notification {
     static async storeTokenInLogin(id) {
         var token = await this.registerForPushNotifications()
         var db = Database.initialisation()
-        console.log("in store token in login" , id)
         db.collection("Login").doc(token).set({id : id})
-                    
+        console.log("token stored in login")
     }
 
 

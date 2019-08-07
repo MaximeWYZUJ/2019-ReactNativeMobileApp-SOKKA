@@ -143,7 +143,7 @@ class SearchList extends React.Component {
                                 [
                                     {
                                         text: 'Confirmer',
-                                        onPress: () => this.props.navigation.navigate("OngletRecherche_Autour", {type: "Joueurs"})
+                                        onPress: () => this.props.navigation.navigate("RechercherTab", {type: "Joueurs"})
                                     },
                                     {
                                         text: 'Annuler',
@@ -169,7 +169,7 @@ class SearchList extends React.Component {
                                 [
                                     {
                                         text: 'Confirmer',
-                                        onPress: () => this.props.navigation.navigate("OngletRecherche_Autour", {type: "Equipes"})
+                                        onPress: () => this.props.navigation.navigate("RechercherTab", {type: "Equipes"})
                                     },
                                     {
                                         text: 'Annuler',
@@ -195,7 +195,7 @@ class SearchList extends React.Component {
                                 [
                                     {
                                         text: 'Confirmer',
-                                        onPress: () => this.props.navigation.navigate("OngletRecherche_Autour", {type: "Terrains"})
+                                        onPress: () => this.props.navigation.navigate("RechercherTab", {type: "Terrains"})
                                     },
                                     {
                                         text: 'Annuler',
@@ -225,7 +225,7 @@ class SearchList extends React.Component {
                                     },
                                     {
                                         text: 'Rechercher',
-                                        onPress: () => this.props.navigation.navigate("OngletRecherche_Autour", {type: "Equipes"}),
+                                        onPress: () => this.props.navigation.navigate("RechercherTab", {type: "Equipes"}),
                                     },
                                 ],
                         )}

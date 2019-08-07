@@ -119,6 +119,8 @@ class ComposantRechercheTableau extends React.Component {
             dataFavAlphab: dataFA,
             filtres: f
         })
+        console.log(f);
+        console.log(dataF);
     }
 
 

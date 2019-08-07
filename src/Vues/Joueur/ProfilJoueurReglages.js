@@ -41,6 +41,9 @@ class ProfilJoueurReglages extends React.Component {
         this.age = this.joueur.age;
         this.sexe = this.joueur.sexe;
         this.poste = this.joueur.poste;
+
+        this.mdp = "";
+        this.mdpConfirm = "";
         
         if (this.joueur.AKA == undefined || this.joueur.AKA === "") {
             this.AKAplaceholder = "...";
@@ -282,6 +285,46 @@ class ProfilJoueurReglages extends React.Component {
     }
 
 
+    modifierMdp() {
+        // On veut modifier le mdp
+        if (this.mdp != "" && this.mdp == this.mdpConfirm && this.mdp.length >= 6) {
+            var user = firebase.auth().currentUser;
+            user.updatePassword(this.mdp).then(() => {
+                console.log("mot de passe changé");
+                this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', ''),retour_arriere_interdit : true})
+                this.setState({isLoading: false});
+            }, (error) => {
+                console.log(error);
+                this.setState({isLoading: false})
+                Alert.alert(
+                    "",
+                    "La modification du mot de passe nécessite de s'être connecté récemment. Veuillez vous reconnecter pour mettre à jour votre mot de passe.",
+                    [
+                        {
+                            text: 'OK',
+                            onPress: () => {this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', ''),retour_arriere_interdit : true})},
+                            style: 'cancel'
+                        }
+                    ]
+                );
+            })
+        
+        // On ne veut pas modifier le mdp
+        } else if (this.mdp == "") {
+            this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', ''),retour_arriere_interdit : true})
+            this.setState({isLoading: false});
+
+        // On modifie mal le mdp
+        } else if (this.mdp != this.mdpConfirm) {
+            this.setState({isLoading: false});
+            Alert.alert('', "Le mot de passe de confirmation n'est pas le même que le nouveau mot de passe")
+        } else {
+            this.setState({isLoading: false});
+            Alert.alert('', "Ton mot de passe doit contenir au moins 6 caractères")
+        }
+    }
+
+
     async _validate() {
 
         if (this.naissance) {
@@ -330,7 +373,6 @@ class ProfilJoueurReglages extends React.Component {
         db.collection("Joueurs").doc(this.id).set({
             age : this.state.age,
             fiabilite : this.joueur.fiabilite,
-            mail : this.joueur.mail,
             naissance : this.joueur.naissance,
             nom : this.joueur.nom,
             telephone : this.joueur.telephone,
@@ -350,9 +392,32 @@ class ProfilJoueurReglages extends React.Component {
             merge: true
 
         }).then(() => {
-            console.log("Document successfully written!");
-            this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', ''),retour_arriere_interdit : true})
-            this.setState({isLoading: false});
+            // On veut modifier le mail
+            if (this.mail != "") {
+                var user = firebase.auth().currentUser;
+                user.updateEmail(this.mail).then(() => {
+                    db.collection("Joueurs").doc(this.id).set({
+                        mail: this.joueur.mail
+                    }, {merge: true})
+                    this.modifierMdp();
+                }, (error) => {
+                    console.log(error);
+                    this.setState({isLoading: false})
+                    Alert.alert(
+                        "",
+                        "La modification de ton adresse mail nécessite de s'être connecté récemment. Reconnecte toi pour mettre à jour ton adresse mail.",
+                        [
+                            {
+                                text: 'OK',
+                                onPress: () => {this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', ''),retour_arriere_interdit : true})},
+                                style: 'cancel'
+                            }
+                        ]
+                    );
+                })
+            } else {
+                this.modifierMdp();
+            }
         }).catch(function(error) {
             this.setState({isLoading: false})
             console.log("Error writing document: ", error);
@@ -539,6 +604,27 @@ class ProfilJoueurReglages extends React.Component {
                                 placeholder={this.joueur.mail}
                                 />
                         </View>
+                        <View style={{flex: 1, alignItems: 'center'}}>
+                            <Text style={{fontWeight: 'bold', fontSize: 18}}>Modifier le mot de passe</Text>
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>Nouveau mot de passe :  </Text>
+                            <TextInput
+                                style={{flex: 1, borderColor: '#C0C0C0'}}
+                                onChangeText={(t) => this.mdp=t}
+                                placeholder={"nouveau mot de passe"}
+                                secureTextEntry={true}
+                            />
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>Confirmation du mot de passe :  </Text>
+                            <TextInput
+                                style={{flex: 1, borderColor: '#C0C0C0'}}
+                                onChangeText={(t) => this.mdpConfirm=t}
+                                placeholder={"nouveau mot de passe"}
+                                secureTextEntry={true}
+                            />
+                        </View>
                     </View>
 
                     <View style={styles.validate}>
@@ -547,7 +633,7 @@ class ProfilJoueurReglages extends React.Component {
 
                     <View style={styles.validate}>
                         <Button title="Contacter SOKKA" onPress={() => {
-                            const to = "email@email.com"
+                            const to = "contact@sokka.app"
                             Email(to, {
                                 subject : "Contacter SOKKA",
                                 body : "Bla bla"

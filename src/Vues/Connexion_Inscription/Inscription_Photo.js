@@ -82,13 +82,10 @@ export default class Inscription_Photo extends React.Component {
     }
 
 
-    /**
-     * Fonction qui renvoie la position de la ville à partir de son nom
-     * @param {String} Name : Nom de la ville 
-     */
+
     findPositionVilleFromName(name) {
         for(var i  =  0 ; i < villes.length; i++) {
-            if(name.toLocaleLowerCase() == villes[i].Nom_commune.toLocaleLowerCase()) {
+            if(NormalizeString.normalize(name) == NormalizeString.normalize(villes[i].Nom_commune)) {
                 var position = villes[i].coordonnees_gps
                 var latitude = position.split(',')[0]
                 var longitude = position.split(', ')[1]
@@ -186,8 +183,10 @@ export default class Inscription_Photo extends React.Component {
             this.uploadImageFinal(this.state.photo.uri, this.state.pseudo)
                 .then(() => {
 
-                    this.uploadUser(image_changed).then(() => {
-                        this.props.navigation.navigate('ConfirmationInscription', {pseudo: LocalUser.data.pseudo, photo: LocalUser.data.photo})
+                    this.uploadUser(image_changed).then((user) => {
+                        user.sendEmailVerification();
+                        Alert.alert("", "Nous t'avons envoyé un mail de confirmation à ton adresse mail. Pense à cliquer sur le lien pour pouvoir activer ton compte.")
+                        this.props.navigation.navigate('ConfirmationInscription', {pseudo: LocalUser.data.pseudo, photo: LocalUser.data.photo});
                     });
                 })
                 .catch((error) => {
@@ -196,7 +195,9 @@ export default class Inscription_Photo extends React.Component {
                 });
 
         } else {
-            this.uploadUser(image_changed).then(() => {
+            this.uploadUser(image_changed).then((user) => {
+                user.sendEmailVerification();
+                Alert.alert("", "Nous t'avons envoyé un mail de confirmation à ton adresse mail. Pense à cliquer sur le lien pour pouvoir activer ton compte.")
                 this.props.navigation.navigate('ConfirmationInscription', {pseudo: LocalUser.data.pseudo, photo: LocalUser.data.photo});
             });
         }
@@ -210,113 +211,103 @@ export default class Inscription_Photo extends React.Component {
         var fileName = this.state.pseudo
         const oldState = this.state;
         
-        firebase.auth().createUserWithEmailAndPassword(this.state.mail, this.state.mdp)
-        .then(function(data){
-            var id = data.user.uid
-            console.log("id")
-            /* Obtenir une ref à la photo. */
-            if(image_changed) {
-                var ref = firebase.storage().ref().child("Photos_profil_Joueurs/test/" + fileName)
+        data = await firebase.auth().createUserWithEmailAndPassword(this.state.mail, this.state.mdp)
 
-                /* Une fois qu'on a l'url on peut enregistrer les données de
-                 l'utilisateurdans firebase. */
-                ref.getDownloadURL().then(function(url) {
-                    
-                    Notification.storeTokenInLogin(id).then(function() {
-                        user = {
-                            id: id,
-                            age: oldState.age,
-                            aiment: [],
-                            equipes: [],
-                            equipesFav: [],
-                            fiabilite: 0,
-                            mail: oldState.mail,
-                            naissance: firebase.firestore.Timestamp.fromMillis(Date.parse(oldState.naissance)),
-                            nom: oldState.prenom+" "+oldState.nom,
-                            nomQuery : NormalizeString.decompose(oldState.prenom+" "+oldState.nom),
-                            prenomQuery : NormalizeString.decompose(oldState.prenom),
-                            photo: url,
-                            //position: ???,
-                            position: null,
-                            pseudo: oldState.pseudo,
-                            queryPseudo: NormalizeString.normalize(oldState.pseudo),
-                            pseudoQuery: NormalizeString.decompose(oldState.pseudo),
-                            sexe: oldState.sexe,
-                            reseau: [],
-                            score: 0,
-                            telephone: "XX.XX.XX.XX.XX",
-                            terrains: [],
-                            ville: oldState.ville,
-                            departement: oldState.departement,
-                            zone: oldState.zone,
-                            poste: "mixte",
-                            nbMessagesNonLu : 0
-                        }
-                        
-                        console.log("before store localUser")
-                        // Stockage en local
-                        LocalUser.exists = true;
-                        LocalUser.data = user;
-                        LocalUser.data.naissance = new Date(user.naissance.toDate());
-                        var villePos = this.findPositionVilleFromName(docData.ville);
-                        LocalUser.geolocalisation = villePos;
-    
-                        // Stockage dans la DB
-                        Database.addDocToCollection(user, id, 'Joueurs')
+        var id = data.user.uid
+        console.log("id")
+        
+        /* Obtenir une ref à la photo. */
+        if(image_changed) {
+            var ref = firebase.storage().ref().child("Photos_profil_Joueurs/test/" + fileName)
 
-                        return user;
-                    })
-
-                }, function(error){
-                    console.log(error);
-                    return 'erreur'
-                });
-            } else {
-                Notification.storeTokenInLogin(id).then(function() {
-                    user = {
-                        id: id,
-                        age: oldState.age,
-                        aiment: [],
-                        equipes: [],
-                        equipesFav: [],
-                        fiabilite: 0,
-                        mail: oldState.mail,
-                        naissance: firebase.firestore.Timestamp.fromMillis(Date.parse(oldState.naissance)),
-                        nom: oldState.prenom+" "+oldState.nom,
-                        photo: null,
-                        //position: ???,
-                        position: null,
-                        pseudo: oldState.pseudo,
-                        queryPseudo: NormalizeString.normalize(oldState.pseudo),
-                        pseudoQuery: NormalizeString.decompose(oldState.pseudo),
-                        sexe: oldState.sexe,
-                        reseau: [],
-                        score: 0,
-                        telephone: "XX.XX.XX.XX.XX",
-                        terrains: [],
-                        ville: oldState.ville,
-                        departement: oldState.departement,
-                        zone: oldState.zone,
-                        poste: "mixte"
-                    }
-
-                    // Stockage en local
-                    LocalUser.exists = true;
-                    LocalUser.data = user;
-                    LocalUser.data.naissance = new Date(user.naissance.toDate());
-                    var villePos = this.findPositionVilleFromName(docData.ville);
-                    LocalUser.geolocalisation = villePos;
-
-                    // Stockage dans la DB
-                    Database.addDocToCollection(user, id, 'Joueurs')
-
-                    return user;
-                });
+            /* Une fois qu'on a l'url on peut enregistrer les données de
+                l'utilisateurdans firebase. */
+            url = await ref.getDownloadURL();
+                
+            Notification.storeTokenInLogin(id)
+            
+            user = {
+                id: id,
+                age: oldState.age,
+                aiment: [],
+                equipes: [],
+                equipesFav: [],
+                fiabilite: 0,
+                mail: oldState.mail,
+                naissance: firebase.firestore.Timestamp.fromMillis(Date.parse(oldState.naissance)),
+                nom: oldState.prenom+" "+oldState.nom,
+                nomQuery : NormalizeString.decompose(oldState.prenom+" "+oldState.nom),
+                prenomQuery : NormalizeString.decompose(oldState.prenom),
+                photo: url,
+                //position: ???,
+                position: null,
+                pseudo: oldState.pseudo,
+                queryPseudo: NormalizeString.normalize(oldState.pseudo),
+                pseudoQuery: NormalizeString.decompose(oldState.pseudo),
+                sexe: oldState.sexe,
+                reseau: [],
+                score: 0,
+                telephone: "XX.XX.XX.XX.XX",
+                terrains: [],
+                ville: oldState.ville,
+                departement: oldState.departement,
+                zone: oldState.zone,
+                poste: "mixte",
+                nbMessagesNonLu : 0
             }
-        }).catch(function(error) {
-              console.log(error)
-              return 'erreur'
-          });
+                    
+            // Stockage en local
+            LocalUser.exists = true;
+            LocalUser.data = user;
+            LocalUser.data.naissance = new Date(user.naissance.toDate());
+            var villePos = this.findPositionVilleFromName(user.ville);
+            LocalUser.geolocalisation = villePos;
+
+            // Stockage dans la DB
+            await Database.addDocToCollection(user, id, 'Joueurs')
+            
+        } else {
+            Notification.storeTokenInLogin(id)
+
+            user = {
+                id: id,
+                age: oldState.age,
+                aiment: [],
+                equipes: [],
+                equipesFav: [],
+                fiabilite: 0,
+                mail: oldState.mail,
+                naissance: firebase.firestore.Timestamp.fromMillis(Date.parse(oldState.naissance)),
+                nom: oldState.prenom+" "+oldState.nom,
+                photo: null,
+                //position: ???,
+                position: null,
+                pseudo: oldState.pseudo,
+                queryPseudo: NormalizeString.normalize(oldState.pseudo),
+                pseudoQuery: NormalizeString.decompose(oldState.pseudo),
+                sexe: oldState.sexe,
+                reseau: [],
+                score: 0,
+                telephone: "XX.XX.XX.XX.XX",
+                terrains: [],
+                ville: oldState.ville,
+                departement: oldState.departement,
+                zone: oldState.zone,
+                poste: "mixte"
+            }
+
+            // Stockage en local
+            LocalUser.exists = true;
+            LocalUser.data = user;
+            LocalUser.data.naissance = new Date(user.naissance.toDate());
+            var villePos = this.findPositionVilleFromName(user.ville);
+            LocalUser.geolocalisation = villePos;
+
+            // Stockage dans la DB
+            await Database.addDocToCollection(user, id, 'Joueurs')
+        }
+
+        return data.user;
     }
        
     

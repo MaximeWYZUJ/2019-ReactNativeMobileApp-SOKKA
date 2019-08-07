@@ -116,7 +116,7 @@ export default class Joueurs_Equipe extends React.Component {
                                 [
                                     {
                                         text: 'Confirmer',
-                                        onPress : () => {this.props.navigation.navigate("OngletRecherche_Autour", {type: "Joueurs"})}
+                                        onPress : () => {this.props.navigation.navigate("RechercherTab", {type: "Joueurs"})}
                                     },
                                     {
                                         text: 'Annuler',
