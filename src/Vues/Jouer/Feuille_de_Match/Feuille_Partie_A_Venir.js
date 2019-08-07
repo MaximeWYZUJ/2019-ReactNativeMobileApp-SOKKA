@@ -439,7 +439,7 @@ class Feuille_Partie_A_Venir extends React.Component {
     handleConfirmerOui() {
         Alert.alert(
             '',
-            "Tu souhaite confirmer ta présence pour cette partie ? ",
+            "Tu souhaites confirmer ta présence pour cette partie ? ",
             [
                 {text: 'Oui', onPress: () => this.confirmerJoueurPresence()},
                 {
@@ -459,7 +459,7 @@ class Feuille_Partie_A_Venir extends React.Component {
     handleConfirmerNon() {
         Alert.alert(
             '',
-            "Tu souhaite annuler ta présence pour cette partie ? ",
+            "Tu souhaites annuler ta présence pour cette partie ? ",
             [
                 {text: 'Oui', onPress: () => this.annulerJoueurPresence()},
                 {

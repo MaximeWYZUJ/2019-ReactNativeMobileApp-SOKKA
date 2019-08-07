@@ -182,7 +182,7 @@ class Notif_Convocation_Defi extends React.Component {
         console.log("in handle confirmer non")
         Alert.alert(
             '',
-            "Tu souhaite annuler ta présence pour ce défi ? ",
+            "Tu souhaites annuler ta présence pour ce défi ? ",
             [
                 {text: 'Oui', onPress: () => this.annulerJoueurPresence()},
                 {
@@ -202,7 +202,7 @@ class Notif_Convocation_Defi extends React.Component {
     handleConfirmerOui() {
         Alert.alert(
             '',
-            "Tu souhaite confirmer ta présence pour ce Defi ? ",
+            "Tu souhaites confirmer ta présence pour ce Defi ? ",
             [
                 {text: 'Oui', onPress: () => this.confirmerJoueurPresence()},
                 {

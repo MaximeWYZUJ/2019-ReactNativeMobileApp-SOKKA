@@ -1103,7 +1103,7 @@ class ProfilJoueur extends React.Component {
 
                     {/* Defis */}
                     <View style = {[styles.defis_container, styles.additional_style_container]}>
-                        <TouchableOpacity style={styles.header_container} onPress={() => {this.props.navigation.push("CalendrierJoueur", {id: this.id, header: this.joueur.pseudo})}}>
+                        <TouchableOpacity style={styles.header_container} onPress={() => {console.log("profil : ", this.joueur.pseudo); this.props.navigation.push("CalendrierJoueur", {id: this.id, header: this.joueur.pseudo})}}>
                             <Text style={styles.header}>Calendrier</Text>
                         </TouchableOpacity>
                         {this.displayDefis()}

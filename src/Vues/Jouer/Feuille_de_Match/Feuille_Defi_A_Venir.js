@@ -326,7 +326,7 @@ class Feuille_Defi_A_Venir extends React.Component {
         console.log("in handle confirmer non")
         Alert.alert(
             '',
-            "Tu souhaite annuler ta présence pour ce défi ? ",
+            "Tu souhaites annuler ta présence pour ce défi ? ",
             [
                 {text: 'Oui', onPress: () => this.annulerJoueurPresence()},
                 {
@@ -346,7 +346,7 @@ class Feuille_Defi_A_Venir extends React.Component {
     handleConfirmerOui() {
         Alert.alert(
             '',
-            "Tu souhaite confirmer ta présence pour ce defi ? ",
+            "Tu souhaites confirmer ta présence pour ce defi ? ",
             [
                 {text: 'Oui', onPress: () => this.confirmerJoueurPresence()},
                 {

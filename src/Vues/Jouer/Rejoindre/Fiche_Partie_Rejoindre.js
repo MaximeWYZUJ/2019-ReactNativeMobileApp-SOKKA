@@ -275,7 +275,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
         
         Alert.alert(
             '',
-            'Tu souhaites t’inscrire cette partie',
+            'Tu souhaites t’inscrire à cette partie',
             [
               {text: 'Confirmer', 
                     onPress: () => {

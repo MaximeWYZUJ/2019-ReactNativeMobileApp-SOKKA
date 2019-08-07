@@ -100,7 +100,7 @@ class Choix_Joueurs_Partie extends React.Component {
         d =this.props.navigation.getParam("date", new Date())
         Alert.alert(
             '',
-            'Tu as bien rejoins cette partie, Les joueurs invités vont recevoir une notification pour confirmer leur participation ',
+            'Les joueurs invités vont recevoir une notification pour confirmer leur participation ',
             [
               {text: 'Ok',  onPress: async () => {
                

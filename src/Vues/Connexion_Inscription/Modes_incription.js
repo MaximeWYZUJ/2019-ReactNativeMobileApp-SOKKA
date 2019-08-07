@@ -125,40 +125,28 @@ export default class Modes_incription extends React.Component {
         var db = Database.initialisation();
 
         if (this.state.mdp === this.state.mdp_confimation) {
-            firebase.auth().signInWithEmailAndPassword(this.state.mail, " ")
-            .then((user) => {
-            
-                
+            firebase.auth().createUserWithEmailAndPassword(this.state.mail, this.state.mdp)
+            .then((userCred) => {
+                userCred.user.delete();
+
+                this.setState({
+                    mailErrorMsg : ' ',
+                    inscriptionReussie : true,
+                })
+
+                this.props.navigation.push(
+                    "InscriptionCGU", {
+                        mail : this.state.mail,
+                        mdp : this.state.mdp
+                })
             })
-            .catch((error) => {
-            const { code, message } = error;
-            
-                
-                if(code === "EMAIL_TAKEN") {
-                    this.setState({
-                        mailErrorMsg : 'Cette adresse email existe deja...'
-                    })
-                }else if(code === "INVALID_EMAIL"){
-                    this.setState({
-                        mailErrorMsg : 'Adresse email incorrecte...'
-                    })
-
-                } else {
-                    this.setState({
-                        mailErrorMsg : ' ',
-                        inscriptionReussie : true,
-                    })
-
-                    this.props.navigation.push(
-                        "InscriptionCGU", {
-                            mail : this.state.mail,
-                            mdp : this.state.mdp
-                    })
+            .catch((error) => {            
+                switch(error.code) {
+                    case "auth/email-already-in-use": {this.setState({mailErrorMsg: 'Cette adresse email est déjà associée à un compte. Veuillez vous connecter avec votre mot de passe.'}); break;}
+                    case "auth/invalid-email": {this.setState({mailErrorMsg: 'Adresse email incorrect...'}); break;}
+                    case "auth/weak-password": {this.setState({mailErrorMsg: "Le mot de passe est trop facile à deviner. Essaie de le ralonger et d'ajouter des caractères spéciaux..."}); break;}
+                    default : {this.setState({mailErrorMsg: "Cette adresse email et ce mot de passe ne conviennent pas"}); break;}
                 }
-
-                // For details of error codes, see the docs
-                // The message contains the default Firebase string
-                // representation of the error
             });
         }
     }
