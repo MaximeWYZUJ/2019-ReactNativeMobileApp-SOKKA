@@ -78,15 +78,24 @@ class Fiche_Defi_Rejoindre extends React.Component {
         this.findTerrain(this.state.defi.terrain)
         this.ChangeThisTitle('Defi ' +this.buildDate(new Date(this.state.defi.jour.seconds * 1000)))
 
+        this.getOrga()
         //this.downloadAllDataDefi()
         this._moveEquipe1()
         this._moveEquipe2()
         this.getButeurs()
         this.getHommeMatch()
         this.getCommentaire(this.state.defi)
+
         this.setState({isLoading : false})
+
     }
 
+    async getOrga(){
+        console.log("in GET ORGA")
+        var organisateur = await Database.getDocumentData(this.state.defi.organisateur,"Joueurs")
+        console.log("organisateur", organisateur)
+        this.setState({organisateur : organisateur})
+    }
     /**
      * Fonction qui va permettre de gérer la bare de navigation, si la props reçu 
      * interdit le retour en arriere on affiche pas de bare, mais on va afficher 
@@ -490,6 +499,14 @@ class Fiche_Defi_Rejoindre extends React.Component {
         }  
         console.log(liste)
         this.setState({commentaires : liste}) 
+    }
+
+    async goToFicheJoueur(joueur){
+        this.setState({isLoading : true})
+        var db = Database.initialisation()
+        var equipes = await Database.getArrayDocumentData(joueur.equipes, "Equipes")
+        this.setState({isLoading : false})
+        this.props.navigation.push("ProfilJoueur", {id: joueur.id, joueur :joueur, equipes : equipes})
     }
 
     /**
@@ -995,6 +1012,14 @@ class Fiche_Defi_Rejoindre extends React.Component {
     }
 
 
+    renderPseudoOrga(){
+        if(this.state.organisateur != undefined) {
+            return this.state.organisateur.pseudo
+        } else {
+            return "todo"
+        }
+    }
+      
     /**
      * Va permettre de render les équipes dont l'utilisateur est capitaine
      */
@@ -1105,7 +1130,13 @@ class Fiche_Defi_Rejoindre extends React.Component {
                         
                     <View>
                         {/* Information sur le defi */}
-                        <Text style = {styles.infoDefis}> Defi {this.state.defi.format} par </Text>
+                        <View style = {{flexDirection : "row", alignSelf : "center"}}>
+                                    <Text style = {styles.infoDefis}> Défi {this.state.defi.format} par </Text>
+                                    <TouchableOpacity 
+                                        onPress = {() => this.goToFicheJoueur(this.state.organisateur)}>
+                                        <Text>{this.renderPseudoOrga()}</Text>
+                                    </TouchableOpacity>
+                        </View>                        
                         <Text style = {styles.separateur}>_____________________________________</Text>
                         <Text style = {styles.infoDefis}> {date}</Text>
                         <Text style = {styles.separateur}>_____________________________________</Text>
