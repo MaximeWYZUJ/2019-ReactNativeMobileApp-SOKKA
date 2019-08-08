@@ -193,7 +193,6 @@ class ComposantRechercheTableau extends React.Component {
         for(var i = 0; i < donneesBrutes.length ; i ++) {
             item = donneesBrutes[i];
             let pseudo = item[this.champNom];
-            console.log(pseudo)
             let lettre = NormalizeString.normalize(pseudo.toLowerCase())[0].toUpperCase();
             data[lettre].push(item);
         }

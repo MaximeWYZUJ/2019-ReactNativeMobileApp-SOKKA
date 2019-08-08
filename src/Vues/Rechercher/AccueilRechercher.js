@@ -57,79 +57,11 @@ export default class AccueilRechercher extends React.Component {
     }
 
     rechercheTerrain() {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                let latUser = position.coords.latitude
-                let longUser = position.coords.longitude
-                let pos = {
-                    latitude : latUser,
-                    longitude : longUser
-                }
-                LocalUser.geolocalisation = pos;
-                
-                this.props.navigation.navigate("RechercherTab", {type: "Terrains"});
-        },
-        (error) => {
-            
-            console.log(error)
-            Alert.alert(
-                '', 
-                "Nous ne parvenons pas à capter votre position, voulez vous utiliser  \n celle de  " + LocalUser.data.ville + " ?",
-                [
-                    {text: 'Oui', onPress: () => {
-                        var pos = this.findPositionVilleFromName(LocalUser.data.ville)
-                        LocalUser.geolocalisation = pos;
-                        this.props.navigation.navigate("RechercherTab", {type: "Terrains"});
-                    } },
-                    {
-                      text: 'Non',
-                      onPress: () => console.log('Cancel Pressed'),
-                      style: 'cancel',
-                    },
-                ],
-                
-                )           
-        },
-        { enableHighAccuracy: true, timeout:    5000, maximumAge :300000}
-        )
+        this.props.navigation.navigate("RechercherTab", {type: "Terrains"});
     }
 
     rechercheDefi() {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                let latUser = position.coords.latitude
-                let longUser = position.coords.longitude
-                let pos = {
-                    latitude : latUser,
-                    longitude : longUser
-                }
-                LocalUser.geolocalisation = pos;
-                
-                this.props.navigation.navigate("RechercherTabDefi", {type: "Defis"});
-        },
-        (error) => {
-            
-            console.log(error)
-            Alert.alert(
-                '', 
-                "Nous ne parvenons pas à capter votre position, voulez vous utiliser  \n celle de  " + LocalUser.data.ville + " ?",
-                [
-                    {text: 'Oui', onPress: () => {
-                        var pos = this.findPositionVilleFromName(LocalUser.data.ville)
-                        LocalUser.geolocalisation = pos;
-                        this.props.navigation.navigate("RechercherTabDefi", {type: "Defis"});
-                    } },
-                    {
-                      text: 'Non',
-                      onPress: () => console.log('Cancel Pressed'),
-                      style: 'cancel',
-                    },
-                ],
-                
-                )           
-        },
-        { enableHighAccuracy: true, timeout:    5000, maximumAge :300000}
-        )
+        this.props.navigation.navigate("RechercherTabDefi", {type: "Defis"});
     }
 
     render() {
@@ -156,7 +88,7 @@ export default class AccueilRechercher extends React.Component {
                 <TouchableOpacity
                     style={styles.header_container}
                     onPress={() => this.rechercheDefi()}>
-                    <Text style={styles.header}>Rechercher un défi</Text>
+                    <Text style={styles.header}>Rechercher un défi / une partie</Text>
                 </TouchableOpacity>
             </View>
         )

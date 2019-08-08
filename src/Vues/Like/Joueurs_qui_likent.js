@@ -28,6 +28,13 @@ import ComposantRechercheTableau from '../../Components/Recherche/ComposantReche
         />
       )
     }
+
+
+    static navigationOptions = ({navigation}) => {
+      return {
+        title: navigation.getParam("titre", "Likes")
+      }
+    }
     
   
     render() {

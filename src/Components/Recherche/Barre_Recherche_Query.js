@@ -122,6 +122,7 @@ export default class Barre_Recherche extends React.Component {
                             style={{flex: 1, borderWidth: 1, width : wp('9%'), backgroundColor : 'white'}}
                             placeholder = "  Rechercher"
                             onChangeText={this.texteChanged}
+                            onSubmitEditing={() => this.runQuery()}
                         />
 
                         {/* Icon de la loupe*/}

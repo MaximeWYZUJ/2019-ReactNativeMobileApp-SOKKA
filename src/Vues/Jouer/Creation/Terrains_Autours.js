@@ -1,9 +1,10 @@
 import React from 'react'
-import {View, Animated,TouchableOpacity,FlatList, Image,Dimensions,StyleSheet,Text} from 'react-native'
+import {View, ScrollView, TouchableOpacity, FlatList, Image, Dimensions, StyleSheet, Text, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import MapView, { MAP_TYPES, ProviderPropType } from 'react-native-maps';
 import Terrains from '../../../Helpers/Toulouse.json'
+import Villes from '../../../Components/Creation/villes.json'
 import ItemTerrain from '../../../Components/Terrain/ItemTerrain'
 import Item_Terrain_creation_defis from '../../../Components/Terrain/Item_Terrain_creation_defis'
 import Item_Terrain_Map_Creation_Defis from '../../../Components/Terrain/Item_Terrain_Map_Creation_Defis'
@@ -12,7 +13,6 @@ import { connect } from 'react-redux'
 import Barre_Recherche from '../../../Components/Recherche/Barre_Recherche'
 import { withNavigation } from 'react-navigation'
 import Carousel from 'react-native-snap-carousel';
-import { ScrollView } from 'react-native-gesture-handler';
 import Slider from "react-native-slider";
 import Color from '../../../Components/Colors'
 import FiltrerTerrain from '../../../Components/Recherche/FiltrerTerrain'
@@ -27,7 +27,12 @@ const DEFAULT_PADDING = { top: 750, right: 200, bottom: 750, left: 200 };
 const DISTANCE_MAX = 1500
 const LISTE = 'liste'
 const MAP = 'map'
-const SLIDER_DISTANCE_MAX = 20;
+const SLIDER_DISTANCE_MAX = 10;
+
+const image_map = require('app/res/map.png');
+const image_list = require('app/res/list.png');
+const image_terrain = require('app/res/marker_terrain_selected.png');
+const image_terrain_selected = require('app/res/marker_terrain.png');
 
 
 /**
@@ -37,110 +42,166 @@ const SLIDER_DISTANCE_MAX = 20;
 class Terrains_Autours extends React.Component {
 
     constructor(props) {
-super(props)
-this.latitude =	LocalUser.geolocalisation.latitude;//this.props.latitude
-this.longitude =  LocalUser.geolocalisation.longitude;
-this.allTerrains = this.fetchClosestTerrains(this.buildTerrains())
+		super(props)
 
-console.log(this.latitude+"  ;  "+this.longitude);
-
+		
         this.state = {
-txtRecherche : '',
-allTerrains :   this.allTerrains,
-terrainFiltres : this.allTerrains,
-terrainsFiltresEtDistance : this.allTerrains,
-sliderValue : DISTANCE_MAX, 
-typeDisplay : LISTE,
-markers: [],
-sliderValueList : SLIDER_DISTANCE_MAX,
-displayFiltres: false,
-filtres: null,
-region : {
-latitude: this.latitude,
-longitude: this.longitude,
-latitudeDelta: 0.0922,
-longitudeDelta: 0.0421,
- },
+			latitude: LocalUser.geolocalisation.latitude,
+			longitude: LocalUser.geolocalisation.longitude,
 
-selectedTerrain : undefined
-}
-}
+			txtRecherche : '',
+			allTerrains :   [],
+			terrainFiltres : [],
+			terrainsFiltresEtDistance : [],
+			sliderValue : DISTANCE_MAX, 
+			typeDisplay : LISTE,
+			markers: [],
+			sliderValueList : SLIDER_DISTANCE_MAX,
+			displayFiltres: false,
+			filtres: null,
 
-componentDidMount() {
+			region : {
+				latitude: LocalUser.geolocalisation.latitude,
+				longitude: LocalUser.geolocalisation.longitude,
+				latitudeDelta: 0.0922,
+				longitudeDelta: 0.0421,
+			  },
 
-var markers = []
-for(var i =0 ; i < 8; i ++) {
-var t =  {
-title: ' ',
-coordinates: {
-latitude: parseFloat(this.allTerrains[i].Latitude)  ,
-longitude: parseFloat(this.allTerrains[i].Longitude),
- },
- id : this.allTerrains[i].id
-}
-markers.push(t)
-}
-this.setState({markers : markers, selectedTerrain : markers[0]})
-}
+			selectedTerrain : undefined
+		}
+	}
 
+	componentDidMount() {
+		this.triTerrains().then(() => {
+			var markers = [];
+			for(var i =0 ; i < Math.min(8, this.state.allTerrains.length); i ++) {
+				var t =  {
+					title: ' ',
+					coordinates: {
+						latitude: parseFloat(this.state.allTerrains[i].Latitude)  ,
+						longitude: parseFloat(this.state.allTerrains[i].Longitude),
+					},
+					id : this.state.allTerrains[i].id
+				}
+				markers.push(t)
+			}
+			this.setState({markers : markers, selectedTerrain : markers[0]})
+		})
 
-
-
-    buildTerrains() {
-let liste = []
-for(var i =0 ; i < Terrains.length ; i++) {
-let distance =  Distance.calculDistance(this.latitude,this.longitude, Terrains[i].Latitude,Terrains[i].Longitude)
-
-if(distance <= DISTANCE_MAX) {
-let t = {
-id : Terrains[i].id,
-Latitude: Terrains[i].Latitude,
-Longitude : Terrains[i].Longitude,
-InsNom: Terrains[i].InsNom,
-distance : distance,
-N_Voie : Terrains[i].N_Voie,
-Voie : Terrains[i].Voie,
-Ville : Terrains[i].Ville,
-id : Terrains[i].id,
-Payant :  Terrains[i].Payant, // true, false
-queryName : Terrains[i].queryName
-// ajouter les champs relatifs aux sanitaires, type de sol, etc.
-}
-liste.push(t)
-}
-}
-return liste
-}
+        this.didFocusSubscription = this.props.navigation.addListener('didFocus', this.didFocusAction);
+        this.demanderGeolocalisation();
+	}
+	
 
 
-/**
-* Fonction qui va permettre de mettre en forme les terrains et calculer leur distance
-* par rapport à la nouvelle région de la carte
-*/
-buildTerrainsWithRegionChanged() {
-let liste = []
-for(var i =0 ; i < Terrains.length ; i++) {
-var latitude = this.state.region.latitude
-var longitude = this.state.region.longitude
-let distance =  Distance.calculDistance(latitude,longitude, Terrains[i].Latitude,Terrains[i].Longitude)
-if(distance <= DISTANCE_MAX) {
-let t = {
-id : Terrains[i].id,
-Latitude: Terrains[i].Latitude,
-Longitude : Terrains[i].Longitude,
-InsNom: Terrains[i].InsNom,
-distance : distance,
-N_Voie : Terrains[i].N_Voie,
-Voie : Terrains[i].Voie,
-Ville : Terrains[i].Ville,
-id : Terrains[i].id,
-Payant :  Terrains[i].Payant,
-queryName : Terrains[i].queryName
-}
-liste.push(t)
-}
-}
-return liste
+    didFocusAction = () => {
+        this.demanderGeolocalisation();
+    }
+
+
+    componentWillUnmount() {
+        this.didFocusSubscription.remove();
+    }
+
+
+	demanderGeolocalisation() {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                let latUser = position.coords.latitude
+                let longUser = position.coords.longitude
+                let pos = {
+                    latitude : latUser,
+                    longitude : longUser
+                }
+                LocalUser.geolocalisation = pos;
+                this.setState({
+                    latitude: pos.latitude,
+                    longitude: pos.longitude
+                })
+                this.triTerrains().then(() => {
+					var markers = [];
+					for(var i =0 ; i < Math.min(8, this.state.allTerrains.length); i ++) {
+						var t =  {
+							title: ' ',
+							coordinates: {
+								latitude: parseFloat(this.state.allTerrains[i].Latitude)  ,
+								longitude: parseFloat(this.state.allTerrains[i].Longitude),
+							},
+							id : this.state.allTerrains[i].id
+						}
+						markers.push(t)
+					}
+					this.setState({markers : markers, selectedTerrain : markers[0]})
+				})
+        },
+        (error) => {
+            
+
+            Alert.alert(
+                '', 
+                "Nous ne parvenons pas à capter votre position. Nous utiliserons celle de " + LocalUser.data.ville.charAt(0).toUpperCase() + LocalUser.data.ville.slice(1),
+			)
+			var pos = this.findPositionVilleFromName(LocalUser.data.ville)
+			LocalUser.geolocalisation = pos;
+			this.setState({
+				latitude: pos.latitude,
+				longitude: pos.longitude
+			})
+			this.triTerrains().then(() => {
+				var markers = [];
+				for(var i =0 ; i < Math.min(8, this.state.allTerrains.length); i ++) {
+					var t =  {
+						title: ' ',
+						coordinates: {
+							latitude: parseFloat(this.state.allTerrains[i].Latitude)  ,
+							longitude: parseFloat(this.state.allTerrains[i].Longitude),
+						},
+						id : this.state.allTerrains[i].id
+					}
+					markers.push(t)
+				}
+				this.setState({markers : markers, selectedTerrain : markers[0]})
+			})
+        },
+        {enableHighAccuracy: true, timeout:    5000, maximumAge :300000}
+        )
+	}
+	
+
+	findPositionVilleFromName(name) {
+        for(var i  =  0 ; i < Villes.length; i++) {
+            if(name.toLocaleLowerCase() == Villes[i].Nom_commune.toLocaleLowerCase()) {
+                var position = Villes[i].coordonnees_gps
+                var latitude = position.split(',')[0]
+                var longitude = position.split(', ')[1]
+                 var pos = {
+                    latitude : parseFloat(latitude),
+                    longitude : parseFloat(longitude)
+                }
+               return pos
+
+            }
+        }
+    }
+	
+
+	/**
+	 * Fonction qui va permettre de mettre en forme les terrains et calculer leur distance
+	 * par rapport à la nouvelle région de la carte
+	 */
+	buildTerrainsWithRegionChanged() {
+		let liste = []
+		for(var i =0 ; i < Terrains.length ; i++) {
+			var latitude = this.state.region.latitude
+			var longitude = this.state.region.longitude
+			let distance =  Distance.calculDistance(latitude,longitude, Terrains[i].Latitude,Terrains[i].Longitude)
+			if(distance <= DISTANCE_MAX) {
+				let t = {...Terrains[i], distance: distance};
+				
+				liste.push(t)
+			}
+		}
+		return liste
     }
 
 /**
@@ -149,181 +210,176 @@ return liste
 * en fonction de ce que tappe l'utilisateur
 */
     recherche = (data)  => {
-this.setState({
-terrainFiltres : data,
-terrainsFiltresEtDistance : this.filtrerDistanceSlider(data)
-})
-}
+		this.setState({
+			terrainFiltres : data,
+			terrainsFiltresEtDistance : this.filtrerDistanceSlider(data)
+		})
+	}
+	
 
-    /**
-* Fonction qui va permettre de trouver le terrain le plus proche de l'utilisateur 
-* à partir d'une liste. Elle va renvoyer un couple dont le 1ier elt est le 
-* terrain et le second la liste sans le terrain
-*
-* @param {*} liste 
-* @returns [terrain, newListe] : terrain le plus proche , liste sans le terrain
-*/
-closestTerrain(liste){
+	/**
+	 * Pour filtrer les terrains, utilisé dans le composant BarreRecherche
+	 */
+	filtrerData = (data, f) => {
+		var filteredData = data;
+		filteredData = FiltrerTerrain.filtrerTerrains(data, f)
+		
+		return filteredData;
+	}
 
-if(liste.length > 0) {
-var terrain = liste[0]
-newListe = []
-for(var i = 1; i < liste.length; i++) {
-/* On trouve un nouveau min. */
-if( terrain.distance > liste[i].distance) {
-newListe.push(terrain)
-terrain = liste[i]
-}else {
-newListe.push(liste[i])
-}
-}
-            return [terrain, newListe]
-}else {
-return [null,[]]
-}
-}
+	handleFilterButton = () =>{
+		this.setState({displayFiltres: !this.state.displayFiltres});
+	}
 
+	handleValidateFilters = (q, f) => {
+		this.handleFilterButton();
 
-/**
-* Pour filtrer les terrains, utilisé dans le composant BarreRecherche
-*/
-filtrerData = (data) => {
-f = this.state.filtres;
-filteredData = data;
+		var terrainsDistance = this.filtrerDistanceSlider(this.state.allTerrains);
 
-if (f!=null) {
-if (f.gratuit) {
-filteredData = data.filter(function (terrain) {
-return (terrain.Payant == false);
-})
-}
+		this.setState({
+			filtres: f,
+			terrainFiltres: this.filtrerData(this.state.allTerrains, f),
+			terrainsFiltresEtDistance: this.filtrerData(terrainsDistance, f)
+		})
+	}
 
-// faire des data.filter(condition) pour filtrer
-}
-        return filteredData;
-}
-
-handleFilterButton = () =>{
-this.setState({displayFiltres: !this.state.displayFiltres});
-}
-
-handleValidateFilters = (q, f) => {
-this.handleFilterButton();
-this.setState({filtres: f})
-}
-
-displayFiltres() {
-if (this.state.displayFiltres) {
-return (<FiltrerTerrain handleValidate={this.handleValidateFilters} init={this.state.filtres}/>);
-}
-}
+	displayFiltres() {
+		if (this.state.displayFiltres) {
+			return (<FiltrerTerrain handleValidate={this.handleValidateFilters} init={this.state.filtres}/>);
+		}
+	}
 
 
-/**
-* Fonction qui va permettre de trier les terrains en fonction de leur distance 
-* par rapport à l'utilisateur.
-*/
-fetchClosestTerrains(Terrains) {
-
-let liste = []
-let terrain = null
-        let newListe = Terrains 
-        // A suppr
-        
-for(var i = 0; i< Terrains.length; i++) {
-var x = this.closestTerrain(newListe)
-terrain = x[0]
-newListe  = x[1]
-            liste.push(terrain)
-}
 
 
-var max = 8;
-var markers = []
-if(liste.length < max) max = liste.length
+	async triTerrains() {
+        this.setState({isLoading: true});
+
+        // Suppression des villes trop loin
+        var terrainsProches = this.getTerrainsProches(SLIDER_DISTANCE_MAX, Terrains, false);
+
+        // Tri des villes par distance
+        var terrainsTriesSansDoublons = terrainsProches.sort(this.comparaisonDistanceTerrains);
+
+		var terrainsFiltres = FiltrerTerrain.filtrerTerrains(terrainsTriesSansDoublons, this.state.filtres);
+
+        this.setState({
+			allTerrains: terrainsTriesSansDoublons,
+			terrainFiltres: terrainsFiltres,
+			terrainsFiltresEtDistance: terrainsFiltres,
+            isLoading: false,
+        })
+    }
 
 
-return liste
-}
+    // Comparaison de deux villes en fonction de leur distance par rapport à soi
+    comparaisonDistanceTerrains = (terrain1, terrain2) => {
+        if (terrain1.distance < terrain2.distance) {
+            return -1;
+        } else if (terrain1.distance > terrain2.distance) {
+            return 1;
+        } else {
+            return 0;
+        }
+	}
+	
+
+    // Renvoie la liste des villes proches de notre position
+    getTerrainsProches(distanceMax, tableau, doBreak) {
+        if (tableau != undefined) {
+            var terrainsProches = [];
+            for (v of tableau) {
+                vLat = v.Latitude;
+                vLong = v.Longitude;
+                d = Distance.calculDistance(this.state.latitude, this.state.longitude, vLat, vLong);
+                
+                if (d < distanceMax) {
+                    terrainsProches.push({...v, distance: d});
+                } else {
+                    if (doBreak) {
+                        break;
+                    }
+                }
+            }
+
+            return terrainsProches;
+        }
+    }
 
 
-relancerRecherche() {
-
-var newListe = this.fetchClosestTerrains(this.buildTerrainsWithRegionChanged())
-
-var markers = []
-for(var i =0 ; i < 8; i ++) {
-var t =  {
-title: ' ',
-coordinates: {
-latitude: parseFloat(newListe[i].Latitude)  ,
-longitude: parseFloat(newListe[i].Longitude),
- },
- id : newListe[i].id
-}
-markers.push(t)
-}
-
-var region = {
-latitude: parseFloat(newListe[0].Latitude),
-longitude: parseFloat(newListe[0].Longitude),
-latitudeDelta: 0.0922,
-longitudeDelta: 0.0421,
-}
-this.map.animateToRegion(region,1000)
-this.setState({markers : markers, terrainFiltres : newListe,terrainSelectionne : markers[0]})
-}
 
 
-filtrerDistanceSlider(liste) {
-if (this.state.sliderValueList <= SLIDER_DISTANCE_MAX) {
-let listeOK = [];
-for (var i = 0; i<liste.length; i++) {
-distance = liste[i].distance;
-if (distance < this.state.sliderValueList) {
-listeOK.push(liste[i]);
-}
-}
-return listeOK;
-} else {
-return liste;
-}
-}
+	relancerRecherche() {
+
+		this.triTerrains(this.buildTerrainsWithRegionChanged()).then(() => {
+			var markers = []
+			for(var i =0 ; i < Math.min(8, this.state.allTerrains.length); i ++) {
+				var t =  {
+					title: ' ',
+					coordinates: {
+						latitude: parseFloat(this.state.allTerrains[i].Latitude)  ,
+						longitude: parseFloat(this.state.allTerrains[i].Longitude),
+					},
+					id : newListe[i].id
+				}
+				markers.push(t)
+			}
+
+			var region = {
+				latitude: parseFloat(this.state.allTerrains[0].Latitude),
+				longitude: parseFloat(this.state.allTerrains[0].Longitude),
+				latitudeDelta: 0.0922,
+				longitudeDelta: 0.0421,
+			}
+			this.map.animateToRegion(region,1000)
+			this.setState({markers : markers, terrainFiltres : this.state.allTerrains, terrainSelectionne : markers[0]})
+		})
+	}
 
 
-changeMarkerWithSlider(index) {
+	filtrerDistanceSlider(liste) {
+		if (this.state.sliderValueList <= SLIDER_DISTANCE_MAX) {
+			let v = this.state.sliderValueList;
+			return liste.filter((t) => {
+				return t.distance < v;
+			});
+		} else {
+			return liste;
+		}
+	}
 
-let liste = []
-let t = {
-title: ' ',
- 	coordinates: {
- 	latitude: parseFloat(this.state.terrainFiltres[index].Latitude)  ,
- 	longitude: parseFloat(this.state.terrainFiltres[index].Longitude),
-},
-id : this.state.terrainFiltres[index].id
-}
-liste.push(t)
+	
+	changeMarkerWithSlider(index) {
+
+		let liste = []
+		let t = {
+			title: ' ',
+			  	coordinates: {
+				  		latitude: parseFloat(this.state.terrainFiltres[index].Latitude)  ,
+				  		longitude: parseFloat(this.state.terrainFiltres[index].Longitude),
+				},
+				id : this.state.terrainFiltres[index].id
+		}
+		liste.push(t)
         this.setState({ indexState : index,selectedTerrain : t})
-this.fitAllMarkers(index)
+		this.fitAllMarkers(index)
 
-}
+	}
 
-fitAllMarkers(index) {
+	fitAllMarkers(index) {
 
-let markers = [
-{latitude : parseFloat(this.state.terrainFiltres[index].Latitude), longitude : parseFloat(this.state.terrainFiltres[index].Longitude)}
-]
-var region = {
-latitude: parseFloat(this.state.terrainFiltres[index].Latitude),
-longitude: parseFloat(this.state.terrainFiltres[index].Longitude),
-latitudeDelta: 0.0922,
-longitudeDelta: 0.0421,
-}
-this.map.animateToRegion(region,1000)
-    //	this.map.fitToCoordinates(markers, {edgePadding: DEFAULT_PADDING,animated: true,});
-}
- 
-
+		let markers = [
+				{latitude : parseFloat(this.state.terrainFiltres[index].Latitude), longitude : parseFloat(this.state.terrainFiltres[index].Longitude)}
+			]
+			var region = {
+				latitude: parseFloat(this.state.terrainFiltres[index].Latitude),
+				longitude: parseFloat(this.state.terrainFiltres[index].Longitude),
+				latitudeDelta: 0.0922,
+				longitudeDelta: 0.0421,
+			}
+			this.map.animateToRegion(region,1000)
+	}
+	  
 
 onRegionChange = (region) => {
 oldRegion = this.state.region
@@ -335,14 +391,9 @@ this.setState({ region : region })
 };
 
 
-    
-goToMapTerrains() {
-this.props.navigation.push("RechercherTerrainsMap",  {latitude : this.latitude, longitude : this.longitude, typeTuille : "creer_defis"})
-}
-
-// =============================================================================================
-//====================================== RENDER ================================================
-// =============================================================================================
+	// =============================================================================================
+	//====================================== RENDER ================================================
+	// =============================================================================================
 
 
 _renderItem = ({item}) => {
@@ -356,11 +407,11 @@ return (
                     id={item.id}
                     distance={distance}
                     InsNom={item.InsNom}
-EquNom={item.EquNom}
-N_Voie = {item.N_Voie}
-Voie = {item.Voie}
-Ville = {item.Ville}
-Ville={item.Ville}
+					EquNom={item.EquNom}
+					N_Voie = {item.N_Voie}
+					Voie = {item.Voie}
+					Ville = {item.Ville}
+					Payant = {item.Payant}
                 />
 )
 } else {
@@ -389,192 +440,192 @@ Ville = {item.Ville}
 
 var distance = item.distance
         var txtDistance = distance.toString().split('.')[0];
-txtDistance = txtDistance +','+ distance.toString().split('.')[1][0]
+		txtDistance = txtDistance +','+ distance.toString().split('.')[1][0]
 
-var gotoItem = this.props.gotoItemOnPress != undefined && this.props.gotoItemOnPress;
+		var gotoItem = this.props.gotoItemOnPress != undefined && this.props.gotoItemOnPress;
 
-return (
-<Item_Terrain_Map_Creation_Defis	
-InsNom = {item.InsNom}
-EquNom = {item.EquNom}
-Voie = {item.Voie}
-N_Voie = {item.N_Voie}
-id = {item.id}
-isShown = {this.props.terrainSelectionne == item.id}
-distance = {txtDistance}
-gotoItemOnPress = {gotoItem}
-nav = {this.props.navigation}
-/>
-)
-}
-
-
-/**
-* Fonction qui permet d'affihcer le boutton pour relancer une recherche dans un quartier.
-*/
-renderBtnRelancerRecherche() {
-
-return(
-<TouchableOpacity style = {{flex: 1, backgroundColor : Color.agOOraBlue, padding : hp('1%'), borderRadius : 5, marginHorizontal: hp('10%')}}
-onPress = {() =>this.relancerRecherche()}>
-<Text style = {{color : "white", textAlign: 'center'}}>Relancer la recherche dans ce quartier</Text>
-</TouchableOpacity>
-)
-}
+		return (
+			<Item_Terrain_Map_Creation_Defis				
+				InsNom = {item.InsNom}
+				EquNom = {item.EquNom}
+				Voie = {item.Voie}
+				N_Voie = {item.N_Voie}
+				id = {item.id}
+				isShown = {this.props.terrainSelectionne == item.id}
+				distance = {txtDistance}
+				gotoItemOnPress = {gotoItem}
+				nav = {this.props.navigation}
+			/>
+		)
+	}
 
 
-/**
-* Méthode qui permet de choisir quoi afficher en fonction de si l'utilisateur veut 
-* séléctionner un terrain en mode liste ou non.
-*/
-displayRender() {
-if(this.state.typeDisplay == LISTE ) {
-return(
-[<ScrollView style = {{marginBottom : hp('1%')}}>
-<View style = {{flex : 1}}>
-<Barre_Recherche
-handleTextChange ={this.recherche}
-data = {this.allTerrains}
-field = "queryName"
-filtrerData = {this.filtrerData}
-handleFilterButton={this.handleFilterButton}
+	/**
+	 * Fonction qui permet d'affihcer le boutton pour relancer une recherche dans un quartier.
+	 */
+	renderBtnRelancerRecherche() {
 
-/>
-<View style={{flex: 1, justifyContent: 'center', alignContent: 'center', marginHorizontal: wp('5%')}}>
-<View style={{flex: 1, alignItems: 'center'}}>
-<Text>{this.state.sliderValueList > SLIDER_DISTANCE_MAX ? '> 20 km' : this.state.sliderValueList + " km"}</Text>
-</View>
-<Slider
-minimumValue={1}
-maximumValue={SLIDER_DISTANCE_MAX+1}
-onValueChange={(v) => this.setState({
-sliderValueList: v,
-terrainsFiltresEtDistance: this.filtrerDistanceSlider(this.state.terrainFiltres)
-})}
-step={1}
-value={this.state.sliderValueList}
-minimumTrackTintColor={Color.lightGray}
-maximumTrackTintColor={Color.lightGray}
-thumbTintColor={Color.agOOraBlue}
-/>
-</View>
-{this.displayFiltres()}
-<FlatList
-data= {this.state.terrainsFiltresEtDistance}
-keyExtractor={(item) => item.id}
-renderItem={this._renderItem}
-extraData = {this.props.terrainSelectionne}
-/>
+		return(
+			<TouchableOpacity style = {{flex: 1, backgroundColor : Color.agOOraBlue, padding : hp('1%'), borderRadius : 5, marginHorizontal: hp('10%')}}
+				onPress = {() =>this.relancerRecherche()}>
+				<Text style = {{color : "white", textAlign: 'center'}}>Relancer la recherche dans ce quartier</Text>
+			</TouchableOpacity>
+		)
+	}
+	
 
-</View>
-</ScrollView>,
+	/**
+	 * Méthode qui permet de choisir quoi afficher en fonction de si l'utilisateur veut 
+	 * séléctionner un terrain en mode liste ou non.
+	 */
+	displayRender() {
+		if(this.state.typeDisplay == LISTE ) {
+			return(
+				[<ScrollView style = {{marginBottom : hp('1%')}}>
+					<View style = {{flex : 1}}>
+						<Barre_Recherche
+							handleTextChange ={this.recherche}
+							data = {this.state.allTerrains}
+							field = "queryName"
+							filtrerData = {(data) => FiltrerTerrain.filtrerTerrains(data, this.state.filtres)}
+							handleFilterButton={this.handleFilterButton}
 
-<TouchableOpacity 
-style = {{padding : wp('4%'),position : "absolute",bottom : hp('6%'), right: wp('1%')}}
-onPress={() => this.setState({typeDisplay : MAP})}
->
-<Image
-source = {require('../../../../res/map.png')}
-style = {{width : wp('17%'), height : wp('17%')}}/>
-</TouchableOpacity>]
-)
-} else {
-return(
-[<Barre_Recherche
-handleTextChange ={this.recherche}
-data = {this.allTerrains}
-field = "queryName"
-filtrerData = {this.filtrerData}
-handleFilterButton={this.handleFilterButton}
-/>,
+						/>
+						<View style={{flex: 1, justifyContent: 'center', alignContent: 'center', marginHorizontal: wp('5%')}}>
+							<View style={{flex: 1, alignItems: 'center'}}>
+								<Text>{this.state.sliderValueList > SLIDER_DISTANCE_MAX ? '> 20 km' : this.state.sliderValueList + " km"}</Text>
+							</View>
+							<Slider
+								minimumValue={1}
+								maximumValue={SLIDER_DISTANCE_MAX+1}
+								onValueChange={(v) => this.setState({sliderValueList: v})}
+								onSlidingComplete={(v) => this.setState({
+									sliderValueList: v,
+									terrainsFiltresEtDistance: this.filtrerDistanceSlider(this.state.terrainFiltres)
+								})}
+								step={1}
+								value={this.state.sliderValueList}
+								minimumTrackTintColor={Color.lightGray}
+								maximumTrackTintColor={Color.lightGray}
+								thumbTintColor={Color.agOOraBlue}
+							/>
+						</View>
+						{this.displayFiltres()}
+						<FlatList
+								data= {this.state.terrainsFiltresEtDistance}
+								keyExtractor={(item) => item.id}
+								renderItem={this._renderItem}
+								extraData = {this.props.terrainSelectionne}
+						/>
+						
+					</View>
+				</ScrollView>,
 
-<View style={{marginVertical : hp('1%'), flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
-{this.renderBtnRelancerRecherche()}
-</View>,
+				<TouchableOpacity 
+					style = {{padding : wp('4%'),position : "absolute",bottom : hp('6%'), right: wp('1%')}}
+					onPress={() => this.setState({typeDisplay : MAP})}
+					>
+					<Image style = {{width : wp('17%'), height : wp('17%')}} source = {image_map}/>
+				</TouchableOpacity>]
 
-<MapView
-provider={this.props.provider}
-ref={ref => { this.map = ref; }}
-mapType={MAP_TYPES.STANDARD}
+			)
+		} else {
+			return(
+					[<Barre_Recherche
+						handleTextChange ={this.recherche}
+						data = {this.state.allTerrains}
+						field = "queryName"
+						filtrerData = {(data) => FiltrerTerrain.filtrerTerrains(data, this.state.filtres)}
+						handleFilterButton={this.handleFilterButton}
+					/>,
 
-style={styles.map}
-initialRegion = {
-{latitude: this.latitude,
-longitude: this.longitude,
-latitudeDelta: LATITUDE_DELTA,
-longitudeDelta: LONGITUDE_DELTA}
-}
+					<View style={{marginVertical : hp('1%'), flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+						{this.renderBtnRelancerRecherche()}
+					</View>,
 
-onRegionChange={this.onRegionChange}
->
+					<MapView
+						provider={this.props.provider}
+						ref={ref => { this.map = ref; }}
+						mapType={MAP_TYPES.STANDARD}
+						
+						style={styles.map}
+						initialRegion = {
+								{latitude: this.state.latitude,
+								longitude: this.state.longitude,
+								latitudeDelta: LATITUDE_DELTA,
+								longitudeDelta: LONGITUDE_DELTA}
+						}
+							
+						onRegionChange={this.onRegionChange}
+						>
 
+							
+						{/* Marker pour la position de l'utilisateur */}
+						<MapView.Marker
+							coordinate={
+								{latitude: this.state.latitude,
+								longitude:  this.state.longitude}
+							}
+							title={"title"}
+							description={"description"}>
+						</MapView.Marker>
 
-{/* Marker pour la position de l'utilisateur */}
-<MapView.Marker
-coordinate={
-{latitude: this.latitude,
-longitude:  this.longitude}
-}
-title={"title"}
-description={"description"}>
-</MapView.Marker>
+						{/* Marker depuis le state : va etre le terrain en 1ier plan */}
+						{this.state.markers.map(marker =>{
+							if(marker.id  == this.state.selectedTerrain.id) {
+								return(
+									<MapView.Marker 
+										coordinate={marker.coordinates}
+										title={marker.title}
+										description = {"okok"}>
+										<Image source = {image_terrain_selected} style = {{width : 80, height : 80}}/>
+									</MapView.Marker>
+								)
+							} else {
+								return(
+									<MapView.Marker 
+										coordinate={marker.coordinates}
+										title={marker.title}
+										description = {"okok"}>
+										<Image source = {image_terrain} style = {{width : 80, height : 80}}/>
+									</MapView.Marker>
+								)
+							}
+						})}
+					</MapView>,
 
-{/* Marker depuis le state : va etre le terrain en 1ier plan*/}
-{this.state.markers.map(marker =>{
-if(marker.id  == this.state.selectedTerrain.id) {
-return(
-<MapView.Marker 
-coordinate={marker.coordinates}
-title={marker.title}
-description = {"okok"}>
-<Image source = {require('../../../../res/marker_terrain_selected.png')} style = {{width : 80, height : 80}}/>
-</MapView.Marker>
-)
-} else {
-return(
-<MapView.Marker 
-coordinate={marker.coordinates}
-title={marker.title}
-description = {"okok"}>
-<Image source = {require('../../../../res/marker_terrain.png')} style = {{width : 80, height : 80}}/>
-</MapView.Marker>
-)
-}
-})}
-</MapView>,
+					/* Vue contenant le carousel */
+					<View style = {{position : "absolute", bottom : hp('1%')}}>
+						<Carousel
+							ref={c => this._slider1Ref = c}
+							data={this.state.terrainFiltres}	
+							extraData = {this.props.terrainSelectionne}		 
+							//renderItem={this._renderItemCarrousel.bind(this)}
+							renderItem={this._renderItemCarrousel}
+							sliderWidth={wp('100%')}
+							itemWidth={wp('80%')}
+							hasParallaxImages={true}
+							inactiveSlideScale={0.94}
+							inactiveSlideOpacity={0.7}
+							containerCustomStyle={styles.slider}
+							onSnapToItem={(index) =>this.changeMarkerWithSlider(index) }
+							contentContainerCustomStyle={styles.sliderContentContainer}
+						/>
+					</View>,
 
-/* Vue contenant le carousel*/
-<View style = {{position : "absolute", bottom : hp('1%')}}>
-<Carousel
-ref={c => this._slider1Ref = c}
-data={this.state.terrainFiltres}	
-extraData = {this.props.terrainSelectionne}	
-//renderItem={this._renderItemCarrousel.bind(this)}
-renderItem={this._renderItemCarrousel}
-sliderWidth={wp('100%')}
-itemWidth={wp('80%')}
-hasParallaxImages={true}
-inactiveSlideScale={0.94}
-inactiveSlideOpacity={0.7}
-containerCustomStyle={styles.slider}
-onSnapToItem={(index) =>this.changeMarkerWithSlider(index) }
-contentContainerCustomStyle={styles.sliderContentContainer}
-/>
-</View>,
+					<TouchableOpacity
+						style = {{padding : wp('4%'),position : "absolute",bottom : hp('6%'), right: wp('1%')}}
+						onPress={() => this.setState({typeDisplay : LISTE})}
+						>
+						<Image
+							source = {image_list}
+							style = {{width : wp('17%'), height : wp('17%')}}/>
 
-<TouchableOpacity
-style = {{padding : wp('4%'),position : "absolute",bottom : hp('6%'), right: wp('1%')}}
-onPress={() => this.setState({typeDisplay : LISTE})}
->
-<Image
-source = {require('../../../../res/list.png')}
-style = {{width : wp('17%'), height : wp('17%')}}/>
-
-</TouchableOpacity>]
-)
-}
-}
-
+					</TouchableOpacity>]
+			)
+		}
+	}
+	
     
     render() {
         return this.displayRender();

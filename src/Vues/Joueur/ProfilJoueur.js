@@ -515,7 +515,7 @@ class ProfilJoueur extends React.Component {
         }
         
 
-        this.props.navigation.push("ProfilJoueurMesTerrainsFavScreen", {terrains : terrainsData, header : this.joueur.pseudo})
+        this.props.navigation.push("ProfilJoueurMesTerrainsFavScreen", {terrains : terrainsData, header : this.joueur.pseudo, monProfil: this.monProfil})
     }
 
     async getDocumentJoueur() {
@@ -949,7 +949,6 @@ class ProfilJoueur extends React.Component {
 	
 
     render() {
-        console.log("RENDER PROFIL !!!!!!!!!!!!!!!")
         if (this.state.displayFullPicture) {
             return(
                 <View style= {{
@@ -979,7 +978,7 @@ class ProfilJoueur extends React.Component {
                     onRefresh={this._onRefresh}
                     />
                 }>
-							
+				
                     {/* Caracteristiques du joueur */}
                     <View style={[styles.perso_container]}>
                         {this.renderIconMessage()}
@@ -1006,7 +1005,7 @@ class ProfilJoueur extends React.Component {
                                     <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville.charAt(0).toUpperCase() + this.joueur.ville.slice(1)}</Text>
                                 </View>
                                 {/*<Text style={{margin: 5,  fontSize : RF(3.25)}}>{this.joueur.pseudo}</Text>*/}
-                                <Text>Joueur {this.joueur.poste}</Text>
+                                <Text>{this.joueur.poste == "gardien" ? "Gardien" : "Joueur " + this.joueur.poste}</Text>
                             </TouchableOpacity>
                             {this._displayReglages()}
                         </View>
@@ -1043,7 +1042,7 @@ class ProfilJoueur extends React.Component {
                             <TouchableOpacity
                                 style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}
                                 onPress={() => this.props.navigation.push('ProfilJoueurMesEquipesScreen', {joueur: this.joueur, header: this.joueur.pseudo, monProfil: this.monProfil, equipes: this.equipes})}>
-                                <Text style={styles.header}>Equipes</Text>
+                                <Text style={styles.header}>{this.monProfil ? "Mes Equipes" : "Equipes"}</Text>
                             </TouchableOpacity>
                             {this.renderBtnCreerEquipe()}
                         </View>
@@ -1065,7 +1064,7 @@ class ProfilJoueur extends React.Component {
                         <TouchableOpacity
                             style={styles.header_container}
                             onPress={() => this.props.navigation.push('ProfilJoueurMesFavorisScreen', {joueur: this.joueur, header: this.joueur.pseudo, monProfil: this.monProfil, id: this.id})}>
-                            <Text style={styles.header}>Favoris</Text>
+                            <Text style={styles.header}>{this.monProfil ? "Mes Favoris" : "Favoris"}</Text>
                         </TouchableOpacity>
                         <ScrollView
                             horizontal={true}>

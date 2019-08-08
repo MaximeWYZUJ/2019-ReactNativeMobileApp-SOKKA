@@ -11,10 +11,13 @@ import { connect } from 'react-redux'
 import actions from '../../../Store/Reducers/actions'
 import LocalUser from '../../../Data/LocalUser.json'
 
+import SimpleLoading from '../../../Components/Loading/Simple_Loading'
+import ComposantRechercheTableau from '../../../Components/Recherche/ComposantRechercheTableau'
+
+
 import firebase from 'firebase'
 import '@firebase/firestore'
 
-/* A VOIR COMMENT ON RECUPRERE LES IDS DES EQUIPES */
 
 /**
  * Classe qui va permettre à l'utilisateur de selectionner l'équipe pour le terrain
@@ -37,7 +40,8 @@ class Choix_Equipe_Defis extends React.Component  {
             equipesFiltrees : [],
             equipeSelectionnee : undefined,
             allDataEquipeSelectionnee : undefined,
-            userData : LocalUser.data
+            userData : LocalUser.data,
+            isLoading: true,
         }
         this.MON_ID =  LocalUser.data.id
     }
@@ -61,65 +65,11 @@ class Choix_Equipe_Defis extends React.Component  {
             for(var i = 0; i < results.docs.length; i ++) {
                 equipesArray.push(results.docs[i].data())
             }
-            this.setState({mesEquipes : equipesArray, equipesFiltrees : equipesArray})
-            
+            this.setState({mesEquipes : equipesArray, isLoading: false})
         })
-
-
-
-        // Récuperer la liste des equipes de l'utilisateur
-        /*var docRef = db.collection('Joueurs').doc(this.MON_ID);
-        docRef.get().then(async (doc) => {
-            if (doc.exists) {
-
-                // Sauvegarder les donnnes de l'utilisateur dans le state
-                this.setState({userData : doc.data()})
-                
-                var mesEquipes = doc.data().equipes     // Liste des id des equipes de l'utilisateur
-               
-                //!!!!!!!!!!!!!!!!!!!!!!!!!!! AMELIORER !!!!!!!
-                // Boucler sur les equipes pour récuperer les données. 
-                for(var i = 0 ; i < mesEquipes.length; i++) {
-                    var equipeRef = db.collection('Equipes').doc(mesEquipes[i]);
-                    equipeRef.get().then(async(docEquipe) => {
-                        if(docEquipe.exists) {
-                            var equipe = docEquipe.data()
-
-                            // Vérifier si on est capitaine
-                            for(var j = 0; j< equipe.capitaines.length; j ++) {
-                                if(equipe.capitaines[j]== this.MON_ID) {
-                                    equipesArray.push(equipe)
-
-                                    break;
-                                }
-                            }
-                            this.setState({mesEquipes : equipesArray, equipesFiltrees : equipesArray})
-                        
-                        }
-
-
-
-                    })
-                }
-            } else {
-                console.log("No such document!");
-            }
-        }).catch(function(error) {
-                console.log("Error getting document:", error);
-        });*/
     }
 
 
-    /**
-	 * Fonction qui va être passé en props du componant
-	 * BareRecherche et qui va permettre de filtrer les equipes 
-	 * en fonction de ce que tappe l'utilisateur
-	 */
-    recherche = (data)  => {
-		this.setState({
-			equipesFiltrees : data
-		})
-    }
 
 
     /**
@@ -127,19 +77,12 @@ class Choix_Equipe_Defis extends React.Component  {
      * joueur à convoquer.
      */
     gotoChoixJoueur() {
-        console.log("in go to choix joueur")
         const action = { type: actions.CHOISIR_UNE_DE_MES_EQUIPES, value: this.state.equipeSelectionnee}
         this.props.dispatch(action)
 
-        console.log(action)
         const action2 = { type: actions.SAVE_EQUIPES_FAVORITES, value: this.state.userData.equipesFav}
         this.props.dispatch(action2)
-        console.log(action2)
 
-
-        console.log("::::::::::::::::")
-        console.log('------' +  this.props.navigation.getParam('duree', '')+ '---------')
-        console.log('::::::::::::::')
         this.props.navigation.push("ChoixJoueursDefis2Equipes", 
         {
             format : this.format,
@@ -198,17 +141,14 @@ class Choix_Equipe_Defis extends React.Component  {
     
 
     _renderItem = ({item}) => {
-        console.log("ID == ",item.id)
         return(
             <View style = {{flexDirection : "row", marginTop : hp('3%'), backgroundColor : "white", paddingVertical : hp('2%')}}>
 
                 {/* Image de l'équipe */}
-                <TouchableOpacity
-                    style = {{flexDirection : 'row'}}
-                    onPress = {() =>    this.HandleSelectionEquipe(item)   }>
+                <View style = {{flexDirection : 'row'}}>
                     <Image
                         source = {{uri : item.photo}}
-                        style = {{width : wp('15%'), height : wp('15%'), marginLeft : wp('2%'), marginRight : wp('2%')}}
+                        style = {{width : wp('15%'), height : wp('15%'), marginLeft : wp('2%'), marginRight : wp('2%'), backgroundColor: 'gray'}}
                     />
 
                     {/* Nom et note de l'équipe */}
@@ -229,7 +169,7 @@ class Choix_Equipe_Defis extends React.Component  {
                         </View>
                         
                     </View>
-                </TouchableOpacity>
+                </View>
 
                 <CheckBox
                     title=' '
@@ -246,8 +186,15 @@ class Choix_Equipe_Defis extends React.Component  {
             </View>
         )
     }
-        
+    
     render() {
+        if (this.state.isLoading) {
+            return (
+                <View>
+                    <SimpleLoading taille={hp('3%')}/>
+                </View>
+            )
+        }
         return(
             <View>
                 
@@ -280,27 +227,12 @@ class Choix_Equipe_Defis extends React.Component  {
 
                 <Text style = {{fontSize : RF(2.4), alignSelf : "center", paddingVertical : hp('2%')}}>Avec quelle équipe souhaites-tu jouer ?</Text>
 
-                {/* Bare de recherche */}
-                <Barre_Recherche
-                    handleTextChange ={this.recherche}
-					data = {this.state.mesEquipes}
-					field = "nom"
+                <ComposantRechercheTableau
+                    type={"Equipes"}
+                    donnees={this.state.mesEquipes}
+                    renderItem={this._renderItem}
+                    header={"Mes Equipes"}
                 />
-
-                <View
-                    style={styles.header_container}>
-                    <Text style={styles.header}>Mes equipes</Text>
-                </View>
-
-                {/* View contenant la liste des équipe dont l'user est capitaine */}
-                <View>
-                    <FlatList
-                        data = {this.state.equipesFiltrees}
-                        renderItem={this._renderItem}
-                        extraData = {this.state.equipeSelectionnee}
-
-                    />
-                </View>
             </View>
         )
     }
@@ -312,13 +244,7 @@ const styles = {
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom : hp('2%'),
-        //marginLeft : wp('5%'),
-        //marginRight : wp('5%'),
         marginTop : hp('3%'),
-        //borderRadius : 15,
-
-
-
     },
 
     header: {

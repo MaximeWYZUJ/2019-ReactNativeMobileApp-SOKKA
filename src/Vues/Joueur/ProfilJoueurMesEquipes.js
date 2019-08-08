@@ -23,7 +23,7 @@ class ProfilJoueurMesEquipes extends React.Component {
 
 
     _get_header_title() {
-        if (this.props.monProfil) {
+        if (this.props.navigation.getParam('monProfil', false)) {
             return "Mes Equipes"
         } else {
             return "Equipes"
@@ -39,6 +39,7 @@ class ProfilJoueurMesEquipes extends React.Component {
                     title={this._get_header_title()}
                     type={"Equipes"}
                     data={this.equipes}
+                    monProfil={this.props.navigation.getParam('monProfil', undefined)}
                     renderItem={({item}) =>
                         <Item_Equipe
                             isCaptain={false}
