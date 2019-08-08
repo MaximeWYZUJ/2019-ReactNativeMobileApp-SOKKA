@@ -175,11 +175,11 @@ export default class Recapitulatif_Partie extends React.Component {
 
 
     goToFichePartie(id,date) {
-        if(this.nbJoueursRecherche > 0 && this.joueurs.length > 0) {
+        if(this.nbJoueursRecherche > 0 && this.joueurs.length > 1) {
             msg = "Les joueurs qui le souhaitent peuvent s’inscrire et les joueurs invités vont recevoir une notification pour confirmer leur participation."
         } else if(this.joueurs.length > 0 && this.nbJoueursRecherche == 0 ) {
             msg = "Les joueurs invités vont recevoir une notification pour confirmer leur participation."
-        } else if(this.joueurs.length == 0 && this.nbJoueursRecherche > 0) {
+        } else if(this.joueurs.length == 1 && this.nbJoueursRecherche > 0) {
             msg = "Les joueurs qui le souhaitent peuvent s’inscrire."
         }
 
@@ -300,6 +300,10 @@ export default class Recapitulatif_Partie extends React.Component {
         if(this.prix != null && this.prix > 0) {
             return(                    
                 <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par joueur = {this.prix} (à regler sur place)</Text>
+            )
+        }  else {
+            return(
+                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Gratuit</Text>
             )
         }
     }

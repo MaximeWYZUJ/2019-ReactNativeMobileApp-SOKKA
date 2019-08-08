@@ -454,6 +454,18 @@ export default class Recapitulatif_Defis extends React.Component {
         
     }
 
+    renderPrix(){
+        if(this.prix != null && this.prix > 0) {
+            return(                    
+                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par équipe = {this.prix} (à regler sur place)</Text>
+            )
+        }  else {
+            return(
+                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Gratuit</Text>
+            )
+        }
+    }
+
     render() {
 
         console.log("=========", this.nomsTerrain)
@@ -529,8 +541,7 @@ export default class Recapitulatif_Defis extends React.Component {
                             {this.renderEquipeAdverse()}
                         </View>
 
-                        <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par équipe = {this.prix} (à regler sur place)</Text>
-
+                                {this.renderPrix()}
                         {/* Message de chauffe*/}
                         <Text style = {styles.txt_message_chauffe}>{this.messageChauffe}</Text>
                 </View>
