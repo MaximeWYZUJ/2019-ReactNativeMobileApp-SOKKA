@@ -105,9 +105,13 @@ export default class Inscription_Age_Zone extends React.Component {
     }
 
     calculAge()  {
-        var d = new Date()
-        var x = new Date(this.state.today)
-        return (d.getFullYear()  - x.getFullYear())
+        var today = new Date();
+        var naissanceDate = new Date(this.state.today)
+        var ageCalcul = today.getFullYear() - naissanceDate.getFullYear() - 1;
+        if (today.getMonth() > naissanceDate.getMonth() && today.getDay() > naissanceDate.getDay()) {
+            ageCalcul = ageCalcul + 1;
+        }
+        return (ageCalcul)
     }
 
 

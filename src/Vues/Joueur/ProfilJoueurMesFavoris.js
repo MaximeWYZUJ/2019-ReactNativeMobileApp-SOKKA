@@ -5,6 +5,8 @@ import ItemTerrain from '../../Components/Terrain/ItemTerrain.js'
 import Database from '../../Data/Database'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
+import Distance from '../../Helpers/Distance'
+import LocalUser from '../../Data/LocalUser.json'
 
 
 class ProfilJoueurMesFavoris extends React.Component {
@@ -31,17 +33,6 @@ class ProfilJoueurMesFavoris extends React.Component {
             gotDataTerrainsFav: false
         }
         this.getData()
-    }
-
-
-    calculerDistance(lat2,long2) {
-        var rad2 = Math.cos(lat2)/Math.cos(lat2);
-        var rad3 = Math.cos(lat)/Math.cos(lat);
-        var radBis = Math.cos(long2-long)/Math.cos(long2-long);
-        return (
-            Math.acos(Math.sin(rad2)*Math.sin(rad3)+
-            Match.cos(rad2)*Math.cos(rad3)*Math.cos(radBis))*6371
-        )
     }
 
 
@@ -106,7 +97,7 @@ class ProfilJoueurMesFavoris extends React.Component {
                         <TouchableOpacity
                             onPress = {() => this.props.navigation.push("Profil_Equipe", {equipeId : item.id})}>
                             <Image
-                                style={{width: wp('18%'), height: wp('18%'), marginLeft : wp('2%'), marginRight : wp('2%'), backgroundColor: 'grey'/*, elevation : 5*/}}
+                                style={{width: wp('20%'), height: wp('20%'), backgroundColor: 'grey'/*, elevation : 5*/}}
                                 source = {{uri : item.photo}}/>
                         </TouchableOpacity>
                     }
@@ -125,7 +116,7 @@ class ProfilJoueurMesFavoris extends React.Component {
                     keyExtractor={(item) => item.id.toString()}
                     data={dataArray}
                     renderItem={({item}) => <JoueurIcon
-                        style={{flex: 1}}
+                        style={{width: wp('20%'), height: wp('20%')}}
                         id={item.id}
                         photo={item.photo}
                         nav={this.props.navigation}

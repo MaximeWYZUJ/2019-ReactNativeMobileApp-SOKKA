@@ -5,6 +5,8 @@ import RF from 'react-native-responsive-fontsize';
 import Database from '../../Data/Database'
 import LocalUser from '../../Data/LocalUser.json'
 
+import Barre_Recherche from '../../Components/Recherche/Barre_Recherche'
+import FiltrerJoueur from '../../Components/Recherche/FiltrerJoueur'
 import ItemJoueur from '../../Components/ProfilJoueur/JoueurItem'
 
 /**
@@ -15,9 +17,18 @@ export default class Joueurs_Equipe extends React.Component {
 
     constructor(props) {
         super(props)
+        var j = props.navigation.getParam("joueurs", []);
+        var jFullData = [];
+        for (d of j) {
+            jFullData.push(d.fullData);
+        }
         this.state = {
-            joueurs : props.navigation.getParam("joueurs", []),
+            joueurs : jFullData,
             equipe : props.navigation.getParam("equipe",undefined),
+
+            joueurFiltres: jFullData,
+            filtres: null,
+            displayFiltres: false,
         }
     }
 
@@ -34,13 +45,11 @@ export default class Joueurs_Equipe extends React.Component {
      * Fonction qui renvoie la liste des capitianes
      */
     buildListOfCap(){
-        var liste = []
-        for(var i = 0; i < this.state.joueurs.length; i++) {
-            var j = this.state.joueurs[i]
-            if(this.state.equipe.capitaines.includes(j.id)) {
-                liste.push(j)
-            }
-        }
+        console.log("capitaines :")
+        var liste = this.state.joueurFiltres.filter((elmt) => {
+            console.log(elmt)
+            return this.state.equipe.capitaines.includes(elmt.id);
+        })
         return liste
     }
 
@@ -48,13 +57,11 @@ export default class Joueurs_Equipe extends React.Component {
      * Fonction qui renvoie la liste des joueurs non capitiane
      */
     buildListOfNonCap(){
-        var liste = []
-        for(var i = 0; i < this.state.joueurs.length; i++) {
-            var j = this.state.joueurs[i]
-            if(! this.state.equipe.capitaines.includes(j.id)) {
-                liste.push(j)
-            }
-        }
+        console.log("joueurs non capitaines :")
+        var liste = this.state.joueurFiltres.filter((elmt) => {
+            console.log(elmt)
+            return !this.state.equipe.capitaines.includes(elmt.id);
+        })
         return liste
     }
 
@@ -76,8 +83,6 @@ export default class Joueurs_Equipe extends React.Component {
                 showLike = {true}
             />
         )
-        
-    
     }
 
     renderBtnChooseCap() {
@@ -130,10 +135,52 @@ export default class Joueurs_Equipe extends React.Component {
             )
         }
     }
+
+
+    recherche = (data)  => {
+
+		this.setState({
+            joueurFiltres : data,
+		})
+    }
+
+
+    handleFilterButton = () => {
+        this.setState({
+            displayFiltres: !this.state.displayFiltres
+        })
+    }
+
+
+    handleValidateFilters = (q, f) => {
+        var dataF = FiltrerJoueur.filtrerJoueurs(this.state.joueurs, f);
+
+        this.setState({
+            joueurFiltres: dataF,
+            filtres: f,
+            displayFiltres: false
+        })
+    }
+
+
+    displayFiltresComponents() {
+        if (this.state.displayFiltres) {
+            return (<FiltrerJoueur handleValidate={this.handleValidateFilters} init={this.state.filtres}/>)    
+        }
+    }
+
+
     render() {
         return(
             <ScrollView style = {{flex : 1}}>
-                
+                <Barre_Recherche
+                    handleTextChange ={this.recherche}
+                    data = {this.state.joueurs}
+                    field = {"pseudoQuery"}
+                    filterData = {(data) => FiltrerJoueur.filtrerJoueurs(data)}
+                    handleFilterButton = {this.handleFilterButton}
+                />
+                {this.displayFiltresComponents()}
             
 
                 <View style = {{marginTop  : hp('1.2%')}}>

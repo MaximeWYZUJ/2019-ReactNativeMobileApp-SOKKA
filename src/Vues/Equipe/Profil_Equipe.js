@@ -203,6 +203,7 @@ export default class Profil_Equipe extends React.Component {
                 photo: j.photo,
                 tokens : tokens,
                 pseudo : j.pseudo,
+                fullData: j,
                 score : parseInt(j.score+"")
             }
 

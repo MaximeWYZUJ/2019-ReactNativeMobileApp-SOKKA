@@ -88,21 +88,15 @@ export default class Inscription_Nom_Pseudo extends React.Component {
             this.setState({isLoading :true})
 
             var pseudoBis = this.state.pseudo;
-            console.log("after psedo")
             if (pseudoBis.length == 0) {
                 pseudoBis = this.state.prenom + " " + this.state.nom;
             }
-            console.log("before ref")
             var db = Database.initialisation()
             var  ref = db.collection("Joueurs");
-            console.log("after get ref")
             var query = ref.where("pseudo", '==' , pseudoBis)
-            console.log("after write query")
             query.get().then(async (results) => {
-                console.log("in result")
                 if(results.docs.length == 0) {
                     this.setState({isLoading : false})
-                    console.log("in elese")
                     this.props.navigation.push("InscriptionZone",
                     {
                         mail : this.state.mail,
