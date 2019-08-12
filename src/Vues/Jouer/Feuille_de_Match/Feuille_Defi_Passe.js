@@ -689,7 +689,7 @@ class Feuille_Defi_Passe extends React.Component {
                     
 
 
-                    <Text>Statistiques joueurss</Text>
+                    <Text>Statistiques joueurs</Text>
 
                     <TabDefiPasse/>
                 </View>

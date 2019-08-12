@@ -7,6 +7,16 @@ class JoueurIcon extends React.Component {
 
     constructor(props){
         super(props)
+
+        if (this.props.style != undefined) {
+            if (this.props.style.width != undefined) {
+                size = this.props.style.width;
+            } else {
+                size = 60;
+            }
+        } else {
+            size = 60;
+        }
     }
 
 
@@ -35,7 +45,7 @@ class JoueurIcon extends React.Component {
         const photo = this.props.photo
         return (
             <TouchableOpacity style={styles.main_container} onPress={() => this.gotoProfilJoueur()}>
-                <Image style={{backgroundColor: '#C0C0C0', width: 60, height: 60}} source={{uri: photo}}/>
+                <Image style={{backgroundColor: '#C0C0C0', width: size, height: size}} source={{uri: photo}}/>
             </TouchableOpacity>
         );
     }

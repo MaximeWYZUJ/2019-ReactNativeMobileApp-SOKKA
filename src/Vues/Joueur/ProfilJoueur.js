@@ -594,7 +594,7 @@ class ProfilJoueur extends React.Component {
         if (query.docs.length == 0) {
             Alert.alert(
                 '',
-                "Pour intégrer " + this.joueur.pseudo + " dans une de tes équipe, tu dois être capitaine d'au moins une équipe"  ,
+                "Pour intégrer " + this.joueur.pseudo + " dans une de tes équipes, tu dois être capitaine d'au moins une équipe"  ,
                 [
                     {
                     text: "D'accord",
@@ -615,7 +615,7 @@ class ProfilJoueur extends React.Component {
             if (pasDansToutesLesEquipes) {
                 Alert.alert(
                     '',
-                    "Tu souhaites intégrer " + this.joueur.pseudo + " dans une de tes équipe ?"  ,
+                    "Tu souhaites intégrer " + this.joueur.pseudo + " dans une de tes équipes ?"  ,
                     [
                         {text: 'Confirmer', onPress: () => this.getEquipesUserCap()},
                         {
@@ -1015,7 +1015,7 @@ class ProfilJoueur extends React.Component {
                                 style={styles.nom_container}
                                 onPress={() => {
                                     if (this.monProfil) {
-                                        this.props.navigation.push('ProfilJoueurReglagesScreen', {id: this.id, joueur: this.joueur, equipes: this.equipes, header: this.joueur.nom});
+                                        this.props.navigation.push('ProfilJoueurReglagesScreen', {id: this.id, joueur: this.joueur, equipes: this.equipes, header: this.joueur.pseudo});
                                     }
                                 }}>
                                 <View style={{flexDirection: 'row', alignItems: 'center'}}>

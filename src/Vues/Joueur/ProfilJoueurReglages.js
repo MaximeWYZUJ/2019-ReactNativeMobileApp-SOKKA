@@ -34,6 +34,8 @@ class ProfilJoueurReglages extends React.Component {
         this.ville = ""
         this.zone = ""
         this.pseudo = ""
+        this.nom = ""
+        this.prenom = ""
         this.score = this.joueur.score;
         this.telephone = ""
         this.mail = ""
@@ -162,7 +164,10 @@ class ProfilJoueurReglages extends React.Component {
     calculAge(naissance) {
         var today = new Date();
         var naissanceDate = new Date(naissance)
-        var ageCalcul = today.getFullYear() - naissanceDate.getFullYear();
+        var ageCalcul = today.getFullYear() - naissanceDate.getFullYear() - 1;
+        if (today.getMonth() > naissanceDate.getMonth() && today.getDay() > naissanceDate.getDay()) {
+            ageCalcul = ageCalcul + 1;
+        }
         this.age = ageCalcul;
         this.setState({age: ageCalcul})
         return ageCalcul;
@@ -261,7 +266,7 @@ class ProfilJoueurReglages extends React.Component {
                 style={{width: wp('60%'), marginRight: wp('5%')}}
                 onValueChange={(itemValue, itemIndex) => {this.poste = itemValue; this.setState({poste: itemValue})}}
                 >
-                <Picker.Item label={"indifférent"} key={0} value={null}/>
+                <Picker.Item label={"poste non renseigné"} key={0} value={null}/>
                 <Picker.Item label={"mixte"} key={1} value={"mixte"}/>
                 <Picker.Item label={"offensif"} key={2} value={"offensif"}/>
                 <Picker.Item label={"defensif"} key={3} value={"defensif"}/>
@@ -346,6 +351,23 @@ class ProfilJoueurReglages extends React.Component {
             this.joueur.queryPseudo = NormalizeString.normalize(this.pseudo);
             this.joueur.pseudoQuery = NormalizeString.decompose(this.pseudo);
         }
+
+
+        if (this.joueur.pseudo == this.joueur.prenom + " " + this.joueur.nom) {
+            var pasDePseudo = true;
+        }
+
+
+        if (this.prenom) {
+            this.joueur.prenom = this.prenom
+        }
+        if (this.nom) {
+            this.joueur.nom = this.nom
+        }
+
+        if (pasDePseudo) {
+            this.joueur.pseudo = this.joueur.prenom + " " + this.joueur.nom;
+        }
         
         this.joueur.score = this.score;
         this.joueur.sexe = this.sexe;
@@ -377,6 +399,8 @@ class ProfilJoueurReglages extends React.Component {
             nom : this.joueur.nom,
             telephone : this.joueur.telephone,
             zone : this.joueur.zone,
+            prenom : this.joueur.prenom,
+            nom: this.joueur.nom,
             pseudo: this.joueur.pseudo,
             queryPseudo: this.joueur.queryPseudo,
             pseudoQuery: this.joueur.pseudoQuery,
@@ -550,6 +574,22 @@ class ProfilJoueurReglages extends React.Component {
                                 dataSource={ds.cloneWithRows(this.state.searchedVilles)}
                                 renderRow={this.renderVille}
                             />
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>Prénom :  </Text>
+                            <TextInput
+                                style={{flex: 1, borderColor: '#C0C0C0'}}
+                                onChangeText={(t) => this.prenom=t}
+                                placeholder={this.joueur.prenom}
+                                />
+                        </View>
+                        <View style={styles.champ}>
+                            <Text>Nom :  </Text>
+                            <TextInput
+                                style={{flex: 1, borderColor: '#C0C0C0'}}
+                                onChangeText={(t) => this.nom=t}
+                                placeholder={this.joueur.nom}
+                                />
                         </View>
                         <View style={styles.champ}>
                             <Text>Pseudo :  </Text>

@@ -220,12 +220,25 @@ export default class Recapitulatif_Defis extends React.Component {
 
         var cherche_adverssaire = (this.contreQui =='poster_une_annonce')
 
+        var joueursSelectionnes = this.props.navigation.getParam('joueursSelectionnes', []);
+
         var msg = ' '
-        if(!cherche_adverssaire) {
-            msg =  "Le capitaine de l'équipe \n"
-            + nomEquipeAdverse + "\n recevra une notification pour \n accepter ou non le defi"
+        if(cherche_adverssaire) {
+            // Poster une annonce
+            if (joueursSelectionnes.length > 1) {
+                // On a convoque des joueurs
+                msg = "Ton défi a bien été créé, tu seras informé dès qu’une équipe aura relevé ton défi. Les joueurs convoqués vont recevoir une notification pour confirmer leur participation"
+            } else {
+                msg = "Ton défi a bien été créé, tu seras informé dès qu’une équipe aura relevé ton défi"
+            }
         }else {
-            msg = "Tu seras informé dès qu'une équipe aura \n relevé ton défi"
+            // Defi contre une equipe en particulier
+            if (joueursSelectionnes.length > 1) {
+                // On a convoque des joueurs
+                msg = "Ton défi a bien été créé, le capitaine de l’équipe " + nomEquipeAdverse +"va recevoir une notification pour accepter ou non le défi. Les joueurs convoqués vont recevoir une notification"
+            } else {
+                msg = "Ton défi a bien été créé, le capitaine de l’équipe " + nomEquipeAdverse + " va recevoir une notification pour accepter ou non le défi »"
+            }
         }
         
         var jour = this.day.split('-')[0]
@@ -457,18 +470,6 @@ export default class Recapitulatif_Defis extends React.Component {
         
     }
 
-    renderPrix(){
-        if(this.prix != null && this.prix > 0) {
-            return(                    
-                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par équipe = {this.prix} (à regler sur place)</Text>
-            )
-        }  else {
-            return(
-                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Gratuit</Text>
-            )
-        }
-    }
-
     render() {
 
         console.log("=========", this.nomsTerrain)
@@ -544,7 +545,8 @@ export default class Recapitulatif_Defis extends React.Component {
                             {this.renderEquipeAdverse()}
                         </View>
 
-                                {this.renderPrix()}
+                        <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par équipe = {this.prix} (à regler sur place)</Text>
+
                         {/* Message de chauffe*/}
                         <Text style = {styles.txt_message_chauffe}>{this.messageChauffe}</Text>
                 </View>
