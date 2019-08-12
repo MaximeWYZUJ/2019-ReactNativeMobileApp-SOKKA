@@ -105,7 +105,7 @@ class Choix_Equipe_Defis extends React.Component  {
         if(equipe.joueurs.length < this.nbJoueurMin) {
             Alert.alert(
                 '',
-                'Tu dois choisir une équipe avec au moins ' + this.nbJoueurMin + ' joueurs'
+                'Ton équipe doit au moins avoir ' + this.nbJoueurMin + ' joueurs pour un ' + this.format
             )
         } else {
             if(this.state.equipeSelectionnee == equipe.id) {

@@ -27,7 +27,7 @@ class Item_Equipe_Creation_Defis extends React.Component {
         if(this.props.nbJoueurs < this.props.nbJoueursMinEquipe) {
             Alert.alert(
                 '',
-                'Tu dois choisir une équipe avec au moins ' + this.props.nbJoueursMinEquipe + ' joueurs'
+                'Ton équipe doit au moins avoir ' + this.props.nbJoueursMinEquipe + ' joueurs pour un ' + this.props.nbJoueursMinEquipe + 'x' + this.props.nbJoueursMinEquipe
             )
         } else {
             this._chooseEquipe(this.props.id)

@@ -189,6 +189,7 @@ class Feuille_Defi_A_Venir extends React.Component {
         })
         var joueurs = capitaines.concat(participants)
 
+        console.log("JOUEURS LENGTH ===========", joueurs.length)
         this.setState({joueurs : joueurs, isLoading : false})
 
         /*console.log("in download all joueur")

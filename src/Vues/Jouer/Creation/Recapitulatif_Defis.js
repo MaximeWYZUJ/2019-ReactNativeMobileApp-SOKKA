@@ -198,13 +198,13 @@ export default class Recapitulatif_Defis extends React.Component {
     
     /**
      * Fonction qui va permettre de construire une liste d'id des joueurs 
-     * sans le capitaine
+     * sans le capitaine qui a organisé le defis
      */
-    buildListOfJoueurWithoutCapitaines() {
+    buildListOfJoueurWithoutCapitaine() {
         var joueurs =  this.props.navigation.getParam('joueursSelectionnes', ' ')
         var liste = []
         for(var i = 0 ; i < joueurs.length; i++) {
-            if( ! this.allDataEquipe.capitaines.includes(joueurs[i])) {
+            if( ! LocalUser.data.id != joueurs[i]) {
                 liste.push(joueurs[i])
             }
         }
@@ -268,7 +268,7 @@ export default class Recapitulatif_Defis extends React.Component {
             confirmesEquipeDefiee : [],
             indisponiblesEquipeOrga : [],
             indisponiblesEquipeDefiee : [],
-            attenteEquipeOrga : this.buildListOfJoueurWithoutCapitaines(),
+            attenteEquipeOrga : this.buildListOfJoueurWithoutCapitaine(),
             attenteEquipeDefiee : [],
             buteurs : [],
             votes : [],
@@ -282,7 +282,7 @@ export default class Recapitulatif_Defis extends React.Component {
             
 
         })
-        .then(this.goToFicheDefi(msg, id,this.allDataEquipe,date,this.buildListOfJoueurWithoutCapitaines()))
+        .then(this.goToFicheDefi(msg, id,this.allDataEquipe,date,this.buildListOfJoueurWithoutCapitaine()))
         .catch(function(error) {
             console.error("Error writing document: ", error);
         });
@@ -346,19 +346,22 @@ export default class Recapitulatif_Defis extends React.Component {
         
     }
 
-    /**
-     * Fonction qui permet de savoir si un ou plusieur joueurs sont les capitaines 
-     * de l'équipe convoquée
-     */
+    
     findCapitaines() {
-        var joueurs =  this.props.navigation.getParam('joueursSelectionnes', ' ')
-        var capitaines = []
+        var joueurs =  this.props.navigation.getParam('joueursSelectionnes', [])
+        if(joueurs.includes(LocalUser.data.id)) {
+            return [LocalUser.data.id]
+        } else {
+            return []
+        }
+        /*var capitaines = []
+
         for(var i = 0 ; i < joueurs.length; i++) {
             if(this.allDataEquipe.capitaines.includes(joueurs[i])) {
                 capitaines.push(joueurs[i])
             }
         }
-        return capitaines
+        return capitaines*/
     }
 
      /**
