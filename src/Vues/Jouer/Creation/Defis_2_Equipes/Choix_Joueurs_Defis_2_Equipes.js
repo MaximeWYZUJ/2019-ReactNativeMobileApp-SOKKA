@@ -710,24 +710,6 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
 
     }
 
-    _renderItemCapitaine = ({item}) => {
-        if( item.id == 'aPyjfKVxEU4OF3GtWgQrYksLToxW2' ) {
-            return(
-                <Joueur_Item_Creation_Defis
-                    id = {item.id}
-                    pseudo = {item.pseudo}
-                    score = {item.score}
-                    photo = {item.photo}
-                    isChecked = {this.state.joueursSelectionnes.includes(item.id)}
-                    handleSelectJoueur = {this.handleJoueurSelectionne} 
-                />
-            ) 
-        } else {
-            return(<View></View>)
-        }
-        
-
-    }
 
     render() {
         // Fusion des joueurs et capitaines pour la recherche

@@ -6,6 +6,8 @@ import RF from 'react-native-responsive-fontsize';
 import Database from '../../Data/Database'
 import StarRating from 'react-native-star-rating'
 import Terrains from '../../Helpers/Toulouse.json'
+import LocalUser from '../../Data/LocalUser.json'
+import Distance from '../../Helpers/Distance'
 import { withNavigation } from 'react-navigation'
 
 
@@ -19,23 +21,33 @@ class Item_Defi extends React.Component {
 
     constructor(props) {
         super(props)
+
         this.state = {
             equipe1 : undefined,
-            equipe2 : undefined
-
+            equipe2 : undefined,
+            terrain : undefined,
         }
     }
 
     componentDidMount() {
-        this.getEquipesFromDB() 
+        this.getEquipesFromDB()
+        this.findTerrain();
     }
 
     
-    findTerrain() {
+    async findTerrain() {
+        var t = null;
         for(var i  = 0 ; i < Terrains.length ; i ++) {
             if(Terrains[i].id == this.props.terrain) {
-                return Terrains[i]
+                t = Terrains[i]
             } 
+        }
+
+        if (t!=null) {
+            var d = Distance.calculDistance(LocalUser.geolocalisation.latitude, LocalUser.geolocalisation.longitude, t.Latitude, t.Longitude)+"";
+            var dTxt = d.split(".")[0]+","+d.split(".")[1][0];
+            t.distance = dTxt;
+            this.setState({terrain: t})
         }
     }
 
@@ -217,12 +229,26 @@ class Item_Defi extends React.Component {
         
     }
 
+
+    renderTerrain() {
+        if (this.state.terrain != undefined) {
+            var terrain = this.state.terrain;
+            return (
+                <View  style = {{width : wp('63%')}}>
+                    <Text style = {styles.nomTerrains}>{terrain.InsNom}</Text>
+                    <Text style = {styles.nomTerrains}>{terrain.N_Voie == " " ? "" : terrain.N_Voie+" "}{terrain.Voie == "0" ? "adresse inconnue" : terrain.Voie}</Text>
+                    <Text style = {styles.nomTerrains}>{terrain.Ville} - {terrain.distance} km</Text>
+                </View>
+            )
+        }
+    }
+
+    
     render() {
         var color = '#FFFFFF' 
         if(this.props.jour < new Date())  color = "#E1E1E1"
 
         var txt = 'Defi ' + this.props.format + ' - ' + this.buildDate()
-        var terrain  = this.findTerrain(this.props.terrain)
         return(
             <TouchableOpacity 
                 style = {[styles.mainContainer, {backgroundColor : color}]}
@@ -242,9 +268,7 @@ class Item_Defi extends React.Component {
                     <Image
                         source = {require('../../../res/terrain1.jpg')}
                         style = {{width : wp('13%'), height : wp('13%'), marginRight : wp('2%')}}/>
-                    <View  style = {{width : wp('63%')}}>
-                        <Text style = {styles.nomTerrains}>{terrain.InsNom}</Text>
-                    </View>
+                    {this.renderTerrain()}
                 </View>
             </TouchableOpacity>
         )

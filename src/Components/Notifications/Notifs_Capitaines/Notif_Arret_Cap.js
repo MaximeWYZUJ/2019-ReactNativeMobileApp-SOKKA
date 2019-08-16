@@ -50,8 +50,8 @@ class Notif_Arret_Cap extends React.Component {
             return(
                     <View style = {{justifyContent : "center", paddingTop : hp('1%')}}>
                         <Image
-                        source = {{uri : this.state.equipe.photo}} 
-                        style = {{height : hp('8%'), width : hp('8%'), borderRadius : hp('4%'), marginRight : wp('3%'), marginLeft: wp('3%')}}   
+                        source = {{uri : this.state.emetteur.photo}} 
+                        style = {{height : hp('8%'), width : hp('8%'), borderRadius : hp('4%'), marginRight : wp('3%'), marginLeft: wp('3%'), backgroundColor: 'gray'}}   
                     />
                     </View>
                     

@@ -135,6 +135,7 @@ export default class Choix_Capitaines_Equipe extends React.Component {
     async sendNotifArretCap() {
         var titre = "Nouvelle Notif"
         var corps = LocalUser.data.pseudo + " n'est plus capitaine de l'équipe " + this.state.equipe.nom
+        
         for(var i = 0; i < this.state.joueurs.length; i++){
             if(this.state.joueurs[i].id != LocalUser.data.id){
                 var joueur = this.state.joueurs[i]

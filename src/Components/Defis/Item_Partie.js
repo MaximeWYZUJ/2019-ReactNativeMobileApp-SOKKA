@@ -5,6 +5,8 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import RF from 'react-native-responsive-fontsize';
 import Terrains from '../../Helpers/Toulouse.json'
 import Database from '../../Data/Database'
+import LocalUser from '../../Data/LocalUser.json'
+import Distance from '../../Helpers/Distance'
 import { withNavigation } from 'react-navigation'
 
 
@@ -19,17 +21,15 @@ class Item_Partie extends React.Component {
         super(props)
         this.state = {
             moreThan3Joueurs : false,
-            joueurs : [{"id" : 'e', "photo" : 'r'}]
+            joueurs : [{"id" : 'e', "photo" : 'r'}],
+            terrain: undefined
         }
-
-        
-
-
-       // this.joueurs = this.buildListofPlayer(this.getJoueursFromDB())
     }
 
     
     componentDidMount() {
+        this.findTerrain();
+
         var joueursArray = []
         var db = Database.initialisation()
         var nb = Math.min(3, this.props.joueurs.length)
@@ -39,17 +39,13 @@ class Item_Partie extends React.Component {
             joueurRef.get().then(async(doc) => {
                 if(doc.exists) {
                     var joueur = doc.data()
-                
-
                     joueursArray.push(joueur)
 
-                    
                 } else {
                     console.log("No such document! kk ");
                 }
                 this.setState({joueurs : joueursArray})
-                this.forceUpdate()               
-
+                this.forceUpdate()
             })
         }
  
@@ -93,38 +89,23 @@ class Item_Partie extends React.Component {
     }
 
 
-    /**
-     * Fonction qui permet de rajouter un item undefined à la fin de la liste de 3 
-     * joueurs si il y'a plus de 3 joueurs inscris sur la partie. Ca permettra d'afficher
-     * les "..."
-     * @param {*} liste 
-     */
-    buildListofPlayer(liste) {
-      
-            return liste
-        
-    }
 
-
-    async getJoueursFromDB() {
-       
-
-        let joueursArray = await Database.getArrayDocumentData(this.props.joueurs, "Joueurs")
-        
-          
-        
-
-
-    }
-        
-
-    findTerrain() {
+    async findTerrain() {
+        var t = null;
         for(var i  = 0 ; i < Terrains.length ; i ++) {
             if(Terrains[i].id == this.props.terrain) {
-                return Terrains[i]
-            } 
+                t = Terrains[i]
+            }
+        }
+
+        if (t!=null) {
+            var d = Distance.calculDistance(LocalUser.geolocalisation.latitude, LocalUser.geolocalisation.longitude, t.Latitude, t.Longitude)+"";
+            var dTxt = d.split(".")[0]+","+d.split(".")[1][0];
+            t.distance = dTxt;
+            this.setState({terrain: t})
         }
     }
+
 
     goToRejoindrePartie()  {
         this.props.navigation.push("FichePartieRejoindre",
@@ -132,7 +113,7 @@ class Item_Partie extends React.Component {
                 id : this.props.id,
                 jour : this.buildDate(),
                 duree : this.props.duree,
-                terrain : this.findTerrain(),
+                terrain : this.state.terrain,
                 nbJoueursRecherche : this.props.nbJoueursRecherche,
                 message_chauffe : this.props.message_chauffe,
                 joueurs  : this.props.joueurs,
@@ -141,34 +122,15 @@ class Item_Partie extends React.Component {
     }
     
 
-    renderDistance() {
-        if(this.props.latitudeUser != undefined && this.props.longitudeUser != undefined) {
-            return(
-                <Text> - okokok</Text>
-            )
-        } 
-    }
-
     _renderItem = ({item}) => {
-            return(
-                <Image
-                    source = {{uri : item.photo}}
-                    style = {styles.photoJoueur}
-                />
-            )
-            
-        
+        return(
+            <Image
+                source = {{uri : item.photo}}
+                style = {styles.photoJoueur}
+            />
+        )
     }
 
-
-    displayPseudo() {
-        for(var i =0 ; i <this.state.joueurs.length; i++) {
-        }
-    }
-
-    renderText = ({item}) => {
-        <Text>{item}</Text>
-    }
 
 
     /**
@@ -196,13 +158,25 @@ class Item_Partie extends React.Component {
         }
     }
 
+
+    renderTerrain() {
+        if (this.state.terrain != undefined) {
+            var terrain = this.state.terrain;
+            return (
+                <View  style = {{width : wp('63%')}}>
+                    <Text style = {styles.nomTerrains}>{terrain.InsNom}</Text>
+                    <Text style = {styles.nomTerrains}>{terrain.N_Voie == " " ? "" : terrain.N_Voie+" "}{terrain.Voie == "0" ? "adresse inconnue" : terrain.Voie}</Text>
+                    <Text style = {styles.nomTerrains}>{terrain.Ville} - {terrain.distance} km</Text>
+                </View>
+            )
+        }
+    }
     
     render() {
         var color = '#FFFFFF' 
         if(this.props.jour < new Date())  color = "#E1E1E1"
 
         var txt = 'Partie ' + this.props.format + ' - ' + this.buildDate()
-        var terrain  = this.findTerrain(this.props.terrain)
 
          return (
             <TouchableOpacity 
@@ -226,21 +200,14 @@ class Item_Partie extends React.Component {
                     </View>
                 </View>
 
-
-
-                
-
                 {/* View contenant le terrain*/}
                 <View style = {{flexDirection : "row" , marginTop : hp('1%'),width: 'auto', justifyContent:'center', 
-        alignItems: 'center'}}>
+                    alignItems: 'center'}}>
                     <Image
                         source = {require('../../../res/terrain1.jpg')}
                         style = {{width : wp('13%'), height : wp('13%'), marginRight : wp('2%')}}/>
-                    <View style = {{width : wp('63%')}}>
-                        <Text style = {styles.nomTerrains}>{terrain.InsNom}  {this.renderDistance()}</Text>
-                    </View>
+                    {this.renderTerrain()}
                 </View>
-                               
             </TouchableOpacity>
         )
     }

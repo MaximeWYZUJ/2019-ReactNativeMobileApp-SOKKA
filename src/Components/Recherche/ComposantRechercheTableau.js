@@ -77,7 +77,7 @@ class ComposantRechercheTableau extends React.Component {
     }
 
     componentWillUnmount() {
-        this.willBlurSubscription.remove();
+        //this.willBlurSubscription.remove();
     }
 
     willBlurAction = () => {

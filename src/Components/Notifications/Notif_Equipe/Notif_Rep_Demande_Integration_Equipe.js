@@ -108,7 +108,7 @@ class Notif_Rep_Demande_Integration_Equipe extends React.Component {
                         {this.renderPhotoEquipe()}
                     </View>
                     <View>
-                        <Text>{this.renderNomEquipe()} {this.chooseTextToRender()}</Text>
+                        <Text>L'équipe {this.renderNomEquipe()} {this.chooseTextToRender()}</Text>
                         <Text>ton intégration dans l'équipe</Text>
                         
                         <TouchableOpacity

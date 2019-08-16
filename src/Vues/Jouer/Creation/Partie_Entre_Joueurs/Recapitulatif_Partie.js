@@ -299,7 +299,11 @@ export default class Recapitulatif_Partie extends React.Component {
     renderPrix(){
         if(this.prix != null && this.prix > 0) {
             return(                    
-                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par joueur = {this.prix} (à regler sur place)</Text>
+                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par joueur = {this.prix} (à régler sur place)</Text>
+            )
+        } else {
+            return (
+                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Gratuit</Text>
             )
         }
     }

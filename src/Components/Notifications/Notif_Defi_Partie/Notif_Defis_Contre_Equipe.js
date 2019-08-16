@@ -189,7 +189,7 @@ class Notif_Defis_Contre_Equipe extends React.Component {
         console.log("in handle confirmer non")
         Alert.alert(
             '',
-            "Tu souhaites refuser le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
+            "Tu souhaites refuser le défi lancé par l'équipe " + this.state.equipeEmettrice.nom,
             [
                 {text: 'Oui', onPress: () => this.refuserDefis()},
                 {
@@ -209,7 +209,7 @@ class Notif_Defis_Contre_Equipe extends React.Component {
     handleConfirmerOui() {
         Alert.alert(
             '',
-            "Tu souhaites accepter le défi lancé par l'équipe" + this.state.equipeEmettrice.nom,
+            "Tu souhaites accepter le défi lancé par l'équipe " + this.state.equipeEmettrice.nom,
             [
                 {text: 'Oui', onPress: () => this.accepterDefis()},
                 {
@@ -235,6 +235,8 @@ class Notif_Defis_Contre_Equipe extends React.Component {
             db.collection("Defis").doc(this.state.defi.id).update({
                 defis_valide : true,
                 defis_refuse : false
+            }).then(() => {
+                Alert.alert("Tu as bien accepté le défi lancé par l'équipe " + this.state.equipeEmettrice.nom)
             })
         }
     }
@@ -253,6 +255,8 @@ class Notif_Defis_Contre_Equipe extends React.Component {
             db.collection("Defis").doc(this.state.defi.id).update({
                 defis_valide : false,
                 defis_refuse : true
+            }).then(() => {
+                Alert.alert("Tu as bien refusé le défi lancé par l'équipe " + this.state.equipeEmettrice.nom)
             })
         }
     }

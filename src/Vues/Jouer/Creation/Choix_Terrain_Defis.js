@@ -127,7 +127,7 @@ class Choix_Terrain_Defis extends React.Component {
                             var terrain = this.findTerrainsfromId(this.props.terrainSelectionne);
                             if(terrain.Payant) {
                                 var txtBoutton = "Confirmer"
-                                var msg = 'Le terrain sélectionné est un terrain payant. Je confirme avoir réservé le terrain en mon nom.'
+                                var msg = 'Le terrain sélectionné est un terrain payant. Tu confirmes avoir réservé le terrain en ton nom ?'
                             
                                 Alert.alert(
                                 '',

@@ -124,7 +124,7 @@ class Accueil_Jouer extends React.Component {
             console.log(error)
             Alert.alert(
                 '', 
-                "Nous ne parvenons pas à capter votre position, voulez vous utiliser  \n celle de  " + LocalUser.data.ville + " ?",
+                "Nous ne parvenons pas à capter ta position, veux tu utiliser  \n celle de  " + LocalUser.data.ville + " ?",
                 [
                     {text: 'Oui', onPress: () => {
                         var pos = this.findPositionVilleFromName(LocalUser.data.ville)
@@ -343,7 +343,22 @@ class Accueil_Jouer extends React.Component {
                     <View style = {{borderBottomRightRadius : 20,  borderBottomLeftRadius : 20, backgroundColor : 'white',paddingBottom : hp('2%')}}>
                         <TouchableOpacity 
                             style = {styles.bloc}
-                            onPress = {() => this.callNextScreen(Type_Defis.defis_2_equipes)}>
+                            onPress = {async () => {
+                                var equipes = await Database.getArrayDocumentData(LocalUser.data.equipes, "Equipes");
+                                var estCapitaine = false;
+                                for (e of equipes) {
+                                    if (e.capitaines.includes(LocalUser.data.id)) {
+                                        estCapitaine = true;
+                                        break;
+                                    }
+                                }
+
+                                if (estCapitaine) {
+                                    this.callNextScreen(Type_Defis.defis_2_equipes)
+                                } else {
+                                    Alert.alert("", "Tu dois être capitaine d'au moins une équipe pour pouvoir créer un défi")
+                                }
+                            }}>
                             <Text style ={styles.txtTitre}>Proposer un défi entre deux équipes</Text>
                             <Text style  = {styles.txt}>Avec ton équipe, propose un défi à une autre équipe</Text>
                         </TouchableOpacity>

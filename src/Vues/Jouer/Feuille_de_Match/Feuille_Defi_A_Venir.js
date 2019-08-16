@@ -624,7 +624,7 @@ class Feuille_Defi_A_Venir extends React.Component {
      * capitaine
      */
     _renderBtnRelancer = () => {
-        if(this.state.equipeOrganisatrice.capitaines.includes(this.monId)) {
+        if(this.state.equipeOrganisatrice.capitaines.includes(this.monId) && this.state.defi.attenteEquipeOrga.length > 0) {
             return(
                 <TouchableOpacity 
                     style = {styles.btnRelancer}
@@ -632,7 +632,7 @@ class Feuille_Defi_A_Venir extends React.Component {
                             <Text>Relancer</Text>
                 </TouchableOpacity>
             )
-        } else if(this.state.equipeDefiee != undefined && this.state.equipeDefiee.capitaines.includes(this.monId)) {
+        } else if(this.state.equipeDefiee != undefined && this.state.equipeDefiee.capitaines.includes(this.monId) && this.state.defi.attenteEquipeDefiee.length > 0) {
             console.log("okoko in _renderbtnrelancer")
             return(
                 <TouchableOpacity
@@ -930,7 +930,7 @@ class Feuille_Defi_A_Venir extends React.Component {
                     <TouchableOpacity 
                         style = {styles.btnConvoquer}
                         onPress = {() => this.inviterPlusdeJoueur()}>
-                            <Text style = {{alignSelf : "center"}}>Convoquer plus de joueurs</Text>
+                            <Text style = {{alignSelf : "center"}}>Convoquer des joueurs</Text>
                     </TouchableOpacity>
                 )
             }

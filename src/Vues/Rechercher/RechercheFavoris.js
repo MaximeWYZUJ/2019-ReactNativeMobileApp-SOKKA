@@ -44,9 +44,13 @@ export default class RechercheFavoris extends React.Component {
         }
     }
 
+    componentDidMount() {
+        this.willBlurSubscription = this.props.navigation.addListener('willBlur', this.willBlurAction);
+    }
+
 
     componentWillUnmount() {
-        this.willBlurSubscription.remove();
+        //this.willBlurSubscription.remove();
     }
 
     willBlurAction = () => {

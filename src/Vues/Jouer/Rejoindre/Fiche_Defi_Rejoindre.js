@@ -19,6 +19,8 @@ import { StackActions, NavigationActions } from 'react-navigation';
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
 import firebase from 'firebase'
 import '@firebase/firestore'
+import Distance from '../../../Helpers/Distance';
+
 
 // Rememttre à Zéro le stack navigator pour empecher le retour en arriere
 const resetAction = StackActions.reset({
@@ -46,8 +48,6 @@ class Fiche_Defi_Rejoindre extends React.Component {
         }
 
 
-
-
         this.state = {
             defi : this.props.navigation.getParam('defi',undefined), 
             isLoading : true,
@@ -56,7 +56,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
             Voie : ' ',
             CodePostal : ' ',
             Ville : ' ',
-            organisateur : undefined,
+            organisateur : {pseudo: ""},
             equipeOrganisatrice : this.props.navigation.getParam('equipeOrganisatrice',undefined),
             equipeDefiee : this.props.navigation.getParam('equipeDefiee',undefined),
             show_equipe : false,
@@ -84,7 +84,11 @@ class Fiche_Defi_Rejoindre extends React.Component {
         this.getButeurs()
         this.getHommeMatch()
         this.getCommentaire(this.state.defi)
-        this.setState({isLoading : false})
+
+        Database.getDocumentData(this.state.defi.organisateur, "Joueurs")
+        .then((org) => {
+            this.setState({organisateur: org, isLoading: false})
+        })
     }
 
     /**
@@ -138,14 +142,17 @@ class Fiche_Defi_Rejoindre extends React.Component {
     findTerrain(id) {
         for(var i  = 0 ; i < Terrains.length ; i ++) {
             if(Terrains[i].id == id) {
+                var d = Distance.calculDistance(LocalUser.geolocalisation.latitude, LocalUser.geolocalisation.longitude, Terrains[i].Latitude, Terrains[i].Longitude)+"";
+                var dTxt = d.split(".")[0]+","+d.split(".")[1][0];
                 this.setState({
                     InsNom : Terrains[i].InsNom,
                     N_Voie : Terrains[i].N_Voie,
                     Voie : Terrains[i].Voie,
                     CodePostal : Terrains[i].CodePostal,
-                    Ville : Terrains[i].Ville
+                    Ville : Terrains[i].Ville,
+                    terrainDistance : dTxt
                 })
-            } 
+            }
         }
     }
 
@@ -169,7 +176,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
         var minute = (date.getMinutes()).toString()
         if(minute.length == 1) {
-            minute = '0' + mois 
+            minute = '0' + mois
         }
         var heureFin = this.calculHeureFin(heure,minute,this.state.defi.duree)
 
@@ -948,11 +955,12 @@ class Fiche_Defi_Rejoindre extends React.Component {
                     <Text>Relever le defi</Text>
                 </TouchableOpacity>
             )
-           
+        
+        // Joueur pas impliqué dans le dédi
         } else {
             return(
                 <View>
-                    <Text>Attente de validation du défi</Text>
+                    <Text></Text>
                 </View>
             )
         }
@@ -1095,28 +1103,39 @@ class Fiche_Defi_Rejoindre extends React.Component {
             <ScrollView>
                 <View style = {{marginTop : hp('0.5%')}}>
 
-                        
+
                     <View>
                         {/* Information sur le defi */}
-                        <Text style = {styles.infoDefis}> Defi {this.state.defi.format} par </Text>
+                        <Text style = {styles.infoDefis}
+                            onPress={async () => {
+                                if (this.state.organisateur.id != undefined) {
+                                    var equipes = await Database.getArrayDocumentData(this.state.organisateur.equipes, "Equipes");
+                                    this.props.navigation.navigate("ProfilJoueur", {id: this.state.organisateur.id, joueur: this.state.organisateur, equipes: equipes});
+                                }
+                            }}
+                            > Defi {this.state.defi.format} par {this.state.organisateur.pseudo}</Text>
                         <Text style = {styles.separateur}>_____________________________________</Text>
                         <Text style = {styles.infoDefis}> {date}</Text>
                         <Text style = {styles.separateur}>_____________________________________</Text>
                     </View>
 
                     {/* View contenant l'icon terrain et son nom*/}
-                    <View style = {{flexDirection : 'row', marginTop : hp('2%'), marginLeft : wp('8%')}}>
-                            <Image
-                                source = {require('../../../../res/terrain1.jpg')}
-                                style = {styles.photo_terrain}
-                            />
-                            {/* InsNom et EquNom du terrain */}
-                            <View style = {{width : wp('70%'), justifyContent:'center'}}>
-                                <Text style = {styles.nomTerrains}>{this.state.InsNom}</Text>
-                                <Text style = {styles.nomTerrains}>{this.state.N_Voie} {this.state.Voie}</Text>
-                                <Text style = {styles.nomTerrains}>{this.state.CodePostal} {this.state.Ville}</Text>
-                            </View>
-                    </View>
+                    <TouchableOpacity style = {{flexDirection : 'row', marginTop : hp('2%'), marginLeft : wp('8%')}}
+                        onPress={() => {
+                            this.props.navigation.push("ProfilTerrain", {id: this.state.defi.terrain, header: this.state.InsNom})
+                        }}
+                        >
+                        <Image
+                            source = {require('../../../../res/terrain1.jpg')}
+                            style = {styles.photo_terrain}
+                        />
+                        {/* InsNom et EquNom du terrain */}
+                        <View style = {{width : wp('70%'), justifyContent:'center'}}>
+                            <Text style = {styles.nomTerrains}>{this.state.InsNom}</Text>
+                            <Text style = {styles.nomTerrains}>{this.state.N_Voie == " " ? "" : this.state.N_Voie+" "}{this.state.Voie == "0" ? "adresse inconnue" : this.state.Voie}</Text>
+                            <Text style = {styles.nomTerrains}>{this.state.CodePostal} {this.state.Ville} - {this.state.terrainDistance} km</Text>
+                        </View>
+                    </TouchableOpacity>
 
                     {/* Bloc contenant les équipes */}
                     <View style = {styles.containerEquipe}>

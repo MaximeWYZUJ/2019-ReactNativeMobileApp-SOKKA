@@ -61,7 +61,7 @@ export default class RechercheDefaut extends React.Component {
     }
 
     componentWillUnmount() {
-        this.willBlurSubscription.remove();
+        //this.willBlurSubscription.remove();
     }
 
     willBlurAction = () => {
@@ -214,7 +214,7 @@ export default class RechercheDefaut extends React.Component {
             return (
                 <TouchableOpacity onPress={() => Alert.alert(
                     '',
-                    "Votre terrain n'est pas dans la base SOKKA ?\n\nPas de soucis, vous pouvez proposer d'ajouter votre terrain !",
+                    "Ton terrain n'est pas dans la base SOKKA ?\n\nPas de soucis, tu peux proposer d'ajouter ton terrain !",
                     [
                         {
                             text: 'Annuler',

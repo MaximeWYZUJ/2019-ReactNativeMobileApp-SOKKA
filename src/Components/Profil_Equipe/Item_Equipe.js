@@ -90,7 +90,7 @@ export default class Item_Equipe extends React.Component {
                                 fullStarColor='#F8CE08'
                                 emptyStarColor='#B1ACAC'
                                 containerStyle={{width: 40}}/>
-                        <Text style = {styles.txt}>{this.props.nbJoueurs}</Text>
+                        <Text style = {styles.txt}>{this.props.nbJoueurs} joueurs</Text>
                 </View>
 
                 {/* View contenant le pouce pour le like */}

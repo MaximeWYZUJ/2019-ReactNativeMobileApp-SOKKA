@@ -21,15 +21,17 @@ export default class Calendrier_Joueur extends React.Component {
         super(props)
         this.monId = this.props.navigation.getParam('id', LocalUser.data.id);
         this.state  = {
+            defisPassesDisp : [],
+            nbPassesDisp : 0,
             defisPasses : [],
             defisaVenir : [],
             latitude : 0,
             longitude : 0,
             allDefis : [],
             isLoading : true,
-            index : 0
+            index : 0,
+            refreshing: false
         }
-
     }
 
     componentDidMount() {
@@ -42,19 +44,7 @@ export default class Calendrier_Joueur extends React.Component {
             title: navigation.getParam('header', 'pas de header = erreur'),
         };
     }
-    
 
-    static navigationOptions = ({ navigation }) => {
-            return {
-                title: LocalUser.data.pseudo,
-
-                tabBarOnPress({jumpToIndex, scene}) {
-                    jumpToIndex(scene.index);
-                },
-                
-            }
-        
-    }
 
     /** Fonction qui va permettre de trouver tous les défis et parties auxquels 
      * participes l'utilisateur
@@ -149,9 +139,15 @@ export default class Calendrier_Joueur extends React.Component {
                             }
                         }
 
+                        var defisPassesDisp = [];
+                        if (defisaVenir.length == 0 && defisPasses.length != 0) {
+                            defisPassesDisp = defisPasses.slice(-Math.min(defisPasses.length, 3));
+                        }
+
                         this.setState({
                             defisaVenir : defisaVenir,
                             defisPasses : defisPasses,
+                            defisPassesDisp : defisPassesDisp,
                             allDefis : allDefis,
                             isLoading : false,
                             index : index
@@ -226,7 +222,6 @@ export default class Calendrier_Joueur extends React.Component {
                     equipeDefiee = {item.equipeDefiee}
                     terrain = {item.terrain}
                     allDataDefi = {item}
-                        
                 />
             )
         } else {
@@ -243,16 +238,6 @@ export default class Calendrier_Joueur extends React.Component {
         )
     }
 
-
-
-    scrollToSection =() => {
-        this.sectionListRef.scrollToLocation({
-          animated: true,
-          sectionIndex: 1,
-          itemIndex: 0,
-          viewPosition: 0
-        });
-      };
       
 
     /**
@@ -264,15 +249,27 @@ export default class Calendrier_Joueur extends React.Component {
             return(
                 <View style = {{backgroundColor : Colors.grayItem, marginBottom : hp('10%')}} >
                     <Text style = {{fontSize : RF(2.5), alignSelf : "center", marginBottom : hp('2%'), marginTop : hp('2%')}}>Calendrier</Text>
-                   
+
                     <SectionList
                         ref={ref => (this.sectionListRef = ref)}
                         renderItem={this._renderItem}
                         renderSectionHeader={this._renderSectionHeader}
                         getItemLayout={this.getItemLayout}
-                        initialScrollIndex={this.state.index}
+                        initialScrollIndex={0}
+                        refreshing={this.state.refreshing}
+                        onRefresh={() => {
+                            this.setState({refreshing: true});
+
+                            var n = Math.min(this.state.nbPassesDisp + 5, this.state.defisPasses.length);
+                            this.setState({
+                                nbPassesDisp: n,
+                                defisPassesDisp: this.state.defisPasses.slice(-n)
+                            })
+
+                            this.setState({refreshing: false});
+                        }}
                         sections={[
-                            {title: 'Title1', data: this.state.defisPasses},
+                            {title: 'Title1', data: this.state.defisPassesDisp},
                             {title: 'Title2', data: this.state.defisaVenir},
                         ]}
                         keyExtractor={(item, index) => item + index}

@@ -16,6 +16,7 @@ import LocalUser from '../../../Data/LocalUser.json'
 import { StackActions, NavigationActions } from 'react-navigation';
 import firebase from 'firebase'
 import '@firebase/firestore'
+import Distance from '../../../Helpers/Distance'
 
 
 // Rememttre à Zéro le stack navigator pour empecher le retour en arriere
@@ -38,20 +39,10 @@ class Fiche_Partie_Rejoindre extends React.Component {
         super(props)
         this.pseudo = LocalUser.data.pseudo
         this.monId = LocalUser.data.id
-        console.log("in constructeur")
-       /* this.format  = this.props.navigation.getParam('format', '')
-        this.nbJoueursRecherche =  this.props.navigation.getParam('nbJoueursRecherche', '')
-        this.jour = this.buildDate(this.props.navigation.getParam('jour', ''))
-        this.heure = this.buildHeure(this.props.navigation.getParam('jour', ''))
-        this.duree = 2
-        this.messageChauffe  =this.props.navigation.getParam('message_chauffe', '') 
-        this.terrain = this.props.navigation.getParam('terrain', '')
-        */
+        
         this.joueurAnimation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
-        //this.ChangeThisTitle( "Partie " + this.buildDate(this.props.navigation.getParam('jour', '')))
         
         this.state = {
-           // dataJoueurs : this.props.navigation.getParam('joueursWithData', ''),
 
             partie : undefined, 
             isLoading : true,
@@ -63,17 +54,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
             Ville : "inconu",
             joueursData : [],
             commentaires  :[], 
-            currentCommentaire : ""
-            // Infos du défis qu'on va obtenir quand on reviens de la page ajout de joueur
-            /*pseudo = "inconu",
-            format = "inconu",
-            nbJoueursRecherche = 0,
-            jour = this.buildDate(new Date()),
-            heure = this.buildHeure(new Date()),
-            duree = 0,
-            messageChauffe  = "inconu",
-            terrain = "inconu",
-            joueursId =   []   */      
+            currentCommentaire : ""     
 
         }
     }
@@ -210,9 +191,9 @@ class Fiche_Partie_Rejoindre extends React.Component {
         this.findTerrain(partie.terrain)
         var joueursData = await Database.getArrayDocumentData(partie.participants, "Joueurs")
         
-        
+        var organisateur = await Database.getDocumentData(partie.organisateur, "Joueurs");
 
-        this.setState({partie : partie , isLoading : false,joueursData :joueursData })
+        this.setState({partie : partie , isLoading : false, joueursData : joueursData, organisateur : organisateur })
         
         this.getCommentaire(partie)
         this.ChangeThisTitle('Partie ' + this.buildDate(new Date(this.state.partie.jour.seconds * 1000)))
@@ -257,6 +238,8 @@ class Fiche_Partie_Rejoindre extends React.Component {
     findTerrain(id) {
         for(var i  = 0 ; i < Terrains.length ; i ++) {
             if(Terrains[i].id == id) {
+                var d = Distance.calculDistance(LocalUser.geolocalisation.latitude, LocalUser.geolocalisation.longitude, Terrains[i].Latitude, Terrains[i].Longitude)+"";
+                var dTxt = d.split(".")[0]+","+d.split(".")[1][0];
                 this.setState({
                     InsNom : Terrains[i].InsNom,
                     EquNom : Terrains[i].EquNom,
@@ -264,6 +247,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
                     Voie : Terrains[i].Voie,
                     CodePostal :Terrains[i].CodePostal,
                     Ville :Terrains[i].Ville,
+                    terrainDistance : dTxt
                 })
             } 
         }
@@ -796,7 +780,15 @@ class Fiche_Partie_Rejoindre extends React.Component {
                         <View>  
                             <View>
                                 {/* Information sur le defi */}
-                                <Text style = {styles.infoDefis}> Partie {this.state.partie.format} par {this.pseudo}</Text>
+                                <Text style = {styles.infoDefis}
+                                    onPress={async () => {
+                                        var org = this.state.organisateur;
+                                        if (org != undefined && org != null) {
+                                            var equipesDuJoueur = await Database.getArrayDocumentData(org.equipes, "Equipes");
+                                            this.props.navigation.navigate("ProfilJoueur", {id: org.id, joueur: org, equipes: equipesDuJoueur});
+                                        }
+                                    }}
+                                    > Partie {this.state.partie.format} par {this.state.organisateur.pseudo}</Text>
                                 <Text style = {styles.separateur}>_____________________________________</Text>
                                 <Text style = {styles.infoDefis}> {date}</Text>
                                 <Text style = {styles.separateur}>_____________________________________</Text>
@@ -811,11 +803,10 @@ class Fiche_Partie_Rejoindre extends React.Component {
                                     />
                                     {/* InsNom et EquNom du terrain */}
                                     <View style = {{width : wp('70%'), justifyContent:'center'}}>
-                                        <Text style = {styles.nomTerrains}>{this.state.InsNom}</Text>
-                                        <Text style = {styles.nomTerrains}>{this.state.N_Voie} {this.state.Voie}</Text>
-                                        <Text style = {styles.nomTerrains}>{this.state.CodePostal} {this.state.Ville}</Text>
-
-                                    </View>
+                                    <Text style = {styles.nomTerrains}>{this.state.InsNom}</Text>
+                                    <Text style = {styles.nomTerrains}>{this.state.N_Voie == " " ? "" : this.state.N_Voie+" "}{this.state.Voie == "0" ? "adresse inconnue" : this.state.Voie}</Text>
+                                    <Text style = {styles.nomTerrains}>{this.state.CodePostal} {this.state.Ville} - {this.state.terrainDistance} km</Text>
+                                </View>
                                 </TouchableOpacity>
                             </View>
 
@@ -837,7 +828,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
                                 {this._renderBtnRejoindre()}
                             </View>
 
-                                
+                            
                             {this.renderPrix()}
                             {/* Les buteurs */}
                             {this._renderListButeurs()}
