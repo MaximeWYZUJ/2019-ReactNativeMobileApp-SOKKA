@@ -45,7 +45,7 @@ export default class Database {
         };
 
         if (!firebase.apps.length) {
-            firebase.initializeApp(config2);
+            firebase.initializeApp(config);
         };
         var db = firebase.firestore();
         return db;
@@ -175,7 +175,7 @@ export default class Database {
         var db = Database.initialisation();
         let docRef = db.collection(collection).doc(id);
         let doc = await docRef.get();
-
+        
         if (doc.exists) {
             return doc.data()
         } else {

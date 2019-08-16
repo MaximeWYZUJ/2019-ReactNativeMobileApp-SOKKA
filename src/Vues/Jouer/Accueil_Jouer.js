@@ -124,7 +124,7 @@ class Accueil_Jouer extends React.Component {
             console.log(error)
             Alert.alert(
                 '', 
-                "Nous ne parvenons pas à capter votre position, voulez vous utiliser  \n celle de  " + LocalUser.data.ville + " ?",
+                "Nous ne parvenons pas à capter ta position, veux tu utiliser  \n celle de  " + LocalUser.data.ville + " ?",
                 [
                     {text: 'Oui', onPress: () => {
                         var pos = this.findPositionVilleFromName(LocalUser.data.ville)

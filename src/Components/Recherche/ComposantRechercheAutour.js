@@ -159,7 +159,7 @@ class ComposantRechercheAutour extends React.Component {
             
             Alert.alert(
                 '',
-                "Nous ne parvenons pas à capter votre position. Nous utiliserons celle de " + LocalUser.data.ville.charAt(0).toUpperCase() + LocalUser.data.ville.slice(1),
+                "Nous ne parvenons pas à capter ta position. Nous utiliserons celle de " + LocalUser.data.ville.charAt(0).toUpperCase() + LocalUser.data.ville.slice(1),
             )
             var pos = this.findPositionVilleFromName(LocalUser.data.ville)
             LocalUser.geolocalisation = pos;

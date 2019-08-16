@@ -13,7 +13,7 @@ import Presences_Joueurs from '../../../Components/Defis/Feuilles_Match/Presence
 import LocalUser from '../../../Data/LocalUser.json'
 import DatesHelpers from '../../../Helpers/DatesHelpers'
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
-
+import Simple_Loading from '../../../Components/Loading/Simple_Loading'
 /**
  * Vue qui permet d'afficher la feuille de match d'une partie à venir
  */
@@ -29,7 +29,8 @@ class Feuille_Partie_A_Venir extends React.Component {
         this.state = {
             joueurs :  [],
             joueursRecherche : [],
-            partie : this.props.navigation.getParam('partie', undefined)
+            partie : this.props.navigation.getParam('partie', undefined),
+            isLoading : false,
         }
 
     }
@@ -493,7 +494,12 @@ class Feuille_Partie_A_Venir extends React.Component {
         )
     }
 
-    
+    async goToProfilJoueur(joueur){
+        this.setState({isLoading : true})
+        var equipes = await Database.getArrayDocumentData(joueur.equipes, "Equipes")
+        this.setState({isLoading : false})
+        this.props.navigation.push("ProfilJoueur", {id: joueur.id, joueur : joueur, equipes : equipes, reseau : []})
+    }
 
 
     /**
@@ -646,7 +652,8 @@ class Feuille_Partie_A_Venir extends React.Component {
             } 
 
             return(
-                <View style = {styles.containerItemJoueur}>
+                <TouchableOpacity style = {styles.containerItemJoueur}
+                    onPress = {() => this.goToProfilJoueur(item) }>
 
                     <Image
                         source = {{uri : item.photo}}
@@ -676,7 +683,7 @@ class Feuille_Partie_A_Venir extends React.Component {
                         </View>
                     </View>
 
-                </View>
+                </TouchableOpacity>
             )
         }
         
@@ -726,7 +733,13 @@ class Feuille_Partie_A_Venir extends React.Component {
     }
 
     render() {
-        if(this.state.partie != undefined) {
+        if(this.state.isLoading) {
+            return(
+                <Simple_Loading
+                    taille = {hp('6%')}
+                />
+            )
+        } else if(this.state.partie != undefined) {
 
         
             var nbJoueurs = this.state.partie.participants.length + this.state.partie.nbJoueursRecherche

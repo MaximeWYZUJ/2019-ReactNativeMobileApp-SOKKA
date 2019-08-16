@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {View, Text,Image,TouchableOpacity} from 'react-native'
+import {View, Text,Image,TouchableOpacity,Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
@@ -11,6 +11,7 @@ import * as firebase from 'firebase';
 import Simple_Loading from '../../Components/Loading/Simple_Loading'
 import Types_Notification from '../../Helpers/Notifications/Types_Notification'
 
+import { Camera, ImagePicker, Permissions } from 'expo';
 
 export default class Creation_Equipe_Photo extends React.Component {
 
@@ -26,27 +27,28 @@ export default class Creation_Equipe_Photo extends React.Component {
         this.updateJoueur = this.updateJoueur.bind(this)
     }
 
-     /**
+      /**
      * Fonction qui permet d'ouvrir la galerie et de permettre à l'utilisateur
      * de choisir une photo de profil
      */
-    _pickImage = async () => {
+    pickImageGallerie = async () => {
 
         
         /* Obtenir les permissions. */
-        const { Permissions } = Expo;
-        const { status: cameraRollPermission } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+        const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
 
-        /* Ouvrir la galerie. */
-        let result = await Expo.ImagePicker.launchImageLibraryAsync({
-        });
-
-        /* Si l'utilisateur à choisis une image. */
-        if (!result.cancelled) {
-            this.setState({ 
-              photo: {uri : result.uri },
-              image_changed : true
+        if (status === "granted") {
+            /* Ouvrir la galerie. */
+            let result = await ImagePicker.launchImageLibraryAsync({
             });
+
+            /* Si l'utilisateur à choisis une image. */
+            if (!result.cancelled) {
+                this.setState({ 
+                photo: {uri : result.uri },
+                image_changed : true
+                });
+            }
         }
     };
 
@@ -161,7 +163,45 @@ export default class Creation_Equipe_Photo extends React.Component {
         
     }
 
+    /**
+     * Fonction qui permet de prendre une photo depuis la camera
+     */
+    pickImageCamera = async () => {
+        /* Obtenir les permissions. */
+        const { status } = await Permissions.askAsync(Permissions.CAMERA);
 
+        if (status === "granted") {
+            this.setState({usingCamera: true})
+        }
+    };
+
+    snapPhoto = async () => {
+        let photo = await this.camera.takePictureAsync();
+        this.setState({
+            photo: {uri: photo.uri},
+            txt_btn: 'SUIVANT',
+            image_changed: true,
+            usingCamera: false
+        })
+    }
+
+    alertPickImage(){
+        Alert.alert(
+            '',
+            "Comment veux-tu prendre la photo ?",
+            [
+                {
+                    text: 'Caméra',
+                    onPress: () => this.pickImageCamera(),
+                },
+                {
+                    text: 'Gallerie',
+                    onPress: () => this.pickImageGallerie(),
+                    style: 'cancel',
+                },
+            ],)
+
+    }
 
     
     //===================================================================================
@@ -251,7 +291,44 @@ export default class Creation_Equipe_Photo extends React.Component {
    
 
     render(){
-        if(! this.state.isLoading) {
+        if (this.state.usingCamera) {
+            return (
+                <View style={{ flex: 1 }}>
+                    <Camera style={{ flex: 1 }} type={this.state.type} ref={ref => {this.camera = ref}}>
+                        <View
+                        style={{
+                            flex: 1,
+                            backgroundColor: 'transparent',
+                            flexDirection: 'row',
+                        }}>
+                            <TouchableOpacity
+                                style={{
+                                flex: 1,
+                                alignSelf: 'flex-end',
+                                alignItems: 'center',
+                                justifyContent: 'space-around'
+                                }}
+                                onPress={() => {
+                                    this.setState({
+                                        type: this.state.type === Camera.Constants.Type.back ? Camera.Constants.Type.front : Camera.Constants.Type.back,
+                                    });
+                                }}>
+                                <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> FLIP </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={{
+                                flex: 1,
+                                alignSelf: 'flex-end',
+                                alignItems: 'center',
+                                }}
+                                onPress={this.snapPhoto}>
+                                <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> SNAP </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </Camera>
+                </View>
+            )
+        } else if(! this.state.isLoading) {
             return(
                 <View style = {styles.main_container}>
     
@@ -271,7 +348,7 @@ export default class Creation_Equipe_Photo extends React.Component {
                         <Text style = {{fontSize : RF(3)}}>Choisis une photo d'équipe  </Text>
                         <TouchableOpacity 
                             style = {{marginTop : hp('5%')}}
-                            onPress={this._pickImage}>
+                            onPress={ () => this.alertPickImage() }>
                     
                             <Image
                             source = {this.state.photo}

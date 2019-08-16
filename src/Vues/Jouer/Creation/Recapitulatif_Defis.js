@@ -14,6 +14,7 @@ import LocalUser from '../../../Data/LocalUser.json'
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
 
 import Notification from '../../../Helpers/Notifications/Notification'
+import { ScrollView } from 'react-native-gesture-handler';
 
 /**
  * Classe qui va permettre d'afficher le récapitulatif d'un défis crée par 
@@ -474,6 +475,7 @@ export default class Recapitulatif_Defis extends React.Component {
 
         console.log("=========", this.nomsTerrain)
         return (
+            <ScrollView>
             <View>
 
 
@@ -551,6 +553,7 @@ export default class Recapitulatif_Defis extends React.Component {
                         <Text style = {styles.txt_message_chauffe}>{this.messageChauffe}</Text>
                 </View>
             </View>
+            </ScrollView>
         )
     }
 }

@@ -107,21 +107,25 @@ export default class Modifier_Groupe extends React.Component {
     };
 
     alertImage(){
-        Alert.alert(
-            '',
-            "Comment veux-tu prendre la photo ?",
-            [
-                {
-                    text: 'Caméra',
-                    onPress: () => this.pickImageCamera(),
-                },
-                {
-                    text: 'Gallerie',
-                    onPress: () => this.pickImageGallerie(),
-                    style: 'cancel',
-                },
-            ],
+        if(this.state.groupe.admin == LocalUser.data.id) {
+            Alert.alert(
+                '',
+                "Comment veux-tu prendre la photo ?",
+                [
+                    {
+                        text: 'Caméra',
+                        onPress: () => this.pickImageCamera(),
+                    },
+                    {
+                        text: 'Gallerie',
+                        onPress: () => this.pickImageGallerie(),
+                        style: 'cancel',
+                    },
+                ],
             )
+        }  else {
+            Alert.alert("","Seul l'administrateur peut modifier le groupe")
+        }
     }
     
 
@@ -220,6 +224,20 @@ export default class Modifier_Groupe extends React.Component {
         ) 
     }
 
+
+    alertNonAdmin(joueur) {
+        Alert.alert(
+            joueur.pseudo,
+            '',
+            [
+                {text: 'Voir le profil', onPress: () => this.voirProfil(joueur.id)},
+                {text: 'Envoyer un message', onPress: () => this.envoyerUnMessage(joueur)},
+                {text: 'Annuler', onPress: () => console.log('Cancel Pressed')},
+
+            ],
+        ) 
+    }
+
     envoyerUnMessage(joueur) {
         this.setState({isLoading : true})
         // Verifier si la conv existe pas déja 
@@ -266,7 +284,11 @@ export default class Modifier_Groupe extends React.Component {
 
     }
     ajouterJoueurs(){
-        this.props.navigation.push("NewMessage", {ajoutGroupeExistant : true, groupe : this.state.groupe})
+        if(this.state.groupe.admin == LocalUser.data.id) {
+            this.props.navigation.push("NewMessage", {ajoutGroupeExistant : true, groupe : this.state.groupe})
+        } else {
+            Alert.alert("","Seul l'administrateur peut modifier le groupe")
+        }
     }
     trouverJoueur(id) {
         for(var i = 0; i < this.state.joueurs.length; i ++){
@@ -308,7 +330,13 @@ export default class Modifier_Groupe extends React.Component {
         return(
             <View style = {{marginRight : wp('8%'), flexDirection : "row"}}>
                 <TouchableOpacity style = {[styles.containerItemJoueur]}
-                    onPress = {() => this.alertAdmin(item)}
+                    onPress = {() => {
+                        if(this.state.groupe.admin == LocalUser.data.id){
+                            this.alertAdmin(item)
+                        } else {
+                            this.alertNonAdmin(item)
+                        }
+                    }}
                    >
 
                     <Image

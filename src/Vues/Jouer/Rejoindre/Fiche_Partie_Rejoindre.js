@@ -52,7 +52,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
         
         this.state = {
            // dataJoueurs : this.props.navigation.getParam('joueursWithData', ''),
-
+            organisateur : undefined,
             partie : undefined, 
             isLoading : true,
             InsNom : "inconnu",
@@ -212,9 +212,19 @@ class Fiche_Partie_Rejoindre extends React.Component {
         
         
 
-        this.setState({partie : partie , isLoading : false,joueursData :joueursData })
         
         this.getCommentaire(partie)
+
+        if(partie.organisateur == LocalUser.data.id) {
+            organisateur = LocalUser.data
+        } else {
+            // Find organisateur
+            for(var i =0 ; i < joueursData.length ; i++) {
+                if(partie.organisateur == joueursData[i].id) organisateur = joueursData[i]
+            }
+        }
+        this.setState({partie : partie , isLoading : false,joueursData :joueursData, organisateur : organisateur })
+
         this.ChangeThisTitle('Partie ' + this.buildDate(new Date(this.state.partie.jour.seconds * 1000)))
 
     }
@@ -450,6 +460,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
     }
 
 
+
     goToFicheTerrain(){
         this.props.navigation.push("ProfilTerrain", {id: this.state.partie.terrain, header: this.state.InsNom})
     }
@@ -506,7 +517,8 @@ class Fiche_Partie_Rejoindre extends React.Component {
     }
 
     _renderBtnRejoindre(){
-        if(! this.state.partie.participants.includes(this.monId))  {
+        var passe = this.state.partie.dateParse >= Date.parse(new Date())
+        if(! this.state.partie.participants.includes(this.monId) && !passe)  {
             return(
                 <TouchableOpacity 
                             style = {styles.btnRejoindre}
@@ -674,6 +686,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
         }
     }
 
+    
 
      /**
      * Fonction qui permet d'afficher les Hommes du match si la partie est passée et 
@@ -778,6 +791,12 @@ class Fiche_Partie_Rejoindre extends React.Component {
         }
     }
 
+    renderPseudoOrga(){
+        if(this.state.organisateur != undefined) {
+            return this.state.organisateur.pseudo
+        }
+    }
+
     displayRender() {
         if(this.state.isLoading) {
             return (
@@ -796,7 +815,13 @@ class Fiche_Partie_Rejoindre extends React.Component {
                         <View>  
                             <View>
                                 {/* Information sur le defi */}
-                                <Text style = {styles.infoDefis}> Partie {this.state.partie.format} par {this.pseudo}</Text>
+                                <View style = {{flexDirection : "row", alignSelf : "center"}}>
+                                    <Text style = {styles.infoDefis}> Partie {this.state.partie.format} par </Text>
+                                    <TouchableOpacity 
+                                        onPress = {() => this.goToFicheJoueur(this.state.organisateur)}>
+                                        <Text>{this.renderPseudoOrga()}</Text>
+                                    </TouchableOpacity>
+                                </View>
                                 <Text style = {styles.separateur}>_____________________________________</Text>
                                 <Text style = {styles.infoDefis}> {date}</Text>
                                 <Text style = {styles.separateur}>_____________________________________</Text>

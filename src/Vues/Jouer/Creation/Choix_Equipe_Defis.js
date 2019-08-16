@@ -196,7 +196,7 @@ class Choix_Equipe_Defis extends React.Component  {
             )
         }
         return(
-            <View>
+            <View style = {{flex : 1}}>
                 
                 {/* Bandeau superieur */}
                 <View style = {{backgroundColor : Colors.grayItem, flexDirection : 'row', justifyContent: 'space-between',paddingVertical : hp('2%'),paddingHorizontal : wp('3%')}}>
