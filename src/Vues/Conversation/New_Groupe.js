@@ -24,6 +24,7 @@ export default class New_Groupe extends React.Component {
         super(props)
         this.state = {
             joueursSelectionnes : props.navigation.getParam("joueurs", []),
+            equipe : props.navigation.getParam("equipe", undefined),
             txt : "",
             photo : require("../../../res/choix_photo.png"),
             image_changed : false,
@@ -36,6 +37,17 @@ export default class New_Groupe extends React.Component {
         this.setState({txt : searchedText})
     };
 
+
+    componentDidMount(){
+        this.getJoueurs()
+    }
+
+    async getJoueurs(){
+        if(this.state.joueursSelectionnes.length == 0 ){
+            var joueurs = await Database.getArrayDocumentData(this.state.equipe.joueurs, "Joueurs")
+            this.setState({joueursSelectionnes : joueurs})
+        }
+    }
 
     
      /**
@@ -203,6 +215,14 @@ export default class New_Groupe extends React.Component {
 
 
 
+    totalLength(){
+        if(this.state.equipe == undefined){
+            return LocalUser.data.reseau.length
+        } else {
+            return this.state.equipe.joueurs.length
+        }
+    }
+
      /**
      * Fonction qui permet de prendre une photo depuis la camera
      */
@@ -344,7 +364,7 @@ export default class New_Groupe extends React.Component {
                     </View>
 
                     <View style = {{width :wp('100%'), paddingVertical : hp('1%'), backgroundColor : Color.grayItem, marginTop : hp('2%')}}>
-                        <Text style = {{color : "#A0A0A0", marginLeft : wp('4%')}}>Participants {this.state.joueursSelectionnes.length} sur {LocalUser.data.reseau.length} </Text>
+                        <Text style = {{color : "#A0A0A0", marginLeft : wp('4%')}}>Participants {this.state.joueursSelectionnes.length} sur {this.totalLength()} </Text>
                     </View>
 
                     <FlatList

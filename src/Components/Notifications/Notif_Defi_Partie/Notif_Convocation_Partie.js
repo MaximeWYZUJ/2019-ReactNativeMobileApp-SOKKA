@@ -464,7 +464,11 @@ class Notif_Convocation_Partie extends React.Component {
             return(
                 <View style = {{marginTop : hp('0.5%')}}>
                     <Text>Tu as confirmé ta présence pour cette partie</Text>
-                        
+                    <TouchableOpacity
+                                onPress = {() => this.goToFichePartie()}
+                                >
+                                <Text style = {styles.txtBtn}>Consulter</Text>
+                            </TouchableOpacity>
                             
                 </View>
             )
@@ -472,7 +476,11 @@ class Notif_Convocation_Partie extends React.Component {
             return(
                 <View style = {{marginTop : hp('0.5%')}}>
                     <Text>Tu es indisponible pour cette partie</Text>
-                     
+                    <TouchableOpacity
+                                onPress = {() => this.goToFichePartie()}
+                                >
+                                <Text style = {styles.txtBtn}>Consulter</Text>
+                            </TouchableOpacity>
                 </View>
             )
         }

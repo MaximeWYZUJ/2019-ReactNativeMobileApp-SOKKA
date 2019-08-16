@@ -259,18 +259,14 @@ class Choix_Joueurs_Partie extends React.Component {
                 </TouchableOpacity>
             )
         } else {
-            if(!this.props.navigation.getParam('ajout_Partie_existante', '')) {
+            //if(!this.props.navigation.getParam('ajout_Partie_existante', '')) {
                 return(
                     <TouchableOpacity
                         onPress ={() =>{this.goToNextScreen()}}>
                         <Text style = {styles.txtBoutton}>Je suis seul</Text>
                     </TouchableOpacity>
                 )
-            }   else {
-                return (
-                    <Text>Suivant</Text>
-                )
-            }
+            
         }
     }
    

@@ -43,7 +43,8 @@ class Fiche_Partie_Rejoindre extends React.Component {
         this.joueurAnimation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
         
         this.state = {
-
+           // dataJoueurs : this.props.navigation.getParam('joueursWithData', ''),
+            organisateur : undefined,
             partie : undefined, 
             isLoading : true,
             InsNom : "inconnu",
@@ -192,10 +193,11 @@ class Fiche_Partie_Rejoindre extends React.Component {
         var joueursData = await Database.getArrayDocumentData(partie.participants, "Joueurs")
         
         var organisateur = await Database.getDocumentData(partie.organisateur, "Joueurs");
-
-        this.setState({partie : partie , isLoading : false, joueursData : joueursData, organisateur : organisateur })
         
         this.getCommentaire(partie)
+
+        this.setState({partie : partie , isLoading : false,joueursData :joueursData, organisateur : organisateur })
+
         this.ChangeThisTitle('Partie ' + this.buildDate(new Date(this.state.partie.jour.seconds * 1000)))
 
     }
@@ -427,11 +429,11 @@ class Fiche_Partie_Rejoindre extends React.Component {
 
     async goToFicheJoueur(joueur){
         this.setState({isLoading : true})
-        var db = Database.initialisation()
         var equipes = await Database.getArrayDocumentData(joueur.equipes, "Equipes")
         this.setState({isLoading : false})
         this.props.navigation.push("ProfilJoueur", {id: joueur.id, joueur :joueur, equipes : equipes})
     }
+
 
 
     goToFicheTerrain(){
@@ -490,7 +492,8 @@ class Fiche_Partie_Rejoindre extends React.Component {
     }
 
     _renderBtnRejoindre(){
-        if(! this.state.partie.participants.includes(this.monId))  {
+        var passe = this.state.partie.dateParse >= Date.parse(new Date())
+        if(! this.state.partie.participants.includes(this.monId) && !passe)  {
             return(
                 <TouchableOpacity 
                             style = {styles.btnRejoindre}
@@ -658,6 +661,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
         }
     }
 
+    
 
      /**
      * Fonction qui permet d'afficher les Hommes du match si la partie est passée et 
@@ -762,6 +766,12 @@ class Fiche_Partie_Rejoindre extends React.Component {
         }
     }
 
+    renderPseudoOrga(){
+        if(this.state.organisateur != undefined) {
+            return this.state.organisateur.pseudo
+        }
+    }
+
     displayRender() {
         if(this.state.isLoading) {
             return (
@@ -780,15 +790,13 @@ class Fiche_Partie_Rejoindre extends React.Component {
                         <View>  
                             <View>
                                 {/* Information sur le defi */}
-                                <Text style = {styles.infoDefis}
-                                    onPress={async () => {
-                                        var org = this.state.organisateur;
-                                        if (org != undefined && org != null) {
-                                            var equipesDuJoueur = await Database.getArrayDocumentData(org.equipes, "Equipes");
-                                            this.props.navigation.navigate("ProfilJoueur", {id: org.id, joueur: org, equipes: equipesDuJoueur});
-                                        }
-                                    }}
-                                    > Partie {this.state.partie.format} par {this.state.organisateur.pseudo}</Text>
+                                <View style = {{flexDirection : "row", alignSelf : "center"}}>
+                                    <Text style = {styles.infoDefis}> Partie {this.state.partie.format} par </Text>
+                                    <TouchableOpacity 
+                                        onPress = {() => this.goToFicheJoueur(this.state.organisateur)}>
+                                        <Text>{this.renderPseudoOrga()}</Text>
+                                    </TouchableOpacity>
+                                </View>
                                 <Text style = {styles.separateur}>_____________________________________</Text>
                                 <Text style = {styles.infoDefis}> {date}</Text>
                                 <Text style = {styles.separateur}>_____________________________________</Text>

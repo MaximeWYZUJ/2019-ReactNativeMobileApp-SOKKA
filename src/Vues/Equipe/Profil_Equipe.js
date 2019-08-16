@@ -58,7 +58,7 @@ export default class Profil_Equipe extends React.Component {
             isaMember : true,
             isCaptain : true,
             nom :' ',
-            joueurs :'erreur',
+            joueurs :[],
             defis : 'erreur',
             id : ''  ,           // Utile pour accéder aux joueurs qui likent 
             allDefis : [],
@@ -737,7 +737,7 @@ export default class Profil_Equipe extends React.Component {
 
 
     newGroupe() {
-        this.props.navigation.push("NewGroupe",{joueurs :this.state.joueurs})
+        this.props.navigation.push("NewGroupe",{joueurs :this.state.joueurs, equipe : this.state.equipe})
     }
 
     /**
@@ -771,7 +771,8 @@ export default class Profil_Equipe extends React.Component {
                                     }
                                 }}>
                                 <Text style = {styles.age_ville}>{this.state.txt_identite}</Text>
-                                <Text style = {styles.nb_joueur}>Equipe {this.state.sexe}, {this.state.nbJoueur}</Text>
+                                <Text style = {styles.nb_joueur}>Equipe {this.state.sexe}</Text>
+                                <Text  style = {styles.nb_joueur}>{this.state.nbJoueur}</Text>
                             </TouchableOpacity>
 
                             {/* action de l'équipe */}
@@ -966,7 +967,9 @@ const styles = {
     icon_message : {
         width : 30,
         height : 30,
-        marginBottom : hp('1.5%')
+        marginBottom : hp('1.5%'),
+        marginLeft : wp('4%'),
+        marginRight : wp('4%')
     },
 
     icon_plus : {
