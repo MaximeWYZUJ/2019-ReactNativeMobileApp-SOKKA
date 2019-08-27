@@ -3,7 +3,7 @@
     "name": "SOKKA",
     "slug": "soKKa",
     "privacy": "public",
-    "sdkVersion": "32.0.0",
+    "sdkVersion": "33.0.0",
     "platforms": [
       "ios",
       "android"
@@ -24,12 +24,15 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.yourappname"
+      "bundleIdentifier": "com.yourcompattny.yourappname"
     },
 
     "android" : {
       "package": "com.yourcompattny.yourappname",
-      "versionCode" : 3
+      "versionCode" : 5,
+      "config": {
+        "googleMaps": { "apiKey": "AIzaSyAlMV0mKKWNek6K4dDWkyEODRHWf94pUaA" }   
+     }
     }
   }
 }
