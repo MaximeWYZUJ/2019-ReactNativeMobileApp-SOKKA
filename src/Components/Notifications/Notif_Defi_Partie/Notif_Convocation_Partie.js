@@ -497,7 +497,7 @@ class Notif_Convocation_Partie extends React.Component {
         } else {
             console.log("ELSE RENDER")
             return(
-                <View style = {{flexDirection : 'row',marginTop : hp('2.5%'), borderWidth : 0, alignContent:"center"}}>
+                <View style = {{flexDirection : 'row',marginTop : hp('2.5%'), alignContent:"center"}}>
                     <View>
                         {this.renderPhotoEmetteur()}
                     </View>

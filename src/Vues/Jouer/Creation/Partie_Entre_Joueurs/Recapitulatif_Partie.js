@@ -1,13 +1,12 @@
 import React from 'react'
 
-import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity,FlatList,Alert} from 'react-native'
+import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity,FlatList,Alert,ScrollView} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../../../Components/Colors'
 import Information_Recapitulatif from '../Information_Recapitulatif'
 import ID from '../../../../Helpers/ID'
 import Database from '../../../../Data/Database'
-import { ScrollView } from 'react-native-gesture-handler';
 import LocalUser from '../../../../Data/LocalUser.json'
 import DatesHelpers from '../../../../Helpers/DatesHelpers'
 import Types_Notification from '../../../../Helpers/Notifications/Types_Notification'

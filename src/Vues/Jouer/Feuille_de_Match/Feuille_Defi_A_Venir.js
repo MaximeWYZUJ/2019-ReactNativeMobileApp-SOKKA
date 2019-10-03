@@ -141,9 +141,9 @@ class Feuille_Defi_A_Venir extends React.Component {
         
         var participants = []
         var capitaines = []
-        // Si l'utilisateur fais partie de l'équipe organisatrice 
-        if(this.state.defi.joueursEquipeOrga.includes(this.monId)) {
 
+        // Si l'utilisateur fais partie de l'équipe organisatrice 
+        if(this.state.defi.joueursEquipeOrga.includes(this.monId) || this.state.equipeOrganisatrice.capitaines.includes(this.monId)) {
             // Recuprerer les données des joueurs et séparer les capitaines
             for(var i = 0; i <this.state.defi.joueursEquipeOrga.length; i++) {
                 var j = await Database.getDocumentData(this.state.defi.joueursEquipeOrga[i], "Joueurs")
@@ -158,8 +158,7 @@ class Feuille_Defi_A_Venir extends React.Component {
             
 
         // Si il fait partie de l'équipe defiee
-        } else if(this.state.equipeDefiee != undefined && this.state.defi.joueursEquipeDefiee.includes(this.monId)) {
-            console.log("okokoko in els if")
+        } else if(this.state.equipeDefiee != undefined && this.state.defi.joueursEquipeDefiee.includes(this.monId) || this.state.equipeDefiee.capitaines.includes(this.monId)) {
             // Recuprerer les données des joueurs et séparer les capitaines
             for(var i = 0; i <this.state.defi.joueursEquipeDefiee.length; i++) {
                 var j = await Database.getDocumentData(this.state.defi.joueursEquipeDefiee[i], "Joueurs")
@@ -172,6 +171,7 @@ class Feuille_Defi_A_Venir extends React.Component {
             }        
         }
 
+      
         // trier et concatener les deux array
         participants = participants.sort(function (a, b) {
             if(a.pseudo == b.pseudo ) {
@@ -189,75 +189,10 @@ class Feuille_Defi_A_Venir extends React.Component {
         })
         var joueurs = capitaines.concat(participants)
 
-        console.log("JOUEURS LENGTH ===========", joueurs.length)
         this.setState({joueurs : joueurs, isLoading : false})
-
-        /*console.log("in download all joueur")
-        var participants = []
-        console.log("in download all joueur 2")
-        console.log("this.state.equipeDefiee != undefined", this.state.equipeDefiee != undefined)
-        console.log("ok")
-        console.log(this.state.equipeDefiee)
-        console.log("this.state.equipeDefiee.capitaines",this.state.equipeDefiee.capitaines)
-        console.log("this.state.equipeDefiee.capitaines.includes(this.monId)", this.state.equipeDefiee.capitaines.includes(this.monId))
-        // Trouver l'équipe dont l'utilisateur est capitaine et selectionner les bon joueurs
-        if(this.state.equipeDefiee != undefined  && this.state.equipeDefiee.capitaines.includes(this.monId)) {
-            participants = this.state.defi.joueursEquipeDefiee
-            console.log("participants : ", participants)
-        } else if(this.state.equipeOrganisatrice.capitaines.includes(this.monId)){
-            participants = this.state.defi.joueursEquipeOrga
-        } else {
-
-            console.log("in else ")
-        }
-        console.log("in download all joueur 3")
-        var joueurs = []
-        var capOrga = []
-        var capDefie = []
-        console.log("Avant le for")
-
-        for(var i =0; i < participants.length; i++) {
-
-            var j =  await Database.getDocumentData(participants[i], "Joueurs")
-
-            // Si c'est un des cap de l'équipe organisatrice
-            if(this.state.equipeOrganisatrice.capitaines.includes(j.id)) {
-                capOrga.push(j)
-            } else if(this.state.equipeDefiee != undefined && this.state.equipeDefiee.capitaines.includes(j.id)) {
-                capDefie.push(j)
-            } else {
-                joueurs.push(j)
-            }
-        }
-        // Trier les joueurs
-        joueurs = joueurs.sort(function (a, b) {
-            if(a.pseudo == b.pseudo ) {
-                return 0
-            } else {
-                return a.pseudo.toLowerCase().localeCompare(b.pseudo.toLowerCase())
-            }
-        })
-
-        // Trier les cap
-        capOrga = capOrga.sort(function (a, b) {
-            if(a.pseudo == b.pseudo ) {
-                return 0
-            } else {
-                return a.pseudo.toLowerCase().localeCompare(b.pseudo.toLowerCase())
-            }
-        })
-        capDefie = capDefie.sort(function (a, b) {
-            if(a.pseudo == b.pseudo ) {
-                return 0
-            } else {
-                return a.pseudo.toLowerCase().localeCompare(b.pseudo.toLowerCase())
-            }
-        })
         
-        // Concatener en respectant l'ordre
-        joueurs = capOrga.concat(capDefie).concat(joueurs)
-        this.setState({joueurs : joueurs, isLoading : false})
-        console.log("end download all data joueur")*/
+        
+
     }
 
     
@@ -988,6 +923,7 @@ class Feuille_Defi_A_Venir extends React.Component {
          )
         } else {
             console.log("in render player liste")
+            console.log(this.state.joueurs)
              return(
                  <View>
                     <View style = {{backgroundColor : Color.lightGray, marginBottom : hp('2%')}}>

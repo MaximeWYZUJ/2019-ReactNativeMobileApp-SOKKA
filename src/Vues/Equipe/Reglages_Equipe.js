@@ -1,7 +1,9 @@
 import React from 'react'
 import {View,Text,Button, Picker, TextInput, TouchableOpacity, Image, Alert} from 'react-native'
-import { Camera, ImagePicker, Permissions } from 'expo';
-import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import { Camera } from 'expo-camera';
+
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from "react-native-responsive-fontsize"
 import Database from '../../Data/Database';
 import NormalizeString from '../../Helpers/NormalizeString'

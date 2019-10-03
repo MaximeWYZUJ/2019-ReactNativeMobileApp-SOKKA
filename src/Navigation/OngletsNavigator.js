@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator, createStackNavigator } from 'react-navigation';
-
+import {View, Text,Image,TouchableOpacity,Alert,Icon} from 'react-native'
 import AccueilProfil from './Navigation'
 //import AccueilProfil from '../TabBar/TempProfil'
 import AccueilNotifs from '../TabBar/Notifications/AccueilNotifications'
@@ -13,28 +13,53 @@ const OngletsNavigator = createBottomTabNavigator({
     TabAccueilProfil: {
         screen: AccueilProfil,
         navigationOptions: {
-            tabBarLabel: "PROFIL"
+            tabBarLabel: "PROFIL",
+            tabBarIcon: ({ tintColor, focused }) => (
+               <Image source = {require("../../res/avatar.png")}
+               style = {{width : 24, height : 24}}/>
+            )
+            
         }
     },
 
     TabAccueilNotifs: {
         screen: AccueilNotifs,
         navigationOptions: {
-            tabBarLabel: "NOTIFS"
+            tabBarLabel: "NOTIFS",
+            tabBarIcon: ({ tintColor, focused }) => (
+                <Image source = {require("../../res/notification.png")}
+                style = {{width : 24, height : 24}}/>
+            )
         }
     },
 
     TabAccueilJouer: {
         screen: AccueilJouer,
         navigationOptions: {
-            tabBarLabel: "JOUER"
+            tabBarLabel: "JOUER",
+            tabBarIcon: ({ tintColor, focused }) => (
+                <Image source = {require("../../res/ball.png")}
+                style = {{width : 24, height : 24}}/>
+            )
+            /*tabBarIcon: ({ tintColor, focused }) => (
+                <TouchableOpacity
+                    onPress = {() => {
+                        Alert.alert("ee","ee")
+                    }}>
+                    <Text>kkkkkk</Text>
+                </TouchableOpacity>
+            )*/
         }
     },
 
     TabAccueilRecherche: {
         screen: AccueilRecherche,
         navigationOptions: {
-            tabBarLabel: "RECHERCHE"
+            tabBarLabel: "RECHERCHE",
+            tabBarIcon: ({ tintColor, focused }) => (
+                <Image source = {require("../../res/search.png")}
+                style = {{width : 24, height : 24}}/>
+            )
         }
     }
 

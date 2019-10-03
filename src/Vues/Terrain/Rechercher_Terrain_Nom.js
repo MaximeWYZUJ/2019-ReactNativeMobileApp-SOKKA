@@ -1,12 +1,11 @@
 import React from 'react'
-import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity, Slider,ListView,ScrollView} from 'react-native'
+import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity, Slider,ListView,ScrollView,FlatList} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Barre_Recherche from '../../Components/Recherche/Barre_Recherche'
 import Colors from '../../Components/Colors'
 import Color from '../../Components/Colors';
 import Terrains from '../../Helpers/Toulouse.json'
-import { FlatList } from 'react-native-gesture-handler';
 import ItemTerrain from '../../Components/Terrain/ItemTerrain'
 //import Slider from "react-native-slider";
 import Distance from '../../Helpers/Distance'

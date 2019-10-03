@@ -562,7 +562,7 @@ class Feuille_Defi_Passe extends React.Component {
      */
     _renderBtnBut(equipe) {
 
-        if(this.state.displayBtnBut) {
+        if(this.state.displayBtnBut && equipe != undefined) {
             return(
                     
                 <View style = {{flexDirection : "row", alignItems:'center', justifyContent:'center', marginLeft : wp('3%'), marginRight : wp('3%')}}>
@@ -582,6 +582,12 @@ class Feuille_Defi_Passe extends React.Component {
                     </TouchableOpacity>
                 </View>
                 
+            )
+        } else {
+            return (
+                <View
+                style = {{width : wp('5%')}} />
+
             )
         }
     }

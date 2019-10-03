@@ -39,6 +39,8 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
     constructor(props) {
         super(props)
+
+        console.log("IN CONSTRUCTOR FICHE DEFI REJOINDRE")
         this.idDefi = this.props.navigation.getParam('id','erreur')
         this.equipe1Animation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
         this.equipe2Animation = new Animated.ValueXY({ x: wp('100%'), y:0 })

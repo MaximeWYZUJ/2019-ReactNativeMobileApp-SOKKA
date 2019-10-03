@@ -492,7 +492,8 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
 
                         var title = "Nouvelle notif"
                         var corps = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.equipe.nom 
-                        corps = corps + " t'as convoqué / relancé pour un un défi le " + this.buildDate(new Date(this.defi.jour.seconds * 1000))
+                        console.log(defi.jour)
+                        corps = corps + " t'as convoqué / relancé pour un un défi le " + this.buildDate(new Date(defi.jour.seconds * 1000))
                         this.sendPushNotification(tokens[k], title, corps)
                     }
                 }
@@ -688,10 +689,38 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                     <Text style = {styles.txtBoutton}>Convoquer</Text>
                 </TouchableOpacity>
             ) 
+        } else if(this.state.joueursSelectionnes.length == 0) {
+            return (
+                <TouchableOpacity
+                    onPress ={() => {
+                        // Si on convoque des joueurs à un défi existant               
+                        if(this.props.navigation.getParam("convocation", false)) {
+                            this.alertConvocation()
+                        // Si on crée un nouveau défi
+                        } else {
+                            this.gotoNextScreen()
+                        }
+                    }}
+                    >
+                    <Text style = {styles.txtBoutton}>Plus tard</Text>
+                </TouchableOpacity>
+            )
         } else {
             return (
-                <Text>Suivant</Text>
-            )
+                <TouchableOpacity
+                    onPress ={() => {
+                        // Si on convoque des joueurs à un défi existant               
+                        if(this.props.navigation.getParam("convocation", false)) {
+                            this.alertConvocation()
+                        // Si on crée un nouveau défi
+                        } else {
+                            this.gotoNextScreen()
+                        }
+                    }}
+                    >
+                    <Text style = {styles.txtBoutton}>Le reste plus tard</Text>
+                </TouchableOpacity>
+            )   
         }
     }
 

@@ -333,7 +333,7 @@ class Notif_Defis_Contre_Equipe extends React.Component {
             )
         } else {
             return(
-                <View style = {{flexDirection : 'row', borderWidth : 1,marginTop : hp('2%')}}>
+                <View style = {{flexDirection : 'row',marginTop : hp('2%')}}>
                     <View>
                         {this.renderPhotoEquipeEmetteur()}
                     </View>

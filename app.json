@@ -29,9 +29,9 @@
 
     "android" : {
       "package": "com.yourcompattny.yourappname",
-      "versionCode" : 5,
+      "versionCode" : 10,
       "config": {
-        "googleMaps": { "apiKey": "AIzaSyAlMV0mKKWNek6K4dDWkyEODRHWf94pUaA" }   
+        "googleMaps": { "apiKey": "AIzaSyCOnOIQwHw3powkcmp7JgNu8J6iG04kGQM" }   
      }
     }
   }

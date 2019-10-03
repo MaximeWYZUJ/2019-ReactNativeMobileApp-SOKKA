@@ -64,7 +64,7 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
                         checkedColor = {Colors.agOOraBlue}
                         right
                         containerStyle={{backgroundColor: 'white', borderWidth :0,marginTop : hp('0.1%'), alignSelf : 'center'}}                    
-                        checked={this.state.isShown}
+                        checked={this.props.terrainSelectionne == this.props.id}
                         onPress={() => {
                             this._chooseTerrain(this.props.id)
                             var checked = this.state.isShown

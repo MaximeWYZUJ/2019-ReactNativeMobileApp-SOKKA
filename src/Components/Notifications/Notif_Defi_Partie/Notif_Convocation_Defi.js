@@ -576,7 +576,7 @@ class Notif_Convocation_Defi extends React.Component {
         } else {
             console.log("ELSE RENDER")
             return(
-                <View style = {{flexDirection : 'row',marginTop : hp('2%'), borderWidth : 1}}>
+                <View style = {{flexDirection : 'row',marginTop : hp('2%')}}>
                     <View>
                         {this.renderPhotoEmetteur()}
                     </View>

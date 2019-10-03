@@ -1,5 +1,5 @@
 import React from 'react'
-import {View, Alert,TouchableOpacity,FlatList, Image,Dimensions,StyleSheet,Text} from 'react-native'
+import {View, Alert,TouchableOpacity,FlatList, Image,Dimensions,StyleSheet,Text,ScrollView} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import MapView, { MAP_TYPES, ProviderPropType } from 'react-native-maps';
@@ -15,7 +15,6 @@ import FiltrerDefi from '../../Components/Recherche/FiltrerDefi'
 import Distance from '../../Helpers/Distance'
 import { withNavigation } from 'react-navigation'
 import Carousel from 'react-native-snap-carousel';
-import { ScrollView } from 'react-native-gesture-handler';
 import Slider from 'react-native-slider';
 import Color from '../../Components/Colors'
 import LocalUser from '../../Data/LocalUser.json'

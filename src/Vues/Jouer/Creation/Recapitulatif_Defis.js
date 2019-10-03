@@ -1,7 +1,7 @@
 
 import React from 'react'
 
-import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity,TextInput,Alert} from 'react-native'
+import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity,TextInput,Alert, ScrollView} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../../Components/Colors'
@@ -14,7 +14,6 @@ import LocalUser from '../../../Data/LocalUser.json'
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
 
 import Notification from '../../../Helpers/Notifications/Notification'
-import { ScrollView } from 'react-native-gesture-handler';
 
 /**
  * Classe qui va permettre d'afficher le récapitulatif d'un défis crée par 

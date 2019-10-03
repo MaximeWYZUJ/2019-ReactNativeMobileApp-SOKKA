@@ -7,8 +7,10 @@ import Database from '../../Data/Database'
 import Color from '../../Components/Colors';
 import Simple_Loading from '../../Components/Loading/Simple_Loading'
 import StarRating from 'react-native-star-rating'
-import { Camera, ImagePicker, Permissions } from 'expo';
+import { Camera } from 'expo-camera';
 
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import AlphabetListView from 'react-native-alphabetlistview'

@@ -11,8 +11,10 @@ import * as firebase from 'firebase';
 import Simple_Loading from '../../Components/Loading/Simple_Loading'
 import Types_Notification from '../../Helpers/Notifications/Types_Notification'
 
-import { Camera, ImagePicker, Permissions } from 'expo';
+import { Camera } from 'expo-camera';
 
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
 export default class Creation_Equipe_Photo extends React.Component {
 
     constructor(props) {

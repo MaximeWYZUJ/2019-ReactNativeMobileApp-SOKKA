@@ -3,7 +3,10 @@ import React from 'react'
 import {View, Text, Image, TouchableOpacity, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
-import { Camera, ImagePicker, Permissions } from 'expo';
+import { Camera } from 'expo-camera';
+
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
 import Database from '../../Data/Database'
 import villes from '../../Components/Creation/villes.json'
 import departements from '../../Components/Creation/departements.json'
@@ -135,9 +138,11 @@ export default class Inscription_Photo extends React.Component {
      * Fonction qui permet de prendre une photo depuis la camera
      */
     pickImageCamera = async () => {
+        console.log("this.pickImageCamera")
         /* Obtenir les permissions. */
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
 
+        console.log(status)
         if (status === "granted") {
             this.setState({usingCamera: true})
         }

@@ -305,7 +305,7 @@ class Notif_Demande_Rejoindre_Capitaines extends React.Component {
     chooseOptionToRender(){
         if(this.state.a_accepte) {
             return(
-                <Text style = {{marginTop : hp('1%')}}>{"Tu est devenu capitaine de l'équipe\n"+ this.nomEquipe()}</Text>
+                <Text style = {{marginTop : hp('1%')}}>{"Tu es devenu capitaine de l'équipe\n"+ this.nomEquipe()}</Text>
             )
         } else if(this.state.a_refuse) {
             return(

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity,FlatList,Alert,KeyboardAvoidingView} from 'react-native'
+import {View, Text,Image,  StyleSheet,ScrollView, TextInput, Animated,TouchableOpacity,FlatList,Alert,KeyboardAvoidingView} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Database from '../../../Data/Database';
@@ -10,7 +10,6 @@ import Terrains from '../../../Helpers/Toulouse.json'
 import actions from '../../../Store/Reducers/actions'
 import Color from '../../../Components/Colors';
 import StarRating from 'react-native-star-rating'
-import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import Joueur_Pseudo_Score from '../../../Components/ProfilJoueur/Joueur_Pseudo_Score'
 import LocalUser from '../../../Data/LocalUser.json'
 import { StackActions, NavigationActions } from 'react-navigation';
@@ -73,7 +72,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
             const {state} = navigation;
             return { title: `${state.params.title}`, 
             headerLeft: (
-
+                    
                <TouchableOpacity
                 onPress = {() =>navigation.dispatch(resetAction)} >
                    <Image

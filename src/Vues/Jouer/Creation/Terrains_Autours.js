@@ -81,7 +81,9 @@ class Terrains_Autours extends React.Component {
 						latitude: parseFloat(this.state.allTerrains[i].Latitude)  ,
 						longitude: parseFloat(this.state.allTerrains[i].Longitude),
 					},
-					id : this.state.allTerrains[i].id
+					id : this.state.allTerrains[i].id,
+					index : i,
+					nom : this.state.allTerrains[i].InsNom
 				}
 				markers.push(t)
 			}
@@ -127,7 +129,8 @@ class Terrains_Autours extends React.Component {
 								latitude: parseFloat(this.state.allTerrains[i].Latitude)  ,
 								longitude: parseFloat(this.state.allTerrains[i].Longitude),
 							},
-							id : this.state.allTerrains[i].id
+							id : this.state.allTerrains[i].id,
+							nom : this.state.allTerrains[i].InsNom
 						}
 						markers.push(t)
 					}
@@ -156,7 +159,9 @@ class Terrains_Autours extends React.Component {
 							latitude: parseFloat(this.state.allTerrains[i].Latitude)  ,
 							longitude: parseFloat(this.state.allTerrains[i].Longitude),
 						},
-						id : this.state.allTerrains[i].id
+						id : this.state.allTerrains[i].id,
+						nom : this.state.allTerrains[i].InsNom
+
 					}
 					markers.push(t)
 				}
@@ -291,7 +296,7 @@ class Terrains_Autours extends React.Component {
             for (v of tableau) {
                 vLat = v.Latitude;
                 vLong = v.Longitude;
-                d = Distance.calculDistance(this.state.latitude, this.state.longitude, vLat, vLong);
+                d = Distance.calculDistance(this.state.region.latitude, this.state.region.longitude, vLat, vLong);
                 
                 if (d < distanceMax) {
                     terrainsProches.push({...v, distance: d});
@@ -311,26 +316,37 @@ class Terrains_Autours extends React.Component {
 
 	relancerRecherche() {
 
+		console.log(this.state.region)
 		this.triTerrains(this.buildTerrainsWithRegionChanged()).then(() => {
+			console.log("then tri terrain")
 			var markers = []
 			for(var i =0 ; i < Math.min(8, this.state.allTerrains.length); i ++) {
+				console.log("in for", i)
+				console.log(this.state.allTerrains[i].Latitude)
+				console.log(this.state.allTerrains[i].Latitude)
+
 				var t =  {
 					title: ' ',
 					coordinates: {
 						latitude: parseFloat(this.state.allTerrains[i].Latitude)  ,
 						longitude: parseFloat(this.state.allTerrains[i].Longitude),
 					},
-					id : newListe[i].id
+					//id : newListe[i].id
+					id : this.state.allTerrains[i].id,
+					nom : this.state.allTerrains[i].InsNom
+
 				}
 				markers.push(t)
 			}
 
+			console.log("before building region")
 			var region = {
 				latitude: parseFloat(this.state.allTerrains[0].Latitude),
 				longitude: parseFloat(this.state.allTerrains[0].Longitude),
 				latitudeDelta: 0.0922,
 				longitudeDelta: 0.0421,
 			}
+			console.log("new region : ", region)
 			this.map.animateToRegion(region,1000)
 			this.setState({markers : markers, terrainFiltres : this.state.allTerrains, terrainSelectionne : markers[0]})
 		})
@@ -579,6 +595,11 @@ class Terrains_Autours extends React.Component {
 									<MapView.Marker 
 										coordinate={marker.coordinates}
 										title={marker.title}
+										onPress = {() => {
+											Alert.alert(
+												"",
+												"Tu souhaites selectionner le terrain : " + marker.nom)
+										}}
 										description = {"okok"}>
 										<Image source = {image_terrain_selected} style = {{width : 80, height : 80}}/>
 									</MapView.Marker>
@@ -588,6 +609,12 @@ class Terrains_Autours extends React.Component {
 									<MapView.Marker 
 										coordinate={marker.coordinates}
 										title={marker.title}
+										onPress = {() => {
+											console.log(marker)
+											Alert.alert(
+												"",
+												"Tu souhaites selectionner le terrain : " + marker.nom)
+										}}
 										description = {"okok"}>
 										<Image source = {image_terrain} style = {{width : 80, height : 80}}/>
 									</MapView.Marker>

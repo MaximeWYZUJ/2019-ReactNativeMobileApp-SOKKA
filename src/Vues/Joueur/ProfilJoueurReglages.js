@@ -1,7 +1,10 @@
 import React from 'react'
 import {Picker, TouchableOpacity, ScrollView, View, Text, StyleSheet, Image, Button, TextInput, ListView, Alert } from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import { Camera, ImagePicker, Permissions } from 'expo';
+import { Camera } from 'expo-camera';
+
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
 import DatePicker from 'react-native-datepicker'

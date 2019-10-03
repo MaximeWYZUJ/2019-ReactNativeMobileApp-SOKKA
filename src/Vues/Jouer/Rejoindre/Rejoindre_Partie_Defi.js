@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity,FlatList,Alert} from 'react-native'
+import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity,FlatList,Alert,ScrollView} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Barre_Recherche from '../../../Components/Recherche/Barre_Recherche'
@@ -9,7 +9,6 @@ import Item_Defi from '../../../Components/Defis/Item_Defi'
 import Colors from '../../../Components/Colors';
 import DataBase from '../../../Data/Database'
 import Type_Defis from '../Type_Defis'
-import { ScrollView } from 'react-native-gesture-handler';
 
 
 
