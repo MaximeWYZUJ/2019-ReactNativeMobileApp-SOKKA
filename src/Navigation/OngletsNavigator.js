@@ -66,7 +66,7 @@ const OngletsNavigator = createBottomTabNavigator({
 },
 
 {
-    lazy: false
+    lazy: true
 })
 
 //export default (createStackNavigator({OngletsNavigator}, {headerMode: "none"}))

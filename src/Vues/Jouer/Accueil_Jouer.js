@@ -379,11 +379,7 @@ class Accueil_Jouer extends React.Component {
                                 this.props.navigation.push("CalendrierJoueur")}}>
                             <Text style ={styles.txtTitre}>Afficher ton calendrier</Text>
                        </TouchableOpacity>
-                       {/*<TouchableOpacity  
-                            style = {styles.bloc}
-                            onPress = {() => this.props.navigation.push("RejoindrePartieDefi")}>
-                            <Text style ={styles.txtTitre}>Rejoindre un défi / partie déjà créé</Text>
-                       </TouchableOpacity>*/}
+                     
                     </View>
                 
 

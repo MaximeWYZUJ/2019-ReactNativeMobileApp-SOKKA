@@ -2,7 +2,7 @@
 import React from 'react'
 
 import {View, Text,Image,TouchableOpacity} from 'react-native'
-import { CheckBox } from 'react-native-elements'
+import CheckBox from 'react-native-checkbox';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../Colors'
@@ -60,8 +60,8 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
             return (
                 <View style = {{flexDirection :'row'}}>
                     <CheckBox
-                        title=' '
-                        checkedColor = {Colors.agOOraBlue}
+                    label=' '
+                    checkedColor = {Colors.agOOraBlue}
                         right
                         containerStyle={{backgroundColor: 'white', borderWidth :0,marginTop : hp('0.1%'), alignSelf : 'center'}}                    
                         checked={this.props.terrainSelectionne == this.props.id}

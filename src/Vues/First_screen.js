@@ -1,5 +1,5 @@
 import React from 'react'
-import {YellowBox, View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity, Alert} from 'react-native'
+import {YellowBox, View, Text, ImageBackground,  StyleSheet, Animated,TouchableOpacity, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Database from '../Data/Database'
@@ -12,6 +12,7 @@ import villes from '../Components/Creation/villes.json'
 import departements from '../Components/Creation/departements.json'
 import NormalizeString from '../Helpers/NormalizeString';
 import Simple_Loading from '../Components/Loading/Simple_Loading'
+import FastImage from 'react-native-fast-image'
 
 /** Pour afficher 5sec faire deux fonction qui affiche qqchose et en fonction du state appeler une ou l'autre */
 /**
@@ -276,7 +277,7 @@ class First_screen extends React.Component {
                             <Text>A toi de les suivre ou de t'adapter à la rencontre</Text>
 
                             {/* Image de l'herbre */}
-                            <Image
+                            <FastImage
                                 source = {require('app/res/grass.jpg')}
                                 style = {styles.grass}
                             />

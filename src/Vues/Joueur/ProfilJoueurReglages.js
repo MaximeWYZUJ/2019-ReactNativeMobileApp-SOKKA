@@ -27,7 +27,9 @@ class ProfilJoueurReglages extends React.Component {
         this.id = this.props.navigation.getParam('id', null)
 
         var auj = new Date();
-        var jNaissance = firebase.firestore.Timestamp.fromMillis(Date.parse(this.joueur.naissance)).toDate();
+      
+
+        var jNaissance = new Date(this.joueur.naissance.seconds * 1000)
         var jNaissanceDisp = jNaissance.getDate()+'-'+(jNaissance.getMonth()+1)+'-'+jNaissance.getFullYear();
         
         this.today = auj.getFullYear() + '-' + (auj.getMonth() + 1) + '-' + auj.getDate();

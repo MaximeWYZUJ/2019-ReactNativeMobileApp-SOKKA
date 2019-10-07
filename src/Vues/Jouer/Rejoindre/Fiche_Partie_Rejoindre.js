@@ -491,16 +491,8 @@ class Fiche_Partie_Rejoindre extends React.Component {
     }
 
     _renderBtnRejoindre(){
-        var passe = this.state.partie.dateParse >= Date.parse(new Date())
-        if(! this.state.partie.participants.includes(this.monId) && !passe)  {
-            return(
-                <TouchableOpacity 
-                            style = {styles.btnRejoindre}
-                            onPress = {() => this.handlePressRejoindre()}>
-                            <Text>S'inscrire</Text>
-                </TouchableOpacity>
-            )
-        }else {
+        var passe = this.state.partie.dateParse <= Date.parse(new Date())
+        if(this.state.partie.participants.includes(this.monId)  || passe) {
             return(
                 <View>
                     <TouchableOpacity 
@@ -530,7 +522,18 @@ class Fiche_Partie_Rejoindre extends React.Component {
                     </TouchableOpacity>
                 </View>
             )
+        } else {
+             
+            return(
+                <TouchableOpacity 
+                            style = {styles.btnRejoindre}
+                            onPress = {() => this.handlePressRejoindre()}>
+                            <Text>S'inscrire</Text>
+                </TouchableOpacity>
+            )
         }
+
+
     }
 
     //=====================================================================

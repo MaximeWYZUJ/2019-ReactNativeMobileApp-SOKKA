@@ -354,6 +354,7 @@ export default class Recapitulatif_Partie extends React.Component {
                             duree = {this.duree}
                             nomsTerrain = {this.nomsTerrain}
                             pseudo = {this.userData.pseudo}
+                            isPartie = {true}
                         />
                     </View>
                     {/* View contenant les deux équipes */}

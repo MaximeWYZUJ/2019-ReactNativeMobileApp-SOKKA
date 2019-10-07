@@ -38,13 +38,34 @@ class ProfilJoueurMesFavoris extends React.Component {
 
     async getData() {
         arrayJ = await Database.getArrayDocumentData(this.joueur.reseau, 'Joueurs')
-        this.setState({reseau: arrayJ, gotDataReseau: true})
+        var joueursTries = arrayJ.sort((j1,j2) => {
+            if(j1.pseudo <= j2.pseudo) {
+                return 1
+            } else {
+                return -1
+            }
+        })
+        this.setState({reseau: joueursTries, gotDataReseau: true})
 
         arrayE = await Database.getArrayDocumentData(this.joueur.equipesFav, 'Equipes')
-        this.setState({equipesFav: arrayE, gotDataEquipesFav: true})
+        var equipesTriees = arrayE.sort((e1,e2) => {
+            if(e1.nom <= e2.nom) {
+                return 1
+            } else {
+                return -1
+            }
+        })
+        this.setState({equipesFav: equipesTriees, gotDataEquipesFav: true})
 
         arrayT = await Database.getArrayDocumentData(this.joueur.terrains, 'Terrains')
-        this.setState({terrainsFav: arrayT, gotDataTerrainsFav: true})
+        var terrainsTries = arrayE.sort((t1,t2) => {
+            if(t1.InsNom <= t2.InsNom) {
+                return 1
+            } else {
+                return -1
+            }
+        })
+        this.setState({terrainsFav: terrainsTries, gotDataTerrainsFav: true})
     }
 
 

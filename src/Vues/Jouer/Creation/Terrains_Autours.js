@@ -17,7 +17,7 @@ import Slider from "react-native-slider";
 import Color from '../../../Components/Colors'
 import FiltrerTerrain from '../../../Components/Recherche/FiltrerTerrain'
 import LocalUser from '../../../Data/LocalUser.json'
-
+import actions from '../../../Store/Reducers/actions'
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / hp('48%');
@@ -94,6 +94,31 @@ class Terrains_Autours extends React.Component {
         this.demanderGeolocalisation();
 	}
 	
+
+	/**
+     * Permet de choisir un terrain et le stock dans un state global 
+     * 
+     * @param {String} idTerrain 
+     */
+    _chooseTerrain(idTerrain ) {
+		console.log("id terrain", idTerrain)
+		const action = { type: actions.CHOISIR_TERRAIN, value: idTerrain}
+		this.props.dispatch(action)
+
+		const action2 = {type : actions.SAVE_NOM_TERRAIN , 
+			value : {
+				InsNom : this.props.InsNom,
+				EquNom : this.props.EquNom,
+				N_Voie : this.props.N_Voie,
+				Voie : this.props.Voie,
+				CodePostal : this.props.CodePostal,
+				Ville : this.props.Ville,
+				distance : this.props.distance
+			}
+		}
+		this.props.dispatch(action2)
+
+}
 
 
     didFocusAction = () => {
@@ -594,14 +619,25 @@ class Terrains_Autours extends React.Component {
 								return(
 									<MapView.Marker 
 										coordinate={marker.coordinates}
+										
 										title={marker.title}
 										onPress = {() => {
 											Alert.alert(
 												"",
-												"Tu souhaites selectionner le terrain : " + marker.nom)
+												"Tu souhaites selectionner le terrain : " + marker.nom,
+												[
+													{text: 'Confirmer', onPress: () => {
+														this._chooseTerrain(marker.id)
+													}},
+													{
+													  text: 'Annuler',
+													  onPress: () => console.log('Cancel Pressed'),
+													  style: 'cancel',
+													},
+												]) 
 										}}
-										description = {"okok"}>
-										<Image source = {image_terrain_selected} style = {{width : 80, height : 80}}/>
+										description = {"okok"}
+										icon = {image_terrain_selected}>
 									</MapView.Marker>
 								)
 							} else {
@@ -613,10 +649,20 @@ class Terrains_Autours extends React.Component {
 											console.log(marker)
 											Alert.alert(
 												"",
-												"Tu souhaites selectionner le terrain : " + marker.nom)
+												"Tu souhaites selectionner le terrain : " + marker.nom,
+												[
+													{text: 'Confirmer', onPress: () => {
+														this._chooseTerrain(marker.id)
+													}},
+													{
+													  text: 'Annuler',
+													  onPress: () => console.log('Cancel Pressed'),
+													  style: 'cancel',
+													},
+												]) 
 										}}
-										description = {"okok"}>
-										<Image source = {image_terrain} style = {{width : 80, height : 80}}/>
+										description = {"okok"}
+										icon = {image_terrain}>
 									</MapView.Marker>
 								)
 							}
