@@ -336,7 +336,26 @@ export default class Creation_Equipe_Photo extends React.Component {
     
                     {/* Bandeau superieur */}
                     <View style = {styles.bandeau}>
-                        <Text> </Text>
+                    <TouchableOpacity
+                        onPress ={() => Alert.alert(
+                                '',
+                                "Es-tu sûr de vouloir quitter ?",
+                                [
+                                    {
+                                        text: 'Oui',
+                                        onPress: () =>  this.props.navigation.push("ProfilJoueur")
+                                        
+                                    },
+                                    {
+                                        text: 'Non',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                            )}>
+                        <Text style = {styles.txtBoutton} >Annuler</Text>
+                    </TouchableOpacity>
+                    
                         <Text style= {{ alignSelf : "center", marginLeft : wp('22%'), marginRight : wp('13%'), fontSize : RF(3.1)}}>Photo</Text>
                         <TouchableOpacity
                         onPress = {() => this.saveEquipeInDb()}

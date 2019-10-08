@@ -21,13 +21,7 @@ class  Joueur_Pseudo_Score extends React.Component {
     }
 
 
-    async gotoProfil() {
-        console.log("in gotoprofil")
-        console.log(this.props.data.equipes)
-        var equipes = await Database.getArrayDocumentData(this.props.data.equipes,"Equipes")
-        console.log("after equipe")
 
-    }
     render(){
 
         var taille = wp('16%')
@@ -35,8 +29,7 @@ class  Joueur_Pseudo_Score extends React.Component {
             taille = this.props.tailleImageJoueur
         }
         return(
-            <TouchableOpacity style = {[styles.containerItemJoueur, this.props.style]}
-            onPress = {() => this.gotoProfil()}>
+            <View style = {[styles.containerItemJoueur, this.props.style]}>
 
                 <Image
                     source = {{uri : this.props.photo}}
@@ -55,7 +48,7 @@ class  Joueur_Pseudo_Score extends React.Component {
                         emptyStarColor='#B1ACAC'
                     />
                 </View> 
-            </TouchableOpacity>
+            </View>
         )
     }
 }

@@ -832,6 +832,13 @@ class Feuille_Defi_A_Venir extends React.Component {
         Alert.alert('', "Les joueurs en attente ont été relancés")
     }
 
+    async goToProfilJoueur(joueur){
+        this.setState({isLoading : true})
+        var equipes = await Database.getArrayDocumentData(joueur.equipes, "Equipes")
+        this.setState({isLoading : false})
+        this.props.navigation.push("ProfilJoueur", {id: joueur.id, joueur : joueur, equipes : equipes, reseau : []})
+    }
+
    
 
     //=========================================================================================
@@ -886,11 +893,16 @@ class Feuille_Defi_A_Venir extends React.Component {
 
             
             return(
-                <View style = {styles.containerItemJoueur}>
+                <TouchableOpacity style = {styles.containerItemJoueur}
+                    onPress = {() => this.goToProfilJoueur(item)}>
                     <Joueur_Pseudo_Score
                         photo = {item.photo}
                         score = {item.score}
                         pseudo = {item.pseudo}
+                        id = {item.id}
+                        data = {{
+                            equipes : item.equipes
+                        }}
                     />
 
                     {this.btnsConfirmer(item.id)}
@@ -904,7 +916,7 @@ class Feuille_Defi_A_Venir extends React.Component {
                     </View>
 
                    
-                </View>
+                </TouchableOpacity>
             
             )
         }

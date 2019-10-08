@@ -1,4 +1,6 @@
-import { Constants, Location, Permissions,Notifications } from 'expo';
+import { Constants, Location,Notifications } from 'expo';
+import * as Permissions from 'expo-permissions';
+
 import Database from '../../Data/Database'
 
 

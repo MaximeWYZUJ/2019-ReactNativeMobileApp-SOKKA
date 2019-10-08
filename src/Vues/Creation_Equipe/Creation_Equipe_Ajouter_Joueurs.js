@@ -1,5 +1,5 @@
 import React from 'react'
-import {View, Text,Image,TouchableOpacity,} from 'react-native'
+import {View, Text,Image,TouchableOpacity,Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
@@ -30,8 +30,26 @@ class Creation_Equipe_Ajouter_Joueurs_Final extends React.Component {
         return(
             <View style = {{flex :1}}>
             <View style = {styles.bandeau}>
-                <Text> </Text>
-                <Text style= {{ alignSelf : "center", fontSize : RF(2.6)}}>Ajouter des joueurs</Text>
+            <TouchableOpacity
+                        onPress ={() => Alert.alert(
+                                '',
+                                "Es-tu sûr de vouloir quitter ?",
+                                [
+                                    {
+                                        text: 'Oui',
+                                        onPress: () =>  this.props.navigation.push("ProfilJoueur")
+                                        
+                                    },
+                                    {
+                                        text: 'Non',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                            )}>
+                        <Text style = {styles.txtBoutton} >Annuler</Text>
+                    </TouchableOpacity>
+                <Text style= {{ fontSize : RF(2.6)}}>Ajouter des joueurs</Text>
                 <TouchableOpacity
                     onPress = {()=> this.props.navigation.push(
                         "CreationEquipeCitation",

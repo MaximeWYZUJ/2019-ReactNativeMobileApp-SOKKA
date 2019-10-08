@@ -12,7 +12,7 @@ import '@firebase/firestore'
 import {SkypeIndicator} from 'react-native-indicators';
 import { Constants, Location, Permissions,Notifications } from 'expo';
 import villes from '../../Components/Creation/villes.json'
-
+import {AsyncStorage} from 'react-native';
 /**
  * Classe qui va permettre d'afficher la page de choix du mode de connexion.
  */
@@ -85,6 +85,18 @@ export default class Modes_de_connexion extends React.Component {
         })    
     }
 
+
+    _storeData = async () => {
+        console.log("in store data")
+        try {
+          await AsyncStorage.setItem('email', this.state.mail);
+          await AsyncStorage.setItem('password', this.state.mdp);
+        } catch (error) {
+          // Error saving data
+          console.log(error)
+        }
+      };
+
     displayTxtCo() {
             return (
                 <View>
@@ -126,6 +138,9 @@ export default class Modes_de_connexion extends React.Component {
         firebase.auth().signInWithEmailAndPassword(this.state.mail, this.state.mdp)
         .then(async (userCred) => {
             if (userCred.user.emailVerified || !checkEmailVerifie) {
+                
+                this._storeData()
+
                 console.log("email verifie")
                 // Récupérations des données de la DB
                 j = await Database.getDocumentData(firebase.auth().currentUser.uid, "Joueurs");

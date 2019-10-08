@@ -6,7 +6,9 @@ import FirstStack from './src/Navigation/FirstStackNavigation'
 import { Provider } from 'react-redux'
 import Store from './src/Store/ConfigureStore'
 //import Defis_Equipe from './src/Components/Profil_Equipe/Defis_Equipe'
-import { Permissions, Notifications} from 'expo'
+import { Notifications} from 'expo'
+import * as Permissions from 'expo-permissions';
+
 import firebase from 'firebase'
 
 export default class App extends React.Component {

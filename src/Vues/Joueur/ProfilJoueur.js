@@ -6,7 +6,8 @@ import RF from 'react-native-responsive-fontsize';
 import Distance from '../../Helpers/Distance'
 import Database from '../../Data/Database'
 import LocalUser from '../../Data/LocalUser.json'
-import { Constants, Location, Permissions,Notifications } from 'expo';
+import { Constants, Location,Notifications } from 'expo';
+import * as Permissions from 'expo-permissions';
 import Type_Defis from '../../Vues/Jouer/Type_Defis'
 import Types_Notification from '../../Helpers/Notifications/Types_Notification'
 import Item_Defi from '../../Components/Defis/Item_Defi'
@@ -19,11 +20,13 @@ import Icon_Message from '../../Components/Conversation/Icon_Message';
 import Villes from '../../Components/Creation/villes.json'
 import NormalizeString from '../../Helpers/NormalizeString'
 import Photo_Equipe from '../../Components/Profil_Equipe/Photo_Equipe'
+import {AsyncStorage} from 'react-native';
 
 class ProfilJoueur extends React.Component {
 
     constructor(props) {
         super(props)
+        console.log("in constructeur profil")
         this.id = this.props.navigation.getParam('id', LocalUser.data.id)
         this.monProfil= Database.isUser(this.id);
         this.equipes = this.props.navigation.getParam('equipes', [])
@@ -37,6 +40,15 @@ class ProfilJoueur extends React.Component {
                 this.AKA = "Tu n'as pas de AKA ! Pense à compléter ton profil dans les réglages...";
             } else {
                 this.AKA = "";
+            }
+        }
+
+        // Si On a pas encore sauvegardé les données des équipes 
+        if(this.monProfil) {
+            if(LocalUser.dataEquipesUser.length  == 0) {
+                LocalUser.dataEquipesUser =  this.equipes
+            } else {
+                this.equipes = LocalUser.dataEquipesUser
             }
         }
         
@@ -61,6 +73,7 @@ class ProfilJoueur extends React.Component {
 
     componentDidMount() {
         this.getAllDefisAndPartie()
+      
     }
 
 
@@ -129,7 +142,7 @@ class ProfilJoueur extends React.Component {
     }
 
     goToFirstScreen() {
-        this.props.navigation.navigate("first", {deconexion : true})  
+        this.props.navigation.push("first", {deconexion : true})  
     }
 
     deco() {
@@ -137,12 +150,15 @@ class ProfilJoueur extends React.Component {
     }
 
     async deconexion() {
+        this.setState({isLoading : true})
         var token = await this.registerForPushNotifications()
+        console.log("token")
         var db = Database.initialisation()
         db.collection("Login").doc(token).delete().then(this.goToFirstScreen).catch(function(error) {
             console.error("Error removing document: ", error);
         });
 
+        console.log("before supr tolen")
         // Supprimer le token de la liste
         var tokens = LocalUser.data.tokens 
         var newTokens = []
@@ -155,6 +171,12 @@ class ProfilJoueur extends React.Component {
         db.collection("Joueurs").doc(this.id).update({
             tokens : newTokens
         })
+        AsyncStorage.clear()
+        console.log("before go to first screan ")
+        
+        this.setState({isLoading : false})
+        this.props.navigation.push("first", {deconexion : true})  
+
     }
 
 
@@ -572,7 +594,7 @@ class ProfilJoueur extends React.Component {
      * est capitaine.
      */
     getEquipesUserCap() {
-        this.setState({isLoading : true,show_equipe : true})
+        //this.setState({isLoading : true,show_equipe : true})
         var equipes = []
         var db = Database.initialisation()
         var ref = db.collection("Equipes");
@@ -977,149 +999,160 @@ class ProfilJoueur extends React.Component {
 
     render() {
         console.log("render")
-        if (this.state.displayFullPicture) {
+        if(this.state.isLoading ) {
             return(
-                <View style= {{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height : hp('100%')}}>
-                     <TouchableOpacity
-                        onPress = {() => this.setState({displayFullPicture: false})}
-                       >
-                        <Image
-                            source = {{uri :this.joueur.photo}}
-                            style = {{
-                                width : wp('97%'),
-                                height : hp('97%'),
-                                resizeMode : 'contain'
-                            }}
-                        />
-                    </TouchableOpacity>
+                <View>
+
+                    <Simple_Loading
+                        taille = {hp("10%")}/>
                 </View>
+                    
             )
         } else {
-            return (
-                <ScrollView style={styles.main_container}
-                refreshControl={
-                    <RefreshControl
-                    refreshing={this.state.refreshing}
-                    onRefresh={this._onRefresh}
-                    />
-                }>
-				
-                    {/* Caracteristiques du joueur */}
-                    <View style={[styles.perso_container]}>
-                        {this.renderIconMessage()}
-                        <View style={styles.top_infos_container}>
-                            <TouchableOpacity
-                                style={{justifyContent: 'center', alignItems: 'center'}}
-                                onPress={() => this.setState({displayFullPicture: true})}>
-                                <Image
-                                    style={styles.image_photo}
-                                    source = {{uri : this.joueur.photo} } />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.nom_container}
-                                onPress={() => {
-                                    if (this.monProfil) {
-                                        this.props.navigation.push('ProfilJoueurReglagesScreen', {id: this.id, joueur: this.joueur, equipes: this.equipes, header: this.joueur.pseudo});
-                                    }
-                                }}>
-                                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                    <Image
-                                        style={{width: 15, height: 15, marginHorizontal: 2}}
-                                        source={this.sexeIcon}
-                                        />
-                                    <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville.charAt(0).toUpperCase() + this.joueur.ville.slice(1)}</Text>
-                                </View>
-                                {/*<Text style={{margin: 5,  fontSize : RF(3.25)}}>{this.joueur.pseudo}</Text>*/}
-                                <Text>{this.getTextePoste()}</Text>
-                            </TouchableOpacity>
-                            {this._displayReglages()}
-                        </View>
-
-                        <View style={{flex: 1, flexDirection: 'row'}}>
-                            <View style={styles.bot_infos_container}>
-                                <StarRating
-                                    disabled={true}
-                                    maxStars={5}
-                                    rating={parseInt(this.joueur.score)}
-                                    starSize={hp('3.5%')}
-                                    fullStarColor='#F8CE08'
-                                    emptyStarColor='#B1ACAC'
-                                    containerStyle={styles.rating}/>
-                            </View>
-                            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center'}}>
-
-                                <TouchableOpacity
-                                    style={{}}
-                                    onPress = {()=> {this.gotoJoueursQuiLikent()}}>
-                                    <Text style={{paddingVertical: 10, paddingHorizontal: 5}}>{this.joueur.aiment.length}</Text>
-                                </TouchableOpacity>
-                                {this.likeJoueur()}
-                                {this.renderIconCapitaine()}
-                            </View>
-                        </View>
-                        <Text style={{fontStyle: 'italic'}}>{this.AKA}</Text>
-                    </View>
-
-
-                    {/* Equipes dont il fait partie */}
-                    <View style={[styles.equipes_container, styles.additional_style_container]}>
-                        <View style={{flexDirection: 'row'}}>
-                            <TouchableOpacity
-                                style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}
-                                onPress={() => this.props.navigation.push('ProfilJoueurMesEquipesScreen', {joueur: this.joueur, header: this.joueur.pseudo, monProfil: this.monProfil, equipes: this.equipes})}>
-                                <Text style={styles.header}>{this.monProfil ? "Mes Equipes" : "Equipes"}</Text>
-                            </TouchableOpacity>
-                            {this.renderBtnCreerEquipe()}
-                        </View>
-                        <View style={{flex: 3}}>
-                            <FlatList
-                                style={{flex: 1}}
-                                horizontal= {true}
-                                data={this.equipes}
-                                keyExtractor={(item) => item.id}
-                                renderItem={({item}) => this.renderItemEquipe(item.id, item)}
-
-                            />
-                        </View>
-                    </View>
-
-
-                    {/* Favoris */}
-                    <View style={[styles.favoris_container, styles.additional_style_container]}>
+            if (this.state.displayFullPicture) {
+                return(
+                    <View style= {{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        height : hp('100%')}}>
                         <TouchableOpacity
-                            style={styles.header_container}
-                            onPress={() => this.props.navigation.push('ProfilJoueurMesFavorisScreen', {joueur: this.joueur, header: this.joueur.pseudo, monProfil: this.monProfil, id: this.id})}>
-                            <Text style={styles.header}>{this.monProfil ? "Mes Favoris" : "Favoris"}</Text>
+                            onPress = {() => this.setState({displayFullPicture: false})}
+                        >
+                            <Image
+                                source = {{uri :this.joueur.photo}}
+                                style = {{
+                                    width : wp('97%'),
+                                    height : hp('97%'),
+                                    resizeMode : 'contain'
+                                }}
+                            />
                         </TouchableOpacity>
-                        <ScrollView
-                            horizontal={true}>
-                            <View style={styles.favoris_categories}>
-                                <Image style={styles.favoris_categorie_icone} source = {require('app/res/icon_joueurs.png')}/>
-                                <Button title="Reseau" onPress={() => this.gotoReseau()}/>
-                                <Image style={styles.favoris_categorie_icone} source = {require('app/res/icon_team.png')} />
-                                <Button title="Equipes" onPress={() => this.gotoEquipesFav()}/>
-                                <Image style={styles.favoris_categorie_icone} source = {require('app/res/icon_terrain.png')}/>
-                                <Button  title="Terrains" onPress={() => this.gotoTerrainsFav()}/>
+                    </View>
+                )
+            } else {
+                return (
+                    <ScrollView style={styles.main_container}
+                    refreshControl={
+                        <RefreshControl
+                        refreshing={this.state.refreshing}
+                        onRefresh={this._onRefresh}
+                        />
+                    }>
+                    
+                        {/* Caracteristiques du joueur */}
+                        <View style={[styles.perso_container]}>
+                            {this.renderIconMessage()}
+                            <View style={styles.top_infos_container}>
+                                <TouchableOpacity
+                                    style={{justifyContent: 'center', alignItems: 'center'}}
+                                    onPress={() => this.setState({displayFullPicture: true})}>
+                                    <Image
+                                        style={styles.image_photo}
+                                        source = {{uri : this.joueur.photo} } />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.nom_container}
+                                    onPress={() => {
+                                        if (this.monProfil) {
+                                            this.props.navigation.push('ProfilJoueurReglagesScreen', {id: this.id, joueur: this.joueur, equipes: this.equipes, header: this.joueur.pseudo});
+                                        }
+                                    }}>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <Image
+                                            style={{width: 15, height: 15, marginHorizontal: 2}}
+                                            source={this.sexeIcon}
+                                            />
+                                        <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville.charAt(0).toUpperCase() + this.joueur.ville.slice(1)}</Text>
+                                    </View>
+                                    {/*<Text style={{margin: 5,  fontSize : RF(3.25)}}>{this.joueur.pseudo}</Text>*/}
+                                    <Text>{this.getTextePoste()}</Text>
+                                </TouchableOpacity>
+                                {this._displayReglages()}
                             </View>
-                        </ScrollView>
 
-                    </View>
+                            <View style={{flex: 1, flexDirection: 'row'}}>
+                                <View style={styles.bot_infos_container}>
+                                    <StarRating
+                                        disabled={true}
+                                        maxStars={5}
+                                        rating={parseInt(this.joueur.score)}
+                                        starSize={hp('3.5%')}
+                                        fullStarColor='#F8CE08'
+                                        emptyStarColor='#B1ACAC'
+                                        containerStyle={styles.rating}/>
+                                </View>
+                                <View style={{flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center'}}>
 
-                    {/* Defis*/} 
-                    <View style = {[styles.defis_container, styles.additional_style_container]}>
-                        <TouchableOpacity style={styles.header_container} onPress={() => {console.log("profil : ", this.joueur.pseudo); this.props.navigation.push("CalendrierJoueur", {id: this.id, header: this.joueur.pseudo})}}>
-                            <Text style={styles.header}>Calendrier</Text>
-                        </TouchableOpacity>
-                        {this.displayDefis()}
-                    </View>
-                    {this.renderBtnDeco()}
-					{this._renderListEquipe()}
+                                    <TouchableOpacity
+                                        style={{}}
+                                        onPress = {()=> {this.gotoJoueursQuiLikent()}}>
+                                        <Text style={{paddingVertical: 10, paddingHorizontal: 5}}>{this.joueur.aiment.length}</Text>
+                                    </TouchableOpacity>
+                                    {this.likeJoueur()}
+                                    {this.renderIconCapitaine()}
+                                </View>
+                            </View>
+                            <Text style={{fontStyle: 'italic'}}>{this.AKA}</Text>
+                        </View>
 
-                </ScrollView>
-            )
+
+                        {/* Equipes dont il fait partie */}
+                        <View style={[styles.equipes_container, styles.additional_style_container]}>
+                            <View style={{flexDirection: 'row'}}>
+                                <TouchableOpacity
+                                    style={{...styles.header_container, flex: 4, marginRight: wp('2%')}}
+                                    onPress={() => this.props.navigation.push('ProfilJoueurMesEquipesScreen', {joueur: this.joueur, header: this.joueur.pseudo, monProfil: this.monProfil, equipes: this.equipes})}>
+                                    <Text style={styles.header}>{this.monProfil ? "Mes Equipes" : "Equipes"}</Text>
+                                </TouchableOpacity>
+                                {this.renderBtnCreerEquipe()}
+                            </View>
+                            <View style={{flex: 3}}>
+                                <FlatList
+                                    style={{flex: 1}}
+                                    horizontal= {true}
+                                    data={this.equipes}
+                                    keyExtractor={(item) => item.id}
+                                    renderItem={({item}) => this.renderItemEquipe(item.id, item)}
+
+                                />
+                            </View>
+                        </View>
+
+
+                        {/* Favoris */}
+                        <View style={[styles.favoris_container, styles.additional_style_container]}>
+                            <TouchableOpacity
+                                style={styles.header_container}
+                                onPress={() => this.props.navigation.push('ProfilJoueurMesFavorisScreen', {joueur: this.joueur, header: this.joueur.pseudo, monProfil: this.monProfil, id: this.id})}>
+                                <Text style={styles.header}>{this.monProfil ? "Mes Favoris" : "Favoris"}</Text>
+                            </TouchableOpacity>
+                            <ScrollView
+                                horizontal={true}>
+                                <View style={styles.favoris_categories}>
+                                    <Image style={styles.favoris_categorie_icone} source = {require('app/res/icon_joueurs.png')}/>
+                                    <Button title="Reseau" onPress={() => this.gotoReseau()}/>
+                                    <Image style={styles.favoris_categorie_icone} source = {require('app/res/icon_team.png')} />
+                                    <Button title="Equipes" onPress={() => this.gotoEquipesFav()}/>
+                                    <Image style={styles.favoris_categorie_icone} source = {require('app/res/icon_terrain.png')}/>
+                                    <Button  title="Terrains" onPress={() => this.gotoTerrainsFav()}/>
+                                </View>
+                            </ScrollView>
+
+                        </View>
+
+                        {/* Defis*/} 
+                        <View style = {[styles.defis_container, styles.additional_style_container]}>
+                            <TouchableOpacity style={styles.header_container} onPress={() => {console.log("profil : ", this.joueur.pseudo); this.props.navigation.push("CalendrierJoueur", {id: this.id, header: this.joueur.pseudo})}}>
+                                <Text style={styles.header}>Calendrier</Text>
+                            </TouchableOpacity>
+                            {this.displayDefis()}
+                        </View>
+                        {this.renderBtnDeco()}
+                        {this._renderListEquipe()}
+
+                    </ScrollView>
+                )
+            }
         }
     }
 

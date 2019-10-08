@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {KeyboardAvoidingView, View, Text,Image, Animated,TouchableOpacity, TextInput,ListView, ScrollView} from 'react-native'
+import {KeyboardAvoidingView, View, Text,Image, Animated,TouchableOpacity, TextInput,ListView, ScrollView,Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
@@ -160,7 +160,26 @@ export default class Creation_Equipe_Zone extends React.Component {
                  <ScrollView>
                 {/* Bandeau superieur */}
                 <View style = {styles.bandeau}>
-                    <Text style= {{ alignSelf : "center", marginLeft : wp('22%'), marginRight : wp('13%'), fontSize : RF(3.1)}}>Lieu de l'équipe</Text>
+                <TouchableOpacity
+                        onPress ={() => Alert.alert(
+                                '',
+                                "Es-tu sûr de vouloir quitter ?",
+                                [
+                                    {
+                                        text: 'Oui',
+                                        onPress: () =>  this.props.navigation.push("ProfilJoueur")
+                                        
+                                    },
+                                    {
+                                        text: 'Non',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                            )}>
+                        <Text style = {styles.txtBoutton} >Annuler</Text>
+                    </TouchableOpacity>
+                    <Text style= {{ fontSize : RF(3.1)}}>Lieu de l'équipe</Text>
                     <TouchableOpacity
                         onPress = {()=> this.props.navigation.push("CreationEquipeAjoutJoueurs", 
                             {   nom : this.props.navigation.getParam("nom",undefined), 
@@ -247,7 +266,8 @@ const styles = {
         flexDirection : 'row',
         backgroundColor : '#DCDCDC',
         paddingTop : hp('1%'),
-        paddingBottom : hp('1%')
+        paddingBottom : hp('1%'),
+        justifyContent : 'space-between'
     },
 
     input : {

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {KeyboardAvoidingView, View, Text,Image,TouchableOpacity, TextInput} from 'react-native'
+import {KeyboardAvoidingView, View, Text,Image,TouchableOpacity, TextInput,Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
@@ -29,7 +29,27 @@ export default class Creation_Equipe_Citation extends React.Component {
 
                 {/* Bandeau superieur */}
                 <View style = {styles.bandeau}>
-                    <Text> </Text>
+                <TouchableOpacity
+                        onPress ={() => Alert.alert(
+                                '',
+                                "Es-tu sûr de vouloir quitter ?",
+                                [
+                                    {
+                                        text: 'Oui',
+                                        onPress: () =>  this.props.navigation.push("ProfilJoueur")
+                                        
+                                    },
+                                    {
+                                        text: 'Non',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                            )}>
+                        <Text style = {styles.txtBoutton} >Annuler</Text>
+                    </TouchableOpacity>
+        
+        
                     <Text style= {{ alignSelf : "center", fontSize : RF(3.1)}}>Phrase fétiche</Text>
                     <TouchableOpacity
                         onPress = {()=> this.props.navigation.push(

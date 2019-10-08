@@ -3,11 +3,10 @@ import {View, Text,Image} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../Colors'
-import { CheckBox } from 'react-native-elements'
 import { connect } from 'react-redux'
 import StarRating from 'react-native-star-rating'
 import Joueur_Pseudo_Score from '../ProfilJoueur/Joueur_Pseudo_Score'
-
+import CheckBox from 'react-native-checkbox'
 
 class Joueurs_Ajout_Item extends React.PureComponent{
 
@@ -61,12 +60,12 @@ class Joueurs_Ajout_Item extends React.PureComponent{
             </View>
             <CheckBox
                     right
-                    title=' '
+                    label=' '
                     checkedColor = {Colors.agOOraBlue}
                     
                     containerStyle={{backgroundColor: '#F7F7F7', borderWidth :0}}                    
                     checked={isShown}
-                    onPress={() => {
+                    onChange={() => {
                         this._addJoueur(this.props.joueur.id)
                         var checked = this.state.isShown
                         this.setState({isShown: !checked})

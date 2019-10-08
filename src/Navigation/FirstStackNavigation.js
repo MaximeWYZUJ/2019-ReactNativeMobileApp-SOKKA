@@ -74,6 +74,8 @@ const FirstStackNavigation = createStackNavigator({
         screen : Confimation_Inscription
     },
 
+    
+
     NavigationInterne: {
         screen : NavigationInterne,
         navigationOptions: { title: '', header: null }

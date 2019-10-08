@@ -42,6 +42,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
         console.log("IN CONSTRUCTOR FICHE DEFI REJOINDRE")
         this.idDefi = this.props.navigation.getParam('id','erreur')
+        console.log("this.idDefi", this.idDefi)
         this.equipe1Animation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
         this.equipe2Animation = new Animated.ValueXY({ x: wp('100%'), y:0 })
         this.userData = {
@@ -49,7 +50,8 @@ class Fiche_Defi_Rejoindre extends React.Component {
             isCapitaine : true
         }
 
-
+        console.log("defi", this.props.navigation.getParam('defi',undefined) )
+       
         this.state = {
             defi : this.props.navigation.getParam('defi',undefined), 
             isLoading : true,
@@ -72,14 +74,19 @@ class Fiche_Defi_Rejoindre extends React.Component {
             commentaires : [],
             currentCommentaire : ""
         }
+        console.log("fin constructor")
     }
+
 
   
 
     componentDidMount() {
+        console.log("in component did mount")
         this.findTerrain(this.state.defi.terrain)
+        console.log("after find terrain")
         this.ChangeThisTitle('Defi ' +this.buildDate(new Date(this.state.defi.jour.seconds * 1000)))
 
+        console.log("after change title")
         //this.downloadAllDataDefi()
         this._moveEquipe1()
         this._moveEquipe2()
@@ -126,6 +133,8 @@ class Fiche_Defi_Rejoindre extends React.Component {
       
 
     ChangeThisTitle = (titleText) => {
+        console.log("in change title")
+        console.log(titleText)
         const {setParams} = this.props.navigation;
         setParams({ title: titleText })
     }
@@ -478,7 +487,11 @@ class Fiche_Defi_Rejoindre extends React.Component {
      * va permettre de séléctionner l'équipe passée en param pour relever le défi.
      */
     chooseEquipe(equipe) {
-        this.setState({equipeDefiee : equipe, show_equipe : false})
+        var defi = this.state.defi
+        defi.equipeDefiee = equipe
+        this.setState({equipeDefiee : equipe, show_equipe : false, defi: defi})
+
+                        
     }
 
 
@@ -585,6 +598,18 @@ class Fiche_Defi_Rejoindre extends React.Component {
             }
         }
         return undefined
+    }
+
+    textPrixDefi() {
+        if(this.state.defi != undefined) {
+            if(this.state.defi.prix_par_equipe == 0) {
+                return "Gratuit"
+            }  else {
+                return  this.state.defi.prix_par_equipe + " € (à regler sur place)"
+            }
+        } else {
+            return " "
+        }
     }
 
 
@@ -812,6 +837,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
 
     _renderTxtMillieu(){
+        console.log("in render txtMILLIEU")
         if(new Date(this.state.defi.jour.seconds * 1000) < new Date) {
             if(this.state.defi.scoreConfirme) {
                 return(
@@ -848,6 +874,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
      * Permet d'afficher l'équipe défiée
      */
     _renderEquipeDefie(){
+        console.log("in render equipe defiee")
 
         if(this.state.equipeDefiee != undefined) {
             return(
@@ -888,11 +915,11 @@ class Fiche_Defi_Rejoindre extends React.Component {
         console.log("NON CAP1 et this.state.equipeDefiee == undefined",this.state.equipeDefiee == undefined && (!cap1) )
         var participe1 =this.state.defi.joueursEquipeOrga.includes(this.userData.id)
         var participe2  = this.state.defi.joueursEquipeDefiee.includes(this.userData.id)
-        if(this.state.defi.defis_refuse) {
+        /*if(this.state.defi.defis_refuse) {
             return(
                 <Text style = {{color : 'red'}}> Défi refusé</Text>
             )
-        }
+        }*/
 
 
         // Si le défi est passé
@@ -958,7 +985,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
                 </TouchableOpacity>
             )
         
-        // Joueur pas impliqué dans le dédi
+        // Joueur pas impliqué dans le défi
         } else {
             return(
                 <View>
@@ -969,33 +996,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
     }
 
 
-    /**
-     * Pour accepeter ou non une équipe qui relève le défi, pour le moment 
-     * juste du texte !
-     */
-    renderAcepterEquipe() {
-        /*console.log("in renderAZccepterZEquoe")
-        console.log(this.state.equipeDefiee != undefined &&  !this.state.defi.defis_valide)
-        if(this.state.equipeDefiee != undefined &&  !this.state.defi.defis_valide) {
-            return(
-                <View>
-                    <Text style = {{color : 'red'}}>L'équipe {this.state.equipeDefiee.nom} souhaite relever </Text>
-                    <Text style = {{color : 'red'}}>le défi posté</Text>
-
-                    <View style = {{flexDirection : 'row'}}>
-                        <TouchableOpacity>
-                            <Text style = {{color : 'red'}}>Oui</Text>
-                        </TouchableOpacity>
-                        <Text style = {{color : 'red'}}> / </Text>
-
-                        <TouchableOpacity>
-                            <Text style = {{color : 'red'}}>Non</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            )
-        }*/
-    }
+    
 
 
     /**
@@ -1007,15 +1008,22 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
                 <TouchableOpacity 
                     onPress = {() => {
-                        this.chooseEquipe(item)
-                        this.saveParticipationInDb(item.id,item.nom)
-                        Alert.alert(
-                            ' ',
-                            "Ta demande de relever le défi avec ton équipe " +
-                            item.nom + " a bien été envoyée à l’équipe " + this.state.equipeOrganisatrice.nom + 
-                            '\n' + '\n'
-                            + "Tu seras informé dès que l’équipe " + this.state.equipeOrganisatrice.nom + " aura accepté ou refusé"
-                        )
+                        if( parseFloat(this.state.defi.format.split(' ')[0]) > item.nbJoueurs) {
+                            this.chooseEquipe(item)
+                            this.saveParticipationInDb(item.id,item.nom)
+                            
+                            Alert.alert(
+                                ' ',
+                                "Ta demande de relever le défi avec ton équipe " +
+                                item.nom + " a bien été envoyée à l’équipe " + this.state.equipeOrganisatrice.nom + 
+                                '\n' + '\n'
+                                + "Tu seras informé dès que l’équipe " + this.state.equipeOrganisatrice.nom + " aura accepté ou refusé"
+                            )
+                        } else {
+                            Alert.alert(" ",
+                            "Tu dois séléctionner une équipe avec au moins " + parseFloat(this.state.defi.format.split(' ')[0]) + " joueurs")
+                        }
+                       
                     }}>
                    <View style = {{flexDirection : "row"}}>
                         <Image
@@ -1093,6 +1101,33 @@ class Fiche_Defi_Rejoindre extends React.Component {
             )
         }
     }
+
+    
+    /**
+     * Pour accepeter ou non une équipe qui relève le défi, pour le moment 
+     * juste du texte ! Ne pas suppr !!
+     */
+    renderAcepterEquipe() {
+        /*console.log("in renderAZccepterZEquoe")
+        console.log(this.state.equipeDefiee != undefined &&  !this.state.defi.defis_valide)
+        if(this.state.equipeDefiee != undefined &&  !this.state.defi.defis_valide) {
+            return(
+                <View>
+                    <Text style = {{color : 'red'}}>L'équipe {this.state.equipeDefiee.nom} souhaite relever </Text>
+                    <Text style = {{color : 'red'}}>le défi posté</Text>
+                    <View style = {{flexDirection : 'row'}}>
+                        <TouchableOpacity>
+                            <Text style = {{color : 'red'}}>Oui</Text>
+                        </TouchableOpacity>
+                        <Text style = {{color : 'red'}}> / </Text>
+                        <TouchableOpacity>
+                            <Text style = {{color : 'red'}}>Non</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )
+        }*/
+    }
     
 
 
@@ -1100,7 +1135,6 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
         var seconds =this.state.defi.jour.seconds
         var date = this.buildDateString(new Date(seconds* 1000))
-
         return(
             <ScrollView>
                 <View style = {{marginTop : hp('0.5%')}}>
@@ -1164,7 +1198,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
                     </View>
 
                     <Text style = {{marginTop : hp('1%'), alignSelf : "center"}}>
-                        Prix par équipe = {this.state.defi.prix_par_equipe}€ (à regler sur place)
+                        Prix par équipe : {this.textPrixDefi()}
                     </Text>
 
 

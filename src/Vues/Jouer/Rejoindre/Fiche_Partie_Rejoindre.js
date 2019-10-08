@@ -759,7 +759,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
     renderPrix(){
         if(this.state.partie.prix_par_joueurs != null) {
             return(
-                <Text style = {{marginLeft : wp('3%')}}>Prix par joueur : {this.state.partie.prix_par_joueurs} (à régler sur place) </Text>
+                <Text style = {{marginLeft : wp('3%')}}>Prix par joueur : {this.state.partie.prix_par_joueurs} € (à régler sur place) </Text>
             )
         } else {
             return (

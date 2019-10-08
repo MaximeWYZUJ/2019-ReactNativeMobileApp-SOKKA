@@ -67,9 +67,26 @@ export default class Creation_Equipe_Nom extends React.Component {
             return(
                 <View style = {styles.main_container}>
 
-                    {/* Bandeau superieur */}
+                    {/* Bandeau superieur = FAIRE COMPOSANT BANDEAU !! AVEC DES CALCBAK GENRE ON PRESSANNULER */}
                     <View style = {styles.bandeau}>
-                        <Text style= {{ alignSelf : "center", marginLeft : wp('22%'), marginRight : wp('13%'), fontSize : RF(3.1)}}>Nom de l'équipe</Text>
+                    <TouchableOpacity
+                        onPress ={() => Alert.alert(
+                                '',
+                                "Es-tu sûr de vouloir quitter ?",
+                                [
+                                    {
+                                        text: 'Oui',
+                                        onPress: () => this.props.navigation.push("ProfilJoueur")},
+                                    {
+                                        text: 'Non',
+                                        onPress: () => {},
+                                        style: 'cancel',
+                                    },
+                                ],
+                            )}>
+                        <Text style = {styles.txtBoutton} >Annuler</Text>
+                    </TouchableOpacity>
+                        <Text style= {{ fontSize : RF(3.1)}}>Nom de l'équipe</Text>
                         <TouchableOpacity
                             onPress = {()=> this.goToNextScreen()}
                         >
@@ -119,7 +136,8 @@ const styles = {
         flexDirection : 'row',
         backgroundColor : '#DCDCDC',
         paddingTop : hp('1%'),
-        paddingBottom : hp('1%')
+        paddingBottom : hp('1%'),
+        justifyContent: 'space-between'
     },
 
     txt_input : {

@@ -27,6 +27,8 @@ import List_Messages from '../Vues/Conversation/List_Messages'
 import New_Message from '../Vues/Conversation/New_Message'
 import New_Groupe from '../Vues/Conversation/New_Groupe'
 import Modifier_Groupe from '../Vues/Conversation/Modifier_Groupe'
+import Fiche_Partie_Rejoindre from '../Vues/Jouer/Rejoindre/Fiche_Partie_Rejoindre'
+import Fiche_Defi_Rejoindre from '../Vues/Jouer/Rejoindre/Fiche_Defi_Rejoindre'
 
 const stackNavigator = createStackNavigator({
 
@@ -176,6 +178,19 @@ const stackNavigator = createStackNavigator({
    */
   CalendrierJoueur : {
     screen : Calendrier_Joueur
+  },
+
+
+  /**
+   * Screen qui affiche le récap d'une partie et permet à l'utilisateur de la 
+   * rejoindre
+   */
+  FichePartieRejoindre : {
+    screen : Fiche_Partie_Rejoindre
+  },
+
+  FicheDefiRejoindre : {
+    screen : Fiche_Defi_Rejoindre
   },
 }, {
   headerLayoutPreset: 'center'

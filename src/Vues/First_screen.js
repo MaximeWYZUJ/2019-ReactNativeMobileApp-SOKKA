@@ -12,6 +12,7 @@ import villes from '../Components/Creation/villes.json'
 import departements from '../Components/Creation/departements.json'
 import NormalizeString from '../Helpers/NormalizeString';
 import Simple_Loading from '../Components/Loading/Simple_Loading'
+import {AsyncStorage} from 'react-native';
 
 /** Pour afficher 5sec faire deux fonction qui affiche qqchose et en fonction du state appeler une ou l'autre */
 /**
@@ -144,15 +145,31 @@ class First_screen extends React.Component {
     }
 
 
-
+    _retrieveData = async () => {
+        console.log("in retrieve data")
+        try {
+          const email = await AsyncStorage.getItem('email');
+          const password = await AsyncStorage.getItem('password');
+            this.checkConnexion(email,password)
+          if (value !== null) {
+            // We have data!!
+          }
+        } catch (error) {
+          // Error retrieving data
+          console.log(error)
+        }
+      };
 
     /**
      * Fonction qui va permettre de vérifier si un utilisateur est déja connecté sur 
      * ce téléphone, si c'est le cas alors on vas directement sur son profil.
      */
     async checkIfUserISConnected() {
+        
         console.log("in check token")
-        var token =  await this.registerForPushNotifications()
+        this._retrieveData()
+
+        /*var token =  await this.registerForPushNotifications()
 
         var doc = await Database.getDocumentData(token, "Login")
 
@@ -163,11 +180,11 @@ class First_screen extends React.Component {
         } else {
             console.log("IN ELSE !!!!")
             this.setState({isLoading : false})
-        }
+        }*/
 
     }
 
-    async registerForPushNotifications() {
+   /* async registerForPushNotifications() {
         const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
         console.log('in register')
         if (status !== 'granted') {
@@ -206,25 +223,7 @@ class First_screen extends React.Component {
     }
 
 
-    /**
-     * Fonction qui renvoie la position de la ville à partir de son nom
-     * @param {String} Name : Nom de la ville 
-     */
-    findPositionVilleFromName(name) {
-        for(var i  =  0 ; i < villes.length; i++) {
-            if(name.toLocaleLowerCase() == villes[i].Nom_commune.toLocaleLowerCase()) {
-                var position = villes[i].coordonnees_gps
-                var latitude = position.split(',')[0]
-                var longitude = position.split(', ')[1]
-                 var pos = {
-                    latitude : parseFloat(latitude),
-                    longitude : parseFloat(longitude)
-                }
-               return pos
-
-            }
-        }
-    }
+   
 
  
     gotoProfilJoueur(id) {
@@ -248,7 +247,112 @@ class First_screen extends React.Component {
         }).catch(function(error) {
             console.log("Error getting document:", error);
         });
-   }
+   }*/
+
+      /**
+     * Fonction qui renvoie la position de la ville à partir de son nom
+     * @param {String} Name : Nom de la ville 
+     */
+    findPositionVilleFromName(name) {
+        for(var i  =  0 ; i < villes.length; i++) {
+            if(name.toLocaleLowerCase() == villes[i].Nom_commune.toLocaleLowerCase()) {
+                var position = villes[i].coordonnees_gps
+                var latitude = position.split(',')[0]
+                var longitude = position.split(', ')[1]
+                 var pos = {
+                    latitude : parseFloat(latitude),
+                    longitude : parseFloat(longitude)
+                }
+               return pos
+
+            }
+        }
+    }
+
+
+    /**
+     * Fonction qui va permettre d'authentifier un utilisateur
+     */
+    checkConnexion(email, mdp){
+        this.setState({isLoading : true})
+        var db = Database.initialisation()
+
+        firebase.auth().signInWithEmailAndPassword(email,mdp)
+        .then(async (userCred) => {
+            if (userCred.user.emailVerified || !checkEmailVerifie) {
+                
+                // Récupérations des données de la DB
+                j = await Database.getDocumentData(firebase.auth().currentUser.uid, "Joueurs");
+                jEquipes = await Database.getArrayDocumentData(j.equipes, 'Equipes');
+
+                // Update des données locales
+                LocalUser.exists = true;
+                LocalUser.data = j;
+                var villePos = this.findPositionVilleFromName(j.ville);
+                LocalUser.geolocalisation = villePos;
+
+                // Enregistrement du token
+                this.storeToken(j);
+
+                // Passage à la vue suivante
+                this.props.navigation.navigate("ProfilJoueur", {id: j.id, joueur: j, equipes: jEquipes});
+                this.setState({isLoading: false});
+            } else {
+                Alert.alert("", "Ce compte n'est pas activé. Si tu n'as pas reçu le mail d'activation, appuie sur le bouton ci-dessous",
+                [
+                    {text: "Renvoyer le mail d'activation", onPress: () => this.renvoyerMail()}
+                ]);
+                this.setState({isLoading: false})
+            }
+        })
+        .catch((error) => {
+          const { code, message } = error;
+            console.log(error)
+            this.setState({
+                txt : 'Adresse email ou mot de passe incorrect',
+                isLoading : false
+            })
+            // For details of error codes, see the docs
+            // The message contains the default Firebase string
+            // representation of the error
+        });
+    }
+
+
+    async storeToken(j) {
+        this.registerForPushNotifications()
+        .then(async (token) => {
+            let db = Database.initialisation();
+            db.collection("Login").doc(token).set({id : j.id});
+
+            var tokenListe =  [] 
+            if (j.tokens != undefined) {
+                tokenListe = j.tokens
+            }
+            tokenListe.push(token)
+            LocalUser.data.tokens = tokenListe
+            db.collection("Joueurs").doc(j.id).update({
+                tokens : tokenListe
+            })
+        })
+    }
+
+
+    async registerForPushNotifications() {
+        const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+        console.log('in register')
+        if (status !== 'granted') {
+          const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+          if (status !== 'granted') {
+            return;
+          }
+        }
+        console.log("okook")
+        var token = await Notifications.getExpoPushTokenAsync();
+        console.log("after await token")    
+        return (token)
+    }
+
 
 
 
