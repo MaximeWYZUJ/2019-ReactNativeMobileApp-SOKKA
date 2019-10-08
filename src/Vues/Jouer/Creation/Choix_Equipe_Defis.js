@@ -5,11 +5,11 @@ import RF from 'react-native-responsive-fontsize';
 import Colors from '../../../Components/Colors';
 import Database from '../../../Data/Database'
 import StarRating from 'react-native-star-rating'
-import { CheckBox } from 'react-native-elements'
 import Barre_Recherche from '../../../Components/Recherche/Barre_Recherche'
 import { connect } from 'react-redux'
 import actions from '../../../Store/Reducers/actions'
 import LocalUser from '../../../Data/LocalUser.json'
+import CheckBox from 'react-native-checkbox';
 
 import SimpleLoading from '../../../Components/Loading/Simple_Loading'
 import ComposantRechercheTableau from '../../../Components/Recherche/ComposantRechercheTableau'
@@ -172,12 +172,12 @@ class Choix_Equipe_Defis extends React.Component  {
                 </View>
 
                 <CheckBox
-                    title=' '
+                    label=' '
                     checkedColor = {Colors.agOOraBlue}
                     right
                     containerStyle={{ backgroundColor : 'white',borderWidth :0, alignSelf : 'center'}}                    
                     checked={this.state.equipeSelectionnee == item.id}
-                    onPress = {() => {
+                    onChange = {() => {
                        this.HandleSelectionEquipe(item)
                     }}
 

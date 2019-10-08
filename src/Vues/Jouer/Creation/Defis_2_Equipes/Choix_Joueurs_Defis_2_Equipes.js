@@ -4,11 +4,11 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../.././../../Components/Colors'
 import Barre_Recherche from '../../../../Components/Recherche/Barre_Recherche'
-import { CheckBox } from 'react-native-elements'
 import Joueur_Item_Creation_Defis from '../../../../Components/ProfilJoueur/Joueur_Item_Creation_Defis'
 import Database from '../../../../Data/Database'
 import LocalUser from '../../../../Data/LocalUser.json'
 import FiltrerJoueur from '../../../../Components/Recherche/FiltrerJoueur'
+import CheckBox from 'react-native-checkbox';
 
 import { connect } from 'react-redux'
 
@@ -114,6 +114,7 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                         joueursArray.push(joueur)
                        
                     }
+
                     this.setState({allJoueurs : joueursArray, joueurFiltres : joueursArray})
                 } else {
                     console.log("No such document!");
@@ -169,7 +170,6 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                 joueurs.push(d);
             }
         }
-
 		this.setState({
             joueurFiltres : joueurs,
             capitaineFiltres : capitaines
@@ -802,12 +802,12 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                     <View style = {{flexDirection : 'row', justifyContent : "space-between"}}>
                         <Text>Tout sélectionner</Text>
                         <CheckBox
-                            title=' '
+                            label=' '
                             checkedColor = {Colors.agOOraBlue}
                             right
                             containerStyle={styles.checkBox}                    
                             checked={this.state.selectedEveryone}
-                            onPress = {() => this.handleToutSelectionner()}
+                            onChange = {() => this.handleToutSelectionner()}
 
                         />
                     </View>
@@ -817,12 +817,12 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                             <View  style = {styles.header_container}>
                                 <Text  style = {styles.header} >Capitaines</Text>
                                 <CheckBox
-                                    title=' '
+                                    label=' '
                                     checkedColor = "white"
                                     right
                                     containerStyle={styles.checkBox_header}                    
                                     checked={this.allTheCaptainsAreSelected() }
-                                    onPress = {() => this.handleSelectCapitaines()}
+                                    onChange = {() => this.handleSelectCapitaines()}
 
                                 />
                                 
@@ -840,19 +840,19 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                             <View style = {styles.header_container}>
                                 <Text style = {styles.header}>Joueurs</Text>
                                 <CheckBox
-                                    title=' '
+                                    label=' '
                                     checkedColor = "white"
                                     right
                                     containerStyle={styles.checkBox_header}                    
                                     checked={this.state.selectedAllPlayer }
-                                    onPress = {() => this.handleSelectPlayer()}
+                                    onChange = {() => this.handleSelectPlayer()}
 
                                 />
                             </View>
                             <FlatList
                                 keyExtractor={(item) => item.id}
                                 data = {this.state.joueurFiltres}
-                                extraData = {this.state.joueursSelectionnes}
+                                extraData = {[this.state.joueursSelectionnes, this.state.joueurFiltres]}
                                 renderItem = {this._renderItem}
                             />
                         </View>

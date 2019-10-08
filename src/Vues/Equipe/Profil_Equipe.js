@@ -37,6 +37,7 @@ export default class Profil_Equipe extends React.Component {
     constructor(props) {
         super(props)
 
+        
         this.state = {
             equipe : undefined,
             joueur : 'e',
@@ -68,6 +69,7 @@ export default class Profil_Equipe extends React.Component {
 
     componentDidMount(){
         this.getEquipeWithId(this.props.navigation.getParam('equipeId', null));
+        console.log("this.props.navigation.getParam('equipeId', null)",this.props.navigation.getParam('equipeId', null))
     }
     
 

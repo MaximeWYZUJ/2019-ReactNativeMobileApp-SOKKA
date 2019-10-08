@@ -182,19 +182,13 @@ export default class Recapitulatif_Partie extends React.Component {
             msg = "Ta partie a bien été créée. Les joueurs qui le souhaitent peuvent s’inscrire."
         }
 
+        
         Alert.alert(
-            'Ta partie sera publiée quand tu appuieras sur ok',
+            'Ta partie a bien été créée.',
             msg,
             [
               {text: 'Ok',  onPress: () => {
-                this.storeNotificationInDb(id)
-                this.sendNotifToAllPlayer(date)
-                this.props.navigation.push("FichePartieRejoindre",
-                {
-                    download_All_Data_Partie : true,
-                    id : id,
-                    retour_arriere_interdit : true
-                })
+              
             }
                         
               },
@@ -202,6 +196,15 @@ export default class Recapitulatif_Partie extends React.Component {
             ],
             {cancelable: false},
         ); 
+
+        this.storeNotificationInDb(id)
+         this.sendNotifToAllPlayer(date)
+        this.props.navigation.push("FichePartieRejoindre",
+                {
+                    download_All_Data_Partie : true,
+                    id : id,
+                    retour_arriere_interdit : true
+                })
         
     }
     
@@ -298,7 +301,7 @@ export default class Recapitulatif_Partie extends React.Component {
     renderPrix(){
         if(this.prix != null && this.prix > 0) {
             return(                    
-                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par joueur = {this.prix} (à régler sur place)</Text>
+                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par joueur = {this.prix} € (à régler sur place)</Text>
             )
         } else {
             return (

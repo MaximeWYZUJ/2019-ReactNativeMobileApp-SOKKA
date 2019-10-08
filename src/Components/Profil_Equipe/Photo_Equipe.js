@@ -9,18 +9,22 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 export default class Photo_Equipe extends React.Component {
 
 
+    constructor(props){
+        super(props)
+    }
+
+
     changeBool(bool) {
         this.props.callback(bool);
     }
     
+
     render() {
         return (
             <View style = {styles.main_container}>
-                <TouchableOpacity
-                    onPress = {()=> this.changeBool(true)}
-                >
-                    <Image source = {this.props.urlPhoto} style = {styles.image_equipe} />
-                </TouchableOpacity>
+            
+                
+                    <Image source = {{uri : this.props.urlPhoto}} style = {styles.image_equipe} />
             </View>
         )
     }
@@ -32,8 +36,8 @@ const styles = {
     },
 
     image_equipe : {
-        width : wp('25%'),
-        height :wp('25%')
+        width : wp('17%'),
+        height :wp('17%')
     }
 }
 

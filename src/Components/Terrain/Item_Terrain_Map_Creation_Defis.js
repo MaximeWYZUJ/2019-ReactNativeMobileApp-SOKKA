@@ -65,7 +65,7 @@ class Item_Terrain_Map_Creation_Defis extends React.Component {
                         right
                         containerStyle={{backgroundColor: 'white', borderWidth :0,marginTop : hp('0.1%'), alignSelf : 'center'}}                    
                         checked={this.props.terrainSelectionne == this.props.id}
-                        onPress={() => {
+                        onChange={() => {
                             this._chooseTerrain(this.props.id)
                             var checked = this.state.isShown
                             this.setState({isShown: !checked})

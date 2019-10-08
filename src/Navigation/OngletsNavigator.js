@@ -36,11 +36,14 @@ const OngletsNavigator = createBottomTabNavigator({
     TabAccueilJouer: {
         screen: AccueilJouer,
         navigationOptions: {
+            
             tabBarLabel: "JOUER",
             tabBarIcon: ({ tintColor, focused }) => (
                 <Image source = {require("../../res/ball.png")}
                 style = {{width : 24, height : 24}}/>
-            )
+            ),
+           
+            
             /*tabBarIcon: ({ tintColor, focused }) => (
                 <TouchableOpacity
                     onPress = {() => {
@@ -64,6 +67,7 @@ const OngletsNavigator = createBottomTabNavigator({
     }
 
 },
+
 
 {
     lazy: true

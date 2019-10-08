@@ -19,6 +19,11 @@ class Choix_Format_Defi extends React.Component {
 
     constructor(props){
         super(props)
+
+        props.navigation.setParams({
+            onTabFocus: this.handleTabFocus
+          });
+
         this.type =  this.props.navigation.getParam('type', ' ')
         this.inputRefs = {
             firstTextInput: null,
@@ -32,16 +37,34 @@ class Choix_Format_Defi extends React.Component {
         }
     }
 
+    handleTabFocus = () => {
+        // perform your logic here
+        Alert.alert("eee")
+      };
+    
     static navigationOptions = ({ navigation }) => {
+        title = ""
         if(navigation.getParam('type', ' ') == Type_Defis.defis_2_equipes){
-            return {
-                title: 'Proposer un défi'
-            }
+                title= 'Proposer un défi'
+            
         } else {
-            return {
-                title: 'Proposer une partie'
-            }
+                title= 'Proposer une partie'
         }
+
+        return {
+
+            tabBarOnPress({ navigation, defaultHandler }) {
+                Alert.alert("eee")
+                navigation.state.params.onTabFocus();
+
+                
+             },
+              title : title,
+              tabBarVisible :  false
+        }
+           
+
+       
     }
 
 

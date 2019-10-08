@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, Text, ScrollView, Button, TouchableOpacity, View, FlatList,RefreshControl, Alert } from 'react-native'
+import { StyleSheet, Text,Image, ScrollView, Button, TouchableOpacity, View, FlatList,RefreshControl, Alert } from 'react-native'
 import StarRating from 'react-native-star-rating'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
@@ -18,9 +18,7 @@ import '@firebase/firestore'
 import Icon_Message from '../../Components/Conversation/Icon_Message';
 import Villes from '../../Components/Creation/villes.json'
 import NormalizeString from '../../Helpers/NormalizeString'
-import Image from 'react-native-fast-image'
-
-
+import Photo_Equipe from '../../Components/Profil_Equipe/Photo_Equipe'
 
 class ProfilJoueur extends React.Component {
 
@@ -41,7 +39,7 @@ class ProfilJoueur extends React.Component {
                 this.AKA = "";
             }
         }
-
+        
         this.state = {
             allDefis : [],
             refreshing: false,
@@ -64,6 +62,8 @@ class ProfilJoueur extends React.Component {
     componentDidMount() {
         this.getAllDefisAndPartie()
     }
+
+
 
 
 
@@ -179,13 +179,16 @@ class ProfilJoueur extends React.Component {
             <TouchableOpacity
                 onPress = {() => this.props.navigation.push("Profil_Equipe", {equipeId : id})}>
 
-                <Image
-                    style={{width: wp('18%'), height: wp('18%'), marginLeft : wp('2%'), marginRight : wp('2%'), backgroundColor: 'grey'/*, elevation : 5*/}}
+
+                <Photo_Equipe
+                    urlPhoto = {data.photo}
+                    />
+                
+                {/*<Image
+                    style={{width: wp('18%'), height: wp('18%'), marginLeft : wp('2%'), marginRight : wp('2%'), backgroundColor: 'grey'}}
                     source = {{
                         uri : data.photo,
-                        headers: { Authorization: 'someAuthToken' },
-            priority: FastImage.priority.normal,
-            }}/>
+                    }}/>*/}
             </TouchableOpacity>
         )
     }
@@ -631,7 +634,7 @@ class ProfilJoueur extends React.Component {
             } else {
                 Alert.alert(
                     '',
-                    this.joueur.pseudo + " fait déjà partie de tes équipes dont tu es capitaines"  ,
+                    this.joueur.pseudo + " fait déjà partie de tes équipes dont tu es capitaine"  ,
                     [
                         {
                         text: "D'accord",
@@ -973,6 +976,7 @@ class ProfilJoueur extends React.Component {
 	
 
     render() {
+        console.log("render")
         if (this.state.displayFullPicture) {
             return(
                 <View style= {{

@@ -474,7 +474,7 @@ export default class Recapitulatif_Defis extends React.Component {
     renderPrix(){
         if(this.prix != null && this.prix > 0) {
             return(                    
-                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par équipe = {this.prix} (à régler sur place)</Text>
+                <Text style = {{marginLeft : wp('3%'), marginTop : hp('2%')}}>Prix par équipe = {this.prix} € (à régler sur place)</Text>
             )
         } else {
             return (

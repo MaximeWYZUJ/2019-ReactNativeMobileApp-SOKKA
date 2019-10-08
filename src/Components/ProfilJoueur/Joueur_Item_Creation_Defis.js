@@ -4,7 +4,7 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../Colors'
 import StarRating from 'react-native-star-rating'
-import { CheckBox } from 'react-native-elements'
+import CheckBox from 'react-native-checkbox';
 
 /**
  * Composant qui affiche un item joueurs, ilva permettre de selectionner un joueur 
@@ -55,12 +55,12 @@ class Joueur_Item_Creation_Defis extends React.PureComponent{
                     </View>
 
                     <CheckBox
-                        title=' '
+                        label=' '
                         checkedColor = {Colors.agOOraBlue}
                         right
                         containerStyle={styles.checkBox}                    
                         checked={checked}
-                        onPress = {() => {
+                        onChange = {() => {
                             this.props.handleSelectJoueur(this.props.id)
                             var isChecked = this.state.isChecked
                             this.setState({isChecked : ! isChecked})
