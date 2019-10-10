@@ -771,7 +771,7 @@ class Feuille_Defi_A_Venir extends React.Component {
                         for(var k = 0 ; k < tokens.length; k++) {
                             var title = "Nouvelle notif"
                             var corps = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.state.equipeOrganisatrice.nom 
-                            corps = corps + " t'as convoqué / relancé pour un un défi le " +
+                            corps = corps + " t'a convoqué / relancé pour un un défi le " +
                             this.sendPushNotification(tokens[k], title, corps) 
                         }
                     }
@@ -805,7 +805,7 @@ class Feuille_Defi_A_Venir extends React.Component {
                         for(var k = 0 ; k < tokens.length; k++) {
                             var title = "Nouvelle notif"
                             var corps = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.state.equipeDefiee.nom 
-                            corps = corps + " t'as convoqué / relancé pour un un défi le " + this.buildDate(new Date(this.state.defi.jour.seconds * 1000))
+                            corps = corps + " t'a convoqué / relancé pour un un défi le " + this.buildDate(new Date(this.state.defi.jour.seconds * 1000))
                             this.sendPushNotification(tokens[k], title, corps) 
                         }
                     }

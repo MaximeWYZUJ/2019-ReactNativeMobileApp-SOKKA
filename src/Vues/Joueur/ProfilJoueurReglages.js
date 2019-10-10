@@ -296,6 +296,7 @@ class ProfilJoueurReglages extends React.Component {
 
 
     modifierMdp() {
+        console.log("in modifiermp")
         // On veut modifier le mdp
         if (this.mdp != "" && this.mdp == this.mdpConfirm && this.mdp.length >= 6) {
             var user = firebase.auth().currentUser;
@@ -321,8 +322,9 @@ class ProfilJoueurReglages extends React.Component {
         
         // On ne veut pas modifier le mdp
         } else if (this.mdp == "") {
-            this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', ''),retour_arriere_interdit : true})
+            console.log("in elsif modifier mdfp")
             this.setState({isLoading: false});
+            this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', ''),retour_arriere_interdit : true})
 
         // On modifie mal le mdp
         } else if (this.mdp != this.mdpConfirm) {
@@ -373,6 +375,10 @@ class ProfilJoueurReglages extends React.Component {
         if (pasDePseudo) {
             this.joueur.pseudo = this.joueur.prenom + " " + this.joueur.nom;
         }
+
+        if(this.joueur.prenom == undefined) {
+            this.joueur.prenom = " "
+        }
         
         this.joueur.score = this.score;
         this.joueur.sexe = this.sexe;
@@ -396,6 +402,31 @@ class ProfilJoueurReglages extends React.Component {
         var db = Database.initialisation()
     
         this.setState({isLoading: true})
+        console.log("in validate")
+
+        // TODO SUPPR
+        var test = {
+            age : this.state.age,
+            fiabilite : this.joueur.fiabilite,
+            naissance : this.joueur.naissance,
+            nom : this.joueur.nom,
+            telephone : this.joueur.telephone,
+            zone : this.joueur.zone,
+            prenom : this.joueur.prenom,
+            nom: this.joueur.nom,
+            pseudo: this.joueur.pseudo,
+            queryPseudo: this.joueur.queryPseudo,
+            pseudoQuery: this.joueur.pseudoQuery,
+            ville: this.joueur.ville,
+            departement: this.joueur.departement,
+            photo: this.joueur.photo,
+            score: this.joueur.score,
+            sexe: this.joueur.sexe,
+            poste: this.joueur.poste,
+            AKA: this.joueur.AKA
+        }
+
+        console.log(test)
         /* Enregistrer l'utilisateur dans la base de données. */
         db.collection("Joueurs").doc(this.id).set({
             age : this.state.age,
@@ -421,6 +452,7 @@ class ProfilJoueurReglages extends React.Component {
             merge: true
 
         }).then(() => {
+            console.log("IN THEN !!!")
             // On veut modifier le mail
             if (this.mail != "") {
                 var user = firebase.auth().currentUser;

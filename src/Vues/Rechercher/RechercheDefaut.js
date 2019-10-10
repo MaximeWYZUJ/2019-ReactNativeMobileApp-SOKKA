@@ -147,6 +147,7 @@ export default class RechercheDefaut extends React.Component {
                                 latitudeUser = {LocalUser.geolocalisation.latitude}
                                 longitudeUser = {LocalUser.geolocalisation.longitude}
                                 message_chauffe  = {item.message_chauffe}
+                                partieData = {item}
                             />
                         )
                     } else if(item.type == Type_Defis.defis_2_equipes) {

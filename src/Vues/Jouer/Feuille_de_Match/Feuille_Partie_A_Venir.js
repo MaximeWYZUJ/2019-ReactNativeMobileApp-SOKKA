@@ -120,7 +120,7 @@ class Feuille_Partie_A_Venir extends React.Component {
      */
     async sendNotifToAllPlayer(date) {
         var titre=  "Nouvelle Notif"
-        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le "
+        var corps = LocalUser.data.pseudo + " t'a invité / relancé pour une partie le "
         corps = corps + DatesHelpers.buildDate(date)
         for(var i  = 0; i < this.state.partie.attente.length; i++) {
             if(this.state.partie.attente[i] != LocalUser.data.id) {

@@ -618,6 +618,8 @@ export default class Profil_Equipe extends React.Component {
                     latitudeUser = {this.state.latitude}
                     longitudeUser = {this.state.longitude}
                     message_chauffe  = {item.message_chauffe}
+                    partieData = {item}
+
                 />
             )
         } else if(item.type == Type_Defis.defis_2_equipes) {
@@ -630,6 +632,8 @@ export default class Profil_Equipe extends React.Component {
                     equipeDefiee = {item.equipeDefiee}
                     terrain = {item.terrain}
                     allDataDefi = {item}
+                    dateString = {item.dateString}
+
                         
                 />
             )
@@ -870,6 +874,7 @@ export default class Profil_Equipe extends React.Component {
      * soit l'image en plein écran, soit le profil de l'équipe
      */
     displayRender() {
+        console.log(this.state.id)
         if(this.state.fullPicture == true) {
             return this.displayFullPicture()
         }else {

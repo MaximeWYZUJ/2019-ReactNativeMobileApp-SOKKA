@@ -275,7 +275,9 @@ class Fiche_Partie_Rejoindre extends React.Component {
                             id_partie :  this.props.navigation.getParam('id', ''),
                             enAttente : this.state.partie.attente,
                             inscris : this.state.partie.inscris,
-                            invite : false                          // Si c'est le créateur qui invite
+                            invite : false,                          // Si c'est le créateur qui invite;
+                            organisateur : this.state.partie.organisateur ,
+                            date : this.state.partie.jour
                         })
                     }
             },
@@ -522,7 +524,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
                     </TouchableOpacity>
                 </View>
             )
-        } else {
+        } else if(this.state.partie.nbJoueursRecherche > 0) {
              
             return(
                 <TouchableOpacity 
@@ -531,6 +533,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
                             <Text>S'inscrire</Text>
                 </TouchableOpacity>
             )
+    
         }
 
 
@@ -782,9 +785,13 @@ class Fiche_Partie_Rejoindre extends React.Component {
                 </View>
             )
         } else {
-            var seconds =this.state.partie.jour.seconds
-            var date = this.buildDateString(new Date(seconds* 1000))
-            
+            if(this.state.partie.dateString == undefined) {
+                var seconds =this.state.partie.jour.seconds
+                var date = this.buildDateString(new Date(seconds* 1000))
+            } else {
+                var date = this.state.partie.dateString
+            }
+           
             return(
                 
                 <View style = {{marginTop : hp('4%')}}>

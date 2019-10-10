@@ -300,7 +300,7 @@ class List_Messages extends React.Component {
 
     async sendNotifNewMessage() {
         var titre = "Nouvelle Notif"
-        var corps = LocalUser.data.pseudo + " t'as envoyé un message"
+        var corps = LocalUser.data.pseudo + " t'a envoyé un message"
         if(! this.isAgroupConv()) {
             var tokens = []
             var joueur = this.state.conv.joueur

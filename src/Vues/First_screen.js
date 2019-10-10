@@ -13,6 +13,7 @@ import departements from '../Components/Creation/departements.json'
 import NormalizeString from '../Helpers/NormalizeString';
 import Simple_Loading from '../Components/Loading/Simple_Loading'
 import {AsyncStorage} from 'react-native';
+import { StackActions, NavigationActions } from 'react-navigation';
 
 /** Pour afficher 5sec faire deux fonction qui affiche qqchose et en fonction du state appeler une ou l'autre */
 /**
@@ -21,6 +22,7 @@ import {AsyncStorage} from 'react-native';
 
 class First_screen extends React.Component {
 
+   
     static navigationOptions = { title: '', header: null };
 
 
@@ -63,6 +65,7 @@ class First_screen extends React.Component {
 
     constructor(props) {
         super(props)
+        this.props.nav
 
         this.state = {
             timePassed : false,
@@ -288,6 +291,7 @@ class First_screen extends React.Component {
                 // Update des données locales
                 LocalUser.exists = true;
                 LocalUser.data = j;
+                LocalUser.dataEquipesUser = []
                 var villePos = this.findPositionVilleFromName(j.ville);
                 LocalUser.geolocalisation = villePos;
 

@@ -12,8 +12,10 @@ import Information_Recapitulatif from './Information_Recapitulatif'
 import ID from '../../../Helpers/ID'
 import LocalUser from '../../../Data/LocalUser.json'
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
-
+import DatesHelpers from '../../../Helpers/DatesHelpers'
 import Notification from '../../../Helpers/Notifications/Notification'
+
+const DAY = ['Dimanche','Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
 
 /**
  * Classe qui va permettre d'afficher le récapitulatif d'un défis crée par 
@@ -127,7 +129,7 @@ export default class Recapitulatif_Defis extends React.Component {
                 for(var k = 0; k< j.tokens.length; k++) {
                     var title = "Nouvelle notification"
                     var corps = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.allDataEquipe.nom 
-                    corps = corps + " t'as convoqué / relancé pour un un défi le " + this.buildDate(date)
+                    corps = corps + " t'a convoqué / relancé pour un un défi le " + this.buildDate(date)
                     await this.sendPushNotification(j.tokens[k], title, corps) 
                     //Notification.sendNotificationInvitationDefi(j.tokens[k],date,LocalUser.data,equipe)
                 }
@@ -255,7 +257,8 @@ export default class Recapitulatif_Defis extends React.Component {
         var minutes = this.hours.split(':')[1]
         var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes
         var date = new Date(d)
-
+        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z').getDay()
+        var dateString =DAY[numJour] + " " + jour + '/' + moi + '/'+ an + ' - ' + heure + "h" + minutes + " à "+DatesHelpers.calculHeureFin(heure,minutes, this.duree)
         
         db.collection("Defis").doc(id.toString()).set({
             id : id,
@@ -291,7 +294,8 @@ export default class Recapitulatif_Defis extends React.Component {
             scoreConfirme :  false,
             scoreRenseigneParOrga : false,
             scoreRenseigneParDefiee : false,
-            defis_refuse : false
+            defis_refuse : false,
+            dateString : dateString
             
 
         })
@@ -485,8 +489,23 @@ export default class Recapitulatif_Defis extends React.Component {
 
 
     render() {
-
-        console.log("=========", this.nomsTerrain)
+        console.log("HOURS ", this.day)
+        var jour = this.day.split('-')[0]
+        var moi = this.day.split('-')[1]
+        if(moi.length ==1) {
+            moi = '0'+moi
+        }
+        if(jour.length ==1) {
+            jour = '0'+jour
+        }
+        
+        var an = this.day.split('-')[2]
+        var heure = this.hours.split(':')[0]
+        var minutes = this.hours.split(':')[1]
+      
+        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z').getDay()
+        var d =DAY[numJour] + " " + jour + '/' + moi + '/'+ an + ' - ' + heure + "h" + minutes + " à "+DatesHelpers.calculHeureFin(heure,minutes, this.duree)
+        console.log("=====DATE ==d==",d )
         return (
             <ScrollView>
             <View>

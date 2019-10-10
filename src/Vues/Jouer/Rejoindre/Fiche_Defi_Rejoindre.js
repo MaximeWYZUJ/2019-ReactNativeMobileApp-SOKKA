@@ -602,7 +602,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
     textPrixDefi() {
         if(this.state.defi != undefined) {
-            if(this.state.defi.prix_par_equipe == 0) {
+            if(this.state.defi.prix_par_equipe == 0 || this.state.defi.prix_par_equipe == null) {
                 return "Gratuit"
             }  else {
                 return  this.state.defi.prix_par_equipe + " € (à regler sur place)"
@@ -877,6 +877,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
         console.log("in render equipe defiee")
 
         if(this.state.equipeDefiee != undefined) {
+            console.log("EQUIPE DEFIEE",this.state.equipeDefiee.id)
             return(
                 <Animated.View
                     style = {[this.equipe2Animation.getLayout(), {alignSelf : "flex-end"}]}>
@@ -885,6 +886,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
                         photo = {this.state.equipeDefiee.photo}
                         score = {this.state.equipeDefiee.score}
                         nom = {this.state.equipeDefiee.nom}
+                        id = {this.state.equipeDefiee.id}
                     />
                 </Animated.View>
             )
@@ -1008,7 +1010,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
                 <TouchableOpacity 
                     onPress = {() => {
-                        if( parseFloat(this.state.defi.format.split(' ')[0]) > item.nbJoueurs) {
+                        if( parseFloat(this.state.defi.format.split(' ')[0]) <= item.nbJoueurs) {
                             this.chooseEquipe(item)
                             this.saveParticipationInDb(item.id,item.nom)
                             
@@ -1133,8 +1135,12 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
     displayRender() {
 
-        var seconds =this.state.defi.jour.seconds
-        var date = this.buildDateString(new Date(seconds* 1000))
+        if(this.state.defi.dateString == undefined) {
+            var seconds =this.state.defi.jour.seconds
+            var date = this.buildDateString(new Date(seconds* 1000))
+        } else {
+            var date = this.state.defi.dateString
+        }
         return(
             <ScrollView>
                 <View style = {{marginTop : hp('0.5%')}}>

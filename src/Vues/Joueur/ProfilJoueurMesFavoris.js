@@ -58,7 +58,7 @@ class ProfilJoueurMesFavoris extends React.Component {
         this.setState({equipesFav: equipesTriees, gotDataEquipesFav: true})
 
         arrayT = await Database.getArrayDocumentData(this.joueur.terrains, 'Terrains')
-        var terrainsTries = arrayE.sort((t1,t2) => {
+        var terrainsTries = arrayT.sort((t1,t2) => {
             if(t1.InsNom <= t2.InsNom) {
                 return 1
             } else {
@@ -149,6 +149,9 @@ class ProfilJoueurMesFavoris extends React.Component {
 
     _renderItemTerrain = ({item}) => {
         var distance = Distance.calculDistance(item.Latitude, item.Longitude, LocalUser.geolocalisation.latitude, LocalUser.geolocalisation.longitude);
+
+        console.log("INS", item.InsNom)
+        console.log("Equ", item.EquNom)
 
         return (
 			<ItemTerrain

@@ -139,16 +139,23 @@ export default class Modes_de_connexion extends React.Component {
         .then(async (userCred) => {
             if (userCred.user.emailVerified || !checkEmailVerifie) {
                 
+                console.log("********************************")
+                console.log("USER ID !!!",firebase.auth().currentUser.uid)
+                console.log(this.state.mail)
+                console.log("********************************")
+
                 this._storeData()
 
                 console.log("email verifie")
+
                 // Récupérations des données de la DB
                 j = await Database.getDocumentData(firebase.auth().currentUser.uid, "Joueurs");
                 jEquipes = await Database.getArrayDocumentData(j.equipes, 'Equipes');
-
+                console.log("PSEUDO", j.pseudo)
                 // Update des données locales
                 LocalUser.exists = true;
                 LocalUser.data = j;
+                LocalUser.dataEquipesUser = jEquipes
                 var villePos = this.findPositionVilleFromName(j.ville);
                 LocalUser.geolocalisation = villePos;
 

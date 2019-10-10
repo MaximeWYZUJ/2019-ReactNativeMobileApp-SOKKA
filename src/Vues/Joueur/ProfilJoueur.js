@@ -21,6 +21,9 @@ import Villes from '../../Components/Creation/villes.json'
 import NormalizeString from '../../Helpers/NormalizeString'
 import Photo_Equipe from '../../Components/Profil_Equipe/Photo_Equipe'
 import {AsyncStorage} from 'react-native';
+import DatesHelpers from '../../Helpers/DatesHelpers';
+import { NavigationActions, StackActions } from 'react-navigation';
+
 
 class ProfilJoueur extends React.Component {
 
@@ -46,6 +49,9 @@ class ProfilJoueur extends React.Component {
         // Si On a pas encore sauvegardé les données des équipes 
         if(this.monProfil) {
             if(LocalUser.dataEquipesUser.length  == 0) {
+                for(var i = 0 ; i < this.equipes.length; i++) {
+                    console.log(this.equipes[i].nom)
+                }
                 LocalUser.dataEquipesUser =  this.equipes
             } else {
                 this.equipes = LocalUser.dataEquipesUser
@@ -142,17 +148,18 @@ class ProfilJoueur extends React.Component {
     }
 
     goToFirstScreen() {
-        this.props.navigation.push("first", {deconexion : true})  
+       this.props.navigation.navigate("first", {deconexion : true})  
     }
 
     deco() {
+    
         this.deconexion()
     }
 
     async deconexion() {
         this.setState({isLoading : true})
+     
         var token = await this.registerForPushNotifications()
-        console.log("token")
         var db = Database.initialisation()
         db.collection("Login").doc(token).delete().then(this.goToFirstScreen).catch(function(error) {
             console.error("Error removing document: ", error);
@@ -172,10 +179,16 @@ class ProfilJoueur extends React.Component {
             tokens : newTokens
         })
         AsyncStorage.clear()
-        console.log("before go to first screan ")
+        firebase.auth().signOut().then(() => {
+            // Sign-out successful.
+            this.setState({isLoading : false})
+            this.props.navigation.navigate("first", {deconexion : true})  
+
+          }).catch(function(error) {
+              console.log(error)
+          });
         
-        this.setState({isLoading : false})
-        this.props.navigation.push("first", {deconexion : true})  
+       
 
     }
 
@@ -594,7 +607,7 @@ class ProfilJoueur extends React.Component {
      * est capitaine.
      */
     getEquipesUserCap() {
-        //this.setState({isLoading : true,show_equipe : true})
+        this.setState({isLoading : true,show_equipe : true})
         var equipes = []
         var db = Database.initialisation()
         var ref = db.collection("Equipes");
@@ -718,6 +731,8 @@ class ProfilJoueur extends React.Component {
                     latitudeUser = {this.state.latitude}
                     longitudeUser = {this.state.longitude}
                     message_chauffe  = {item.message_chauffe}
+                    dateString = {item.dateString}
+                    partieData = {item}
                 />
             )
         } else if(item.type == Type_Defis.defis_2_equipes) {
@@ -730,6 +745,8 @@ class ProfilJoueur extends React.Component {
                     equipeDefiee = {item.equipeDefiee}
                     terrain = {item.terrain}
                     allDataDefi = {item}
+                    dateString = {item.dateString}
+
                         
                 />
             )
@@ -995,6 +1012,18 @@ class ProfilJoueur extends React.Component {
             }
         }
     }
+
+
+    renderAge(){
+        console.log("ID JOUEURS !!!!!",this.joueur.id )
+        console.log("NAISSANCE",this.joueur.naissance )
+        if(this.joueur.naissance.seconds == undefined) {
+            var naissance = new Date(this.joueur.naissance)
+        } else {
+            naissance = new Date(this.joueur.naissance.seconds * 1000)
+        }
+        return DatesHelpers.calculAge(naissance)
+    }
 	
 
     render() {
@@ -1062,7 +1091,7 @@ class ProfilJoueur extends React.Component {
                                             style={{width: 15, height: 15, marginHorizontal: 2}}
                                             source={this.sexeIcon}
                                             />
-                                        <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.joueur.age} ans, {this.joueur.ville.charAt(0).toUpperCase() + this.joueur.ville.slice(1)}</Text>
+                                        <Text style={{margin: 5, fontSize : RF(3.25)}}>{this.renderAge()} ans, {this.joueur.ville.charAt(0).toUpperCase() + this.joueur.ville.slice(1)}</Text>
                                     </View>
                                     {/*<Text style={{margin: 5,  fontSize : RF(3.25)}}>{this.joueur.pseudo}</Text>*/}
                                     <Text>{this.getTextePoste()}</Text>

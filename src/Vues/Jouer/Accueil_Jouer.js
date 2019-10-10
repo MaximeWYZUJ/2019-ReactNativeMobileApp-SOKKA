@@ -243,47 +243,48 @@ class Accueil_Jouer extends React.Component {
 
 
    
-    _renderItem = ({item}) => {       
-        if(item.type == Type_Defis.partie_entre_joueurs){
-          
+    _renderItem = ({item}) => {      
+        if(new Date(item.jour.seconds *1000) >= new Date()) { 
+            if(item.type == Type_Defis.partie_entre_joueurs){
             
-            return(
-                <Item_Partie
-                    id = {item.id}
-                    format = {item.format}
-                    jour = {new Date(item.jour.seconds *1000)} 
-                    duree = {item.duree}
-                    joueurs = {this.buildJoueurs(item)}
-                    nbJoueursRecherche =  {item.nbJoueursRecherche}
-                    terrain=  {item.terrain}
-                    latitudeUser = {this.state.latitude}
-                    longitudeUser = {this.state.longitude}
-                    message_chauffe  = {item.message_chauffe}
-                />
-            )
-        } else if(item.type == Type_Defis.defis_2_equipes) {
-                console.log("fffffffffffffffffffffffffffffffffffffffff")
-                console.log(new Date(item.jour.seconds * 1000))
-                console.log(item.equipeOrganisatrice)
-                console.log("fffffffffffffffffffffffffffffffffffffffff")
-
-            
-            return(
-                <Item_Defi
-                    format = {item.format}
-                    jour = {new Date(item.jour.seconds * 1000)}
-                    duree ={item.duree}
-                    equipeOrganisatrice = {item.equipeOrganisatrice}
-                    equipeDefiee = {item.equipeDefiee}
-                    terrain = {item.terrain}
-                    allDataDefi = {item}
-                        
-                />
-            )
-        } else {
-            return(
-                <Text>oooo</Text>
-            )
+                
+                return(
+                    <Item_Partie
+                        id = {item.id}
+                        format = {item.format}
+                        jour = {new Date(item.jour.seconds *1000)} 
+                        duree = {item.duree}
+                        joueurs = {this.buildJoueurs(item)}
+                        nbJoueursRecherche =  {item.nbJoueursRecherche}
+                        terrain=  {item.terrain}
+                        latitudeUser = {this.state.latitude}
+                        longitudeUser = {this.state.longitude}
+                        message_chauffe  = {item.message_chauffe}
+                        dateString = {item.dateString}
+                        partieData = {item}
+                    />
+                )
+            } else if(item.type == Type_Defis.defis_2_equipes) {
+                
+                
+                return(
+                    <Item_Defi
+                        format = {item.format}
+                        jour = {new Date(item.jour.seconds * 1000)}
+                        duree ={item.duree}
+                        equipeOrganisatrice = {item.equipeOrganisatrice}
+                        equipeDefiee = {item.equipeDefiee}
+                        terrain = {item.terrain}
+                        allDataDefi = {item}
+                        dateString = {item.dateString}
+                            
+                    />
+                )
+            } else {
+                return(
+                    <Text>oooo</Text>
+                )
+            }
         }
     }
 

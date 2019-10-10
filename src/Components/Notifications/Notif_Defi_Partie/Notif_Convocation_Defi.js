@@ -582,7 +582,7 @@ class Notif_Convocation_Defi extends React.Component {
                     </View>
                     <View>
                         <Text>Le capitaine {this.renderNomEmetteur()} de l'équipe  </Text>
-                        <Text>{this.renderNomEquipe()}  t'as convoqué / relancé pour</Text>
+                        <Text>{this.renderNomEquipe()}  t'a convoqué / relancé pour</Text>
 
                         {/* Date et btn consulter*/}
                         <View style = {{flexDirection : "row"}}>

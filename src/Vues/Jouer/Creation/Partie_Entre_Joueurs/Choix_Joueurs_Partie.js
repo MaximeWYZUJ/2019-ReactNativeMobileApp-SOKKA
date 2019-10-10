@@ -74,7 +74,7 @@ class Choix_Joueurs_Partie extends React.Component {
         console.log("DATE : ",date)
 
         var titre=  "Nouvelle Notif"
-        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le "
+        var corps = LocalUser.data.pseudo + " t'a invité / relancé pour une partie le "
         corps = corps + DatesHelpers.buildDate(date)
 
         for(var i  = 0; i < this.props.joueursPartie.length; i++) {
@@ -89,6 +89,30 @@ class Choix_Joueurs_Partie extends React.Component {
                 }
             }
         }
+        if(! this.props.navigation.getParam("invite",false)) {
+            this.sendNotifToOrganisateur(date)
+        }
+    }
+
+
+    async sendNotifToOrganisateur(date) {
+        var nbInvite = " "
+        if(this.props.joueursPartie.length > 1) {
+            nbInvite = " et à invité " + this.props.joueurs.length + "joueur(s)"
+        }
+        var titre=  "Nouvelle Notif"
+        var corps = LocalUser.data.pseudo + " s’est inscrit" + nbInvite + "pour une partie le " 
+        corps = corps + DatesHelpers.buildDate(date)
+
+        var orga = await Database.getDocumentData(this.props.navigation.getParam("organisateur","erreur"), "Joueurs")
+        
+        var tokens = orga.tokens
+        if(tokens != undefined) {
+            for(var k =0; k < tokens.length; k ++) {
+                await this.sendPushNotification(tokens[k], titre, corps)
+            }
+        }
+
     }
     // ======================================================
 

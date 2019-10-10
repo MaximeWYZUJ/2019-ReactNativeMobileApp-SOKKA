@@ -167,7 +167,7 @@ export default class Notification {
     static sendNotificationInvitationDefi(destinataire,date,emeteur,equipe) {
         console.log("IN SEND NOTIF !!")
         var corps = "Le capitaine " + emeteur.pseudo + " de l'équipe " + equipe.nom 
-        corps = corps + " t'as convoqué / relancé pour un un défi le "
+        corps = corps + " t'a convoqué / relancé pour un un défi le "
         corps = corps + this.buildDate(date)
         
         var titre  = "Nouvelle notification"

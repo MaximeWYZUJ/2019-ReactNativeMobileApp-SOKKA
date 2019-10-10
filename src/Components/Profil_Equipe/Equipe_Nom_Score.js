@@ -19,8 +19,8 @@ class Equipe_Nom_Score extends React.Component {
             <TouchableOpacity 
                 onPress = {() => 
                     {
-                        
-                        this.props.navigation.navigate("Profil_Equipe", {equipeId : this.props.id})
+                        console.log("idEquipe : ",this.props.id)
+                        this.props.navigation.push("Profil_Equipe", {equipeId : this.props.id})
                     }
             
             }

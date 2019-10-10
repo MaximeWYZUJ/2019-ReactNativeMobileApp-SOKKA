@@ -125,7 +125,7 @@ export default class  Choix_Message_Chauffe extends React.Component {
 
                 <View style = {{marginTop : hp('4%')}}>
                     <Text style = {styles.texte}> Quel message souhaites-tu envoyer </Text>
-                    <Text style = {styles.texte}>à tes futures adverssaires</Text>
+                    <Text style = {styles.texte}>à tes futurs adverssaires</Text>
                 </View>
                 
 

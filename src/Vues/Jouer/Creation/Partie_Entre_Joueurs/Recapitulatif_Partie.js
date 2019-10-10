@@ -11,6 +11,8 @@ import LocalUser from '../../../../Data/LocalUser.json'
 import DatesHelpers from '../../../../Helpers/DatesHelpers'
 import Types_Notification from '../../../../Helpers/Notifications/Types_Notification'
 
+const DAY = ['Dimanche','Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+
 /**
  * Classe présentant le récapitulatif d'une partie que l'utilisateur est en train
  * de créer
@@ -99,7 +101,7 @@ export default class Recapitulatif_Partie extends React.Component {
      */
     async sendNotifToAllPlayer(date) {
         var titre=  "Nouvelle Notif"
-        var corps = LocalUser.data.pseudo + " t'as invité / relancé pour une partie le "
+        var corps = LocalUser.data.pseudo + " t'a invité / relancé pour une partie le "
         corps = corps + DatesHelpers.buildDate(date)
 
         for(var i  = 0; i < this.joueurs.length; i++) {
@@ -175,11 +177,11 @@ export default class Recapitulatif_Partie extends React.Component {
 
     goToFichePartie(id,date) {
         if(this.nbJoueursRecherche > 0 && this.joueurs.length > 1) {
-            msg = "Ta partie a bien été créée. Les joueurs qui le souhaitent peuvent s’inscrire et les joueurs invités vont recevoir une notification pour confirmer leur participation."
+            msg = "Les joueurs qui le souhaitent peuvent s’inscrire et les joueurs invités vont recevoir une notification pour confirmer leur participation."
         } else if(this.joueurs.length > 0 && this.nbJoueursRecherche == 0 ) {
-            msg = "Ta partie a bien été créée. Les joueurs invités vont recevoir une notification pour confirmer leur participation."
+            msg = "Les joueurs invités vont recevoir une notification pour confirmer leur participation."
         } else if(this.joueurs.length == 1 && this.nbJoueursRecherche > 0) {
-            msg = "Ta partie a bien été créée. Les joueurs qui le souhaitent peuvent s’inscrire."
+            msg = "Les joueurs qui le souhaitent peuvent s’inscrire."
         }
 
         
@@ -234,6 +236,10 @@ export default class Recapitulatif_Partie extends React.Component {
         var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z'
         console.log(d)
         var date = new Date(d)
+
+        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z').getDay()
+        var dateString =DAY[numJour] + " " + jour + '/' + moi + '/'+ an + ' - ' + heure + "h" + minutes + " à "+DatesHelpers.calculHeureFin(heure,minutes, this.duree)
+        
         recherche = this.nbJoueursRecherche > 0
         db.collection("Defis").doc(id.toString()).set({
             id : id,
@@ -257,7 +263,9 @@ export default class Recapitulatif_Partie extends React.Component {
             inscris : [],
             buteurs : [],
             votes : [],
-            absents : []
+            absents : [],
+            dateString: dateString
+
         })
         .then(this.goToFichePartie(id,date))
         .catch(function(error) {

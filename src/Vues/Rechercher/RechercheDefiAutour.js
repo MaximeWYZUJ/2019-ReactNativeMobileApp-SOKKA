@@ -446,7 +446,8 @@ class RechercheDefiAutour extends React.Component {
                     terrain=  {item2.terrain}
                     latitudeUser = {LocalUser.geolocalisation.latitude}
                     longitudeUser = {LocalUser.geolocalisation.longitude}
-                    message_chauffe  = {item2.message_chauffe}
+					message_chauffe  = {item2.message_chauffe}
+					partieData = {item}
                 />
             )
         } else if(item2.type == Type_Defis.defis_2_equipes) {

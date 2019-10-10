@@ -8,6 +8,7 @@ import Database from '../../Data/Database'
 import LocalUser from '../../Data/LocalUser.json'
 import Distance from '../../Helpers/Distance'
 import { withNavigation } from 'react-navigation'
+import { database } from 'firebase';
 
 
 const DAY = ['Dimanche','Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
@@ -123,10 +124,18 @@ class Item_Partie extends React.Component {
     
 
     _renderItem = ({item}) => {
+        var color = "white"
+        if(this.props.partieData != undefined) {
+            if(this.props.partieData.confirme.includes(item.id)) {
+                color = "green"
+            } else if(this.props.partieData.attente.includes(item.id)) {
+                color = "#C0C0C0"
+            } 
+        }
         return(
             <Image
                 source = {{uri : item.photo}}
-                style = {styles.photoJoueur}
+                style = {[styles.photoJoueur, {borderWidth : 3, borderColor : color}]}
             />
         )
     }
@@ -176,7 +185,12 @@ class Item_Partie extends React.Component {
         var color = '#FFFFFF' 
         if(this.props.jour < new Date())  color = "#E1E1E1"
 
-        var txt = 'Partie ' + this.props.format + ' - ' + this.buildDate()
+        if(this.props.dateString == undefined) {
+            var date = this.buildDate()
+        } else {
+            var date = this.props.dateString
+        }
+        var txt = 'Partie ' + this.props.format + ' - ' + date
 
          return (
             <TouchableOpacity 

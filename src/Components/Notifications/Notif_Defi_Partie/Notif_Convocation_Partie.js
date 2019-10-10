@@ -444,7 +444,7 @@ class Notif_Convocation_Partie extends React.Component {
         if(! this.state.aconfirmer && ! this.state.arefuse) {
             return(
                 <View style = {{alignSelf : "center"}}>
-                        <Text>{this.renderNomEmetteur()}  t'as invité / relancé pour </Text>
+                        <Text>{this.renderNomEmetteur()}  t'a invité / relancé pour </Text>
 
                         {/* Date et btn consulter */}
                         <View style = {{flexDirection : "row"}}>

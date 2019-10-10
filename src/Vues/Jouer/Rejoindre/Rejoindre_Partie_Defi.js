@@ -124,6 +124,8 @@ export default class Rejoindre_Partie_Defi extends React.Component {
                     latitudeUser = {this.state.latitude}
                     longitudeUser = {this.state.longitude}
                     message_chauffe  = {item.message_chauffe}
+                    partieData = {item}
+
                 />
             )
         } else if(item.type == Type_Defis.defis_2_equipes) {

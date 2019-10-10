@@ -248,7 +248,12 @@ class Item_Defi extends React.Component {
         var color = '#FFFFFF' 
         if(this.props.jour < new Date())  color = "#E1E1E1"
 
-        var txt = 'Defi ' + this.props.format + ' - ' + this.buildDate()
+        if(this.props.dateString == undefined) {
+            var date = this.buildDate()
+        } else {
+            var date = this.props.dateString
+        }
+        var txt = 'Defi ' + this.props.format + ' - ' + date
         return(
             <TouchableOpacity 
                 style = {[styles.mainContainer, {backgroundColor : color}]}
