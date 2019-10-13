@@ -126,11 +126,15 @@ class Item_Partie extends React.Component {
     _renderItem = ({item}) => {
         var color = "white"
         if(this.props.partieData != undefined) {
-            if(this.props.partieData.confirme.includes(item.id)) {
-                color = "green"
-            } else if(this.props.partieData.attente.includes(item.id)) {
-                color = "#C0C0C0"
-            } 
+            if (this.props.partieData.confirme != undefined) {
+                if(this.props.partieData.confirme.includes(item.id)) {
+                    color = "green"
+                }
+            } else if (this.props.partieData.attente != undefined) {
+                if (this.props.partieData.attente.includes(item.id)) {
+                    color = "C0C0C0"
+                }
+            }
         }
         return(
             <Image
@@ -201,10 +205,11 @@ class Item_Partie extends React.Component {
                 <Text>{txt}</Text>
                 <View style = {{flexDirection : "row", marginTop : hp('1%')}}>
                     <FlatList
+                        horizontal={true}
                         data = {this.state.joueurs}
                         keyExtractor={(item) => item.id}
                         renderItem = {this._renderItem}
-                        numColumns={4}
+                        //numColumns={4}
                         extraData = {this.state}
                     />
                     <Text style = {{fontSize : RF(3), fontWeight : "bold", marginTop : hp('2%'), marginRight : wp('3%')}}>...</Text>

@@ -9,11 +9,9 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
 import Database from '../../Data/Database'
 import villes from '../../Components/Creation/villes.json'
-import departements from '../../Components/Creation/departements.json'
 import NormalizeString from '../../Helpers/NormalizeString.js';
 import * as firebase from 'firebase';
 import '@firebase/firestore'
-import FileUploader from  'react-firebase-file-uploader';
 import {SkypeIndicator} from 'react-native-indicators';
 import LocalUser from '../../Data/LocalUser.json';
 import Notification from '../../Helpers/Notifications/Notification'
@@ -40,7 +38,7 @@ export default class Inscription_Photo extends React.Component {
         const naissance = navigation.getParam('naissance', ' ');
         const age = navigation.getParam('age','');
         const zone = navigation.getParam('zone', '');
-        const departement = this.getDepartement(ville);
+        const departement = navigation.getParam('departement', "erreur getParam inscriptionPhoto 13/10/19");
 
         this.state = {
             nom : nom,
@@ -64,26 +62,6 @@ export default class Inscription_Photo extends React.Component {
             usingCamera: false
         }
     }
-
-
-    getDepartement(nomVille) {
-        for (var i=0; i<villes.length; i++) {
-            if (nomVille === villes[i].Nom_commune) {
-                var cp = villes[i].Code_postal+"";
-                if (cp.length < 5) {
-                    cp = "0" + cp;
-                }
-                var depCode = cp.substr(0, 2);
-                for (var j=0; j<departements.length; j++) {
-                    if (departements[j].departmentCode === depCode) {
-                        return departements[j].departmentName;
-                    }
-                }
-            }
-        }
-        return "erreur"
-    }
-
 
 
     findPositionVilleFromName(name) {

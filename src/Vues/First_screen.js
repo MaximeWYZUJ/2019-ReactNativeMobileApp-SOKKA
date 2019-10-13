@@ -26,43 +26,6 @@ class First_screen extends React.Component {
     static navigationOptions = { title: '', header: null };
 
 
-    getDepartement(nomVille) {
-        for (var i=0; i<villes.length; i++) {
-            if (NormalizeString.normalize(nomVille) == NormalizeString.normalize(villes[i].Nom_commune)) {
-                var cp = villes[i].Code_postal+"";
-                if (cp.length < 5) {
-                    cp = "0" + cp;
-                }
-                var depCode = cp.substr(0, 2);
-                for (var j=0; j<departements.length; j++) {
-                    if (departements[j].departmentCode === depCode) {
-                        return departements[j].departmentName;
-                    }
-                }
-            }
-        }
-        return "erreur"
-    }
-
-    async fonction() {
-        /*var db = Database.initialisation();
-        var coll = await db.collection("Joueurs").get();
-        for (var i=0; i<coll.docs.length; i++) {
-            var data = coll.docs[i].data();
-            if (data.departement == undefined) {
-                var departement = this.getDepartement(data.ville);
-            } else {
-                var departement = data.departement;
-            }
-            db.collection("Joueurs").doc(data.id).set({
-                ...data,
-                pseudoQuery: NormalizeString.decompose(data.pseudo),
-                ville: NormalizeString.normalize(data.ville),
-                departement: NormalizeString.normalize(departement)
-            })
-        }*/
-    }
-
     constructor(props) {
         super(props)
         this.props.nav

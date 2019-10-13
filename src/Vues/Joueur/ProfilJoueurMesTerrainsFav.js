@@ -3,8 +3,6 @@ import { View, StyleSheet, FlatList,Text } from 'react-native'
 import SearchList from '../../Components/SearchList.js'
 import ItemTerrain from '../../Components/Terrain/ItemTerrain'
 
-
-
 class ProfilJoueurMesTerrainsFav extends React.Component {
 
     static navigationOptions = ({ navigation }) => {
