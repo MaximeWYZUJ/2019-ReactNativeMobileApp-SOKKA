@@ -106,6 +106,11 @@ class Notif_Reponse_Releve_Defi extends React.Component {
         }
     }
 
+    renderDateDefi(){
+        if(this.state.defi != undefined) {
+            return this.state.defi.dateString
+        }
+    }
 
     render() {
         if(this.state.isLoading) {
@@ -126,7 +131,7 @@ class Notif_Reponse_Releve_Defi extends React.Component {
 
                         {/* Date et btn consulter*/}
                         <View style = {{flexDirection : "row"}}>
-                            {/*<Text>un défi le {this.renderDateDefi()} </Text>*/}
+                            <Text> le {this.renderDateDefi()} </Text>
                             
                             <TouchableOpacity
                                 onPress = {() => this.goToFicheDefi()}

@@ -90,8 +90,15 @@ class ProfilJoueur extends React.Component {
 
     static navigationOptions = ({ navigation }) => {
         if(! navigation.getParam("retour_arriere_interdit",false)) {
+            var joueur  = navigation.getParam('joueur', undefined)
+            var titre = ""
+            if (joueur == undefined) {
+                titre = LocalUser.data.pseudo
+            } else {
+                titre = joueur.pseudo
+            }
             return {
-                title: navigation.getParam('joueur', ' ').pseudo,
+                title: titre,
 
                 tabBarOnPress({jumpToIndex, scene}) {
                     jumpToIndex(scene.index);
@@ -106,8 +113,15 @@ class ProfilJoueur extends React.Component {
             
         } else {
             const {state} = navigation;
+            var joueur  = navigation.getParam('joueur', undefined)
+            var titre = ""
+            if (joueur == undefined) {
+                titre = LocalUser.data.pseudo
+            } else {
+                titre = joueur.pseudo
+            }
             return { 
-                title: navigation.getParam('joueur', ' ').pseudo,
+                title:titre,
                 
                 tabBarOnPress({jumpToIndex, scene}) {
                     jumpToIndex(scene.index);

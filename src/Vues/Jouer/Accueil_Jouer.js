@@ -53,8 +53,9 @@ class Accueil_Jouer extends React.Component {
             title: 'Jouer',
             tabBarOnPress({jumpToIndex, scene}) {
                 jumpToIndex(scene.index);
-                console.log(scene.index)
-            }
+            },               
+         headerLeft: (<View></View>),
+
         }
     }
 

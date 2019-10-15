@@ -260,10 +260,13 @@ export default class Recapitulatif_Defis extends React.Component {
         
         var an = this.day.split('-')[2]
         var heure = this.hours.split(':')[0]
+        if(heure.length == 1) {
+            heure = "0" + heure
+        }
         var minutes = this.hours.split(':')[1]
         var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes
         var date = new Date(d)
-        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z').getDay()
+        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes).getDay()
         var dateString =DAY[numJour] + " " + jour + '/' + moi + '/'+ an + ' - ' + heure + "h" + minutes + " à "+DatesHelpers.calculHeureFin(heure,minutes, this.duree)
       
         var joueurs = this.joueursSelectionnes
@@ -533,6 +536,7 @@ export default class Recapitulatif_Defis extends React.Component {
 
     render() {
         console.log("HOURS ", this.day)
+        console.log()
         var jour = this.day.split('-')[0]
         var moi = this.day.split('-')[1]
         if(moi.length ==1) {
@@ -541,12 +545,17 @@ export default class Recapitulatif_Defis extends React.Component {
         if(jour.length ==1) {
             jour = '0'+jour
         }
+
         
         var an = this.day.split('-')[2]
         var heure = this.hours.split(':')[0]
+
+        if(heure.length == 1) {
+            heure = "0" + heure
+        }
         var minutes = this.hours.split(':')[1]
       
-        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z').getDay()
+        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes).getDay()
         var d =DAY[numJour] + " " + jour + '/' + moi + '/'+ an + ' - ' + heure + "h" + minutes + " à "+DatesHelpers.calculHeureFin(heure,minutes, this.duree)
         console.log("=====DATE ==d==",d )
         return (

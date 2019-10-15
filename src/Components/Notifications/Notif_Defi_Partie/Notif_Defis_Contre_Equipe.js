@@ -262,6 +262,13 @@ class Notif_Defis_Contre_Equipe extends React.Component {
     }
 
 
+    dateDefis(){
+        if(this.state.defi != undefined) {
+            return this.state.defi.dateString
+        }
+    }
+
+
     renderPhotoEquipeEmetteur() {
         if(this.state.equipeEmettrice != undefined) {
             return(
@@ -335,7 +342,7 @@ class Notif_Defis_Contre_Equipe extends React.Component {
                     </View>
                     <View>
                         <Text> L'équipe {this.renderNomEquipeEmettrice()} défie ton équipe</Text>
-                        <Text> {this.renderNomEquipeReceptrice()} </Text>
+                        <Text> {this.renderNomEquipeReceptrice()} {this.dateDefis()}  </Text>
 
                         <TouchableOpacity
                             onPress = {() => this.goToFicheDefi()}

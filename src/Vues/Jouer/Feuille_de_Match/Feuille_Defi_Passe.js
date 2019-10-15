@@ -115,9 +115,11 @@ class Feuille_Defi_Passe extends React.Component {
                 for(var k = 0; k < tokens.length ; k++) {
                     console.log("eeeeeeeeeeeeeeeee", tokens[k])
                     await this.sendPushNotification(tokens[k], titre, corps)
-                    await this.storeNotifToCapAdverse(joueur)
                 }
+                await this.storeNotifToCapAdverse(joueur)
+
             }
+
         }
     }
 

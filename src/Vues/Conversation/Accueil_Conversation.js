@@ -82,7 +82,7 @@ export default class Accueil_Conversation extends React.Component {
 
      /** Fonction appelée au moment où l'utilisateur pull to refresh */
      _onRefresh = async () => {
-        this.setState({refreshing: true});
+        this.setState({refreshing: true, conversations : []});
         this.getConversations()
 
         this.setState({refreshing : false})

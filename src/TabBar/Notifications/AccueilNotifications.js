@@ -28,7 +28,7 @@ export default class AccueilNotifications extends React.Component {
 
      /** Fonction appelée au moment où l'utilisateur pull to refresh */
     _onRefresh = async () => {
-        this.setState({refreshing: true});
+        this.setState({refreshing: true, notifications : []});
         await this.getNotifications()
         //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
         this.setState({refreshing : false})
