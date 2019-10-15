@@ -69,7 +69,6 @@ export default class Profil_Equipe extends React.Component {
 
     componentDidMount(){
         this.getEquipeWithId(this.props.navigation.getParam('equipeId', null));
-        console.log("this.props.navigation.getParam('equipeId', null)",this.props.navigation.getParam('equipeId', null))
     }
     
 
@@ -86,35 +85,23 @@ export default class Profil_Equipe extends React.Component {
         var db = Database.initialisation()
         var allDefis = []
         var now = new Date()
-        console.log("GET ALL defi", this.state.id)
         var ref = db.collection("Defis");
-        var query = ref.where("equipeOrganisatrice", "==", this.state.id)
-                        .where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
+        var query = ref.where("equipesConcernees", "array-contains" ,this.state.id).orderBy("dateParse")
 
-        // On regarde si l'equipe organise  un defi
         query.get().then(async (results) => {
             for(var i = 0; i < results.docs.length ; i++) {
-                allDefis.push(results.docs[i].data())
+                var defi = results.docs[i].data()
+                allDefis.push(defi)
+                //defisArray.push(results.docs[i].data())
             }
 
-            
-
-            // Regarder si cette équipe est defiée 
-            var queryEqDefiee = ref.where("equipeDefiee", "==", this.state.id)
-                                        .where("dateParse", ">=",Date.parse(now))
-                queryEqDefiee.get().then(async (resultsDefiDefiee) => {
-
-                    for(var i = 0; i < resultsDefiDefiee.docs.length ; i++) {
-                        if(! this.allreaddyDownloadDefi(allDefis, resultsDefiDefiee.docs[i].data())) { 
-                                allDefis.push(resultsDefiDefiee.docs[i].data())
-                        }
-                    }
-                })
-
-                this.setState({allDefis : allDefis})
-            }).catch(function(error) {
+            this.setState({
+                allDefis : allDefis,
+                isLoading : false,
+            })
+        }).catch(function(error) {
               console.log("Error getting documents partie:", error);
-        });   
+        });    
     }
 
 
@@ -142,8 +129,6 @@ export default class Profil_Equipe extends React.Component {
     * @param {*} id
     */
     getEquipeWithId(id) {
-        console.log("in get Equipe ============="),
-        console.log(id)
         Database.getDocumentData(id, 'Equipes').then(async (doc) => {
             if (doc.joueurs.length > 1) {
                 var nbJ = doc.joueurs.length + " joueurs";
@@ -358,10 +343,7 @@ export default class Profil_Equipe extends React.Component {
      * @param {String} body 
      */
     async sendPushNotification(token , title,body ) {
-        console.log("in send push notif")
-        console.log(token)
-        console.log(title)
-        console.log(body)
+    
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: token,
@@ -394,9 +376,7 @@ export default class Profil_Equipe extends React.Component {
         for(var i = 0; i < this.state.joueurs.length; i ++) {
             var joueur = this.state.joueurs[i]
             if(joueur.isCaptain) {
-                console.log("===================================",joueur)
                 await this.storeNotifRejoindreEquipe(joueur.id)
-                console.log("after store")
                 for(var k = 0; k < joueur.tokens.length; k++) {
                     await this.sendPushNotification(joueur.tokens[k], titre,corps)
                 }
@@ -848,7 +828,9 @@ export default class Profil_Equipe extends React.Component {
                     {/* BLOC DEFIS */}
                     <View style = {styles.main_container_defis}>
                         <View style = {styles.view_txt_defis}>
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress = {() => {
+                                this.props.navigation.push("CalendrierEquipe", {idEquipe : this.state.id, header : this.state.nom})
+                            }}>
                                 <Text style = {styles.txt_defis}>Défis de l'équipe</Text>
                             </TouchableOpacity>
 
@@ -874,7 +856,6 @@ export default class Profil_Equipe extends React.Component {
      * soit l'image en plein écran, soit le profil de l'équipe
      */
     displayRender() {
-        console.log(this.state.id)
         if(this.state.fullPicture == true) {
             return this.displayFullPicture()
         }else {

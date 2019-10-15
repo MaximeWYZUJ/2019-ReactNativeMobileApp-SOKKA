@@ -46,7 +46,9 @@ export default class AccueilNotifications extends React.Component {
         query.get().then(async (results) => {
            
             for(var i = 0; i < results.docs.length ; i++) {
-               notifications.push(results.docs[i].data())
+                var notif = results.docs[i].data()
+                notif.id = results.docs[i].id
+               notifications.push(notif)
             }
 
 

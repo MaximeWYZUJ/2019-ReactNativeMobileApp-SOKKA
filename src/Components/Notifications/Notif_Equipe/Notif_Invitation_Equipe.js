@@ -43,12 +43,10 @@ class Notif_Invitation_Equipe extends React.Component {
     async getData() {
 
         // Données de l'émeteur 
-        console.log("before  emetteur", this.props.notification.emetteur)
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 
         // Données du défi 
         var equipe = await Database.getDocumentData(this.props.notification.equipe, "Equipes")
-        console.log(':::::::::::', equipe.joueurs)
         this.setState({emetteur : emetteur, equipe : equipe,isLoading : false, 
             a_refuse : ! equipe.joueursAttentes.includes(LocalUser.data.id) && !equipe.joueurs.includes(LocalUser.data.id),
             a_accepte :  equipe.joueurs.includes(LocalUser.data.id)})
@@ -207,23 +205,17 @@ class Notif_Invitation_Equipe extends React.Component {
      * Fonction qui envoie une notification de refus à chaque capitaine de l'équipe
      */
     async sendNotifRefu() {
-        console.log("IN SEND NOTIF REFU !!!")
         var titre = "Nouvelle notif"
         var corps = LocalUser.data.pseudo + " a refusé de rejoindre ton équipe "
         corps   = corps + this.state.equipe.nom + "."
-        console.log("this.state.equipe.capitaines.length",this.state.equipe.capitaines.length)
         for(var i = 0; i <this.state.equipe.capitaines.length; i++) {
             id = this.state.equipe.capitaines[i]
-            console.log("id ", id)
             if(id != LocalUser.data.id) {
                 var cap = await Database.getDocumentData(id,"Joueurs")
                 var tokens = [] 
                 if(cap.tokens != undefined) tokens = cap.tokens
-                console.log("before boucle send notif", tokens)
-                console.log("before boucle send notif", tokens.length)
-
+               
                 for(var k = 0; k < tokens.length; k++) {
-                    console.log("==== ", tokens[k])
                     await this.sendPushNotification(tokens[k], titre, corps)
                 }
             }
@@ -239,19 +231,14 @@ class Notif_Invitation_Equipe extends React.Component {
         var titre = "Nouvelle notif"
         var corps = LocalUser.data.pseudo + " a accepté de rejoindre ton équipe "
         corps   = corps + this.state.equipe.nom + "."
-        console.log("this.state.equipe.capitaines.length",this.state.equipe.capitaines.length)
         for(var i = 0; i <this.state.equipe.capitaines.length; i++) {
             id = this.state.equipe.capitaines[i]
-            console.log("id ", id)
             if(id != LocalUser.data.id) {
                 var cap = await Database.getDocumentData(id,"Joueurs")
                 var tokens = [] 
                 if(cap.tokens != undefined) tokens = cap.tokens
-                console.log("before boucle send notif", tokens)
-                console.log("before boucle send notif", tokens.length)
 
                 for(var k = 0; k < tokens.length; k++) {
-                    console.log("==== ", tokens[k])
                     await this.sendPushNotification(tokens[k], titre, corps)
                 }
             }
@@ -262,16 +249,12 @@ class Notif_Invitation_Equipe extends React.Component {
         corps   = corps + this.state.equipe.nom + "." 
         for(var i = 0; i <this.state.equipe.joueurs.length; i++) {
             id = this.state.equipe.joueurs[i]
-            console.log("id ", id)
             if(id != LocalUser.data.id && ! this.state.equipe.capitaines.includes(id)) {
                 var joueur = await Database.getDocumentData(id,"Joueurs")
                 var tokens = [] 
                 if(joueur.tokens != undefined) tokens = joueur.tokens
-                console.log("before boucle send notif", tokens)
-                console.log("before boucle send notif", tokens.length)
 
                 for(var k = 0; k < tokens.length; k++) {
-                    console.log("==== ", tokens[k])
                     await this.sendPushNotification(tokens[k], titre, corps)
                 }
             }
@@ -373,14 +356,12 @@ class Notif_Invitation_Equipe extends React.Component {
 
     render(){
         if(this.state.isLoading) {
-            console.log("IS LOADING")
             return(
                 <Simple_Loading
                     taille = {hp('3%')}
                 />
             )
         } else {
-            console.log("ELSE RENDER")
             return(
                 <View style = {{flexDirection : 'row',marginTop : hp('2.5%'), borderWidth : 0, alignContent:"center"}}>
                     <View>

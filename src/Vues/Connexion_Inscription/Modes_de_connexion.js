@@ -10,7 +10,8 @@ import LocalUser from '../../Data/LocalUser.json'
 import firebase from 'firebase'
 import '@firebase/firestore'
 import {SkypeIndicator} from 'react-native-indicators';
-import { Constants, Location, Permissions,Notifications } from 'expo';
+import { Constants, Location,Notifications } from 'expo';
+import * as Permissions from 'expo-permissions';
 import villes from '../../Components/Creation/villes.json'
 import {AsyncStorage} from 'react-native';
 /**
@@ -87,7 +88,6 @@ export default class Modes_de_connexion extends React.Component {
 
 
     _storeData = async () => {
-        console.log("in store data")
         try {
           await AsyncStorage.setItem('email', this.state.mail);
           await AsyncStorage.setItem('password', this.state.mdp);
@@ -139,19 +139,14 @@ export default class Modes_de_connexion extends React.Component {
         .then(async (userCred) => {
             if (userCred.user.emailVerified || !checkEmailVerifie) {
                 
-                console.log("********************************")
-                console.log("USER ID !!!",firebase.auth().currentUser.uid)
-                console.log(this.state.mail)
-                console.log("********************************")
+          
 
                 this._storeData()
 
-                console.log("email verifie")
 
                 // Récupérations des données de la DB
                 j = await Database.getDocumentData(firebase.auth().currentUser.uid, "Joueurs");
                 jEquipes = await Database.getArrayDocumentData(j.equipes, 'Equipes');
-                console.log("PSEUDO", j.pseudo)
                 // Update des données locales
                 LocalUser.exists = true;
                 LocalUser.data = j;
@@ -160,7 +155,8 @@ export default class Modes_de_connexion extends React.Component {
                 LocalUser.geolocalisation = villePos;
 
                 // Enregistrement du token
-                this.storeToken(j);
+
+                await this.storeToken(j);
 
                 // Passage à la vue suivante
                 this.props.navigation.navigate("ProfilJoueur", {id: j.id, joueur: j, equipes: jEquipes});
@@ -188,7 +184,7 @@ export default class Modes_de_connexion extends React.Component {
 
 
     async storeToken(j) {
-        this.registerForPushNotifications()
+        await this.registerForPushNotifications()
         .then(async (token) => {
             let db = Database.initialisation();
             db.collection("Login").doc(token).set({id : j.id});
@@ -208,16 +204,13 @@ export default class Modes_de_connexion extends React.Component {
 
     async registerForPushNotifications() {
         const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-        console.log('in register')
         if (status !== 'granted') {
           const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
           if (status !== 'granted') {
             return;
           }
         }
-        console.log("okook")
         var token = await Notifications.getExpoPushTokenAsync();
-        console.log("after await token")    
         return (token)
     }
 

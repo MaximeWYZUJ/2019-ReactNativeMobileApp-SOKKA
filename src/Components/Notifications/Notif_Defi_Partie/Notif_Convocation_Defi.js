@@ -8,7 +8,8 @@ import Simple_Loading from '../../Loading/Simple_Loading'
 import Database  from '../../../Data/Database'
 import LocalUser from '../../../Data/LocalUser.json'
 import { withNavigation } from 'react-navigation'
-
+import DatesHelpers from '../../../Helpers/DatesHelpers';
+import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
 
 /**
  * Classe qui permet d'afficher une notification de convocation ou relance
@@ -25,8 +26,11 @@ class Notif_Convocation_Defi extends React.Component {
             isLoading : true,
             emetteur : undefined,
             equipe : undefined,
-            defi : undefined
+            defi : undefined,
+            show_boutons : props.notification.show_boutons,
+            texte : props.notification.texte
         }
+
     }
 
     componentDidMount() {
@@ -64,12 +68,21 @@ class Notif_Convocation_Defi extends React.Component {
         var equipe = await Database.getDocumentData(this.props.notification.equipe, "Equipes")
 
         // Données de l'émeteur 
-        console.log("before  emetteur", this.props.notification.emetteur)
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 
         // Données du défi 
         var defi = await Database.getDocumentData(this.props.notification.defi, "Defis")
-        this.setState({equipe :equipe , emetteur : emetteur, defi : defi,isLoading : false})
+        var show_boutons = true
+        var txt = this.state.texte
+        if(defi != undefined && (defi.confirmesEquipeDefiee.includes(this.monId) || defi.confirmesEquipeOrga.includes(this.monId))){
+            txt = txt + "\n Réponse : Confirmé"
+            show_boutons = false
+        } else if(defi != undefined &&(defi.indisponiblesEquipeDefiee.includes(this.monId) || defi.indisponiblesEquipeOrga.includes(this.monId))) {
+            txt = txt + "\n Réponse : Refusé"  
+            show_boutons = false
+        }
+        console.log("after test")
+        this.setState({equipe :equipe , emetteur : emetteur, defi : defi,isLoading : false, show_boutons : show_boutons, texte : txt})
     }
 
     // ===========================================================================
@@ -111,26 +124,39 @@ class Notif_Convocation_Defi extends React.Component {
     async sendNotifConfirmeToAllCapitaine(date) {
 
         
-        console.log("IN SEND NOTIF TO ALL CAP !!!")
-        console.log( this.buildDate(new Date(date)))
         var titre=  "Nouvelle Notif"
         var corps = LocalUser.data.pseudo + " a confirmé sa présence pour un défi le "
         corps = corps +  this.buildDate(new Date(date))
-        console.log("capitaines : ",this.state.equipe.capitaines)
+        console.log(corps)
         for(var i  = 0; i < this.state.equipe.capitaines.length; i++) {
+            console.log("in for")
             if(this.state.equipe.capitaines[i] != LocalUser.data.id) {
                 var cap = await Database.getDocumentData(this.state.equipe.capitaines[i], "Joueurs")
 
                 var tokens = cap.tokens
-                console.log("TOKEN ", tokens)
                 if(tokens != undefined) {
                     for(var k =0; k < tokens.length; k ++) {
-                        console.log("TOKENS :" ,tokens[k])
                         await this.sendPushNotification(tokens[k], titre, corps)
                     }
                 }
+
+                console.log("before store in db")
+                db.collection("Notifs").add(
+                    {
+                        dateParse : Date.parse(new Date()),
+                        defi : this.state.defi.id,
+                        emetteur :  LocalUser.data.id,
+                        recepteur : cap.id ,
+                        time : new Date(),
+                        type : Types_Notification.CONFIRMER_PRESENCE_DEFI,
+                        equipe : this.state.equipe.id,
+                        texte :  corps,
+                        heure : DatesHelpers.buildDateNotif(new Date())
+                    }
+                ) 
             }
         }
+        console.log("end sendNotifConfirmeToAllCapitaine ")
 
     }
 
@@ -141,11 +167,10 @@ class Notif_Convocation_Defi extends React.Component {
      */
     async sendNotifIndispoToAllCapitaine(date) {
 
-        
+        var db = Database.initialisation()
         var titre=  "Nouvelle Notif"
         var corps = LocalUser.data.pseudo + " est indisponible pour un défi le "
         corps = corps +  this.buildDate(new Date(date))
-        console.log("capitaines : ",this.state.equipe.capitaines)
         for(var i  = 0; i < this.state.equipe.capitaines.length; i++) {
             if(this.state.equipe.capitaines[i] != LocalUser.data.id) {
                 var cap = await Database.getDocumentData(this.state.equipe.capitaines[i], "Joueurs")
@@ -156,7 +181,23 @@ class Notif_Convocation_Defi extends React.Component {
                         await this.sendPushNotification(tokens[k], titre, corps)
                     }
                 }
+
+                db.collection("Notifs").add(
+                    {
+                        dateParse : Date.parse(new Date()),
+                        defi : this.state.defi.id,
+                        emetteur :  LocalUser.data.id,
+                        recepteur : cap.id ,
+                        time : new Date(),
+                        type : Types_Notification.ANNULER_PRESENCE_DEFI,
+                        equipe : this.state.equipe.id,
+                        texte :  corps,
+                        heure : DatesHelpers.buildDateNotif(new Date())
+                    }
+                ) 
             }
+
+           
         }
 
     }
@@ -179,7 +220,6 @@ class Notif_Convocation_Defi extends React.Component {
      * présence. 
      */
     handleConfirmerNon() {
-        console.log("in handle confirmer non")
         Alert.alert(
             '',
             "Tu souhaites annuler ta présence pour ce défi ? ",
@@ -222,7 +262,7 @@ class Notif_Convocation_Defi extends React.Component {
     async annulerJoueurPresence() {
         await this.sendNotifIndispoToAllCapitaine(new Date(this.state.defi.jour.seconds *1000))
 
-        console.log("in anulee")
+        console.log("after send notif to all cap")
         // Trouver l'équipe dont l'utilisateur est membre 
         if(this.state.defi.joueursEquipeOrga.includes(this.monId)) {
 
@@ -236,7 +276,6 @@ class Notif_Convocation_Defi extends React.Component {
             if(! j.includes(this.monId)){
                 j.push(this.monId) 
             }
-            console.log("indispo ok ", j)
 
             // Suppr l'user des joueurs en attente (on crée des new objet pour que le state se maj)
             var att  = []
@@ -245,7 +284,6 @@ class Notif_Convocation_Defi extends React.Component {
                     att.push(this.state.defi.attenteEquipeOrga[i])
                 }
             }
-            console.log("att ok ", att)
 
             // Suppr l'user  des joueurs confirme
             var  conf  = []
@@ -255,7 +293,6 @@ class Notif_Convocation_Defi extends React.Component {
                     conf.push(this.state.defi.confirmesEquipeOrga[i])
                 } 
             }
-            console.log("conf ok ", conf)
 
             // Mettre à jour le state.
             var defi = this.state.defi
@@ -263,7 +300,7 @@ class Notif_Convocation_Defi extends React.Component {
             defi.attenteEquipeOrga = att
             defi.indisponiblesEquipeOrga = j
 
-            this.setState({defi, defi})
+            this.setState({defi, defi, show_boutons : false})
 
             // Enregistrer dans la db
             var db = Database.initialisation()
@@ -280,7 +317,6 @@ class Notif_Convocation_Defi extends React.Component {
 
         // Cas où le joueur est dans l'équipe défiée
         } else {
-            console.log("in elese")
             // Ajouter l'id de l'utilisateur dans la liste des indispo (Creation d'un new array pour le re render)
             var j = []
             for(var i = 0 ; i < this.state.defi.indisponiblesEquipeDefiee.length; i++) {
@@ -290,7 +326,6 @@ class Notif_Convocation_Defi extends React.Component {
             if(! j.includes(this.monId)){
                 j.push(this.monId) 
             }
-            console.log("indispo ok ")
             // Suppr l'user des joueurs en attente (on crée des new objet pour que le state se maj)
             var att  = []
             for(var i = 0 ; i < this.state.defi.attenteEquipeDefiee.length ; i++) {
@@ -298,7 +333,6 @@ class Notif_Convocation_Defi extends React.Component {
                     att.push(this.state.defi.attenteEquipeDefiee[i])
                 }
             }
-            console.log("att ok ")
 
 
             // Suppr l'user  des joueurs confirmés
@@ -308,18 +342,15 @@ class Notif_Convocation_Defi extends React.Component {
                     conf.push(this.state.defi.confirmesEquipeDefiee[i])
                 } 
             }
-            console.log("conf ok ")
 
 
             // Mettre à jour le state.
             var defi = this.state.defi
-            console.log("after var defi")
             defi.confirmesEquipeDefiee = conf
             defi.attenteEquipeDefiee = att
             defi.indisponiblesEquipeDefiee = j
 
             this.setState({defi, defi})
-            console.log("after set state")
             // Enregistrer dans la db
             var db = Database.initialisation()
             var partieRef = db.collection("Defis").doc(this.state.defi.id)
@@ -333,6 +364,14 @@ class Notif_Convocation_Defi extends React.Component {
                 console.error("Error updating document: ", error);
             });
         }
+
+
+        // stocker la notif : 
+      
+        var txt = ""
+        txt =  this.props.notification.texte +  "\n reponse : Refusé"
+        this.setState({texte : txt})
+        
          
    
     }
@@ -343,8 +382,9 @@ class Notif_Convocation_Defi extends React.Component {
      * confirmés. Ainsi que  d'enregistrer le def mise à jour dans la DB.
      */
     async confirmerJoueurPresence() {
-
+        console.log("confirmerJoueurPresence")
         await this.sendNotifConfirmeToAllCapitaine(new Date(this.state.defi.jour.seconds *1000))
+
         // Trouver l'équipe dont l'utilisateur est membre 
         if(this.state.defi.joueursEquipeOrga.includes(this.monId)) {
 
@@ -380,7 +420,7 @@ class Notif_Convocation_Defi extends React.Component {
             defi.attenteEquipeOrga = att
             defi.indisponiblesEquipeOrga = indispo
 
-            this.setState({defi, defi})
+            this.setState({defi, defi,show_boutons : false})
 
             // Enregistrer dans la db
             var db = Database.initialisation()
@@ -394,6 +434,7 @@ class Notif_Convocation_Defi extends React.Component {
                 // The document probably doesn't exist.
                 console.error("Error updating document: ", error);
             });
+
 
         // Cas où le joueur est dans l'équipe défiée
         } else {
@@ -444,7 +485,13 @@ class Notif_Convocation_Defi extends React.Component {
                 console.error("Error updating document: ", error);
             });
         }
-         
+
+        
+
+         var txt = ""
+         txt =  this.props.notification.texte +  "\n reponse : Confirmé"
+         this.setState({texte : txt})
+
     }
 
 
@@ -514,7 +561,6 @@ class Notif_Convocation_Defi extends React.Component {
 
     renderPhotoEmetteur() {
         if(this.state.emetteur != undefined) {
-            console.log("ookokoko")
             return(
                     <View style = {{justifyContent : "center", paddingTop : hp('1%')}}>
                         <Image
@@ -534,7 +580,6 @@ class Notif_Convocation_Defi extends React.Component {
     }
 
     renderDateDefi() {
-        console.log("RENDER DATE")
         if(this.state.defi != undefined) {
             return this.buildDate(new Date(this.state.defi.jour.seconds * 1000))
         } else {
@@ -544,7 +589,7 @@ class Notif_Convocation_Defi extends React.Component {
 
 
     renderBtnConfirmer() {
-        if(new  Date(this.state.defi.jour.seconds *1000) > new Date) {
+        if(new  Date(this.state.defi.jour.seconds *1000) > new Date && this.state.show_boutons) {
             return(
                 <View style = {{flexDirection : "row"}}>
                     <Text>Confirmer : </Text>
@@ -567,26 +612,22 @@ class Notif_Convocation_Defi extends React.Component {
 
     render() {
         if(this.state.isLoading) {
-            console.log("IS LOADING")
             return(
                 <Simple_Loading
                     taille = {hp('3%')}
                 />
             )
         } else {
-            console.log("ELSE RENDER")
             return(
                 <View style = {{flexDirection : 'row',marginTop : hp('2%')}}>
                     <View>
                         {this.renderPhotoEmetteur()}
                     </View>
                     <View>
-                        <Text>Le capitaine {this.renderNomEmetteur()} de l'équipe  </Text>
-                        <Text>{this.renderNomEquipe()}  t'a convoqué / relancé pour</Text>
-
+                        <Text style ={{width : wp('55%')}}>{this.state.texte}</Text>
                         {/* Date et btn consulter*/}
                         <View style = {{flexDirection : "row"}}>
-                            <Text>un défi le {this.renderDateDefi()} </Text>
+                            {/*<Text>un défi le {this.renderDateDefi()} </Text>*/}
                             
                             <TouchableOpacity
                                 onPress = {() => this.goToFicheDefi()}

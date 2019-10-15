@@ -39,7 +39,6 @@ class Notif_feuille_completee_Defi_adverse extends React.Component {
     async getData() {
 
 
-        console.log(this.props.notification)
         // Données de la partie 
         var defi = await Database.getDocumentData(this.props.notification.defi, "Defis")
 

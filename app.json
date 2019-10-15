@@ -8,7 +8,7 @@
       "ios",
       "android"
     ],
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -24,7 +24,13 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sokka.sokkaapp"
+      "bundleIdentifier": "com.sokka.sokkaapp",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Cette application utilise la caméra pour permettre à l'utilisateur de personnaliser son avatar, ou celui d'une équipe.",
+        "NSLocationWhenInUseUsageDescription": "Cette application utilise la position de l'appareil pour proposer des terrains, des joueurs et des match à proximité de l'utilisateur.",
+        "NSPhotoLibraryUsageDescription": "Cette application a besoin d'accèder à la galerie pour permettre à l'utilisateur de personnaliser son avatar ou celui d'une équipe"
+
+      }
     },
 
     "android" : {

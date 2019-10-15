@@ -110,8 +110,6 @@ class Notif_Presence_Partie extends React.Component {
 
     renderDatePartie() {
         if(this.state.partie != undefined) {
-            console.log("in date partie") 
-            console.log(DatesHelpers.buildDate(new Date(this.state.partie.jour.seconds * 1000)))
             return DatesHelpers.buildDate(new Date(this.state.partie.jour.seconds * 1000))
 
         } else {

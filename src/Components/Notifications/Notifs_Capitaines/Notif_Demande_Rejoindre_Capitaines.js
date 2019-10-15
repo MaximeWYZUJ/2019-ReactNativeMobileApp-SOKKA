@@ -40,7 +40,6 @@ class Notif_Demande_Rejoindre_Capitaines extends React.Component {
      */
     async getData() {
 
-        console.log("in get data")
         // Données de l'équipe concernée
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 
@@ -83,7 +82,6 @@ class Notif_Demande_Rejoindre_Capitaines extends React.Component {
      */
     async accepter() {
         this.setState({isLoading : true})
-        console.log("in accepter")
         var db = Database.initialisation()
         var equipeRef = db.collection("Equipes").doc(this.state.equipe.id)
         
@@ -172,8 +170,6 @@ class Notif_Demande_Rejoindre_Capitaines extends React.Component {
         await this.storeNotifAccepterInDb(this.state.emetteur.id)
         
 
-        console.log("before for joueur equipe")
-        console.log(this.state.equipe.joueurs.length)
         for(var i = 0; i < this.state.equipe.joueurs.length; i++){
             var corps =  LocalUser.data.pseudo + " est maintenant capitaine de l'équipe " + this.nomEquipe()
             var joueurId = this.state.equipe.joueurs[i]
@@ -194,12 +190,7 @@ class Notif_Demande_Rejoindre_Capitaines extends React.Component {
 
     async storeNotifAccepterInDb(recepteur) {
         var db = Database.initialisation()
-        console.log("in store notif ")
-        console.log(new Date)
-        console.log( Date.parse(new Date()))
-        console.log(LocalUser.data.id)
-        console.log( this.state.equipe.id)
-        console.log( Types_Notification.ACCEPTE_DEMANDE_CAPITAINE)
+        
         await db.collection("Notifs").add({
             time : new Date(),
             dateParse : Date.parse(new Date()),

@@ -250,6 +250,7 @@ export default class Recapitulatif_Partie extends React.Component {
             organisateur : this.userData.id,
             ville : this.ville,
             participants : this.buildListOfJoueur(this.joueurs),
+            joueursConcernes : this.buildListOfJoueur(this.joueurs),
             message_chauffe : this.messageChauffe,
             terrain : this.props.navigation.getParam('terrain', ''),
             nbJoueursRecherche : this.nbJoueursRecherche,
@@ -264,7 +265,7 @@ export default class Recapitulatif_Partie extends React.Component {
             buteurs : [],
             votes : [],
             absents : [],
-            dateString: dateString
+            dateString: dateString,
 
         })
         .then(this.goToFichePartie(id,date))

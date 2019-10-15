@@ -9,7 +9,10 @@ import Database from '../../../../Data/Database'
 import LocalUser from '../../../../Data/LocalUser.json'
 import FiltrerJoueur from '../../../../Components/Recherche/FiltrerJoueur'
 import CheckBox from 'react-native-checkbox';
-
+import firebase from 'firebase'
+import '@firebase/firestore'
+import DatesHelpers from '../../../../Helpers/DatesHelpers'
+import Types_Notification from '../../../../Helpers/Notifications/Types_Notification'
 import { connect } from 'react-redux'
 
 
@@ -255,10 +258,10 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
             }
             this.setState({joueursSelectionnes : j, selectedAllCapitnaines : this.allTheCaptainsAreSelected()})
         } else {
-           Alert.alert(
+            Alert.alert(
                '',
                'Ce joueur participe déja au défi, tu ne peux pas le séléctionner'
-           )
+            )
         }
             
         
@@ -352,7 +355,6 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
             
             // Ajouter les capitaines à la liste déja sélectionnées
             for(var i = 0 ; i <this.state.joueursSelectionnes.length; i++) {
-                console.log("in for 2", this.state.joueursSelectionnes[i])
                 if(! j.includes(this.state.joueursSelectionnes[i] )) {
                     j.push(this.state.joueursSelectionnes[i])
 
@@ -418,6 +420,39 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
 
     //========================== NOTIFICATION ==========================
 
+   
+    
+     /**
+     * Fonction qui va sauvagarder dans la base de données les notifications
+     * pour la convocation à la partie
+     */
+    storeNotificationInDb() {
+        var db = Database.initialisation() 
+        var defi = this.props.navigation.getParam("defi",undefined)
+        var txt = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.equipe.nom 
+        txt = txt + " t'a convoqué / relancé pour un un défi le " + this.buildDate(new Date(defi.jour.seconds * 1000))
+        console.log(txt)
+        for(var i  = 0; i <this.state.joueursSelectionnes.length; i++) {
+            if(this.state.joueursSelectionnes[i]!= LocalUser.data.id) {
+                db.collection("Notifs").add(
+                    {
+                        dateParse : Date.parse(new Date()),
+                        defi :defi.id,
+                        emetteur :LocalUser.data.id,
+                        recepteur :this.state.joueursSelectionnes[i],
+                        time : new Date(),
+                        type : Types_Notification.CONVOCATION_RELANCE_DEFI,
+                        equipe :this.equipe.id,
+                        dateHeure : DatesHelpers.buildDateNotif(new Date()),
+                        texte : txt,
+                        heure: DatesHelpers.buildDateNotif(new Date()),
+                        show_boutons : true
+                    }
+                )  
+            }
+        }
+    }
+
         /**
      * Fonction qui permet d'envoyer des notifications
      * @param {String} token 
@@ -425,7 +460,6 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
      * @param {String} body 
      */
     sendPushNotification(token , title,body ) {
-        console.log('in send push !!')
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: token,
@@ -451,9 +485,7 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
 
 
     gotoNextScreen() {
-        console.log("::::::::::::::::")
-        console.log('------' +  this.props.navigation.getParam('duree', '')+ '---------')
-        console.log('::::::::::::::')
+        
         this.props.navigation.push(
             "Defis2EquipesContreQui", 
             {
@@ -478,10 +510,10 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
      * Fonction qui amène l'utilisateur sur la fiche du défi pour lequel il a inviter des joueurs
      */
     goBackToFiche() {
-        console.log("in go back to fiche")
         var defi  =this.props.navigation.getParam('defi', undefined)
         var joueursEquipe = this.props.navigation.getParam('joueursEquipe',[])
         
+        this.storeNotificationInDb()
         // Envoyer les notif
         var defi  = this.props.navigation.getParam("defi",undefined)
         for(var i = 0; i < this.state.allJoueurs.length ; i++) {
@@ -566,21 +598,23 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
      * Fonction qui va mettre à jour les participants d'un défi
      */
     updateDefiExistant() {
+        console.log("in updateDefiExistant")
         var defi =this.props.navigation.getParam('defi', undefined)
         var joueursEquipe = this.props.navigation.getParam('joueursEquipe',[])
-        console.log("in update")
         if(defi != undefined) {
-                console.log("in if")
 
             // 1ier cas : il s'agit de l'équipe défiée 
             if(this.equipe.id == defi.equipeDefiee) {
+                console.log("in if")
                 var db = Database.initialisation()
                 var DefiRef = db.collection("Defis").doc(defi.id) 
                 DefiRef.update({
                     confirmesEquipeDefiee : defi.confirmesEquipeDefiee.concat(this.findCapitaines()),
                     attenteEquipeDefiee : defi.attenteEquipeDefiee.concat(this.buildListOfJoueurWithoutCapitaines()),
                     joueursEquipeDefiee : this.state.joueursSelectionnes.concat(joueursEquipe),
-                    participants : defi.participants.concat(this.state.joueursSelectionnes)
+                    participants : defi.participants.concat(this.state.joueursSelectionnes),
+                    joueursConcernes : defi.joueursConcernes.concat(this.state.joueursSelectionnes)
+
                 }).then(this.goBackToFiche)
                 .catch(function(error) {
                     // The document probably doesn't exist.
@@ -588,6 +622,8 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                 });
 
             } else if(this.equipe.id == defi.equipeOrganisatrice) {
+                console.log("in else if")
+                console.log("this.state.joueursSelectionnes",  this.state.joueursSelectionnes)
                 var db = Database.initialisation()
                 var DefiRef = db.collection("Defis").doc(defi.id) 
                 
@@ -595,7 +631,8 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                     confirmesEquipeOrga : defi.confirmesEquipeOrga.concat(this.findCapitaines()),
                     attenteEquipeOrga : defi.attenteEquipeOrga.concat(this.buildListOfJoueurWithoutCapitaines()),
                     joueursEquipeOrga : this.state.joueursSelectionnes.concat(joueursEquipe),
-                    participants : defi.participants.concat(this.state.joueursSelectionnes)
+                    participants : defi.participants.concat(this.state.joueursSelectionnes),
+                    joueursConcernes : defi.joueursConcernes.concat(this.state.joueursSelectionnes)
                 }).then(this.goBackToFiche)
                 .catch(function(error) {
                     // The document probably doesn't exist.
@@ -673,54 +710,58 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
         var joueursEquipe = this.props.navigation.getParam("joueursEquipe", [])
         var nbJoueurs = this.state.joueursSelectionnes.length +joueursEquipe.length
         
-        if( this.state.joueursSelectionnes.length > 0 && (nbAtteint || nbJoueurs >= parseInt(this.format.split("x")[0])) ) {
-            return( 
-                <TouchableOpacity
-                    onPress ={() => {
-                        // Si on convoque des joueurs à un défi existant               
-                        if(this.props.navigation.getParam("convocation", false)) {
-                            this.alertConvocation()
-                        // Si on crée un nouveau défi
-                        } else {
-                            this.gotoNextScreen()
-                        }
-                    }}
-                    >
-                    <Text style = {styles.txtBoutton}>Convoquer</Text>
-                </TouchableOpacity>
-            ) 
-        } else if(this.state.joueursSelectionnes.length == 0) {
-            return (
-                <TouchableOpacity
-                    onPress ={() => {
-                        // Si on convoque des joueurs à un défi existant               
-                        if(this.props.navigation.getParam("convocation", false)) {
-                            this.alertConvocation()
-                        // Si on crée un nouveau défi
-                        } else {
-                            this.gotoNextScreen()
-                        }
-                    }}
-                    >
-                    <Text style = {styles.txtBoutton}>Plus tard</Text>
-                </TouchableOpacity>
-            )
+        if(this.props.navigation.getParam("convocation", false) &&this.state.joueursSelectionnes.length == 0 ) {
+            return <Text>Suivant</Text>
         } else {
-            return (
-                <TouchableOpacity
-                    onPress ={() => {
-                        // Si on convoque des joueurs à un défi existant               
-                        if(this.props.navigation.getParam("convocation", false)) {
-                            this.alertConvocation()
-                        // Si on crée un nouveau défi
-                        } else {
-                            this.gotoNextScreen()
-                        }
-                    }}
-                    >
-                    <Text style = {styles.txtBoutton}>Le reste plus tard</Text>
-                </TouchableOpacity>
-            )   
+            if( this.state.joueursSelectionnes.length > 0 && (nbAtteint || nbJoueurs >= parseInt(this.format.split("x")[0])) ) {
+                return( 
+                    <TouchableOpacity
+                        onPress ={() => {
+                            // Si on convoque des joueurs à un défi existant               
+                            if(this.props.navigation.getParam("convocation", false)) {
+                                this.alertConvocation()
+                            // Si on crée un nouveau défi
+                            } else {
+                                this.gotoNextScreen()
+                            }
+                        }}
+                        >
+                        <Text style = {styles.txtBoutton}>Convoquer</Text>
+                    </TouchableOpacity>
+                ) 
+            } else if(this.state.joueursSelectionnes.length == 0) {
+                return (
+                    <TouchableOpacity
+                        onPress ={() => {
+                            // Si on convoque des joueurs à un défi existant               
+                            if(this.props.navigation.getParam("convocation", false)) {
+                                this.alertConvocation()
+                            // Si on crée un nouveau défi
+                            } else {
+                                this.gotoNextScreen()
+                            }
+                        }}
+                        >
+                        <Text style = {styles.txtBoutton}>Plus tard</Text>
+                    </TouchableOpacity>
+                )
+            } else {
+                return (
+                    <TouchableOpacity
+                        onPress ={() => {
+                            // Si on convoque des joueurs à un défi existant               
+                            if(this.props.navigation.getParam("convocation", false)) {
+                                this.alertConvocation()
+                            // Si on crée un nouveau défi
+                            } else {
+                                this.gotoNextScreen()
+                            }
+                        }}
+                        >
+                        <Text style = {styles.txtBoutton}>Le reste plus tard</Text>
+                    </TouchableOpacity>
+                )   
+            }
         }
     }
 

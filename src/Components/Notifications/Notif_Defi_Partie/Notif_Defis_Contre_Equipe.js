@@ -10,7 +10,8 @@ import Database  from '../../../Data/Database'
 import LocalUser from '../../../Data/LocalUser.json'
 import { withNavigation } from 'react-navigation'
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification';
-
+import firebase from 'firebase'
+import '@firebase/firestore'
 
 
 /**
@@ -49,7 +50,6 @@ class Notif_Defis_Contre_Equipe extends React.Component {
         // Données de l'émeteur 
         //var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 
-        console.log("after emeteur equipe")
         // Données du défi 
         var defi = await Database.getDocumentData(this.props.notification.defi, "Defis")
         this.setState({equipeEmettrice :equipeEmettrice , equipeReceptrice : equipeReceptrice, defi : defi, defis_valide : defi.defis_valide, defis_refuse  : defi.defis_refuse, isLoading : false})
@@ -104,7 +104,6 @@ class Notif_Defis_Contre_Equipe extends React.Component {
                 if(cap.tokens != undefined) tokens = cap.tokens
 
                 for(var k = 0; k < tokens.length; k++) {
-                    console.log("==== ", tokens[k])
                     await this.sendPushNotification(tokens[k], titre, corps)
                 }
             }
@@ -127,7 +126,6 @@ class Notif_Defis_Contre_Equipe extends React.Component {
                 if(cap.tokens != undefined) tokens = cap.tokens
                 
                 for(var k = 0; k < tokens.length; k++) {
-                    console.log("==== ", tokens[k])
                     await this.sendPushNotification(tokens[k], titre, corps)
                 }
             }
@@ -186,7 +184,6 @@ class Notif_Defis_Contre_Equipe extends React.Component {
      * présence. 
      */
     handleConfirmerNon() {
-        console.log("in handle confirmer non")
         Alert.alert(
             '',
             "Tu souhaites refuser le défi lancé par l'équipe " + this.state.equipeEmettrice.nom,
@@ -234,7 +231,10 @@ class Notif_Defis_Contre_Equipe extends React.Component {
             this.setState({defis_valide : true, defis_refuse : false})
             db.collection("Defis").doc(this.state.defi.id).update({
                 defis_valide : true,
-                defis_refuse : false
+                defis_refuse : false,
+                equipesConcernees : firebase.firestore.FieldValue.arrayUnion(this.state.equipeReceptrice.id),
+                joueursConcernes : firebase.firestore.FieldValue.arrayUnion(this.state.equipeReceptrice.capitaines)
+
             }).then(() => {
                 Alert.alert("Tu as bien accepté le défi lancé par l'équipe " + this.state.equipeEmettrice.nom)
             })
@@ -260,10 +260,6 @@ class Notif_Defis_Contre_Equipe extends React.Component {
             })
         }
     }
-
-    // A FINIR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! JEN ETAIS A CODER LES FONCTION DE REFUS OU D ACCEPTATION 
-    //DU DEFI
 
 
     renderPhotoEquipeEmetteur() {

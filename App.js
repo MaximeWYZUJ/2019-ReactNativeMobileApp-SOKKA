@@ -37,7 +37,6 @@ export default class App extends React.Component {
       }
     }
     
-    console.log("Token :", await Notifications.getExpoPushTokenAsync());
 
     //this.subscription = Notifications.addListener(this.handleNotification);
 
@@ -47,14 +46,10 @@ export default class App extends React.Component {
   }
 
   async getToken() {
-    console.log("in get token")
     //let fcmToken = await AsyncStorage.getItem('fcmToken');
     //if (!fcmToken) {
-      console.log('fffffffffffffffff')
         let fcmToken = await firebase.messaging().getToken();
-        console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj")
-        console.log(fcmToken)
-        console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjj")
+        
        // if (fcmToken) {
             // user has a device token
           //  await AsyncStorage.setItem('fcmToken', fcmToken);
@@ -65,7 +60,6 @@ export default class App extends React.Component {
    sendPushNotification() {
 	   body = 'voici une notif',
 	   title = "test"
-	   console.log("in send push Notification")
     return fetch('https://exp.host/--/api/v2/push/send', {
       body: JSON.stringify({
         to: "ExponentPushToken[zNqAkxI17q7G_fDIuJ5ySD]",

@@ -161,32 +161,37 @@ class ProfilJoueur extends React.Component {
      
         var token = await this.registerForPushNotifications()
         var db = Database.initialisation()
-        db.collection("Login").doc(token).delete().then(this.goToFirstScreen).catch(function(error) {
+        db.collection("Login").doc(token).delete().catch(function(error) {
             console.error("Error removing document: ", error);
         });
 
-        console.log("before supr tolen")
-        // Supprimer le token de la liste
-        var tokens = LocalUser.data.tokens 
         var newTokens = []
-        for(var i =0; i < tokens.length; i ++) {
-            if(tokens[i].localeCompare(token) != 0) {
-                newTokens.push(tokens[i])
+        if(LocalUser.data.tokens != undefined) {        
+            // Supprimer le token de la liste
+            var tokens = LocalUser.data.tokens 
+            for(var i =0; i < tokens.length; i ++) {
+                if(tokens[i].localeCompare(token) != 0) {
+                    newTokens.push(tokens[i])
+                }
             }
         }
         
+        console.log("after supr token in array")
         db.collection("Joueurs").doc(this.id).update({
             tokens : newTokens
+        }).then(() => {
+            console.log("after suppr token in db")
+            AsyncStorage.clear()
+            firebase.auth().signOut().then(() => {
+                // Sign-out successful.
+                this.setState({isLoading : false})
+                this.props.navigation.navigate("first", {deconexion : true})  
+    
+              }).catch(function(error) {
+                  console.log(error)
+              });
         })
-        AsyncStorage.clear()
-        firebase.auth().signOut().then(() => {
-            // Sign-out successful.
-            this.setState({isLoading : false})
-            this.props.navigation.navigate("first", {deconexion : true})  
-
-          }).catch(function(error) {
-              console.log(error)
-          });
+       
         
        
 
@@ -270,11 +275,19 @@ class ProfilJoueur extends React.Component {
         var now = new Date()
 
         var ref = db.collection("Defis");
-        var query = ref.where("participants", "array-contains", this.id)
-                        .where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
-
-        // On regarde si l'utilisateur participe à un defi
+        var query = ref.where("joueursConcernes", "array-contains", this.id).where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
         query.get().then(async (results) => {
+            for(var i = 0; i < results.docs.length ; i++) {
+                var defi = results.docs[i].data()
+                defi.jour.seconds = defi.jour.seconds -7200 
+                allDefis.push(defi)
+
+            }
+            this.setState({allDefis : allDefis})
+
+        })
+        // On regarde si l'utilisateur participe à un defi
+       /* query.get().then(async (results) => {
             for(var i = 0; i < results.docs.length ; i++) {
                 var defi = results.docs[i].data()
                 defi.jour.seconds = defi.jour.seconds -7200 
@@ -326,7 +339,7 @@ class ProfilJoueur extends React.Component {
             
         }).catch(function(error) {
               console.log("Error getting documents partie:", error);
-        });   
+        }); */  
     }
 
 

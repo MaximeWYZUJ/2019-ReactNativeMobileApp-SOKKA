@@ -277,7 +277,8 @@ class Fiche_Partie_Rejoindre extends React.Component {
                             inscris : this.state.partie.inscris,
                             invite : false,                          // Si c'est le créateur qui invite;
                             organisateur : this.state.partie.organisateur ,
-                            date : this.state.partie.jour
+                            date : this.state.partie.jour,
+                            joueursConcernes : this.state.partie.joueursConcernes
                         })
                     }
             },

@@ -45,7 +45,6 @@ class Notif_Convocation_Partie extends React.Component {
         var arefuse = false
         var aconfirmer = false
         // Données de l'émeteur 
-        console.log("before  emetteur", this.props.notification.emetteur)
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 
         // Données du défi 
@@ -89,7 +88,6 @@ class Notif_Convocation_Partie extends React.Component {
      * @param {String} body 
      */
     async sendPushNotification(token , title,body ) {
-        console.log("________ "+ body +  " _____")
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: token,
@@ -138,7 +136,6 @@ class Notif_Convocation_Partie extends React.Component {
     async sendNotifConfirmer(date) {
         this.storeNotifConfirmerInDB()
 
-        console.log("in send notif confirme")
         var titre=  "Nouvelle Notif"
         var corps = LocalUser.data.pseudo + " est confirme sa présence pour une partie le "
         corps = corps +  DatesHelpers.buildDate(new Date(date))
@@ -146,7 +143,6 @@ class Notif_Convocation_Partie extends React.Component {
         var tokens = this.state.emetteur.tokens
         if(tokens != undefined) {
             for(var k =0; k < tokens.length; k ++) {
-                console.log(tokens[k])
                 await this.sendPushNotification(tokens[k], titre, corps)
             }
         }
@@ -164,7 +160,6 @@ class Notif_Convocation_Partie extends React.Component {
      * présence. 
      */
     handleConfirmerNon() {
-        console.log("in handle confirmer non")
         Alert.alert(
             '',
             "Tu n'es pas disponible pour cette partie",
@@ -206,7 +201,6 @@ class Notif_Convocation_Partie extends React.Component {
      */
     async confirmerJoueurPresence()  {
 
-        console.log("IN CONFIRM ER JOUEUR PRESENCE")
 
         this.setState({aconfirmer  : true})
         await this.sendNotifConfirmer(this.state.partie.jour.seconds*1000)
@@ -275,7 +269,6 @@ class Notif_Convocation_Partie extends React.Component {
 
         // Store the notifs
         var db = Database.initialisation() 
-        console.log()
         db.collection("Notifs").add(
             {
                 dateParse : Date.parse(new Date()),
@@ -300,7 +293,6 @@ class Notif_Convocation_Partie extends React.Component {
 
         // Store the notifs
         var db = Database.initialisation() 
-        console.log()
         db.collection("Notifs").add(
             {
                 dateParse : Date.parse(new Date()),
@@ -392,7 +384,6 @@ class Notif_Convocation_Partie extends React.Component {
 
     renderPhotoEmetteur() {
         if(this.state.emetteur != undefined) {
-            console.log("ookokoko")
             return(
                     <View style = {{justifyContent : "center", paddingTop : hp('1%')}}>
                         <Image
@@ -420,6 +411,7 @@ class Notif_Convocation_Partie extends React.Component {
     }
 
     renderBtnConfirmer() {
+        if(!this.state.aconfirmer && !this.state.arefuse)
         return(
             <View style = {{flexDirection : "row"}}>
                 <Text>Confirmer : </Text>
@@ -440,8 +432,16 @@ class Notif_Convocation_Partie extends React.Component {
     }
 
 
+    renderReponse(){
+        if(this.state.aconfirmer) {
+            return "Réponse : Confirmé"
+        } else if(this.state.arefuse) {
+            return "Réponse : Refusé"
+        }
+    }
+
     chooseOptionToRender(){
-        if(! this.state.aconfirmer && ! this.state.arefuse) {
+       // if(! this.state.aconfirmer && ! this.state.arefuse) {
             return(
                 <View style = {{alignSelf : "center"}}>
                         <Text>{this.renderNomEmetteur()}  t'a invité / relancé pour </Text>
@@ -457,10 +457,12 @@ class Notif_Convocation_Partie extends React.Component {
                             </TouchableOpacity>
                         </View>
                         
+                        <Text>{this.renderReponse()}</Text>
+
                         {this.renderBtnConfirmer()}
                 </View>
             )
-        } else if(this.state.aconfirmer){
+        /*} else if(this.state.aconfirmer){
             return(
                 <View style = {{marginTop : hp('0.5%')}}>
                     <Text>Tu as confirmé ta présence pour cette partie</Text>
@@ -483,19 +485,17 @@ class Notif_Convocation_Partie extends React.Component {
                             </TouchableOpacity>
                 </View>
             )
-        }
+        }*/
     }
     
     render() {
         if(this.state.isLoading) {
-            console.log("IS LOADING")
             return(
                 <Simple_Loading
                     taille = {hp('3%')}
                 />
             )
         } else {
-            console.log("ELSE RENDER")
             return(
                 <View style = {{flexDirection : 'row',marginTop : hp('2.5%'), alignContent:"center"}}>
                     <View>

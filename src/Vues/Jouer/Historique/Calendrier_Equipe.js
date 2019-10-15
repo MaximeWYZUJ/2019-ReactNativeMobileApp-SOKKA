@@ -1,7 +1,7 @@
 
 import React from 'react'
 
-import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity,FlatList,Alert,ScrollView,SectionList,Button, DatePickerAndroid} from 'react-native'
+import {View, Text,Image,  StyleSheet, Animated,TouchableOpacity,FlatList,Alert,ScrollView,SectionList,Button} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import Database from '../../../Data/Database';
@@ -15,11 +15,14 @@ import LocalUser from '../../../Data/LocalUser.json'
 /**
  * Permet d'afficher l'historique d'un joueur
  */
-export default class Calendrier_Joueur extends React.Component {
+export default class Calendrier_Equipe extends React.Component {
 
     constructor(props) {
         super(props)
         this.monId = this.props.navigation.getParam('id', LocalUser.data.id);
+        this.equipeId = this.props.navigation.getParam("idEquipe", "erreur")
+        this.nomEquipe = this.props.navigation.getParam("nomEquipe", "erreur")
+
         this.state  = {
             defisPassesDisp : [],
             nbPassesDisp : 0,
@@ -41,13 +44,13 @@ export default class Calendrier_Joueur extends React.Component {
 
     static navigationOptions = ({ navigation }) => {
         return { 
-            title: navigation.getParam('header', 'pas de header = erreur'),
+            title: navigation.getParam('header', 'Calendrier'),
         };
     }
 
 
     /** Fonction qui va permettre de trouver tous les défis et parties auxquels 
-     * participes l'utilisateur
+     * participes l'equipe
      */
     getAllDefisAndPartie() {
         var db = Database.initialisation()
@@ -57,36 +60,8 @@ export default class Calendrier_Joueur extends React.Component {
         var index = 1
         var now = new Date()
         var ref = db.collection("Defis");
-        var query = ref.where("joueursConcernes", "array-contains", this.monId).orderBy("dateParse")
-        query.get().then(async (results) => {
-            for(var i = 0; i < results.docs.length ; i++) {
-                var dateDefi = new Date(  results.docs[i].data().jour.seconds*1000 - 7200000)
+        var query = ref.where("equipesConcernees", "array-contains", this.equipeId).orderBy("dateParse")
 
-                var defi = results.docs[i].data()
-                //defi.jour.seconds = defi.jour.seconds -7200
-                // Si le defi ou la partie est passés
-                if(dateDefi < now) {
-                    defisPasses.push(defi)
-                    index ++
-                }else {
-                    defisaVenir.push(defi)
-                }
-                allDefis.push(defi)
-                //defisArray.push(results.docs[i].data())
-            }
-            this.setState({
-                defisaVenir : defisaVenir,
-                defisPasses : defisPasses,
-                allDefis : allDefis,
-                isLoading : false,
-                index : index
-            })
-        }).catch(function(error) {
-            console.log(error)
-        })
-        /*var query = ref.where("participants", "array-contains", this.monId).orderBy("dateParse")
-
-        // On regarde si l'utilisateur participe à un defi
         query.get().then(async (results) => {
             console.log("CALENDRIER :",results.docs.length )
             for(var i = 0; i < results.docs.length ; i++) {
@@ -103,6 +78,7 @@ export default class Calendrier_Joueur extends React.Component {
                     defisaVenir.push(defi)
                 }
                 allDefis.push(defi)
+                
                 //defisArray.push(results.docs[i].data())
             }
             this.setState({
@@ -112,82 +88,10 @@ export default class Calendrier_Joueur extends React.Component {
                 isLoading : false,
                 index : index
             })
-
-
-            // Query pour trouver les équipes dont l'user est capitaine
-            var refEquipe = db.collection("Equipes");
-            var queryEqCap = refEquipe.where("capitaines", "array-contains", this.monId)
-            queryEqCap.get().then(async (resultsEquipe) => {
-                for(var i = 0; i < resultsEquipe.docs.length ; i++) {
-
-                    var idEquipe =resultsEquipe.docs[i].data().id
-                    // Query pour trouver si cette équipe organise un defi
-                    var queryEqOrga = ref.where("equipeOrganisatrice", "==", idEquipe)
-
-                    queryEqOrga.get().then(async (resultsDefiOrga) => {
-                        for(var i = 0; i < resultsDefiOrga.docs.length ; i++) {
-                            var dateDefi = new Date(  resultsDefiOrga.docs[i].data().jour.seconds*1000)
-                            if(! this.allreaddyDownloadDefi(allDefis, resultsDefiOrga.docs[i].data())) {
-
-                                var defi = resultsDefiOrga.docs[i].data()
-                                defi.jour.seconds = defi.jour.seconds -7200
-                                // Si le defi ou la partie est passés
-                                if(dateDefi < now) {
-                                    defisPasses.push(defi)
-                                    index ++
-                                }else {
-                                    defisaVenir.push(defi)
-                                }
-                                allDefis.push(defi)
-                            }
-                            
-                        }
-                    })
-
-                    // Query pour trouver si cette équipe est defiée pour un  defi
-                    var queryEqDefiee = ref.where("equipeDefiee", "==",idEquipe)
-
-                    queryEqDefiee.get().then(async (resultsDefiDefiee) => {
-                    
-                        for(var i = 0; i < resultsDefiDefiee.docs.length ; i++) {
-                            var dateDefi = new Date(  resultsDefiDefiee.docs[i].data().jour.seconds*1000)
-                            if(! this.allreaddyDownloadDefi(allDefis, resultsDefiDefiee.docs[i].data())) {
-
-                                var defi = resultsDefiDefiee.docs[i].data()
-                                defi.jour.seconds =defi.jour.seconds - 7200 
-                                // Si le defi ou la partie est passés
-                                if(dateDefi < now) {
-                                    defisPasses.push(defi)
-                                    index ++
-                                }else {
-                                    defisaVenir.push(defi)
-                                }
-                                allDefis.push(defi)
-                            }
-                        }
-
-                        var defisPassesDisp = [];
-                        if (defisaVenir.length == 0 && defisPasses.length != 0) {
-                            defisPassesDisp = defisPasses.slice(-Math.min(defisPasses.length, 3));
-                        }
-
-                        this.setState({
-                            defisaVenir : defisaVenir,
-                            defisPasses : defisPasses,
-                            defisPassesDisp : defisPassesDisp,
-                            allDefis : allDefis,
-                            isLoading : false,
-                            index : index
-                        })
-                    })
-                }
-
-            })
-
             
         }).catch(function(error) {
               console.log("Error getting documents partie:", error);
-        }); */  
+        });   
     }
 
 

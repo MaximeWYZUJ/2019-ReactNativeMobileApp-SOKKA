@@ -11,7 +11,7 @@ import StarRating from 'react-native-star-rating'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import RF from 'react-native-responsive-fontsize';
 import AlphabetListView from 'react-native-alphabetlistview'
-import { CheckBox } from 'react-native-elements'
+import CheckBox from 'react-native-checkbox'
 
 import firebase from 'firebase'
 import '@firebase/firestore'
@@ -29,6 +29,8 @@ export default class New_Message extends React.Component {
             ajoutGroupeExistant: this.props.navigation.getParam('ajoutGroupeExistant', false),
             groupe : this.props.navigation.getParam('groupe', undefined),
         }
+
+     
     }
 
     static navigationOptions = ({ navigation }) => {
@@ -194,9 +196,12 @@ export default class New_Message extends React.Component {
         }
         this.setState({isLoading : false})
 
-        console.log("update donne")
+        console.log("before concat")
+        console.log(this.state.groupe.participants)
         var groupe = this.state.groupe
         groupe.participants = groupe.participants.concat(this.state.joueursSelectiones)
+        console.log("after concat")
+        console.log(groupe.participants)
         this.props.navigation.push("ListMessages", {conv : groupe})
     }
 
@@ -245,12 +250,11 @@ export default class New_Message extends React.Component {
             var checked = this.state.groupe.participants.includes(id) || this.state.joueursSelectiones.includes(id)
             return(
                 <CheckBox
-                right
-                title=' '
-                checkedColor = {Color.agOOraBlue}
+                
+                label=' '
                 containerStyle={{backgroundColor: 'white', borderWidth :0,alignSelf : "center"}}                    
                 checked={checked}
-                onPress={() => {
+                onChange={() => {
                     if(! this.state.groupe.participants.includes(id)) {
                         this.selectionnerUnJoueur(id)
                     }
@@ -261,12 +265,11 @@ export default class New_Message extends React.Component {
             
             return(
                 <CheckBox
-                right
-                title=' '
-                checkedColor = {Color.agOOraBlue}
+                
+                label=' '
                 containerStyle={{backgroundColor: 'white', borderWidth :0,alignSelf : "center"}}                    
                 checked={this.state.joueursSelectiones.includes(id)}
-                onPress={() => {
+                onChange={() => {
                     this.selectionnerUnJoueur(id)
                 }}
             />
@@ -335,13 +338,10 @@ export default class New_Message extends React.Component {
                     </View>                   
                     <TouchableOpacity
                         onPress = {() => {
-                            if(this.state.joueursSelectiones.length > 1) {
-                                if(this.state.ajoutGroupeExistant) {
-                                    console.log("in if")
-                                    this.ajoutGroupeExistant()
-                                } else {
+                            if(this.state.ajoutGroupeExistant && this.state.joueursSelectiones.length > 0) {
+                                this.ajoutGroupeExistant()
+                            } else  if(! this.state.ajoutGroupeExistant && this.state.joueursSelectiones.length > 1) {
                                     this.props.navigation.push("NewGroupe", {joueurs :this.buildDataJoueursNav()})
-                                }
                             }
                         }}>
                         <Text style = {styles.annuler}>Suivant</Text>

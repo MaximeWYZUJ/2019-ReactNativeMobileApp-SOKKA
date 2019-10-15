@@ -16,7 +16,6 @@ import '@firebase/firestore'
 class List_Messages extends React.Component {
   constructor(props){
       super(props)
-      console.log("in list message !!",props.navigation.getParam('conv', undefined))
     this.state = {
         conv : this.props.navigation.getParam('conv', undefined),
         messages : [],
@@ -106,11 +105,9 @@ class List_Messages extends React.Component {
                 i++
                 nbMessages = i
             });
-            console.log("ok build all messages")
             this.setState({messages : messages, isLoading : false, lastMessageId :lastMessageId, nbMessages : nbMessages})
 
         }).catch(function(errro) {console.log(errro)});
-        console.log(messages)
         
     }
 
@@ -235,13 +232,11 @@ class List_Messages extends React.Component {
 
 
     async sendMsg(msg){
-        console.log("in send msg", this.state.conv.lecteurs)
         var db = Database.initialisation()
         if(this.state.conv.lecteurs != undefined){
             await this.incrementeNbMsgNonLu()
         }
 
-        console.log("after increment")
         await db.collection("Conversations").doc(this.state.conv.id).collection("Messages").add({
             aLue : false,
             dateEnvoie : Date.parse(new Date()),
@@ -250,14 +245,12 @@ class List_Messages extends React.Component {
         }).catch(function(error){console.log(error)})
         .then(console.log("msg send"))
 
-        console.log("apres anout doc dans collection message")
         await db.collection("Conversations").doc(this.state.conv.id).update({
             txtDernierMsg : msg.text,
             dateDernierMessage : Date.parse(new Date()),
             aLue : false,
             lecteurs : [LocalUser.data.id]
         })
-        console.log("apres maj doc conv")
         conv = this.state.conv
         conv.txtDernierMsg = msg.text,
         conv.dateDernierMessage = Date.parse(new Date()),
@@ -309,11 +302,9 @@ class List_Messages extends React.Component {
                 await this.sendPushNotification(tokens[i], titre,corps)
             }
         } else {
-            console.log("in send notif message group")
             corps =  LocalUser.data.pseudo + " a envoyé un message au groupe " + this.state.conv.nom
             for(var i = 0 ; i < this.state.joueurs.length; i++){
                 var joueur = this.state.joueurs[i]
-                console.log("joueur pseudo ", joueur.pseudo)
                 var tokens = []
                 if(joueur.tokens != undefined) tokens = joueur.tokens
                 for(var k = 0; k < tokens.length; k++) {
@@ -326,13 +317,10 @@ class List_Messages extends React.Component {
     async incrementeNbMsgNonLu(){
 
         if(this.isAgroupConv()) {
-            console.log("====================in increment if !! ========")
             for(var i = 0 ; i < this.state.joueurs.length; i++) {
                 var joueur = this.state.joueurs[i]
-                console.log("in boucle", joueur.pseudo)
-                console.log(this.state.conv)
+               
                 if( this.state.conv.lecteurs.includes(joueur.id)){
-                    console.log("in increment",joueur.id)
                     var db = Database.initialisation()
                     var ref =  db.collection("Joueurs").doc(joueur.id)
                     var j = await ref.get().then((doc) => {
@@ -345,13 +333,11 @@ class List_Messages extends React.Component {
                     })
                
                 }
-                console.log("okokoko")
             }
             
         } else {
             var joueur = this.state.conv.joueur
                 if( this.state.conv.lecteurs.includes(joueur.id)){
-                    console.log("in increment",joueur.id)
                     var db = Database.initialisation()
                     var ref =  db.collection("Joueurs").doc(joueur.id)
                     var j = await ref.get().then((doc) => {
@@ -405,7 +391,6 @@ class List_Messages extends React.Component {
     }
 
     nomConv(conv){
-        console.log(conv.nom)
         if(conv.nom == undefined) {
             return(conv.joueur.pseudo)
         } else {
@@ -519,7 +504,6 @@ class List_Messages extends React.Component {
     for(var i = 0; i < messages.length ; i++) {
         await this.sendMsg(messages[i])
     }
-    cpnsole.log("everithing good !!!!!!!!!!")
     
     
   }

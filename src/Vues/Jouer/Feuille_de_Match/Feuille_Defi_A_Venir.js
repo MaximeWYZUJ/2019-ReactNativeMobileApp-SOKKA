@@ -17,6 +17,8 @@ import { StackActions, NavigationActions } from 'react-navigation';
 import LocalUser from '../../../Data/LocalUser.json'
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
 import Notification from '../../../Helpers/Notifications/Notification'
+import DatesHelpers from '../../../Helpers/DatesHelpers'
+
 
 // Rememttre à Zéro le stack navigator pour empecher le retour en arriere
 const resetAction = StackActions.reset({
@@ -34,8 +36,8 @@ class Feuille_Defi_A_Venir extends React.Component {
     constructor(props) {
         super(props)
 
-        console.log("CONSTRUCTEUR FEUILLE DEFI A VENIR !")
         
+        console.log("in constructor")
 
         this.monId = LocalUser.data.id
         this.state = {
@@ -47,12 +49,13 @@ class Feuille_Defi_A_Venir extends React.Component {
             isLoading : true
 
         }
-        console.log("in constructor")
+        console.log("defis", this.state.defi)
+        console.log("after log defi")
     }
 
     componentDidMount() {
 
-        console.log("in did mount")
+        console.log("in component did mount")
         this.ChangeThisTitle('Defi ' +this.buildDate(new Date(this.state.defi.jour.seconds * 1000)))
         this.downloadDataAllJoueurs()
     }
@@ -105,6 +108,7 @@ class Feuille_Defi_A_Venir extends React.Component {
     }; 
 
     ChangeThisTitle = (titleText) => {
+        console.log("in change title")
         const {setParams} = this.props.navigation;
         setParams({ title: titleText })
     }
@@ -205,7 +209,6 @@ class Feuille_Defi_A_Venir extends React.Component {
     inviterPlusdeJoueur() {
 
         var nbMinJoueurEquipe = parseInt(this.state.defi.format.split(" ")[0])
-        console.log("nbMin ", nbMinJoueurEquipe)
         var nbAtteint = false
 
         // Trouver l'équipe dont l'user est capitaine
@@ -215,9 +218,6 @@ class Feuille_Defi_A_Venir extends React.Component {
             equipe = this.state.equipeDefiee
             joueurs  = this.state.defi.joueursEquipeDefiee
             nbAtteint = this.state.defi.joueursEquipeDefiee.length >= nbMinJoueurEquipe
-            console.log("NB Attein", nbAtteint)
-            console.log("length ", this.state.defi.joueursEquipeDefiee.length)
-            console.log("nbMinJoueurEquipe", nbMinJoueurEquipe)
         } else if(this.state.equipeOrganisatrice.capitaines.includes(this.monId)) {
             equipe = this.state.equipeOrganisatrice
             nbAtteint = this.state.defi.joueursEquipeOrga.length >= nbMinJoueurEquipe
@@ -259,7 +259,6 @@ class Feuille_Defi_A_Venir extends React.Component {
      * présence. 
      */
     handleConfirmerNon() {
-        console.log("in handle confirmer non")
         Alert.alert(
             '',
             "Tu souhaites annuler ta présence pour ce défi ? ",
@@ -301,7 +300,6 @@ class Feuille_Defi_A_Venir extends React.Component {
      */
     annulerJoueurPresence() {
 
-        console.log("in anulee")
         // Trouver l'équipe dont l'utilisateur est membre 
         if(this.state.defi.joueursEquipeOrga.includes(this.monId)) {
 
@@ -315,7 +313,6 @@ class Feuille_Defi_A_Venir extends React.Component {
             if(! j.includes(this.monId)){
                 j.push(this.monId) 
             }
-            console.log("indispo ok ", j)
 
             // Suppr l'user des joueurs en attente (on crée des new objet pour que le state se maj)
             var att  = []
@@ -324,7 +321,6 @@ class Feuille_Defi_A_Venir extends React.Component {
                     att.push(this.state.defi.attenteEquipeOrga[i])
                 }
             }
-            console.log("att ok ", att)
 
             // Suppr l'user  des joueurs confirme
             var  conf  = []
@@ -334,7 +330,6 @@ class Feuille_Defi_A_Venir extends React.Component {
                     conf.push(this.state.defi.confirmesEquipeOrga[i])
                 } 
             }
-            console.log("conf ok ", conf)
 
             // Mettre à jour le state.
             var defi = this.state.defi
@@ -359,7 +354,6 @@ class Feuille_Defi_A_Venir extends React.Component {
 
         // Cas où le joueur est dans l'équipe défiée
         } else {
-            console.log("in elese")
             // Ajouter l'id de l'utilisateur dans la liste des indispo (Creation d'un new array pour le re render)
             var j = []
             for(var i = 0 ; i < this.state.defi.indisponiblesEquipeDefiee.length; i++) {
@@ -369,7 +363,6 @@ class Feuille_Defi_A_Venir extends React.Component {
             if(! j.includes(this.monId)){
                 j.push(this.monId) 
             }
-            console.log("indispo ok ")
             // Suppr l'user des joueurs en attente (on crée des new objet pour que le state se maj)
             var att  = []
             for(var i = 0 ; i < this.state.defi.attenteEquipeDefiee.length ; i++) {
@@ -377,7 +370,6 @@ class Feuille_Defi_A_Venir extends React.Component {
                     att.push(this.state.defi.attenteEquipeDefiee[i])
                 }
             }
-            console.log("att ok ")
 
 
             // Suppr l'user  des joueurs confirmés
@@ -387,18 +379,15 @@ class Feuille_Defi_A_Venir extends React.Component {
                     conf.push(this.state.defi.confirmesEquipeDefiee[i])
                 } 
             }
-            console.log("conf ok ")
 
 
             // Mettre à jour le state.
             var defi = this.state.defi
-            console.log("after var defi")
             defi.confirmesEquipeDefiee = conf
             defi.attenteEquipeDefiee = att
             defi.indisponiblesEquipeDefiee = j
 
             this.setState({defi, defi})
-            console.log("after set state")
             // Enregistrer dans la db
             var db = Database.initialisation()
             var partieRef = db.collection("Defis").doc(this.state.defi.id)
@@ -524,9 +513,7 @@ class Feuille_Defi_A_Venir extends React.Component {
             });
         }
 
-        console.log("before store notif")
         this.storeNotifConfirmerInDB()
-        console.log("after store notif")
         
          
     }
@@ -568,7 +555,6 @@ class Feuille_Defi_A_Venir extends React.Component {
                 </TouchableOpacity>
             )
         } else if(this.state.equipeDefiee != undefined && this.state.equipeDefiee.capitaines.includes(this.monId) && this.state.defi.attenteEquipeDefiee.length > 0) {
-            console.log("okoko in _renderbtnrelancer")
             return(
                 <TouchableOpacity
                  style = {styles.btnRelancer}
@@ -592,7 +578,6 @@ class Feuille_Defi_A_Venir extends React.Component {
      * @param {String} body 
      */
     sendPushNotification(token , title,body ) {
-        console.log('in send push !!')
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: token,
@@ -608,7 +593,7 @@ class Feuille_Defi_A_Venir extends React.Component {
         }).catch(function(error) {
             console.log("ERROR :", error)
         }).then(function(error) {
-            console.log("THEN", error)
+           
         });
       
       
@@ -754,18 +739,17 @@ class Feuille_Defi_A_Venir extends React.Component {
      */
     storeNotifRelanceInDB() {
         console.log("in store notif relancer")
+        console.log("ùùùùùùù")
+        console.log("this.state.equipeOrganisatrice",this.state.equipeOrganisatrice)
         var db = Database.initialisation() 
 
         // Si je suis de l'equipe orga
         //if(this.state.equipeOrganisatrice.capitaines.includes(this.monId)) {
-        if(this.state.defi.joueursEquipeOrga.includes(this.monId)){
-            console.log("before send notif")
+        if(this.state.defi.joueursEquipeOrga.includes(this.monId) || this.state.equipeOrganisatrice.capitaines.includes(this.monId)){
 
             // Envoyer les notif
             for(var i = 0 ; i < this.state.joueurs.length ; i++) {
-                console.log("in for ")
                 if(this.state.defi.attenteEquipeOrga.includes(this.state.joueurs[i].id)) {
-                    console.log("in if For Notif !!!!!!!")
                     var tokens = this.state.joueurs[i].tokens
                     if(tokens != undefined) {
                         for(var k = 0 ; k < tokens.length; k++) {
@@ -779,8 +763,14 @@ class Feuille_Defi_A_Venir extends React.Component {
             }
 
             // Enregistrer notif dans la db
+            console.log("BEFORE TEXT")
+            var txt = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.state.equipeOrganisatrice.nom 
+            txt = txt + " t'a convoqué / relancé pour un un défi le " + this.buildDate(new Date(this.state.defi.jour.seconds * 1000))
+            console.log("store notif in db relance")
+            console.log(txt)
             for(var i = 0 ; i < this.state.defi.attenteEquipeOrga.length; i++) {
                 if(this.state.defi.attenteEquipeOrga[i] != this.monId) { 
+                  
                     db.collection("Notifs").add(
                         {
                             dateParse : Date.parse(new Date()),
@@ -789,17 +779,23 @@ class Feuille_Defi_A_Venir extends React.Component {
                             recepteur : this.state.defi.attenteEquipeOrga[i],
                             time : new Date(),
                             type : Types_Notification.CONVOCATION_RELANCE_DEFI,
-                            equipe : this.state.equipeOrganisatrice.id
+                            equipe : this.state.equipeOrganisatrice.id,
+                            dateHeure : DatesHelpers.buildDateNotif(new Date()),
+                            texte : txt,
+                            heure: DatesHelpers.buildDateNotif(new Date()),
+                            show_boutons : true
+                           
                         }
-                    )
+                    ).catch(function(erreur) {
+                        console.log(error)
+                    })
                 }
             }
-        } else if(this.state.equipeDefiee != undefined && this.state.defi.joueursEquipeDefiee.includes(this.monId)) {
+        } else if(this.state.equipeDefiee != undefined && (this.state.defi.joueursEquipeDefiee.includes(this.monId) || this.state.equipeDefiee.capitaines.includes(this.monId))) {
+            
             
             for(var i = 0 ; i < this.state.joueurs.length ; i++) {
-                console.log("in for ")
                 if(this.state.defi.attenteEquipeDefiee.includes(this.state.joueurs[i].id)) {
-                    console.log("in if For Notif !!!!!!!")
                     var tokens = this.state.joueurs[i].tokens
                     if(tokens != undefined) {
                         for(var k = 0 ; k < tokens.length; k++) {
@@ -812,6 +808,9 @@ class Feuille_Defi_A_Venir extends React.Component {
                 }
             }
 
+            var txt = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.state.equipeDefiee.nom 
+            txt = txt + " t'a convoqué / relancé pour un un défi le " + this.buildDate(new Date(this.state.defi.jour.seconds * 1000))
+
             for(var i = 0 ; i < this.state.defi.attenteEquipeDefiee.length; i++) {
                 if(this.state.defi.attenteEquipeDefiee[i] != this.monId) {
                     db.collection("Notifs").add(
@@ -822,7 +821,11 @@ class Feuille_Defi_A_Venir extends React.Component {
                             recepteur : this.state.defi.attenteEquipeDefiee[i],
                             time : new Date(),
                             type : Types_Notification.CONVOCATION_RELANCE_DEFI,
-                            equipe : this.state.equipeDefiee.id
+                            equipe : this.state.equipeDefiee.id,
+                            texte : txt,
+                            heure: DatesHelpers.buildDateNotif(new Date()),
+                            show_boutons : true
+
                         }
                     )
                 }
@@ -934,7 +937,6 @@ class Feuille_Defi_A_Venir extends React.Component {
              </View>
          )
         } else {
-            console.log("in render player liste")
             console.log(this.state.joueurs)
              return(
                  <View>
@@ -993,14 +995,15 @@ class Feuille_Defi_A_Venir extends React.Component {
 
     render() {
 
+        console.log("in render")
+        var equipeDefieeExsists = this.state.equipeDefiee != undefined
         if(this.state.defi != undefined) {
-            if(this.state.defi.joueursEquipeDefiee.includes(this.monId)) {
+            if(this.state.defi.joueursEquipeDefiee.includes(this.monId) || (equipeDefieeExsists && this.state.equipeDefiee.capitaines.includes(this.monId))) {
                 var confirme = this.state.defi.confirmesEquipeDefiee
                 var indisponibles =  this.state.defi.indisponiblesEquipeDefiee
                 var attente =  this.state.defi.attenteEquipeDefiee
             } else {
                 var confirme = this.state.defi.confirmesEquipeOrga
-                console.log("CONFIRME  : " , confirme)
                 var indisponibles =  this.state.defi.indisponiblesEquipeOrga
                 var attente =  this.state.defi.attenteEquipeOrga 
             }

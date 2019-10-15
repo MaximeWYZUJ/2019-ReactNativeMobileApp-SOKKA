@@ -136,7 +136,7 @@ class Notif_Presence_Defi extends React.Component {
     }
 
     renderPresence() {
-        if(this.state.defi.type == Types_Notification.CONFIRMER_PRESENCE_DEFI) {
+        if(this.props.notification.type == Types_Notification.CONFIRMER_PRESENCE_DEFI) {
             return "a confirmé sa présence"
         } else {
             return "est indisponible"

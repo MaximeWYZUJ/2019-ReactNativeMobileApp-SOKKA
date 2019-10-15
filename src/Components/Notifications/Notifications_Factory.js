@@ -25,7 +25,8 @@ import Notif_Demande_Rejoindre_Capitaines from './Notifs_Capitaines/Notif_Demand
 import Notifs_Rep_Demande_Cap from './Notifs_Capitaines/Notifs_Rep_Demande_Cap'
 import Notif_New_Cap from './Notifs_Capitaines/Notif_New_Cap'
 import Notif_Arret_Cap from './Notifs_Capitaines/Notif_Arret_Cap'
-
+import Notif_Reponse_Releve_Defi from './Notif_Defi_Partie/Notif_Reponse_Releve_Defi'
+import Notif_Inscription_Partie from './Notif_Defi_Partie/Notif_Inscription_Partie'
 
 /**
  * class qui va permettre d'afficher le bon type de notification en fonction 
@@ -243,6 +244,26 @@ export default class Notifications_Factory extends React.Component {
                         <Notif_Arret_Cap
                             notification = {this.props.notification}
                         />
+                    )
+            
+            case Types_Notification.REFUSER_EQUIPE_DEFIEE:
+                    return(
+                        <Notif_Reponse_Releve_Defi
+                            notification = {this.props.notification}
+                        />
+                    )
+
+            case Types_Notification.ACCEPTER_EQUIPE_DEFIEE:
+                    return(
+                        <Notif_Reponse_Releve_Defi
+                            notification = {this.props.notification}
+                        />
+                    )
+            
+                    case Types_Notification.INSCRIPTION_PARTIE:
+                    return(
+                        <Notif_Inscription_Partie
+                            notification = {this.props.notification}/>
                     )
             default : 
         }

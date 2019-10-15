@@ -93,8 +93,21 @@ export default class Inscription_Nom_Pseudo extends React.Component {
             }
             var db = Database.initialisation()
             var  ref = db.collection("Joueurs");
-            var query = ref.where("pseudo", '==' , pseudoBis)
+
+            this.props.navigation.push("InscriptionZone",
+            {
+                mail : this.state.mail,
+                mdp : this.state.mdp,
+                nom : this.state.nom,
+                prenom : this.state.prenom,
+                pseudo : pseudoBis,
+                sexe: this.state.sexe
+            })
+
+            // ON a pas les permissionq ...
+           /* var query = ref.where("pseudo", '==' , pseudoBis)
             query.get().then(async (results) => {
+
                 if(results.docs.length == 0) {
                     this.setState({isLoading : false})
                     this.props.navigation.push("InscriptionZone",
@@ -110,7 +123,9 @@ export default class Inscription_Nom_Pseudo extends React.Component {
                     this.setState({isLoading : false})
                     Alert.alert("", "Le pseudo " + pseudoBis + " est déjà pris")
                 }
-            }) 
+            }).catch(function(error) {
+                console.log(error)
+            })*/
 
            
         }

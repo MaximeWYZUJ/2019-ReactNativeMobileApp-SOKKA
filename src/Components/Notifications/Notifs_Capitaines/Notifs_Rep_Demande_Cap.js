@@ -30,7 +30,6 @@ class Notifs_Rep_Demande_Cap extends React.Component {
     }
 
     async getData() {
-        console.log("in get data")
         // Données de l'équipe concernée
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 

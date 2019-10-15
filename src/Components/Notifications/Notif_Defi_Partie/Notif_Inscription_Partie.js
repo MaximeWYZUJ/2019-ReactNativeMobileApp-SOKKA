@@ -1,4 +1,5 @@
 
+
 import React from 'react'
 import {View, Text,Image, ImageBackground,  StyleSheet, Animated,TouchableOpacity,TextInput, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -8,16 +9,12 @@ import Simple_Loading from '../../Loading/Simple_Loading'
 import Database  from '../../../Data/Database'
 import LocalUser from '../../../Data/LocalUser.json'
 import { withNavigation } from 'react-navigation'
-import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
+import Type_Defis from '../../../Vues/Jouer/Type_Defis';
+import Types_Notification from '../../../Helpers/Notifications/Types_Notification';
+import DatesHelpers from '../../../Helpers/DatesHelpers'
 
-
-
-/**
- * Notification indiquant que le capitaine de l'équipe de l'organisateur a complété la feuille
- * de match d'un défi
- */
-class Notif_feuille_completee_Partie extends React.Component {
-
+class Notif_Inscription_Partie extends React.Component {
+    
     constructor(props) {
 
         super(props)
@@ -25,9 +22,9 @@ class Notif_feuille_completee_Partie extends React.Component {
 
         this.state = {
             isLoading : true,
-            partie : undefined,
-           organisateur : undefined,
-            
+            emetteur : undefined,
+            equipe : undefined,
+            defi : undefined
         }
     }
 
@@ -38,43 +35,48 @@ class Notif_feuille_completee_Partie extends React.Component {
     async getData() {
 
 
+        // Données de l'équipe concernée
+        var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
+
+
         // Données de la partie 
         var partie = await Database.getDocumentData(this.props.notification.partie, "Defis")
-        var organisateur = await Database.getDocumentData(this.props.notification.organisateur, "Joueurs")
-        this.setState({partie : partie, organisateur : organisateur, isLoading : false})
-
+        this.setState({ emetteur : emetteur, partie : partie,isLoading : false})
     }
+
 
     componentDidMount() {
         this.getData()
     }
 
-    
-    /**
+
+     /**
      * Pour se rendre dans la fiche de la partie
      */
     goToFichePartie() {
-       
         this.props.navigation.push("FichePartieRejoindre", 
             {
                 id : this.state.partie.id,
+                /*jour : this.buildDate(),
+                duree : this.props.duree,
+                terrain : this.findTerrain(),
+                nbJoueursRecherche : this.state.partie.nbJoueursRecherche,
+                message_chauffe : this.props.message_chauffe,
+                joueurs  : this.props.joueurs,
+                joueursWithData : this.state.joueurs     // Les 3 premiers joueurs du défi (on a deja leur données donc pas besoin de les rechercher)*/
             })
-        
     }
 
-
-    renderPhotoOrga() {
-        if(this.state.organisateur != undefined) {
+    renderPhotoEmetteur() {
+        if(this.state.emetteur != undefined) {
             return(
-                <View style = {{justifyContent : "center", paddingTop : hp('1%')}}>
-                    <Image
-                    source = {{uri : this.state.organisateur.photo}} 
-                    style = {{height : hp('8%'), width : hp('8%'), borderRadius : hp('4%'), marginRight : wp('3%'), marginLeft: wp('3%')}}   
-                />
-               
-               
-                </View>
-                
+                    <View style = {{justifyContent : "center", paddingTop : hp('1%')}}>
+                        <Image
+                        source = {{uri : this.state.emetteur.photo}} 
+                        style = {{height : hp('8%'), width : hp('8%'), borderRadius : hp('4%'), marginRight : wp('3%'), marginLeft: wp('3%')}}   
+                    />
+                    </View>
+                    
             )
         } else {
             return(
@@ -85,45 +87,34 @@ class Notif_feuille_completee_Partie extends React.Component {
         }
     }
 
-    renderpseudoOrga() {
-        if(this.state.organisateur != undefined) {
-            return this.state.organisateur.pseudo
-        } else {
-            return '___'
-        }
-    }
 
-   
     render() {
-        if(! this.state.isLoading) {
-            return(
-                <View style = {{flexDirection : 'row', marginTop : hp('2%')}}>
-                    <View>
-                        {this.renderPhotoOrga()}
-                    </View>
-                    <View>
-                        <Text>{this.renderpseudoOrga()} a complété la feuille</Text>
-                        <Text>de match de partie</Text>
-                        <TouchableOpacity
-                            onPress = {() => this.goToFichePartie()}>
-                            <Text style = {styles.txtBtn}>Consulter</Text>
-                        </TouchableOpacity>
-                    </View>
-                   
-                        
-                </View>
-            )
-        } else {
+        if(this.state.isLoading) {
             return(
                 <Simple_Loading
                     taille = {hp('3%')}
                 />
             )
+        } else {
+            return(
+                <View style = {{flexDirection : 'row', marginTop : hp('2%')}}>
+                    <View>
+                        {this.renderPhotoEmetteur()}
+                    </View>
+                    <View>
+                       <Text style = {{width : wp("55%")}}>{this.props.notification.texte}</Text>
+                        <TouchableOpacity
+                            onPress = {() => this.goToFichePartie()}
+                            >
+                            <Text style = {styles.txtBtn}>Consulter</Text>
+                        </TouchableOpacity>
+                        
+                    </View>
+                </View>
+            )
         }
     }
 }
-
-
 
 const styles = {
     txtBtn : {
@@ -131,4 +122,4 @@ const styles = {
     }
 }
 
-export default withNavigation (Notif_feuille_completee_Partie)
+export default withNavigation(Notif_Inscription_Partie)

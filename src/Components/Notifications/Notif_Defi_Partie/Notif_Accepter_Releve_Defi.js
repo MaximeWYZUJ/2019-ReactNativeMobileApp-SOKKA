@@ -9,7 +9,8 @@ import Database  from '../../../Data/Database'
 import LocalUser from '../../../Data/LocalUser.json'
 import { withNavigation } from 'react-navigation'
 import Types_Notification from '../../../Helpers/Notifications/Types_Notification'
-
+import firebase from 'firebase'
+import '@firebase/firestore'
 /**
  * Classe qui permet d'afficher les notfications pour accèpter ou non une
  * équipe qui à relevée un défi posté par une des équipes dont l'utilisateur
@@ -47,10 +48,9 @@ class Notif_Accepter_Releve_Defi extends React.Component {
         // Données de l'émeteur 
         //var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 
-        console.log("after emeteur equipe")
         // Données du défi 
         var defi = await Database.getDocumentData(this.props.notification.defi, "Defis")
-        this.setState({equipeEmettrice :equipeEmettrice , equipeReceptrice : equipeReceptrice, defi : defi, defis_valide : defi.defis_valide, defis_refuse  : defi.defis_refuse, isLoading : false})
+        this.setState({equipeEmettrice :equipeEmettrice , equipeReceptrice : equipeReceptrice, defi : defi, defis_valide : defi.defis_valide, defis_refuse  : this.props.notification.equipeRefusee, isLoading : false})
     }
 
      
@@ -136,13 +136,19 @@ class Notif_Accepter_Releve_Defi extends React.Component {
      * Fonction qui permet d'accepter le défi
      */
     async accepterDefis() {
+        var capitaines = this.state.equipeEmettrice.capitaines
+        var joueursConcernes = this.state.defi.joueursConcernes
         await this.storeNotifDefis(Types_Notification.ACCEPTER_EQUIPE_DEFIEE)
         var db = Database.initialisation()
         if(this.state.defi != undefined) {
             this.setState({defis_valide : true, defis_refuse : false})
             db.collection("Defis").doc(this.state.defi.id).update({
                 defis_valide : true,
-                defis_refuse : false
+                defis_refuse : false,
+                attenteValidation: false,
+                equipesConcernees : firebase.firestore.FieldValue.arrayUnion(this.state.equipeEmettrice.id),
+                joueursConcernes : joueursConcernes.concat(capitaines)
+
             })
         }
     }
@@ -151,14 +157,32 @@ class Notif_Accepter_Releve_Defi extends React.Component {
      * Fonction qui permet de refuser le défi
      */
     async refuserDefis() {
+
+        var idJoueurEquipeDefie = "erreur"
+        if(this.state.defi.joueursEquipeDefiee.length >=1) {
+            var idJoueurEquipeDefie = this.state.defi.joueursEquipeDefiee[1]  
+        }
+        var r = []
+
+
         await this.storeNotifDefis(Types_Notification.REFUSER_EQUIPE_DEFIEE)
         var db = Database.initialisation()
         if(this.state.defi != undefined) {
             this.setState({defis_valide : false, defis_refuse : true})
             db.collection("Defis").doc(this.state.defi.id).update({
                 defis_valide : false,
-                defis_refuse : true
+                //defis_refuse : true,
+                recherche : true,
+                equipeDefiee: "",
+                attenteValidation : false
+
             })
+
+            db.collection("Notifs").doc(this.props.notification.id).update({
+                equipeRefusee : true
+            })
+
+
         }
     }
 
@@ -206,12 +230,10 @@ class Notif_Accepter_Releve_Defi extends React.Component {
         var titre = "Nouvelle notif"
         var corps = "L'équipe " + this.state.equipeReceptrice.nom + " a " + txt + " de vous défier"
         for(var i = 0; i < this.state.equipeEmettrice.capitaines.length; i++) {
-            console.log("début boucle")
 
             var id = this.state.equipeEmettrice.capitaines[i]
 
             var cap = await Database.getDocumentData(id, "Joueurs")
-            console.log("after get cap in db")
             var tokens = []
             if(cap.tokens != undefined) tokens = cap.tokens
             for(var k = 0; k < tokens.length; k++) {
@@ -317,7 +339,7 @@ class Notif_Accepter_Releve_Defi extends React.Component {
 
 
     renderNotif() {
-        console.log("this.state.defi.defis_valide =====", this.state.defi.defis_valide)
+       
         if(this.state.defis_valide) {
             return(
                 <View style =  {{ marginTop : hp('1.5%')}}>
