@@ -40,8 +40,13 @@ export default class Calendrier_Joueur extends React.Component {
 
 
     static navigationOptions = ({ navigation }) => {
+        var titre =  navigation.getParam('header', undefined)
+        if(titre ==undefined) {
+            titre = "Calendrier"
+        }
         return { 
-            title: navigation.getParam('header', 'pas de header = erreur'),
+            
+            title: titre
         };
     }
 

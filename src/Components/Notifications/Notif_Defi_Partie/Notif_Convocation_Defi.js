@@ -260,6 +260,8 @@ class Notif_Convocation_Defi extends React.Component {
      * annuler . Ainsi que  d'enregistrer le defi mis à jour dans la DB.
      */
     async annulerJoueurPresence() {
+        this.setState({isLoading : true})
+
         await this.sendNotifIndispoToAllCapitaine(new Date(this.state.defi.jour.seconds *1000))
 
         console.log("after send notif to all cap")
@@ -358,7 +360,9 @@ class Notif_Convocation_Defi extends React.Component {
                 confirmesEquipeDefiee : conf,
                 attenteEquipeDefiee : att,
                 indisponiblesEquipeDefiee : j,
-            }).then()
+            }).then(() => {
+                this.setState({isLoading : false})
+            })
             .catch(function(error) {
                 // The document probably doesn't exist.
                 console.error("Error updating document: ", error);
@@ -382,6 +386,7 @@ class Notif_Convocation_Defi extends React.Component {
      * confirmés. Ainsi que  d'enregistrer le def mise à jour dans la DB.
      */
     async confirmerJoueurPresence() {
+        this.setState({isLoading : true})
         console.log("confirmerJoueurPresence")
         await this.sendNotifConfirmeToAllCapitaine(new Date(this.state.defi.jour.seconds *1000))
 
@@ -429,7 +434,9 @@ class Notif_Convocation_Defi extends React.Component {
                 confirmesEquipeOrga : j,
                 attenteEquipeOrga : att,
                 indisponiblesEquipeOrga : indispo,
-            }).then()
+            }).then(() => {
+                this.setState({isLoading : false})
+            })
             .catch(function(error) {
                 // The document probably doesn't exist.
                 console.error("Error updating document: ", error);

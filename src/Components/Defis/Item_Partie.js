@@ -183,9 +183,13 @@ class Item_Partie extends React.Component {
     
     render() {
         var color = '#FFFFFF' 
-        if(this.props.jour < new Date())  color = "#E1E1E1"
 
-        if(this.props.dateString == undefined) {
+        var now = Date.parse(new Date())
+        if(this.props.partieData.dateParse < now )  { 
+            color = "#E1E1E1"
+
+        }
+        if(this.props.partieData.dateString == undefined) {
             var date = this.buildDate()
         } else {
             var date = this.props.dateString

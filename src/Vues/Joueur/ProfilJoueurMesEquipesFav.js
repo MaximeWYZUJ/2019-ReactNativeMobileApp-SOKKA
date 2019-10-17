@@ -19,6 +19,17 @@ class ProfilJoueurMesEquipesFav extends React.Component {
         this.joueur = this.props.navigation.getParam('joueur', null);
         this.equipesFav = this.props.navigation.getParam('equipesFav', null);
         this.monProfil = this.props.navigation.getParam('monProfil', false);
+
+        if(this.equipesFav != null) {
+            this.equipesFav.sort(function(a, b){
+                if( a.nom.toLowerCase() <= b.nom.toLowerCase()) {
+                    return -1
+                } else {
+                    return 1
+                }
+            }
+            );
+        }
     }
 
     _get_header_title() {

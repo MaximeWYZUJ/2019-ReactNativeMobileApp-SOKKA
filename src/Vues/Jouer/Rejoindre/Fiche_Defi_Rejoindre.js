@@ -73,7 +73,8 @@ class Fiche_Defi_Rejoindre extends React.Component {
             nbVotantOrga : 0,
             nbVotantDefiee : 0,
             commentaires : [],
-            currentCommentaire : ""
+            currentCommentaire : "",
+            showChangeHeureDialog : false
         }
         console.log("ID:", this.state.defi.id)
     }
@@ -1170,6 +1171,25 @@ class Fiche_Defi_Rejoindre extends React.Component {
     
 
 
+    changeDateDialog(){
+        if(this.state.showChangeHeureDialog) {
+            return(
+                <View style = {styles.containerListEquipe}>
+                <Text>
+                    Tu souhaites changer l'heure du défi ?
+                </Text>
+
+               
+                <TouchableOpacity
+                    onPress = {() => this.setState({showChangeHeureDialog : false})} >
+                    <Text style = {{fontWeight : "bold"}}>Annuler</Text>
+                </TouchableOpacity>
+            </View>
+            )
+        }
+    }
+
+
     displayRender() {
 
         if(this.state.defi.dateString == undefined) {
@@ -1194,7 +1214,10 @@ class Fiche_Defi_Rejoindre extends React.Component {
                             }}
                             > Defi {this.state.defi.format} par {this.state.organisateur.pseudo}</Text>
                         <Text style = {styles.separateur}>_____________________________________</Text>
-                        <Text style = {styles.infoDefis}> {date}</Text>
+                        <TouchableOpacity
+                            onPress = {() => this.setState({showChangeHeureDialog : true})}>
+                            <Text style = {styles.infoDefis}> {date}</Text>
+                        </TouchableOpacity>
                         <Text style = {styles.separateur}>_____________________________________</Text>
                     </View>
 

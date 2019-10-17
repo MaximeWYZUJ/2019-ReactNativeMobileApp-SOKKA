@@ -297,7 +297,7 @@ class Accueil_Jouer extends React.Component {
             if(this.state.allDefisPartie.length != 0) {
 
                 return(
-                    <ScrollView style = {{paddingBottom : hp('20%')}}
+                    <ScrollView style = {{paddingBottom : hp('2%')}}
                     refreshControl={
                         <RefreshControl
                           refreshing={this.state.refreshing}
@@ -305,7 +305,7 @@ class Accueil_Jouer extends React.Component {
                         />
                       }
                     >
-                        <View style = {{ alignContent : "center", paddingBottom : 180, marginBottom : hp('60%')}}>
+                        <View style = {{ alignContent : "center", paddingBottom : 10, marginBottom : hp('2%')}}>
                             <FlatList
                                 data = {this.state.allDefisPartie}
                                 renderItem = {this._renderItem}

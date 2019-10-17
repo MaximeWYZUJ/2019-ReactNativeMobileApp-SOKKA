@@ -53,7 +53,7 @@ export default class New_Message extends React.Component {
         var newJoueurs = []
         for(var i =0 ; i < this.state.joueurs.length; i++){
             var joueur = this.state.joueurs[i]
-            if(joueur.pseudo.startsWith(searchedText)) {
+            if(joueur.pseudo.toLowerCase().startsWith(searchedText.toLowerCase())) {
                 newJoueurs.push(joueur)
             }
         }

@@ -185,7 +185,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
 
         var id = this.props.navigation.getParam('id', 'erreur')
         var partie = await Database.getDocumentData(id,"Defis")
-
+        console.log("id partie", id)
     
         partie.jour.seconds = partie.jour.seconds - 7200    // Pour mettre en heure francaise
         this.findTerrain(partie.terrain)

@@ -202,7 +202,7 @@ class Notif_Convocation_Partie extends React.Component {
     async confirmerJoueurPresence()  {
 
 
-        this.setState({aconfirmer  : true})
+        this.setState({aconfirmer  : true, isLoading : true})
         await this.sendNotifConfirmer(this.state.partie.jour.seconds*1000)
 
         // Ajouter l'id de l'utilisateur dans la liste des confirme (Creation d'un new array pour le re render)
@@ -239,7 +239,8 @@ class Notif_Convocation_Partie extends React.Component {
             confirme : j,
             attente : att,
             indisponibles : indispo,
-        }).then(function(){
+        }).then(() =>{
+            this.setState({isLoading : false})
             Alert.alert(
                 '',
                 'Tu as confirmé ta présence pour cette partie'
@@ -314,7 +315,7 @@ class Notif_Convocation_Partie extends React.Component {
      * Ainsi que  d'enregistrer la partie mise à jour dans la DB.
      */
     async annulerJoueurPresence() {
-        this.setState({arefuse  : true})
+        this.setState({arefuse  : true, isLoading : true})
 
         await this.sendNotifIndispo(new Date(this.state.partie.jour.seconds * 1000))
 
@@ -360,7 +361,9 @@ class Notif_Convocation_Partie extends React.Component {
             confirme : confirme,
             attente : attente,
             indisponibles : indispo,
-        }).then(function(){
+        }).then(() =>{
+            this.setState({isLoading : false})
+
             Alert.alert(
                 '',
                 'Tu es indisponible pour cette partie'

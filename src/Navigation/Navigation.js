@@ -200,4 +200,25 @@ const stackNavigator = createStackNavigator({
   headerLayoutPreset: 'center'
 })
 
-export default createAppContainer(stackNavigator)
+
+stackNavigator.navigationOptions = ({ navigation }) => {
+  let tabBarVisible;
+  var  screenWithNoBar = [  "CreationEquipeNom","CreationEquipeZone","CreationEquipeAjoutJoueurs","CreationEquipeCitation","CreationEquipePhoto"]
+
+
+  if (navigation.state.routes.length > 1) {
+    navigation.state.routes.map(route => {
+      if ( screenWithNoBar.includes(route.routeName)) {
+        tabBarVisible = false;
+      } else {
+        tabBarVisible = true;
+      }
+    });
+  }
+
+  return {
+    tabBarVisible
+  };
+};
+
+export default stackNavigator

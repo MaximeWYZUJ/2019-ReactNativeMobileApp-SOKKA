@@ -27,6 +27,10 @@ import StackProfil from './Navigation'
 import ProfilJoueur from '../Vues/Joueur/ProfilJoueur'
 import Choix_Prix from '../Vues/Jouer/Creation/Choix_Prix'
 
+
+let app;
+app = {} || app;
+
 const stackNavigator = createStackNavigator({
 
   /**
@@ -63,6 +67,7 @@ const stackNavigator = createStackNavigator({
     screen : Choix_Terrain_Defis
   },
 
+
   Choix_Prix : {
     screen : Choix_Prix
   },
@@ -83,6 +88,8 @@ const stackNavigator = createStackNavigator({
     screen : Choix_Joueurs_Defis_2_Equipes
   },
 
+
+
   /**
    * Screen qui permet à l'utilisateur de choisir si il veut rechercher une équipe
    * à affronter ou si il veut poster une annonce (lors de la création d'un defi
@@ -99,6 +106,7 @@ const stackNavigator = createStackNavigator({
   ChoixEquipeAdverse : {
     screen : Choix_Equipe_Adverse
   },
+
 
 
 
@@ -137,6 +145,7 @@ const stackNavigator = createStackNavigator({
 	  screen : Choix_Nbr_Joueurs_Partie
   },
 
+  
   /**
    * Screen qui affiche le récapitulatif d'une partie que l'utilisateur viens de créer.
    */
@@ -212,4 +221,26 @@ const stackNavigator = createStackNavigator({
   headerLayoutPreset: 'center'
 })
 
-export default createAppContainer(stackNavigator)
+stackNavigator.navigationOptions = ({ navigation }) => {
+  let tabBarVisible;
+  var  screenWithNoBar = ["ChoixFormatDefi","ChoixDateDefis","ChoixTerrainDefis","Choix_Prix","ChoixEquipeDefis","ChoixJoueursDefis2Equipes",
+  "Defis2EquipesContreQui","ChoixEquipeAdverse","ChoixMessageChauffe","RecapitulatifDefis",
+  "ChoixJoueursPartie","ChoixNbrJoueursPartie","RecapitulatifPartie"]
+
+
+  if (navigation.state.routes.length > 1) {
+    navigation.state.routes.map(route => {
+      if ( screenWithNoBar.includes(route.routeName)) {
+        tabBarVisible = false;
+      } else {
+        tabBarVisible = true;
+      }
+    });
+  }
+
+  return {
+    tabBarVisible
+  };
+};
+
+export default stackNavigator

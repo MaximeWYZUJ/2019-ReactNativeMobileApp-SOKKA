@@ -459,6 +459,9 @@ export default class Recapitulatif_Defis extends React.Component {
             heure ++
             minutes -= 60
         }
+        if(heure >= 24) {
+            heure = heure - 24
+        }
         if(minutes.toString().length == 1) {
             minutes = '0'+ minutes.toString()
         }

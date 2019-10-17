@@ -68,6 +68,8 @@ export default class DatesHelpers {
         if(minutes >= 60) {
             heure ++
             minutes -= 60
+        } if(heure >=24) {
+            heure = heure - 24
         }
         if(minutes.toString().length == 1) {
             minutes = '0'+ minutes.toString()

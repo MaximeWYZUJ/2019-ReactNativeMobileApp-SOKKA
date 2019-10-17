@@ -29,7 +29,6 @@ class ProfilJoueur extends React.Component {
 
     constructor(props) {
         super(props)
-        console.log("in constructeur profil")
         this.id = this.props.navigation.getParam('id', LocalUser.data.id)
         this.monProfil= Database.isUser(this.id);
         this.equipes = this.props.navigation.getParam('equipes', [])
@@ -50,7 +49,6 @@ class ProfilJoueur extends React.Component {
         if(this.monProfil) {
             if(LocalUser.dataEquipesUser.length  == 0) {
                 for(var i = 0 ; i < this.equipes.length; i++) {
-                    console.log(this.equipes[i].nom)
                 }
                 LocalUser.dataEquipesUser =  this.equipes
             } else {
@@ -73,6 +71,9 @@ class ProfilJoueur extends React.Component {
         } else {
             this.sexeIcon = require('app/res/femenine.png');
         }
+
+
+        
     }
 
 
@@ -190,11 +191,9 @@ class ProfilJoueur extends React.Component {
             }
         }
         
-        console.log("after supr token in array")
         db.collection("Joueurs").doc(this.id).update({
             tokens : newTokens
         }).then(() => {
-            console.log("after suppr token in db")
             AsyncStorage.clear()
             firebase.auth().signOut().then(() => {
                 // Sign-out successful.
@@ -750,7 +749,7 @@ class ProfilJoueur extends React.Component {
                 <Item_Partie
                     id = {item.id}
                     format = {item.format}
-                    jour = {new Date(item.jour.seconds *1000)} 
+                    jour = {new Date(item.jour.toDate())} 
                     duree = {item.duree}
                     joueurs = {this.buildJoueurs(item)}
                     nbJoueursRecherche =  {item.nbJoueursRecherche}
@@ -978,7 +977,6 @@ class ProfilJoueur extends React.Component {
         var refConv  = db.collection("Conversations");
         var query = refConv.where("participants", 'array-contains' , LocalUser.data.id).where("estUnGroupe", "==",false)
         query.get().then(async (results) => {
-            console.log("query ok !!!")
             var pasResultat = results.docs.length == 0
             var existePas = true
             for( var i  = 0 ; i < results.docs.length; i++) {
@@ -988,7 +986,6 @@ class ProfilJoueur extends React.Component {
                     conv.joueur = joueur
                 }
             }
-            console.log("==== pseudo  §§§ ====", joueur.pseudo)
            if(pasResultat || existePas) {
                var ref = db.collection("Conversations").doc()
                 await ref.set({
@@ -1042,8 +1039,6 @@ class ProfilJoueur extends React.Component {
 
 
     renderAge(){
-        console.log("ID JOUEURS !!!!!",this.joueur.id )
-        console.log("NAISSANCE",this.joueur.naissance )
         if(this.joueur.naissance.seconds == undefined) {
             var naissance = new Date(this.joueur.naissance)
         } else {

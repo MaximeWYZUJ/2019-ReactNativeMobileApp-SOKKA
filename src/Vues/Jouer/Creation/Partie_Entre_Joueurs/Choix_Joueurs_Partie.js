@@ -163,10 +163,15 @@ class Choix_Joueurs_Partie extends React.Component {
 
     goToFichePartie() {
         console.log("in go to fiche partie")
-        var msg = "Tu es bien inscrit à cette partie"
-        if(this.props.joueursPartie.length > 0) {
-            msg = ' Tu es bien inscrit à cette partie, les joueurs invités vont recevoir une notification pour confirmer leur participation '
+        var msg = ""
+        if(this.props.joueursPartie.length > 0 && this.props.JoueursParticipantsPartie.includes(LocalUser.data.id)) {
+            msg =   "Les joueurs invités vont recevoir une notification pour confirmer leur participation."
+        } else if(this.props.joueursPartie.length  > 0 && !this.props.JoueursParticipantsPartie.includes(LocalUser.data.id)) {
+            msg = "Tu es bien inscrit à cette partie. Les joueurs invités vont recevoir une notification pour confirmer leur participation."
+        } else {
+            msg = "Tu es bien inscrit à cette partie"
         }
+        
         console.log(msg)
         d =this.props.navigation.getParam("date", new Date())
        

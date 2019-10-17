@@ -18,6 +18,17 @@ class ProfilJoueurMonReseau extends React.Component {
         this.joueur = this.props.navigation.getParam('joueur', null)
         this.reseau = this.props.navigation.getParam('reseau', null)
         this.monProfil = this.props.navigation.getParam('monProfil', false);
+
+        if(this.reseau != null) {
+            this.reseau.sort(function(a, b){
+                if( a.pseudo.toLowerCase() <= b.pseudo.toLowerCase()) {
+                    return -1
+                } else {
+                    return 1
+                }
+            }
+            );
+        }
     }
 
 
