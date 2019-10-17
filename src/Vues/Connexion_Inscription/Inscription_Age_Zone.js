@@ -43,7 +43,8 @@ export default class Inscription_Age_Zone extends React.Component {
             pseudo : pseudo,
             sexe: sexe,
             age : 0,
-            searchedVilles : []
+            searchedVilles : [],
+            depCode : ""
         }
 
     }
@@ -115,22 +116,13 @@ export default class Inscription_Age_Zone extends React.Component {
     }
 
 
-    getDepartement(nomVille) {
-        for (var i=0; i<villes.length; i++) {
-            if (nomVille === villes[i].Nom_commune) {
-                var cp = villes[i].Code_postal+"";
-                if (cp.length < 5) {
-                    cp = "0" + cp;
-                }
-                var depCode = cp.substr(0, 2);
-                for (var j=0; j<departements.length; j++) {
-                    if (departements[j].departmentCode === depCode) {
-                        return departements[j].departmentName;
-                    }
-                }
+    getDepartement() {
+        for (var i=0; i<departements.length; i++) {
+            if (departements[i].departmentCode === this.state.depCode) {
+                return departements[i].departmentName;
             }
         }
-        return "erreur"
+        return "erreur 13/10/19 inscription age zone";
     }
 
 
@@ -144,7 +136,7 @@ export default class Inscription_Age_Zone extends React.Component {
                 pseudo : this.state.pseudo,
                 sexe: this.state.sexe,
                 ville : NormalizeString.normalize(this.state.ville),
-                departement : NormalizeString.normalize(this.getDepartement(this.state.ville)),
+                departement : NormalizeString.normalize(this.getDepartement()),
                 zone : this.state.zone,
                 naissance : this.state.today,
                 age : this.calculAge()
@@ -161,10 +153,15 @@ export default class Inscription_Age_Zone extends React.Component {
     renderVille = (adress) => {
         if(this.state.ville.length > 0) {
             var txt = adress.Nom_commune.toLowerCase()
+            var cp = adress.Code_postal;
+            if (cp < 9999) {
+                cp = cp*10;
+            }
+            var depCode = cp+"";
             
             return (
                 <TouchableOpacity
-                    onPress = {() => this.setState({ville :this.jsUcfirst(txt), searchedVilles : [] })}
+                    onPress = {() => this.setState({ville :this.jsUcfirst(txt), depCode: depCode[0]+depCode[1], searchedVilles : [] })}
                     style = {{backgroundColor : Colors.grayItem,  marginTop : hp('1%'), marginBottom : hp('1'),paddingVertical : hp('1%')}}
                     >
                 

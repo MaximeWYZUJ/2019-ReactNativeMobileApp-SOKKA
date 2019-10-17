@@ -16,6 +16,7 @@ class SearchList extends React.Component {
     constructor(props) {
         super(props)
         this.monProfil = this.props.monProfil != undefined && this.props.monProfil == true;
+        this.initData = this.props.data;
 
         this.state = {
             text: '',
@@ -108,6 +109,7 @@ class SearchList extends React.Component {
     handleValidateFilters = (q, f) => {
         this.handleFilterButton();
         this.setState({filtres: f});
+        this.validerRecherche(this.filtrerData2(this.initData, f));
     }
 
 
@@ -118,6 +120,21 @@ class SearchList extends React.Component {
                 case "Equipes" : return FiltrerEquipe.filtrerEquipes(data, this.state.filtres)
                 case "EquipesFav" : return FiltrerEquipe.filtrerEquipes(data, this.state.filtres)
                 case "Terrains": return FiltrerTerrain.filtrerTerrains(data, this.state.filtres)
+            }
+        
+        } else {
+            return data;
+        }
+    }
+
+
+    filtrerData2 = (data, f) => {
+        if (f !== null) {
+            switch (this.props.type) {
+                case "Joueurs" : return FiltrerJoueur.filtrerJoueurs(data, f)
+                case "Equipes" : return FiltrerEquipe.filtrerEquipes(data, f)
+                case "EquipesFav" : return FiltrerEquipe.filtrerEquipes(data, f)
+                case "Terrains": return FiltrerTerrain.filtrerTerrains(data, f)
             }
         
         } else {

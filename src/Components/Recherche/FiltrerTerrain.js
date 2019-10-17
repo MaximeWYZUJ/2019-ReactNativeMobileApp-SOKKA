@@ -20,7 +20,10 @@ export default class FiltrerTerrain extends React.Component {
                 data = data.filter(((elmt) => {return NormalizeString.normalize(elmt["Departement"]) == NormalizeString.normalize(f.departement)}))
             }
             if (f.ville !== "") {
-                data = data.filter(((elmt) => {return NormalizeString.normalize(elmt["Ville"]) === NormalizeString.normalize(f.ville)}))
+                data = data.filter(((elmt) => {
+                    console.log(NormalizeString.normalize(elmt["Ville"]));
+                    console.log(NormalizeString.normalize(f.ville));
+                    return NormalizeString.normalize(elmt["Ville"]) === NormalizeString.normalize(f.ville)}))
             }
             if (f.sanitaires) {
                 data = data.filter(((elmt) => {return elmt["EquSanitairePublic"] === "-1"}))
@@ -345,6 +348,12 @@ export default class FiltrerTerrain extends React.Component {
                         title="valider"
                         color="#13D10C"
                         onPress={() => {this.props.handleValidate(this.createQuery(), this.returnFilter())}}
+                    />
+                    <Button
+                        style={{flex: 1, flexDirection: 'row', justifyContent: 'center', borderRadius : 15, marginHorizontal: wp('30%'), marginTop: 5}}
+                        title="reinitialiser"
+                        color="#13D10C"
+                        onPress={() => {this.props.handleValidate(null, null)}}
                     />
                 </View>
             </View>

@@ -47,6 +47,7 @@ export default class FiltrerEquipe extends React.Component {
         super(props);
 
         if (this.props.init == null || this.props.init == undefined) {
+            this.hasInit = false;
             this.state = {
                 ageMin: 0,
                 ageMax: 99,
@@ -58,6 +59,7 @@ export default class FiltrerEquipe extends React.Component {
                 nbJoueurs: 0
             }
         } else {
+            this.hasInit = true;
             var init = this.props.init;
             this.state = {
                 ageMin: init.ageMin,
@@ -272,8 +274,8 @@ export default class FiltrerEquipe extends React.Component {
                 {/* Filtrer sur l'age */}
                 <KeyboardAvoidingView style={styles.rowFilter} behavior="padding" enabled>
                     <Text style={{width: wp('30%')}}>Age : </Text>
-                    <TextInput style={{width: wp('25%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({ageMin: 0}) : this.setState({ageMin: parseInt(t,10)})} placeholder={"min"}/>
-                    <TextInput style={{width: wp('25%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({ageMax: 99}) : this.setState({ageMax: parseInt(t,10)})} placeholder={"max"}/>
+                    <TextInput style={{width: wp('25%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({ageMin: 0}) : this.setState({ageMin: parseInt(t,10)})} placeholder={this.hasInit ? "min : " + this.state.ageMin : "min"}/>
+                    <TextInput style={{width: wp('25%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({ageMax: 99}) : this.setState({ageMax: parseInt(t,10)})} placeholder={this.hasInit ? "max : " + this.state.ageMax : "max"}/>
                 </KeyboardAvoidingView>
 
                 {/* Filtrer sur le score */}
@@ -285,7 +287,7 @@ export default class FiltrerEquipe extends React.Component {
                 {/* Nombre de joueurs dans l'equipe */}
                 <KeyboardAvoidingView style={styles.rowFilter} behavior="padding" enabled>
                     <Text style={{width: wp('30%')}}>Nb joueurs : </Text>
-                    <TextInput style={{width: wp('50%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({nbJoueurs: 0}) : this.setState({nbJoueurs: parseInt(t,10)})} placeholder={"combien de joueurs ?"}/>
+                    <TextInput style={{width: wp('50%'), marginHorizontal: wp('5%')}} onChangeText={(t) => t==="" ? this.setState({nbJoueurs: 0}) : this.setState({nbJoueurs: parseInt(t,10)})} placeholder={this.hasInit ? this.state.nbJoueurs + " joueurs" : "combien de joueurs ?"}/>
                 </KeyboardAvoidingView>
 
                 {/* Validation */}
@@ -295,6 +297,12 @@ export default class FiltrerEquipe extends React.Component {
                         title="valider"
                         color="#13D10C"
                         onPress={() => {this.props.handleValidate(this.createQuery(), this.returnFilter())}}
+                    />
+                    <Button
+                        style={{flex: 1, flexDirection: 'row', justifyContent: 'center', borderRadius : 15, marginHorizontal: wp('30%'), marginTop: 5}}
+                        title="reinitialiser"
+                        color="#3240A8"
+                        onPress={() => {this.props.handleValidate(null, null)}}
                     />
                 </View>
             </View>
