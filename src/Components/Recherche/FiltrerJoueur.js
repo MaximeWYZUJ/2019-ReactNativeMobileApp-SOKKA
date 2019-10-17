@@ -176,7 +176,7 @@ export default class FiltrerJoueur extends React.Component {
             
             return (
                 <TouchableOpacity
-                    onPress = {() => this.setState({departement :this.jsUcfirst(txt), searchedDepartements : [] })}
+                    onPress = {() => this.setState({departement: NormalizeString.normalize(txt), searchedDepartements : [] })}
                     style = {{backgroundColor : Colors.grayItem,  marginTop : hp('1%'), marginBottom : hp('1'),paddingVertical : hp('1%')}}
                     >
                 
@@ -237,6 +237,7 @@ export default class FiltrerJoueur extends React.Component {
 
         if (this.state.departement.length > 0) {
             ref = ref.where('departement', '==', NormalizeString.normalize(this.state.departement));
+            bool = true;
         }
         if (this.state.ville.length > 0) {
             ref = ref.where('ville', '==', NormalizeString.normalize(this.state.ville));
@@ -278,6 +279,7 @@ export default class FiltrerJoueur extends React.Component {
         b6 = this.state.sexe != null;
         if (b0 || b1 || b2 || b3 || b4 ||b5 || b6) {
             console.log("on retourne le state");
+            console.log(this.state.departement);
             return {...this.state}
         } else {
             return null;
@@ -360,6 +362,12 @@ export default class FiltrerJoueur extends React.Component {
                         title="valider"
                         color="#13D10C"
                         onPress={() => {this.props.handleValidate(this.createQuery(), this.returnFilter())}}
+                    />
+                    <Button
+                        style={{flex: 1, flexDirection: 'row', justifyContent: 'center', borderRadius : 15, marginHorizontal: wp('30%'), marginTop: 5}}
+                        title="reinitialiser"
+                        color="#3240A8"
+                        onPress={() => {this.props.handleValidate(null, null)}}
                     />
                 </View>
             </View>

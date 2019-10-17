@@ -5,31 +5,33 @@ export default class NormalizeString {
 
     static normalize(s) {
 
-        s = s.replace("é", "e");
-        s = s.replace("è", "e");
-        s = s.replace("ê", "e");
-        s = s.replace("ë", "e");
-        s = s.replace("ï", "i");
-        s = s.replace("î", "i");
-        s = s.replace("à", "a");
-        s = s.replace("â", "a");
-        s = s.replace("ä", "a");
-        s = s.replace("û", "u");
-        s = s.replace("ù", "u");
-        s = s.replace("ü", "u");
-        s = s.replace("ô", "o");
-        s = s.replace("ö", "o");
+        s = s.replace(/é/g, "e");
+        s = s.replace(/è/g, "e");
+        s = s.replace(/ê/g, "e");
+        s = s.replace(/ë/g, "e");
+        s = s.replace(/ï/g, "i");
+        s = s.replace(/î/g, "i");
+        s = s.replace(/à/g, "a");
+        s = s.replace(/â/g, "a");
+        s = s.replace(/ä/g, "a");
+        s = s.replace(/û/g, "u");
+        s = s.replace(/ù/g, "u");
+        s = s.replace(/ü/g, "u");
+        s = s.replace(/ô/g, "o");
+        s = s.replace(/ö/g, "o");
         
-        s = s.replace("Ë", "E");
-        s = s.replace("Ê", "E");
-        s = s.replace("Ï", "I");
-        s = s.replace("Î", "I");
-        s = s.replace("Â", "A");
-        s = s.replace("Ä", "A");
-        s = s.replace("Û", "U");
-        s = s.replace("Ü", "U");
-        s = s.replace("Ô", "O");
-        s = s.replace("Ö", "O");
+        s = s.replace(/Ë/g, "E");
+        s = s.replace(/Ê/g, "E");
+        s = s.replace(/Ï/g, "I");
+        s = s.replace(/Î/g, "I");
+        s = s.replace(/Â/g, "A");
+        s = s.replace(/Ä/g, "A");
+        s = s.replace(/Û/g, "U");
+        s = s.replace(/Ü/g, "U");
+        s = s.replace(/Ô/g, "O");
+        s = s.replace(/Ö/g, "O");
+
+        s = s.replace(/-/g, " ");
 
         return s.toLowerCase();
     }

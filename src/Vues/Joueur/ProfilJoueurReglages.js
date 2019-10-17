@@ -9,6 +9,7 @@ import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
 import DatePicker from 'react-native-datepicker'
 import villes from '../../Components/Creation/villes.json'
+import departements from '../../Components/Creation/departements.json'
 import Database from '../../Data/Database'
 import Simple_Loader from '../../Components/Loading/Simple_Loading'
 import NormalizeString from '../../Helpers/NormalizeString';
@@ -37,6 +38,7 @@ class ProfilJoueurReglages extends React.Component {
         this.naissance = ""
         
         this.ville = ""
+        this.depCode = ""
         this.zone = ""
         this.pseudo = ""
         this.nom = ""
@@ -67,6 +69,7 @@ class ProfilJoueurReglages extends React.Component {
             age : this.joueur.age,
             searchedVilles: [],
             ville: "",
+            depCode: "",
             scoreDisp: this.score,
             sexe: this.joueur.sexe,
             poste: this.joueur.poste,
@@ -195,25 +198,6 @@ class ProfilJoueurReglages extends React.Component {
     };
 
 
-    getDepartement(nomVille) {
-        for (var i=0; i<villes.length; i++) {
-            if (nomVille === villes[i].Nom_commune) {
-                var cp = villes[i].Code_postal+"";
-                if (cp.length < 5) {
-                    cp = "0" + cp;
-                }
-                var depCode = cp.substr(0, 2);
-                for (var j=0; j<departements.length; j++) {
-                    if (departements[j].departmentCode === depCode) {
-                        return departements[j].departmentName;
-                    }
-                }
-            }
-        }
-        return "erreur"
-    }
-
-
     /**
      * Pour mettre la première lettre en capitale
      * @param {} string 
@@ -223,8 +207,19 @@ class ProfilJoueurReglages extends React.Component {
     }
 
 
+    getDepartement() {
+        for (var i=0; i<departements.length; i++) {
+            console.log(this.state.depCode);
+            if (departements[i].departmentCode === this.state.depCode) {
+                return departements[i].departmentName;
+            }
+        }
+        return "erreur 13/10/19 reglages joueur";
+    }
+
+
     /**
-     * Verifie que la villle choisie par l'utilisateur est bien 
+     * Verifie que la ville choisie par l'utilisateur est bien 
      * dans la db
      */
     isVilleOk(nomVille) {
@@ -243,10 +238,16 @@ class ProfilJoueurReglages extends React.Component {
     renderVille = (adress) => {
         if(this.state.ville.length > 0) {
             var txt = adress.Nom_commune.toLowerCase()
+            var cp = adress.Code_postal;
+            if (cp < 9999) {
+                cp = cp*10;
+            }
+            var depCode = cp+"";
+            depCode = depCode[0]+depCode[1];
             
             return (
                 <TouchableOpacity
-                    onPress = {() => {this.ville = this.jsUcfirst(txt); this.setState({ville: this.jsUcfirst(txt), searchedVilles: []})}}
+                    onPress = {() => {this.ville = this.jsUcfirst(txt); this.depCode = depCode; this.setState({ville: this.jsUcfirst(txt), depCode: depCode, searchedVilles: []})}}
                     style = {{backgroundColor : Colors.grayItem,  marginTop : hp('1%'), marginBottom : hp('1'),paddingVertical : hp('1%')}}
                     >
                 
@@ -296,16 +297,13 @@ class ProfilJoueurReglages extends React.Component {
 
 
     modifierMdp() {
-        console.log("in modifiermp")
         // On veut modifier le mdp
         if (this.mdp != "" && this.mdp == this.mdpConfirm && this.mdp.length >= 6) {
             var user = firebase.auth().currentUser;
             user.updatePassword(this.mdp).then(() => {
-                console.log("mot de passe changé");
                 this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', ''),retour_arriere_interdit : true})
                 this.setState({isLoading: false});
             }, (error) => {
-                console.log(error);
                 this.setState({isLoading: false})
                 Alert.alert(
                     "",
@@ -322,7 +320,6 @@ class ProfilJoueurReglages extends React.Component {
         
         // On ne veut pas modifier le mdp
         } else if (this.mdp == "") {
-            console.log("in elsif modifier mdfp")
             this.setState({isLoading: false});
             this.props.navigation.push('ProfilJoueur', {id: this.id, joueur: this.joueur, equipes: this.props.navigation.getParam('equipes', ''),retour_arriere_interdit : true})
 
@@ -338,7 +335,6 @@ class ProfilJoueurReglages extends React.Component {
 
 
     async _validate() {
-
         if (this.naissance) {
             var naissanceTimestamp = firebase.firestore.Timestamp.fromMillis(Date.parse(this.naissance));
             this.joueur.naissance = naissanceTimestamp
@@ -348,7 +344,7 @@ class ProfilJoueurReglages extends React.Component {
         }
         if (this.isVilleOk(this.ville)) {
             this.joueur.ville = NormalizeString.normalize(this.ville);
-            this.joueur.departement = NormalizeString.normalize(this.getDepartement(this.ville));
+            this.joueur.departement = NormalizeString.normalize(this.getDepartement());
         }
         if (this.zone) {
             this.joueur.zone = this.zone
@@ -402,31 +398,7 @@ class ProfilJoueurReglages extends React.Component {
         var db = Database.initialisation()
     
         this.setState({isLoading: true})
-        console.log("in validate")
 
-        // TODO SUPPR
-        var test = {
-            age : this.state.age,
-            fiabilite : this.joueur.fiabilite,
-            naissance : this.joueur.naissance,
-            nom : this.joueur.nom,
-            telephone : this.joueur.telephone,
-            zone : this.joueur.zone,
-            prenom : this.joueur.prenom,
-            nom: this.joueur.nom,
-            pseudo: this.joueur.pseudo,
-            queryPseudo: this.joueur.queryPseudo,
-            pseudoQuery: this.joueur.pseudoQuery,
-            ville: this.joueur.ville,
-            departement: this.joueur.departement,
-            photo: this.joueur.photo,
-            score: this.joueur.score,
-            sexe: this.joueur.sexe,
-            poste: this.joueur.poste,
-            AKA: this.joueur.AKA
-        }
-
-        console.log(test)
         /* Enregistrer l'utilisateur dans la base de données. */
         db.collection("Joueurs").doc(this.id).set({
             age : this.state.age,
@@ -452,7 +424,6 @@ class ProfilJoueurReglages extends React.Component {
             merge: true
 
         }).then(() => {
-            console.log("IN THEN !!!")
             // On veut modifier le mail
             if (this.mail != "") {
                 var user = firebase.auth().currentUser;
