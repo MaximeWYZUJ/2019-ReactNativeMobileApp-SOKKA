@@ -103,7 +103,7 @@ const styles =  StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'space-around',
-        alignItem: 'center'
+        alignItems: 'center'
     },
 
     header_container: {

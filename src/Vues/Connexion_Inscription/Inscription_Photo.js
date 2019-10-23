@@ -1,3 +1,4 @@
+
 import React from 'react'
 
 import {View, Text, Image, TouchableOpacity, Alert} from 'react-native'
@@ -14,7 +15,7 @@ import * as firebase from 'firebase';
 import '@firebase/firestore'
 import {SkypeIndicator} from 'react-native-indicators';
 import LocalUser from '../../Data/LocalUser.json';
-import Notification from '../../Helpers/Notifications/Notification'
+import { Constants, Location,Notifications } from 'expo';
 
 /**
  * Classe qui permet à l'utilisateur de choisir ou non sa photo de profil et 
@@ -25,6 +26,7 @@ export default class Inscription_Photo extends React.Component {
     
     constructor(props) {
         super(props)    
+
 
         /* On recupère le mail et le mdp de l'utilisateur. */
         const { navigation } = this.props;
@@ -40,6 +42,22 @@ export default class Inscription_Photo extends React.Component {
         const zone = navigation.getParam('zone', '');
         const departement = navigation.getParam('departement', "erreur getParam inscriptionPhoto 13/10/19");
 
+
+        var jour = naissance.split('-')[0]
+        var mois = naissance.split('-')[1]
+        if(mois.length ==1) {
+            mois = "0"+mois
+        }
+        if(jour.length ==1) {
+            jour = "0"+jour
+        }
+        
+        var an = naissance.split('-')[2]
+        
+        var d =  an + "-" + mois + "-" + jour + "T12:00"
+        var date = new Date(d)
+        
+        console.log("date", date)
         this.state = {
             nom : nom,
             prenom : prenom,
@@ -54,12 +72,12 @@ export default class Inscription_Photo extends React.Component {
             isLoading : false,
             ville : ville,
             departement: departement,
-            naissance : naissance,
+            naissance : date,
             age : age,
             zone : zone,
             id : "erreur",
-
-            usingCamera: false
+            usingCamera: false,
+            dateNaissance : date
         }
     }
 
@@ -166,7 +184,7 @@ export default class Inscription_Photo extends React.Component {
 
                     this.uploadUser(image_changed).then((user) => {
                         user.sendEmailVerification();
-                        Alert.alert("", "Nous t'avons envoyé un mail de confirmation à ton adresse mail. Pense à cliquer sur le lien pour pouvoir activer ton compte.")
+                        Alert.alert("", "Nous t'avons envoyé un mail de confirmation sur ton adresse mail. Pense à cliquer sur le lien pour pouvoir activer ton compte.")
                         this.props.navigation.navigate('ConfirmationInscription', {pseudo: LocalUser.data.pseudo, photo: LocalUser.data.photo});
                     });
                 })
@@ -178,11 +196,12 @@ export default class Inscription_Photo extends React.Component {
         } else {
             this.uploadUser(image_changed).then((user) => {
                 user.sendEmailVerification();
-                Alert.alert("", "Nous t'avons envoyé un mail de confirmation à ton adresse mail. Pense à cliquer sur le lien pour pouvoir activer ton compte.")
+                Alert.alert("", "Nous t'avons envoyé un mail de confirmation sur ton adresse mail. Pense à cliquer sur le lien pour pouvoir activer ton compte.")
                 this.props.navigation.navigate('ConfirmationInscription', {pseudo: LocalUser.data.pseudo, photo: LocalUser.data.photo});
             });
         }
     }
+
 
     async registerForPushNotifications() {
         const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
@@ -192,9 +211,8 @@ export default class Inscription_Photo extends React.Component {
             return;
           }
         }
+        console.log("before getting token")
         var token = await Notifications.getExpoPushTokenAsync();
-        //this.subscription = Notifications.addListener(this.handleNotification);
-    
         return (token)
     }
 
@@ -218,7 +236,7 @@ export default class Inscription_Photo extends React.Component {
                 l'utilisateurdans firebase. */
             url = await ref.getDownloadURL();
                 
-            Notification.storeTokenInLogin(id)
+            //Notifications.storeTokenInLogin(id)
             var token = await this.registerForPushNotifications()
 
             user = {
@@ -229,7 +247,7 @@ export default class Inscription_Photo extends React.Component {
                 equipesFav: [],
                 fiabilite: 0,
                 mail: oldState.mail,
-                naissance: firebase.firestore.Timestamp.fromMillis(Date.parse(oldState.naissance)),
+                naissance: oldState.naissance,
                 nom: oldState.nom,
                 prenom: oldState.prenom,
                 nomQuery : NormalizeString.decompose(oldState.prenom+" "+oldState.nom),
@@ -250,21 +268,25 @@ export default class Inscription_Photo extends React.Component {
                 zone: oldState.zone,
                 poste: "mixte",
                 nbMessagesNonLu : 0,
-                tokens: [token]
+                tokens: [token],
+                poste : "poste non renseigné"
             }
                     
             // Stockage en local
             LocalUser.exists = true;
             LocalUser.data = user;
-            LocalUser.data.naissance = new Date(user.naissance.toDate());
+            //LocalUser.data.naissance = oldState.naissance
             var villePos = this.findPositionVilleFromName(user.ville);
             LocalUser.geolocalisation = villePos;
 
+            console.log("naissance ", LocalUser.data.naissance)
             // Stockage dans la DB
             await Database.addDocToCollection(user, id, 'Joueurs')
             
         } else {
-            Notification.storeTokenInLogin(id)
+            //Notifications.storeTokenInLogin(id)
+            
+            var token = await this.registerForPushNotifications()
 
             user = {
                 id: id,
@@ -274,7 +296,7 @@ export default class Inscription_Photo extends React.Component {
                 equipesFav: [],
                 fiabilite: 0,
                 mail: oldState.mail,
-                naissance: firebase.firestore.Timestamp.fromMillis(Date.parse(oldState.naissance)),
+                naissance:oldState.naissance,
                 nom: oldState.nom,
                 prenom: oldState.prenom,
                 photo: null,
@@ -292,13 +314,16 @@ export default class Inscription_Photo extends React.Component {
                 departement: oldState.departement,
                 zone: oldState.zone,
                 poste: "mixte",
-                tokens : [token]
+                tokens : [token],
+                nbMessagesNonLu : 0,
+                poste : "poste non renseigné"
             }
 
+            console.log(user)
             // Stockage en local
             LocalUser.exists = true;
             LocalUser.data = user;
-            LocalUser.data.naissance = new Date(user.naissance.toDate());
+            //LocalUser.data.naissance = oldState.naissance //new Date(user.naissance);
             var villePos = this.findPositionVilleFromName(user.ville);
             LocalUser.geolocalisation = villePos;
 
@@ -366,8 +391,8 @@ export default class Inscription_Photo extends React.Component {
                         />
                     </View>
     
-                    {/* Vue contenant le boutton photo et les textes de la page */}
                     <View>
+                        
                         <Text 
                             style = {styles.txt_haut}>
                             Choisi ta photo ! 
@@ -397,7 +422,7 @@ export default class Inscription_Photo extends React.Component {
                         </TouchableOpacity>
     
                         <Text style = {styles.txt_bas}>Elle permettra aux autres joueurs</Text>
-                        <Text style = {styles.txt_bas}>de te reconnaitre plus facilement !!</Text>
+                            <Text style = {styles.txt_bas}>de te reconnaitre plus facilement !!</Text>
     
                         {/* Bouton passer */}
                         <View style = {{marginTop : hp('4%')}}>

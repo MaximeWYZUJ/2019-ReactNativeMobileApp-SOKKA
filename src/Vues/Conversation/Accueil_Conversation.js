@@ -243,10 +243,20 @@ export default class Accueil_Conversation extends React.Component {
         var date = new Date(conv.dateDernierMessage)
         var now = new Date()
       
+
         var memeJour = (date.getDate() == now.getDate() && date.getMonth() == now.getMonth() && date.getFullYear() == now.getFullYear())
         var t = (now - date)
         if(memeJour ) {
-            return date.getHours() + ":" + date.getMinutes()
+            var heure = date.getHours().toString()
+            var minutes = date.getMinutes().toString()
+            if(heure.length == 1) {
+                heure = "0" + heure
+            }
+            if(minutes.length == 1) {
+                minutes = "0" + minutes
+            }
+
+            return heure + ":" + minutes
         } else {
            if(now - date < 604800000) {  // nbr of mili seconds in a week
                 return jours[date.getDay()]

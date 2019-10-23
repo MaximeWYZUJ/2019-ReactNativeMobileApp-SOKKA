@@ -56,7 +56,11 @@ class Notif_Reponse_Releve_Defi extends React.Component {
     async goToFicheDefi() {
         this.setState({isLoading : true})
         var eq = undefined
-        if(this.state.defi.equipeDefiee != undefined) {
+        console.log("******************************")
+        console.log("eq defiee" , this.state.defi.equipeDefiee)
+        console.log("******************************")
+
+        if(this.state.defi.equipeDefiee != undefined && this.state.defi.equipeDefiee != "") {
             eq = await Database.getDocumentData(this.state.defi.equipeDefiee, "Equipes")
         }
         this.setState({isLoading : false})

@@ -16,7 +16,7 @@ import { StackActions, NavigationActions } from 'react-navigation';
 import firebase from 'firebase'
 import '@firebase/firestore'
 import Distance from '../../../Helpers/Distance'
-
+import DatesHelpers from '../../../Helpers/DatesHelpers'
 
 // Rememttre à Zéro le stack navigator pour empecher le retour en arriere
 const resetAction = StackActions.reset({
@@ -635,7 +635,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
      * si la feuille de match a été complétée.
      */
     _renderListButeurs() {
-        var date = new Date( this.state.partie.jour.seconds * 1000)
+        var date =  DatesHelpers.buildDateWithTimeZone(new Date(this.state.partie.jour.seconds * 1000))
         if(date < new Date()) {
             console.log(this.state.partie.buteurs)
             // Si les buteurs ont été renseignés
@@ -674,7 +674,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
      * si la feuille de match a été complétée.
      */
     _renderHommesMatch() {
-        var date = new Date( this.state.partie.jour.seconds * 1000)
+        var date =  DatesHelpers.buildDateWithTimeZone(new Date( this.state.partie.jour.seconds * 1000))
         
         if(date < new Date()) {
             // Si les buteurs ont été renseignés

@@ -9,7 +9,7 @@ import LocalUser from '../../Data/LocalUser.json'
 import Distance from '../../Helpers/Distance'
 import { withNavigation } from 'react-navigation'
 import { database } from 'firebase';
-
+import DatesHelpers from '../../Helpers/DatesHelpers'
 
 const DAY = ['Dimanche','Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
 
@@ -189,7 +189,7 @@ class Item_Partie extends React.Component {
         var color = '#FFFFFF' 
 
         var now = Date.parse(new Date())
-        if(this.props.partieData.dateParse < now )  { 
+        if(DatesHelpers.buildDateWithTimeZone(this.props.jour) < new Date() )  { 
             color = "#E1E1E1"
 
         }

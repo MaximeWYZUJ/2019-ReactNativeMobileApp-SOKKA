@@ -4,9 +4,11 @@ import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-nativ
 import RF from 'react-native-responsive-fontsize';
 import Colors from '../Colors'
 import StarRating from 'react-native-star-rating'
-import { CheckBox } from 'react-native-elements'
+//import { CheckBox } from 'react-native-elements'
 import { connect } from 'react-redux'
 import actions from '../../Store/Reducers/actions'
+import LocalUser from '../../Data/LocalUser.json'
+import CheckBox from 'react-native-checkbox'
 
 /**
  * Composant qui affiche un item joueurs, il va permettre de selectionner des  joueur 
@@ -47,6 +49,16 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
      */
     _chooseJoueur(idJoueur, photoJoueur, tokens) {
 
+            var nbJoueurs = this.props.nbJoueursRecherchesPartie
+            var msg = "Seulement " + this.props.nbJoueursRecherchesPartie +  " joueurs sont recherchés pour cette partie"
+
+            if(this.props.nbJoueursRecherchesPartie == 1) {
+                 msg = "Seulement 1 joueur est recherché pour cette partie"
+
+            }
+            if(! this.props.JoueursParticipantsPartie.includes(LocalUser.data.id)) {
+                nbJoueurs = nbJoueurs - 1
+            }
             // Premier cas : On veut déselectionner un joueur : 
             if(this.checkIfUserIsPresent(this.props.joueursPartie, idJoueur)) {
                 const action = { type: actions.CHOISIR_JOUEUR_PARTIE, value:  {id : idJoueur, photo : photoJoueur, tokens : tokens}}
@@ -56,10 +68,10 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
             } else {
                 
                 // Cas où on dépasse le nombre de joueurs recherchés,  this.props.nbJoueursRecherchesPartie = undefined lors de la creation d'une partie
-                if(this.props.joueursPartie.length   >= this.props.nbJoueursRecherchesPartie ) {
+                if(this.props.joueursPartie.length   >= nbJoueurs) {
                     Alert.alert(
                         '',
-                        "Seulement " + this.props.nbJoueursRecherchesPartie +  " joueur(s) sont recherché(s) pour cette partie"
+                        msg
                     )
 
                 // 
@@ -70,7 +82,7 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
                     } else if(this.props.joueursPartie.length  < this.props.nbJoueursRecherchesPartie ) {
                         Alert.alert(
                             '',
-                            "Ce joueur participe déjà à la partie, tu ne peux pas l'ajouter"
+                            "Ce joueur participe déjà à la partie"
                         )
                     }
                 }
@@ -80,7 +92,7 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
     
 
     render()  {
-        const  isChecked  = this.props.isChecked
+        const  isChecked  =  this.props.JoueursParticipantsPartie.includes(this.props.id) || this.props.isChecked
 
         return(
             <View style = {{flexDirection : "row",justifyContent: "space-between", marginTop : hp('3%'), backgroundColor : "white", paddingVertical : hp('2%')}}>
@@ -111,12 +123,12 @@ class Joueur_item_Creation_Partie extends React.PureComponent{
                     </View>
 
                     <CheckBox
-                        title=' '
+                        label=' '
                         checkedColor = {Colors.agOOraBlue}
                         right
                         containerStyle={styles.checkBox}                    
                         checked={isChecked}
-                        onPress = {() => {
+                        onChange = {() => {
                             this._chooseJoueur(this.props.id, this.props.photo, this.props.tokens)
                             var checked = this.state.isChecked
                             this.setState({isChecked: !checked})

@@ -211,8 +211,10 @@ export default class New_Groupe extends React.Component {
         for(var i = 0; i < this.state.joueursSelectionnes.length; i++) {
             liste.push(this.state.joueursSelectionnes[i].id)
         }
-        liste.push(LocalUser.data.id)
-        return liste
+        if(!liste.includes(LocalUser.data.id)) {
+            liste.push(LocalUser.data.id)
+        }
+         return liste
     }
 
 
@@ -322,6 +324,7 @@ export default class New_Groupe extends React.Component {
         } else if(! this.state.isLoading) {
 
             return(
+                
                 <View>
                     
                     {this.renderHeader()}
@@ -369,10 +372,12 @@ export default class New_Groupe extends React.Component {
                         <Text style = {{color : "#A0A0A0", marginLeft : wp('4%')}}>Participants {this.state.joueursSelectionnes.length} sur {this.totalLength()} </Text>
                     </View>
 
-                    <FlatList
-                        data = {this.state.joueursSelectionnes}
-                        renderItem = {this.renderItem}
-                    />
+                    
+                        <FlatList
+                            data = {this.state.joueursSelectionnes}
+                            renderItem = {this.renderItem}
+                            style = {{marginBottom : hp('20%')}}
+                        />                    
                 </View>
             )
         }   else {

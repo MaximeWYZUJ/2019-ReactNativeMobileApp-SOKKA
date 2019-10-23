@@ -147,9 +147,9 @@ export default class Recapitulatif_Defis extends React.Component {
      * @param {Date} date 
      */
     buildDate(date) {
-        var j = date.getDay()
-        var numJour = date.getDate()
-        var mois  =(date.getMonth() + 1).toString()
+        var j = date.getUTCDay()
+        var numJour = date.getUTCDate()
+        var mois  =(date.getUTCMonth() + 1).toString()
         if(mois.length == 1) {
             mois = '0' + mois 
         }
@@ -266,11 +266,13 @@ export default class Recapitulatif_Defis extends React.Component {
         var minutes = this.hours.split(':')[1]
         var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes
         var date = new Date(d)
-        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes).getDay()
+
+        var dateWithTimeZone = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes+"Z")
+        console.log("DATE WITH TIME ZONE", dateWithTimeZone)
+        var numJour = dateWithTimeZone.getUTCDay()
         var dateString =DAY[numJour] + " " + jour + '/' + moi + '/'+ an + ' - ' + heure + "h" + minutes + " à "+DatesHelpers.calculHeureFin(heure,minutes, this.duree)
       
         var joueurs = this.joueursSelectionnes
-        console.log("JOUEURS §§§§§§§§", joueurs)
         db.collection("Defis").doc(id.toString()).set({
             id : id,
             equipeOrganisatrice : this.allDataEquipe.id,
@@ -558,9 +560,13 @@ export default class Recapitulatif_Defis extends React.Component {
         }
         var minutes = this.hours.split(':')[1]
       
-        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes).getDay()
+        var dateDefi = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes+"Z")
+        var numJour = dateDefi.getUTCDay()
         var d =DAY[numJour] + " " + jour + '/' + moi + '/'+ an + ' - ' + heure + "h" + minutes + " à "+DatesHelpers.calculHeureFin(heure,minutes, this.duree)
-        console.log("=====DATE ==d==",d )
+    
+        console.log("DATE, ", dateDefi)
+        console.log("num day",dateDefi.getUTCDay())
+        console.log("=====DATE STRING",d )
         return (
             <ScrollView>
             <View>

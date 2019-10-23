@@ -38,6 +38,7 @@ export default class New_Message extends React.Component {
             title:"Discussions",    
         }; 
     }
+    
 
     componentDidMount(){
         this.getJoueur()
@@ -45,6 +46,14 @@ export default class New_Message extends React.Component {
 
     async getJoueur(){
         var joueurs = await Database.getArrayDocumentData(LocalUser.data.reseau, "Joueurs")
+        joueurs.sort(function(a, b){
+            if( a.pseudo.toLowerCase() <= b.pseudo.toLowerCase()) {
+                return -1
+            } else {
+                return 1
+            }
+        }
+        );
         var joueurBuild = this.buildJoueurs(joueurs)
         this.setState({joueurs : joueurs,joueursFiltres : joueurBuild , isLoading : false})
     }

@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
     main_container: {
         flex: 1,
         flexDirection: 'column',
-        alignItems: 'stretch'
+        //alignItems: 'stretch'
     },
     search_container: {
         flex: 1,

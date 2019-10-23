@@ -71,6 +71,10 @@ export default class DatesHelpers {
         } if(heure >=24) {
             heure = heure - 24
         }
+
+        if(heure.length == 1) {
+            heure = "0" + heure
+        }
         if(minutes.toString().length == 1) {
             minutes = '0'+ minutes.toString()
         }
@@ -88,5 +92,10 @@ export default class DatesHelpers {
             age = age - 1
         }
         return age
+    }
+
+    static buildDateWithTimeZone(date) {
+        var tzDifference = date.getTimezoneOffset();
+        return new Date(date.getTime() - tzDifference * 60 * 1000);
     }
 }

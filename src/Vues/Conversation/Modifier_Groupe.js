@@ -45,7 +45,16 @@ export default class Modifier_Groupe extends React.Component {
         // Trier les joueurs par ordre alpha
         var joueurs = this.props.navigation.getParam('joueurs', [])
 
-        joueurs.sort(function(a, b){
+
+        // Enlever l'utilisateur
+        var j = []
+        for(var i = 0; i < joueurs.length; i++) {
+            if(joueurs[i].id != LocalUser.data.id) {
+                j.push(joueurs[i])
+            }
+        }
+
+        joueurs = j.sort(function(a, b){
             if( a.pseudo.toLowerCase() <= b.pseudo.toLowerCase()) {
                 return -1
             } else {

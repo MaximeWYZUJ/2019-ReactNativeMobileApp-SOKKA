@@ -30,6 +30,7 @@ const DISTANCE_MAX = 1500
 const LISTE = 'liste'
 const MAP = 'map'
 const SLIDER_DISTANCE_MAX = 20;
+const image_target = require('app/res/target.png')
 
 
 /**
@@ -63,6 +64,12 @@ class RechercheDefiAutour extends React.Component {
 			region : {
 				latitude: latitude,
 				longitude: longitude,
+				latitudeDelta: 0.0922,
+				longitudeDelta: 0.0421,
+			},
+			initialRegion : {
+				latitude:  LocalUser.geolocalisation.latitude,
+				longitude: LocalUser.geolocalisation.longitude,
 				latitudeDelta: 0.0922,
 				longitudeDelta: 0.0421,
             },
@@ -414,7 +421,13 @@ class RechercheDefiAutour extends React.Component {
             defis: listeDefis,
             isLoading: false
         });
-    }
+	}
+	
+
+	goToMyLocation() {
+		this.map.animateToRegion(this.state.initialRegion,500)
+
+	}
 
 
 	// =============================================================================================
@@ -716,6 +729,15 @@ class RechercheDefiAutour extends React.Component {
 							<Image
 								source = {require('app/res/list.png')}
 								style = {{width : wp('17%'), height : wp('17%')}}/>
+
+						</TouchableOpacity>,
+						<TouchableOpacity
+							style = {{padding : wp('4%'),position : "absolute",bottom : hp('30%'), right: wp('1%')}}
+							onPress = {() => this.goToMyLocation()}
+							>
+							<Image
+								source = {image_target}
+								style = {{width : wp('10%'), height : wp('10%')}}/>
 
 						</TouchableOpacity>]
 			)

@@ -21,8 +21,11 @@ class List_Messages extends React.Component {
         messages : [],
         isLoading : true,
         joueurs : [],
-        lastMessageId  : undefined
+        lastMessageId  : undefined,
+        lecteurs :  this.props.navigation.getParam('conv', undefined).lecteurs
     }
+
+    console.log("ID CONV",this.state.conv.id)
     this.addMessage = this.addMessage.bind(this)
     this.addMessageGroupe = this.addMessageGroupe.bind(this)
 
@@ -70,15 +73,18 @@ class List_Messages extends React.Component {
     }
 
     componentDidMount(){
+        var db = Database.initialisation()
+        db.collection("Conversations").doc(this.state.conv.id).onSnapshot((doc => {
+            this.setState({lecteurs : doc.data().lecteurs})
+        }));   
         if(! this.isAgroupConv()){
             this.getMessage()
-            var db = Database.initialisation()
+           
 
             db.collection("Conversations").doc(this.state.conv.id).collection("Messages")
             .onSnapshot(this.addMessage);   
         } else {
             this.getMessageGroupConv()
-            var db = Database.initialisation()
             db.collection("Conversations").doc(this.state.conv.id).collection("Messages")
             .onSnapshot(this.addMessageGroupe);   
         }
@@ -233,7 +239,7 @@ class List_Messages extends React.Component {
 
     async sendMsg(msg){
         var db = Database.initialisation()
-        if(this.state.conv.lecteurs != undefined){
+        if(this.state.lecteurs != undefined){
             await this.incrementeNbMsgNonLu()
         }
 
@@ -250,13 +256,15 @@ class List_Messages extends React.Component {
             dateDernierMessage : Date.parse(new Date()),
             aLue : false,
             lecteurs : [LocalUser.data.id]
-        })
+        }).catch(function(error){console.log(error)})
+        .then(console.log("doc conv update"))
         conv = this.state.conv
         conv.txtDernierMsg = msg.text,
         conv.dateDernierMessage = Date.parse(new Date()),
         conv.aLue = false,
         conv.lecteurs = [LocalUser.data.id]
-        this.setState({conv : conv})
+        
+        this.setState({conv : conv, lecteurs : [LocalUser.data.id]})
     }
     
 
@@ -285,9 +293,9 @@ class List_Messages extends React.Component {
           },
           method: 'POST',
         }).catch(function(error) {
-            console.log("ERROR :", error)
+           // console.log("ERROR :", error)
         }).then(function(error) {
-            console.log("THEN", error)
+            //console.log("THEN", error)
         });
     }
 
@@ -320,7 +328,7 @@ class List_Messages extends React.Component {
             for(var i = 0 ; i < this.state.joueurs.length; i++) {
                 var joueur = this.state.joueurs[i]
                
-                if( this.state.conv.lecteurs.includes(joueur.id)){
+                if( this.state.lecteurs.includes(joueur.id)){
                     var db = Database.initialisation()
                     var ref =  db.collection("Joueurs").doc(joueur.id)
                     var j = await ref.get().then((doc) => {
@@ -337,7 +345,8 @@ class List_Messages extends React.Component {
             
         } else {
             var joueur = this.state.conv.joueur
-                if( this.state.conv.lecteurs.includes(joueur.id)){
+                if( this.state.lecteurs.includes(joueur.id)){
+                    console.log("incrementeNbMsgNonLu")
                     var db = Database.initialisation()
                     var ref =  db.collection("Joueurs").doc(joueur.id)
                     var j = await ref.get().then((doc) => {
@@ -431,6 +440,7 @@ class List_Messages extends React.Component {
             var joueur = this.state.joueurs[i]
             if(gData.participants.includes(joueur.id)) {
                 j.push(joueur)
+                console.log(joueur.pseudo)
             }
         }
         return j

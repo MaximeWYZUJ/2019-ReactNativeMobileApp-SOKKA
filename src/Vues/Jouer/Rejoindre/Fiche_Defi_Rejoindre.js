@@ -434,6 +434,22 @@ class Fiche_Defi_Rejoindre extends React.Component {
                 buteurDefiee.push(j)
             }
         }
+
+        buteurDefiee.sort(function(a, b){
+            if( a.nbButs <= b.nbButs) {
+                return 1
+            } else {
+                return -1
+            }
+        })
+
+        buteurOrga.sort(function(a, b){
+            if( a.nbButs <= b.nbButs) {
+                return 1
+            } else {
+                return -1
+            }
+        })
         this.setState({buteurDefiee : buteurDefiee, buteurOrga : buteurOrga})
     }
 

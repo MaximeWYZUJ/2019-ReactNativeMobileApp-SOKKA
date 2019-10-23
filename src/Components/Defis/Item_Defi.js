@@ -9,6 +9,7 @@ import Terrains from '../../Helpers/Toulouse.json'
 import LocalUser from '../../Data/LocalUser.json'
 import Distance from '../../Helpers/Distance'
 import { withNavigation } from 'react-navigation'
+import DatesHelpers from '../../Helpers/DatesHelpers'
 
 
 const DAY = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
@@ -246,8 +247,7 @@ class Item_Defi extends React.Component {
     
     render() {
         var color = '#FFFFFF' 
-        var now = Date.parse(new Date())
-        if(this.props.allDataDefi.dateParse < now )  { // On decale la date de 1h 
+        if(DatesHelpers.buildDateWithTimeZone(this.props.jour) < new Date())  { // On decale la date de 1h 
             color = "#E1E1E1"
 
         }

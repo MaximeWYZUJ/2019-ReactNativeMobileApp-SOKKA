@@ -56,6 +56,7 @@ class ProfilJoueur extends React.Component {
             }
         }
         
+
         this.state = {
             allDefis : [],
             refreshing: false,
@@ -66,6 +67,7 @@ class ProfilJoueur extends React.Component {
             nbMessagesNonLu : this.joueur.nbMessagesNonLu,
         }
 
+        this._onRefresh()
         if (this.joueur.sexe === "masculin") {
             this.sexeIcon = require('app/res/masculine.png');
         } else {
@@ -73,7 +75,33 @@ class ProfilJoueur extends React.Component {
         }
 
 
-        
+        this.equipes.sort(function(a, b){
+            if( a.nom.toLowerCase() <= b.nom.toLowerCase()) {
+                return -1
+            } else {
+                return 1
+            }
+        }
+        );
+
+        /*var db = Database.initialisation()
+
+        var docRef = db.collection("TEST").doc("JdaqhI1JY5jg79DShZFQ")
+        docRef.get().then(function(doc) {
+            if (doc.exists) {
+              console.log(DatesHelpers.buildDateWithTimeZone(new Date(doc.data().jour.seconds * 1000)))
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+                //return "No such doc"
+            }
+        }).catch(function(error) {
+            console.log("Error getting document:", error);
+            //return "erreur"
+        });*/
+        /*db.collection("TEST").add({
+            jour : new Date()
+        })  */      
     }
 
 
@@ -292,7 +320,7 @@ class ProfilJoueur extends React.Component {
         query.get().then(async (results) => {
             for(var i = 0; i < results.docs.length ; i++) {
                 var defi = results.docs[i].data()
-                defi.jour.seconds = defi.jour.seconds -7200 
+                defi.jour.seconds = defi.jour.seconds 
                 allDefis.push(defi)
 
             }
@@ -441,6 +469,11 @@ class ProfilJoueur extends React.Component {
             time : new Date(),
             dateParse : Date.parse(new Date())
         })
+        .then(() => {
+            console.log("store notif ok")
+        }).catch(function(error) {
+            console.log("error store notif ajout reseau", error)
+        })
     }
 	
 	
@@ -479,6 +512,14 @@ class ProfilJoueur extends React.Component {
             equipeFavData = await Database.getDocumentData(idEquipeFav, 'Equipes');
             equipesFav.push(equipeFavData);
         }
+        equipeFavData.sort(function(a, b){
+            if( a.nom.toLowerCase() <= b.nom.toLowerCase()) {
+                return -1
+            } else {
+                return 1
+            }
+        }
+        );
 
         this.props.navigation.push('ProfilJoueurMesEquipesFavScreen', {joueur: this.joueur, equipesFav: equipesFav, header: this.joueur.pseudo, monProfil: this.monProfil});
     }
@@ -1018,21 +1059,25 @@ class ProfilJoueur extends React.Component {
 
 
     getTextePoste() {
-        if (this.joueur.sexe == "feminin") {
-            switch(this.joueur.poste) {
-                case "offensif" : return "Joueuse offensive";
-                case "defensif" : return "Joueuse défensive";
-                case "mixte" : return "Joueuse mixte";
-                case "gardien" : return "Gardienne";
-                default : return "Poste non renseigné"
-            }
+        if(this.joueur.poste == "poste non renseigné") {
+            return 'poste non renseigné'
         } else {
-            switch(this.joueur.poste) {
-                case "offensif" : return "Joueur offensif";
-                case "defensif" : return "Joueur défensif";
-                case "mixte" : return "Joueur mixte";
-                case "gardien" : return "Gardien";
-                default : return "Poste non renseigné"
+            if (this.joueur.sexe == "feminin") {
+                switch(this.joueur.poste) {
+                    case "offensif" : return "Joueuse offensive";
+                    case "defensif" : return "Joueuse défensive";
+                    case "mixte" : return "Joueuse mixte";
+                    case "gardien" : return "Gardienne";
+                    default : return "Poste non renseigné"
+                }
+            } else {
+                switch(this.joueur.poste) {
+                    case "offensif" : return "Joueur offensif";
+                    case "defensif" : return "Joueur défensif";
+                    case "mixte" : return "Joueur mixte";
+                    case "gardien" : return "Gardien";
+                    default : return "Poste non renseigné"
+                }
             }
         }
     }

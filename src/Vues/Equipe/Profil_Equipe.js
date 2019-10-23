@@ -86,7 +86,7 @@ export default class Profil_Equipe extends React.Component {
         var allDefis = []
         var now = new Date()
         var ref = db.collection("Defis");
-        var query = ref.where("equipesConcernees", "array-contains" ,this.state.id).orderBy("dateParse")
+        var query = ref.where("equipesConcernees", "array-contains" ,this.state.id).where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
 
         query.get().then(async (results) => {
             for(var i = 0; i < results.docs.length ; i++) {

@@ -18,8 +18,17 @@ class ProfilJoueurMesEquipes extends React.Component {
     constructor(props) {
         super(props)
         this.equipes = this.props.navigation.getParam('equipes', null);
+        this.equipes.sort(function(a, b){
+            if( a.nom.toLowerCase() <= b.nom.toLowerCase()) {
+                return -1
+            } else {
+                return 1
+            }
+        }
+        );
         this.joueur = this.props.navigation.getParam('joueur', null);
     }
+
 
 
     _get_header_title() {

@@ -31,6 +31,7 @@ const SLIDER_DISTANCE_MAX = 10;
 
 const image_map = require('app/res/map.png');
 const image_list = require('app/res/list.png');
+const image_target = require('app/res/target.png')
 const image_terrain = require('app/res/marker_terrain_selected.png');
 const image_terrain_selected = require('app/res/marker_terrain.png');
 
@@ -59,6 +60,13 @@ class Terrains_Autours extends React.Component {
 			sliderValueList : SLIDER_DISTANCE_MAX,
 			displayFiltres: false,
 			filtres: null,
+
+			initialRegion : {
+				latitude: LocalUser.geolocalisation.latitude,
+				longitude: LocalUser.geolocalisation.longitude,
+				latitudeDelta: 0.0922,
+				longitudeDelta: 0.0421,
+			  },
 
 			region : {
 				latitude: LocalUser.geolocalisation.latitude,
@@ -422,6 +430,10 @@ class Terrains_Autours extends React.Component {
 	}
 	  
 
+	goToMyLocation() {
+		this.map.animateToRegion(this.state.initialRegion,500)
+
+	}
 
 	onRegionChange = (region) => {
 		oldRegion = this.state.region
@@ -696,7 +708,18 @@ class Terrains_Autours extends React.Component {
 							source = {image_list}
 							style = {{width : wp('17%'), height : wp('17%')}}/>
 
-					</TouchableOpacity>]
+					</TouchableOpacity>,
+					
+					<TouchableOpacity
+						style = {{padding : wp('4%'),position : "absolute",bottom : hp('30%'), right: wp('1%')}}
+						onPress = {() => this.goToMyLocation()}
+						>
+						<Image
+							source = {image_target}
+							style = {{width : wp('10%'), height : wp('10%')}}/>
+
+					</TouchableOpacity>
+				]
 			)
 		}
 	}

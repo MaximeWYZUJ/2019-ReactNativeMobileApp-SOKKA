@@ -133,7 +133,7 @@ const styles = {
     },
 
     bloc  : {
-        marginTop : hp('%'),
+        marginTop : hp('3%'),
         marginBottom : hp('3%'),
         borderWidth : 1,
         borderRadius : 8,

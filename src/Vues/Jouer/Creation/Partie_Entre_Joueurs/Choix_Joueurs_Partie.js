@@ -27,9 +27,12 @@ class Choix_Joueurs_Partie extends React.Component {
             photo : LocalUser.data.photo
         }
         this.state = {
-            goToFichePartie : false
+            goToFichePartie : false,
+            isBtnSuivantActiv : true
         }
 
+        const action = { type: actions.RESET_JOUEURS_PARTIE, value: []}
+        this.props.dispatch(action)     
         this.goToFichePartie = this.goToFichePartie.bind(this)
         console.log("JOUEURS CONCERNES ",this.props.navigation.getParam("joueursConcernes",[]))
         
@@ -164,9 +167,10 @@ class Choix_Joueurs_Partie extends React.Component {
     goToFichePartie() {
         console.log("in go to fiche partie")
         var msg = ""
-        if(this.props.joueursPartie.length > 0 && this.props.JoueursParticipantsPartie.includes(LocalUser.data.id)) {
+    
+        if(this.props.joueursPartie.length > 0 && this.props.navigation.getParam("invite", false)) {
             msg =   "Les joueurs invités vont recevoir une notification pour confirmer leur participation."
-        } else if(this.props.joueursPartie.length  > 0 && !this.props.JoueursParticipantsPartie.includes(LocalUser.data.id)) {
+        } else if(this.props.joueursPartie.length  > 0 && !this.props.navigation.getParam("invite", false)) {
             msg = "Tu es bien inscrit à cette partie. Les joueurs invités vont recevoir une notification pour confirmer leur participation."
         } else {
             msg = "Tu es bien inscrit à cette partie"
@@ -335,22 +339,28 @@ class Choix_Joueurs_Partie extends React.Component {
     }
     
     _renderBtnSuivant() {
-        if(this.props.joueursPartie.length > 0) {
-            return(
-                <TouchableOpacity
-                        onPress ={() =>{this.goToNextScreen()}}>
-                        <Text style = {styles.txtBoutton}>Suivant</Text>
-                </TouchableOpacity>
-            )
-        } else {
-            //if(!this.props.navigation.getParam('ajout_Partie_existante', '')) {
+        if(this.state.isBtnSuivantActiv) {
+            if(this.props.joueursPartie.length > 0) {
                 return(
                     <TouchableOpacity
-                        onPress ={() =>{this.goToNextScreen()}}>
-                        <Text style = {styles.txtBoutton}>Je suis seul</Text>
+                            onPress ={() =>{
+                                this.setState({isBtnSuivantActiv : false})
+                                this.goToNextScreen()}}>
+                            <Text style = {styles.txtBoutton}>Suivant</Text>
                     </TouchableOpacity>
                 )
-            
+            } else {
+                //if(!this.props.navigation.getParam('ajout_Partie_existante', '')) {
+                    return(
+                        <TouchableOpacity
+                            onPress ={() =>{
+                                this.setState({isBtnSuivantActiv : false})
+                                this.goToNextScreen()}}>
+                            <Text style = {styles.txtBoutton}>Je suis seul</Text>
+                        </TouchableOpacity>
+                    )
+                
+            }
         }
     }
    
