@@ -28,7 +28,7 @@ export default class AccueilNotifications extends React.Component {
 
      /** Fonction appelée au moment où l'utilisateur pull to refresh */
     _onRefresh = async () => {
-        this.setState({refreshing: true});
+        this.setState({refreshing: true, notifications : []});
         await this.getNotifications()
         //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
         this.setState({refreshing : false})
@@ -46,7 +46,9 @@ export default class AccueilNotifications extends React.Component {
         query.get().then(async (results) => {
            
             for(var i = 0; i < results.docs.length ; i++) {
-               notifications.push(results.docs[i].data())
+                var notif = results.docs[i].data()
+                notif.id = results.docs[i].id
+               notifications.push(notif)
             }
 
 

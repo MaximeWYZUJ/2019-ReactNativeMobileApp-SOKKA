@@ -116,11 +116,9 @@ export default class Inscription_Photo extends React.Component {
      * Fonction qui permet de prendre une photo depuis la camera
      */
     pickImageCamera = async () => {
-        console.log("this.pickImageCamera")
         /* Obtenir les permissions. */
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
 
-        console.log(status)
         if (status === "granted") {
             this.setState({usingCamera: true})
         }
@@ -186,6 +184,20 @@ export default class Inscription_Photo extends React.Component {
         }
     }
 
+    async registerForPushNotifications() {
+        const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+        if (status !== 'granted') {
+          const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+          if (status !== 'granted') {
+            return;
+          }
+        }
+        var token = await Notifications.getExpoPushTokenAsync();
+        //this.subscription = Notifications.addListener(this.handleNotification);
+    
+        return (token)
+    }
+
     /**
      * Permet de récuprer l'url de téléchargement de l'image et d'enregistrer l'image
      * image_change : bool : true si l'user renseigne une image 
@@ -197,7 +209,6 @@ export default class Inscription_Photo extends React.Component {
         data = await firebase.auth().createUserWithEmailAndPassword(this.state.mail, this.state.mdp)
 
         var id = data.user.uid
-        console.log("id")
         
         /* Obtenir une ref à la photo. */
         if(image_changed) {
@@ -208,7 +219,8 @@ export default class Inscription_Photo extends React.Component {
             url = await ref.getDownloadURL();
                 
             Notification.storeTokenInLogin(id)
-            
+            var token = await this.registerForPushNotifications()
+
             user = {
                 id: id,
                 age: oldState.age,
@@ -237,7 +249,8 @@ export default class Inscription_Photo extends React.Component {
                 departement: oldState.departement,
                 zone: oldState.zone,
                 poste: "mixte",
-                nbMessagesNonLu : 0
+                nbMessagesNonLu : 0,
+                tokens: [token]
             }
                     
             // Stockage en local
@@ -278,7 +291,8 @@ export default class Inscription_Photo extends React.Component {
                 ville: oldState.ville,
                 departement: oldState.departement,
                 zone: oldState.zone,
-                poste: "mixte"
+                poste: "mixte",
+                tokens : [token]
             }
 
             // Stockage en local

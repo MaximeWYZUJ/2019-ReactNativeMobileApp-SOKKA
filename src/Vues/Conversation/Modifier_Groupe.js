@@ -24,7 +24,7 @@ export default class Modifier_Groupe extends React.Component {
         super(props)
         this.state = {
             groupe : this.props.navigation.getParam('groupe', undefined),
-            joueurs : [LocalUser.data].concat(this.props.navigation.getParam('joueurs', [])),
+            joueurs : [],//[LocalUser.data].concat(this.props.navigation.getParam('joueurs', [])),
             isLoading : false,
             newNom : "",
             usingCamera : false,
@@ -32,6 +32,8 @@ export default class Modifier_Groupe extends React.Component {
 
 
         }
+
+ 
     
     }
 
@@ -39,6 +41,20 @@ export default class Modifier_Groupe extends React.Component {
         if(this.state.groupe.photo != undefined) { 
             this.setState({image : {uri : this.state.groupe.photo}})
         }
+
+        // Trier les joueurs par ordre alpha
+        var joueurs = this.props.navigation.getParam('joueurs', [])
+
+        joueurs.sort(function(a, b){
+            if( a.pseudo.toLowerCase() <= b.pseudo.toLowerCase()) {
+                return -1
+            } else {
+                return 1
+            }
+        }
+        );
+        this.setState( {joueurs : [LocalUser.data].concat(joueurs)} )
+
 
 
     }
@@ -219,7 +235,7 @@ export default class Modifier_Groupe extends React.Component {
             [
                 {text: 'Voir le profil', onPress: () => this.voirProfil(joueur.id)},
                 {text: 'Envoyer un message', onPress: () => this.envoyerUnMessage(joueur)},
-                {text: 'Supprimer du groupe', onPress: () => this.supprDuGroupe(joueur.includesid)},
+                {text: 'Supprimer du groupe', onPress: () => this.supprDuGroupe(joueur.id)},
                 {text: 'Annuler', onPress: () => console.log('Cancel Pressed')},
 
             ],

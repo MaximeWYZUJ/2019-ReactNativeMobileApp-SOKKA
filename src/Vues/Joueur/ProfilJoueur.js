@@ -29,7 +29,6 @@ class ProfilJoueur extends React.Component {
 
     constructor(props) {
         super(props)
-        console.log("in constructeur profil")
         this.id = this.props.navigation.getParam('id', LocalUser.data.id)
         this.monProfil= Database.isUser(this.id);
         this.equipes = this.props.navigation.getParam('equipes', [])
@@ -50,7 +49,6 @@ class ProfilJoueur extends React.Component {
         if(this.monProfil) {
             if(LocalUser.dataEquipesUser.length  == 0) {
                 for(var i = 0 ; i < this.equipes.length; i++) {
-                    console.log(this.equipes[i].nom)
                 }
                 LocalUser.dataEquipesUser =  this.equipes
             } else {
@@ -73,6 +71,9 @@ class ProfilJoueur extends React.Component {
         } else {
             this.sexeIcon = require('app/res/femenine.png');
         }
+
+
+        
     }
 
 
@@ -90,8 +91,15 @@ class ProfilJoueur extends React.Component {
 
     static navigationOptions = ({ navigation }) => {
         if(! navigation.getParam("retour_arriere_interdit",false)) {
+            var joueur  = navigation.getParam('joueur', undefined)
+            var titre = ""
+            if (joueur == undefined) {
+                titre = LocalUser.data.pseudo
+            } else {
+                titre = joueur.pseudo
+            }
             return {
-                title: navigation.getParam('joueur', ' ').pseudo,
+                title: titre,
 
                 tabBarOnPress({jumpToIndex, scene}) {
                     jumpToIndex(scene.index);
@@ -106,8 +114,15 @@ class ProfilJoueur extends React.Component {
             
         } else {
             const {state} = navigation;
+            var joueur  = navigation.getParam('joueur', undefined)
+            var titre = ""
+            if (joueur == undefined) {
+                titre = LocalUser.data.pseudo
+            } else {
+                titre = joueur.pseudo
+            }
             return { 
-                title: navigation.getParam('joueur', ' ').pseudo,
+                title:titre,
                 
                 tabBarOnPress({jumpToIndex, scene}) {
                     jumpToIndex(scene.index);
@@ -161,32 +176,35 @@ class ProfilJoueur extends React.Component {
      
         var token = await this.registerForPushNotifications()
         var db = Database.initialisation()
-        db.collection("Login").doc(token).delete().then(this.goToFirstScreen).catch(function(error) {
+        db.collection("Login").doc(token).delete().catch(function(error) {
             console.error("Error removing document: ", error);
         });
 
-        console.log("before supr tolen")
-        // Supprimer le token de la liste
-        var tokens = LocalUser.data.tokens 
         var newTokens = []
-        for(var i =0; i < tokens.length; i ++) {
-            if(tokens[i].localeCompare(token) != 0) {
-                newTokens.push(tokens[i])
+        if(LocalUser.data.tokens != undefined) {        
+            // Supprimer le token de la liste
+            var tokens = LocalUser.data.tokens 
+            for(var i =0; i < tokens.length; i ++) {
+                if(tokens[i].localeCompare(token) != 0) {
+                    newTokens.push(tokens[i])
+                }
             }
         }
         
         db.collection("Joueurs").doc(this.id).update({
             tokens : newTokens
+        }).then(() => {
+            AsyncStorage.clear()
+            firebase.auth().signOut().then(() => {
+                // Sign-out successful.
+                this.setState({isLoading : false})
+                this.props.navigation.navigate("first", {deconexion : true})  
+    
+              }).catch(function(error) {
+                  console.log(error)
+              });
         })
-        AsyncStorage.clear()
-        firebase.auth().signOut().then(() => {
-            // Sign-out successful.
-            this.setState({isLoading : false})
-            this.props.navigation.navigate("first", {deconexion : true})  
-
-          }).catch(function(error) {
-              console.log(error)
-          });
+       
         
        
 
@@ -270,11 +288,19 @@ class ProfilJoueur extends React.Component {
         var now = new Date()
 
         var ref = db.collection("Defis");
-        var query = ref.where("participants", "array-contains", this.id)
-                        .where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
-
-        // On regarde si l'utilisateur participe à un defi
+        var query = ref.where("joueursConcernes", "array-contains", this.id).where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
         query.get().then(async (results) => {
+            for(var i = 0; i < results.docs.length ; i++) {
+                var defi = results.docs[i].data()
+                defi.jour.seconds = defi.jour.seconds -7200 
+                allDefis.push(defi)
+
+            }
+            this.setState({allDefis : allDefis})
+
+        })
+        // On regarde si l'utilisateur participe à un defi
+       /* query.get().then(async (results) => {
             for(var i = 0; i < results.docs.length ; i++) {
                 var defi = results.docs[i].data()
                 defi.jour.seconds = defi.jour.seconds -7200 
@@ -326,7 +352,7 @@ class ProfilJoueur extends React.Component {
             
         }).catch(function(error) {
               console.log("Error getting documents partie:", error);
-        });   
+        }); */  
     }
 
 
@@ -723,7 +749,7 @@ class ProfilJoueur extends React.Component {
                 <Item_Partie
                     id = {item.id}
                     format = {item.format}
-                    jour = {new Date(item.jour.seconds *1000)} 
+                    jour = {new Date(item.jour.toDate())} 
                     duree = {item.duree}
                     joueurs = {this.buildJoueurs(item)}
                     nbJoueursRecherche =  {item.nbJoueursRecherche}
@@ -951,7 +977,6 @@ class ProfilJoueur extends React.Component {
         var refConv  = db.collection("Conversations");
         var query = refConv.where("participants", 'array-contains' , LocalUser.data.id).where("estUnGroupe", "==",false)
         query.get().then(async (results) => {
-            console.log("query ok !!!")
             var pasResultat = results.docs.length == 0
             var existePas = true
             for( var i  = 0 ; i < results.docs.length; i++) {
@@ -961,7 +986,6 @@ class ProfilJoueur extends React.Component {
                     conv.joueur = joueur
                 }
             }
-            console.log("==== pseudo  §§§ ====", joueur.pseudo)
            if(pasResultat || existePas) {
                var ref = db.collection("Conversations").doc()
                 await ref.set({
@@ -1015,8 +1039,6 @@ class ProfilJoueur extends React.Component {
 
 
     renderAge(){
-        console.log("ID JOUEURS !!!!!",this.joueur.id )
-        console.log("NAISSANCE",this.joueur.naissance )
         if(this.joueur.naissance.seconds == undefined) {
             var naissance = new Date(this.joueur.naissance)
         } else {

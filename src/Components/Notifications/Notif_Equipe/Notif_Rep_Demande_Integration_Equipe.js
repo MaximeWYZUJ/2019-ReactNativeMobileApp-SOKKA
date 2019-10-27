@@ -36,13 +36,10 @@ class Notif_Rep_Demande_Integration_Equipe extends React.Component {
      * Fonction qui permet de récupérer les données relatives à la notification
      */
     async getData() {
-        console.log('in get data')
         // Données de l'émeteur 
 
-        console.log("after emetteur")
 
         var equipe = await Database.getDocumentData(this.props.notification.equipe, "Equipes")
-        console.log("after equipe")
         this.setState({equipe : equipe,isLoading : false})
     }
 
@@ -94,14 +91,12 @@ class Notif_Rep_Demande_Integration_Equipe extends React.Component {
 
     render(){
         if(this.state.isLoading) {
-            console.log("IS LOADING")
             return(
                 <Simple_Loading
                     taille = {hp('3%')}
                 />
             )
         } else {
-            console.log("ELSE RENDER")
             return(
                 <View style = {{flexDirection : 'row',marginTop : hp('2.5%'), borderWidth : 0, alignContent:"center"}}>
                     <View>

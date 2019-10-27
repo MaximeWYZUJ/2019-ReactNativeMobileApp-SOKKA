@@ -85,6 +85,11 @@ export default class Types_Notification {
 
 
 
+    /**
+     * Quand un joueur s'inscris à une partie que l'utilisateur à créee.
+     */
+    static INSCRIPTION_PARTIE = "INSCRIPTION_PARTIE"
+
     //=========================================================================
     //============================ POUR LES EQUIPES  ==========================
     //=========================================================================

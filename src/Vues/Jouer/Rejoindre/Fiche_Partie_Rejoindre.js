@@ -185,7 +185,7 @@ class Fiche_Partie_Rejoindre extends React.Component {
 
         var id = this.props.navigation.getParam('id', 'erreur')
         var partie = await Database.getDocumentData(id,"Defis")
-
+        console.log("id partie", id)
     
         partie.jour.seconds = partie.jour.seconds - 7200    // Pour mettre en heure francaise
         this.findTerrain(partie.terrain)
@@ -277,7 +277,8 @@ class Fiche_Partie_Rejoindre extends React.Component {
                             inscris : this.state.partie.inscris,
                             invite : false,                          // Si c'est le créateur qui invite;
                             organisateur : this.state.partie.organisateur ,
-                            date : this.state.partie.jour
+                            date : this.state.partie.jour,
+                            joueursConcernes : this.state.partie.joueursConcernes
                         })
                     }
             },

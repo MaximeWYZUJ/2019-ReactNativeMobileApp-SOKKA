@@ -128,7 +128,6 @@ function handleGlobalStetChange(state = initialiserState(Joueurs), action) {
          * Pour sauvegarder le InsNom et EquNom d'un terrain
          */
         case actions.SAVE_NOM_TERRAIN : 
-            console.log("ACTION !!!" , action.value)
             nextState = {
                 ...state,
                 nomsTerrainSelectionne : {
@@ -161,7 +160,6 @@ function handleGlobalStetChange(state = initialiserState(Joueurs), action) {
          * défis
          */
         case actions.CHOISIR_UNE_DE_MES_EQUIPES : 
-            console.log("in reducer choisir une de mes equipes")
             nextState = {
                 ...state,
                 monEquipe : action.value
@@ -212,7 +210,6 @@ function handleGlobalStetChange(state = initialiserState(Joueurs), action) {
          * On vas sauvegarder tous les participants à une partie 
          */
         case actions.STORE_PARTICIPANTS_PARTIE : 
-            console.log("==== ACTION : ", action.value)
             nextState = {
                 ...state,
                 JoueursParticipantsPartie : action.value
@@ -303,7 +300,6 @@ function handleGlobalStetChange(state = initialiserState(Joueurs), action) {
                         nbButs : action.value.newNbButs
                     }
                     dejaMarque = true
-                    console.log(obj)
                     liste.push(obj)
                 }
                 
@@ -397,7 +393,6 @@ function handleGlobalStetChange(state = initialiserState(Joueurs), action) {
             return nextState || state
 
         case actions.STORE_TOKEN :
-            console.log("in store token")
             nextState = {
                 ... state,
                 token : action.value

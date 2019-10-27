@@ -246,8 +246,11 @@ class Item_Defi extends React.Component {
     
     render() {
         var color = '#FFFFFF' 
-        if(this.props.jour < new Date())  color = "#E1E1E1"
+        var now = Date.parse(new Date())
+        if(this.props.allDataDefi.dateParse < now )  { // On decale la date de 1h 
+            color = "#E1E1E1"
 
+        }
         if(this.props.dateString == undefined) {
             var date = this.buildDate()
         } else {

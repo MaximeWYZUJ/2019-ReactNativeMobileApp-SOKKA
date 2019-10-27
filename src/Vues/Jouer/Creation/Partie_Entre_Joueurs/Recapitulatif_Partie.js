@@ -233,11 +233,12 @@ export default class Recapitulatif_Partie extends React.Component {
         var an = this.jour.split('-')[2]
         var heure = this.heure.split(':')[0]
         var minutes = this.heure.split(':')[1]
-        var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z'
+        var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes
         console.log(d)
         var date = new Date(d)
 
-        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z').getDay()
+        console.log("DATE = ", date)
+        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes ).getDay()
         var dateString =DAY[numJour] + " " + jour + '/' + moi + '/'+ an + ' - ' + heure + "h" + minutes + " à "+DatesHelpers.calculHeureFin(heure,minutes, this.duree)
         
         recherche = this.nbJoueursRecherche > 0
@@ -250,6 +251,7 @@ export default class Recapitulatif_Partie extends React.Component {
             organisateur : this.userData.id,
             ville : this.ville,
             participants : this.buildListOfJoueur(this.joueurs),
+            joueursConcernes : this.buildListOfJoueur(this.joueurs),
             message_chauffe : this.messageChauffe,
             terrain : this.props.navigation.getParam('terrain', ''),
             nbJoueursRecherche : this.nbJoueursRecherche,
@@ -264,7 +266,7 @@ export default class Recapitulatif_Partie extends React.Component {
             buteurs : [],
             votes : [],
             absents : [],
-            dateString: dateString
+            dateString: dateString,
 
         })
         .then(this.goToFichePartie(id,date))

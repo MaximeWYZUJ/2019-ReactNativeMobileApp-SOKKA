@@ -29,7 +29,7 @@ import New_Groupe from '../Vues/Conversation/New_Groupe'
 import Modifier_Groupe from '../Vues/Conversation/Modifier_Groupe'
 import Fiche_Partie_Rejoindre from '../Vues/Jouer/Rejoindre/Fiche_Partie_Rejoindre'
 import Fiche_Defi_Rejoindre from '../Vues/Jouer/Rejoindre/Fiche_Defi_Rejoindre'
-
+import Calendrier_Equipe from '../Vues/Jouer/Historique/Calendrier_Equipe'
 const stackNavigator = createStackNavigator({
 
   ProfilJoueur : {
@@ -180,6 +180,10 @@ const stackNavigator = createStackNavigator({
     screen : Calendrier_Joueur
   },
 
+  CalendrierEquipe : {
+    screen : Calendrier_Equipe
+  },
+
 
   /**
    * Screen qui affiche le récap d'une partie et permet à l'utilisateur de la 
@@ -196,4 +200,25 @@ const stackNavigator = createStackNavigator({
   headerLayoutPreset: 'center'
 })
 
-export default createAppContainer(stackNavigator)
+
+stackNavigator.navigationOptions = ({ navigation }) => {
+  let tabBarVisible;
+  var  screenWithNoBar = [  "CreationEquipeNom","CreationEquipeZone","CreationEquipeAjoutJoueurs","CreationEquipeCitation","CreationEquipePhoto"]
+
+
+  if (navigation.state.routes.length > 1) {
+    navigation.state.routes.map(route => {
+      if ( screenWithNoBar.includes(route.routeName)) {
+        tabBarVisible = false;
+      } else {
+        tabBarVisible = true;
+      }
+    });
+  }
+
+  return {
+    tabBarVisible
+  };
+};
+
+export default stackNavigator

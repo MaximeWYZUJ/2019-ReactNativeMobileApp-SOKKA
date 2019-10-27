@@ -78,22 +78,14 @@ export default class Creation_Equipe_Photo extends React.Component {
      */
     async saveEquipeInDb() {
         this.setState({isLoading : true})
-        console.log("in save equipe")
 
         // Enregistrer la photo 
         var  urlPhoto = await this.savePhotoInStorage()
-        console.log("==== URL : ", urlPhoto)
-
-        console.log("[LocalUser.data.id]," ,[LocalUser.data.id])
-        console.log(this.props.navigation.getParam("nom",""))
-        console.log( NormalizeString.decompose(this.props.navigation.getParam("nom","")))
-        
+  
         // Sauver le document de l'équipe
         var db = Database.initialisation()
         var equipeRef = db.collection("Equipes").doc()
-        console.log(equipeRef.id)
         this.setState({idEquipe : equipeRef.id})
-        console.log("before set")
         await equipeRef.set({
             age : 23,
             aiment : [],
@@ -155,11 +147,8 @@ export default class Creation_Equipe_Photo extends React.Component {
         for(var i =0; i < LocalUser.data.equipes.length; i++) {
             var e = await Database.getDocumentData(LocalUser.data.equipes[i], "Equipes")
             eq.push(e)
-            console.log(e.nom)
         }
 
-        console.log(" E == ", eq)
-        console.log("equipes : ", LocalUser.data.equipes)
         
         this.props.navigation.push("ProfilJoueur", {id: LocalUser.data.id, joueur : LocalUser.data, equipes : eq, retour_arriere_interdit : true})
         
@@ -218,7 +207,6 @@ export default class Creation_Equipe_Photo extends React.Component {
      * @param {String} body 
      */
     async sendPushNotification(token , title,body ) {
-        console.log("________ "+ body +  " _____")
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: token,
@@ -256,7 +244,6 @@ export default class Creation_Equipe_Photo extends React.Component {
             await this.storeNotifInvitationInDB(idEquipe, joueurs[i])
             var j = await Database.getDocumentData(joueurs[i], "Joueurs")
             var tokens = j.tokens
-            console.log("tokens : ", tokens)
             if(tokens != undefined) {
                 for(var k =0; k < tokens.length; k ++) {
                     await this.sendPushNotification(tokens[k], titre, corps)
@@ -273,7 +260,6 @@ export default class Creation_Equipe_Photo extends React.Component {
      */
     async storeNotifInvitationInDB(equipeId, idRecepteur) {
         var db = Database.initialisation() 
-        console.log()
         db.collection("Notifs").add(
             {
                 dateParse : Date.parse(new Date()),

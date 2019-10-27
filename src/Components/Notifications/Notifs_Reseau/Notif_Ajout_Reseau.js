@@ -54,7 +54,6 @@ class Notif_Ajout_Reseau extends React.Component {
         if(this.state.emetteur == undefined) {
             return("___")
         } else {
-            console.log("eeeeeeeeeee", this.state.emetteur.pseudo)
             return this.state.emetteur.pseudo
         }
     }

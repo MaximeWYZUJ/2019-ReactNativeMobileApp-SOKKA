@@ -10,6 +10,7 @@ import Database from '../../../../Data/Database'
 import LocalUser from '../../../../Data/LocalUser.json'
 import actions from '../../../../Store/Reducers/actions';
 import DatesHelpers from '../../../../Helpers/DatesHelpers'
+import Types_Notification from '../../../../Helpers/Notifications/Types_Notification'
 import firebase from 'firebase'
 import '@firebase/firestore'
 /**
@@ -30,6 +31,8 @@ class Choix_Joueurs_Partie extends React.Component {
         }
 
         this.goToFichePartie = this.goToFichePartie.bind(this)
+        console.log("JOUEURS CONCERNES ",this.props.navigation.getParam("joueursConcernes",[]))
+        
     }
 
     // ===========================================================================
@@ -44,7 +47,6 @@ class Choix_Joueurs_Partie extends React.Component {
      * @param {String} body 
      */
     async sendPushNotification(token , title,body ) {
-        console.log('in send push !!')
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: token,
@@ -71,7 +73,6 @@ class Choix_Joueurs_Partie extends React.Component {
      */
     async sendNotifToAllPlayer(date) {
 
-        console.log("DATE : ",date)
 
         var titre=  "Nouvelle Notif"
         var corps = LocalUser.data.pseudo + " t'a invité / relancé pour une partie le "
@@ -80,7 +81,6 @@ class Choix_Joueurs_Partie extends React.Component {
         for(var i  = 0; i < this.props.joueursPartie.length; i++) {
             if(this.props.joueursPartie[i].id != LocalUser.data.id) {
                 var tokens = this.props.joueursPartie[i].tokens
-                console.log("TOKENS !!, ", this.props.joueursPartie[i].pseudo + ' -> ' + tokens)
 
                 if(tokens != undefined) {
                     for(var k =0; k < tokens.length; k ++) {
@@ -89,6 +89,7 @@ class Choix_Joueurs_Partie extends React.Component {
                 }
             }
         }
+        console.log("! this.props.navigation.getParam(invite,false)",! this.props.navigation.getParam("invite",false))
         if(! this.props.navigation.getParam("invite",false)) {
             this.sendNotifToOrganisateur(date)
         }
@@ -97,8 +98,9 @@ class Choix_Joueurs_Partie extends React.Component {
 
     async sendNotifToOrganisateur(date) {
         var nbInvite = " "
-        if(this.props.joueursPartie.length > 1) {
-            nbInvite = " et à invité " + this.props.joueurs.length + "joueur(s)"
+        console.log("joueur length" ,this.props.joueursPartie.length )
+        if(this.props.joueursPartie.length  > 0) {
+            nbInvite = " et à invité " + this.props.joueursPartie.length + " joueur(s)"
         }
         var titre=  "Nouvelle Notif"
         var corps = LocalUser.data.pseudo + " s’est inscrit" + nbInvite + "pour une partie le " 
@@ -112,7 +114,46 @@ class Choix_Joueurs_Partie extends React.Component {
                 await this.sendPushNotification(tokens[k], titre, corps)
             }
         }
+        this.storeNotifInscription(corps)
+    }
 
+    async storeNotifInscription(text) {
+        console.log("in store notif")
+        var db = Database.initialisation() 
+        var partie = await Database.getDocumentData(this.props.navigation.getParam('id_partie', 'erreur'),"Defis")
+        console.log("after get partie")
+        db.collection("Notifs").add({
+            recepteur : partie.organisateur,
+            emetteur :  LocalUser.data.id,
+            dateParse : Date.parse(new Date()),
+            partie : partie.id,
+            time : new Date(),
+            type : Types_Notification.INSCRIPTION_PARTIE,
+            texte : text
+        })
+    }
+
+
+     /**
+     * Fonction qui va sauvagarder dans la base de données les notifications
+     * pour la convocation à la partie
+     */
+    storeNotificationInDb(id) {
+        var db = Database.initialisation() 
+        for(var i  = 0; i < this.props.joueursPartie.length; i++) {
+            if(this.props.joueursPartie[i].id!= LocalUser.data.id) {
+                db.collection("Notifs").add(
+                    {
+                        dateParse : Date.parse(new Date()),
+                        partie : id,
+                        emetteur :  LocalUser.data.id,
+                        recepteur : this.props.joueursPartie[i].id,
+                        time : new Date(),
+                        type : Types_Notification.CONVOCATION_RELANCE_PARTIE,
+                    }
+                )  
+            }
+        }
     }
     // ======================================================
 
@@ -121,14 +162,29 @@ class Choix_Joueurs_Partie extends React.Component {
 
 
     goToFichePartie() {
+        console.log("in go to fiche partie")
+        var msg = ""
+        if(this.props.joueursPartie.length > 0 && this.props.JoueursParticipantsPartie.includes(LocalUser.data.id)) {
+            msg =   "Les joueurs invités vont recevoir une notification pour confirmer leur participation."
+        } else if(this.props.joueursPartie.length  > 0 && !this.props.JoueursParticipantsPartie.includes(LocalUser.data.id)) {
+            msg = "Tu es bien inscrit à cette partie. Les joueurs invités vont recevoir une notification pour confirmer leur participation."
+        } else {
+            msg = "Tu es bien inscrit à cette partie"
+        }
+        
+        console.log(msg)
         d =this.props.navigation.getParam("date", new Date())
+       
         Alert.alert(
             '',
-            'Les joueurs invités vont recevoir une notification pour confirmer leur participation ',
+            msg,
             [
               {text: 'Ok',  onPress: async () => {
-               
+              
+                console.log("on press alert")
                 await this.sendNotifToAllPlayer(new Date(d.seconds * 1000))
+                await this.storeNotificationInDb( this.props.navigation.getParam('id_partie', ''))
+                console.log("after store notif")
                 // Remettre à zéro la liste des joueurs séléctionnés  
                 const action = { type: actions.RESET_JOUEURS_PARTIE, value: []}
                 this.props.dispatch(action)               
@@ -170,7 +226,7 @@ class Choix_Joueurs_Partie extends React.Component {
 
 
     goToNextScreen() {
-        
+        console.log("in go to next screen")
         /*
             Cas où on choisit des joueurs pour ajouter des joueurs à une partie qui est crée. 
         */
@@ -209,6 +265,7 @@ class Choix_Joueurs_Partie extends React.Component {
             Cas où on choisit des joueurs pour rejoindre une partie déja crée.
         */
         } else {
+            console.log("in else")
             this.updateParticipantsDefis()
         }
     }
@@ -218,8 +275,8 @@ class Choix_Joueurs_Partie extends React.Component {
      * Fonction qui va permettre de rajouter les joueurs séléctionnés dans la liste des 
      * participants à un défis. 
      */
-    updateParticipantsDefis() {
-     
+    async updateParticipantsDefis() {
+        console.log("updateParticipantsDefis")
         var id = this.props.navigation.getParam('id_partie', 'erreur')
         var joueursEnPlus = this.props.joueursPartie.length 
         if(  ! this.props.navigation.getParam('invite',  false)) {
@@ -230,7 +287,6 @@ class Choix_Joueurs_Partie extends React.Component {
         var inscris = this.props.navigation.getParam('inscris',  [])
 
         var db = Database.initialisation()
-        console.log(this.props.joueursPartie.length)
         // Mettre à jour les participants
         for(var i = 0 ; i< this.props.joueursPartie.length ; i++) {
             array.push(this.props.joueursPartie[i].id)
@@ -258,13 +314,17 @@ class Choix_Joueurs_Partie extends React.Component {
             nbRecherche =  0,
             recherche = false
         }
+
+        
         defisRef.update({
             participants: array,
             nbJoueursRecherche : nbRecherche ,
             attente : enAttente,
             inscris : inscris,
             recherche : recherche,
-            confirme : firebase.firestore.FieldValue.arrayUnion(this.monId)
+            confirme : firebase.firestore.FieldValue.arrayUnion(this.monId),
+            joueursConcernes : array
+
         })
         .then(this.goToFichePartie)
         .catch(function(error) {
@@ -296,7 +356,7 @@ class Choix_Joueurs_Partie extends React.Component {
    
 
     render() {
-      
+      console.log("LENGTH," , this.props.joueursPartie.length )
         return(
             <View style = {{ flex : 1}}>
 

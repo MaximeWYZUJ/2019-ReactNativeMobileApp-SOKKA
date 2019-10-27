@@ -115,9 +115,11 @@ class Feuille_Defi_Passe extends React.Component {
                 for(var k = 0; k < tokens.length ; k++) {
                     console.log("eeeeeeeeeeeeeeeee", tokens[k])
                     await this.sendPushNotification(tokens[k], titre, corps)
-                    await this.storeNotifToCapAdverse(joueur)
                 }
+                await this.storeNotifToCapAdverse(joueur)
+
             }
+
         }
     }
 
@@ -140,7 +142,7 @@ class Feuille_Defi_Passe extends React.Component {
                 
                 // Envoyer la notifs aux cap adverse 
                 await this.sendNotifToCapitaineAdverse(this.state.equipeDefiee, this.state.equipeOrganisatrice.nom)
-            } else if(this.state.equipeDefiee.capitaines.includes(this.monId)) {
+            } else if(this.state.equipeDefiee.capitaines.includes(this.monId) && this.state.defi.joueursEquipeDefiee.includes(this.monId)) {
                 var joueurs = this.state.defi.confirmesEquipeDefiee
                 corps = "Le capitaine de ton équipe " + this.state.equipeDefiee.nom + " a renseigné la feuille de match du défi contre "
                 corps = corps + this.state.equipeOrganisatrice.nom + "." 

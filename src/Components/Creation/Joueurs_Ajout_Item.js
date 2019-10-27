@@ -27,7 +27,6 @@ class Joueurs_Ajout_Item extends React.PureComponent{
      * @param {String} joueur 
      */
     _addJoueur(idJoueur ) {
-        console.log("okokokoko")
 
       // if(! this.propsisShown) {
             const action = { type: "AJOUTER_JOUEUR_EQUIPE_CREATION", value: idJoueur}

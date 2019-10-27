@@ -38,8 +38,8 @@ export default class Recapitulatif_Defis extends React.Component {
         this.terrain = this.props.navigation.getParam('terrain', ' '),
         this.messageChauffe =  this.props.navigation.getParam('messageChauffe', ' '),
         this.prix = this.props.navigation.getParam('prix', null)
-        this.nomsTerrain = this.props.navigation.getParam('nomsTerrains', ' '),
-
+        this.nomsTerrain = this.props.navigation.getParam('nomsTerrains', ' '), 
+        this.joueursSelectionnes =  this.props.navigation.getParam('joueursSelectionnes', [])
         this.state = {
             equipeAdverse : {
                 nom : "_",
@@ -50,6 +50,10 @@ export default class Recapitulatif_Defis extends React.Component {
         this.equipe1Animation = new Animated.ValueXY({ x: -wp('100%'), y:0 })
         this.equipe2Animation = new Animated.ValueXY({ x: wp('100%'), y:0 })
         this.goToFicheDefi = this.goToFicheDefi.bind(this)
+        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        console.log("joueurs selectionnes",  this.joueursSelectionnes)
+        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
     }
 
     static navigationOptions = ({ navigation }) => {
@@ -178,15 +182,16 @@ export default class Recapitulatif_Defis extends React.Component {
 
     
      goToFicheDefi(msg, id,equipe,date,joueurs) {
+        this.storeNotificationsInDB(id,date)
+        this.storeNotificationDefiEquipe(id)
+        this.sendNotif(equipe,joueurs,date)
         Alert.alert(
             '',
             msg,
             [
               {text: 'Ok',  onPress:  () =>  {
                
-                this.storeNotificationsInDB(id)
-                this.storeNotificationDefiEquipe(id)
-                 this.sendNotif(equipe,joueurs,date)
+              
                 this.props.navigation.push("AccueilJouer")
             }
                         
@@ -203,14 +208,16 @@ export default class Recapitulatif_Defis extends React.Component {
      * sans le capitaine qui a organisé le defis
      */
     buildListOfJoueurWithoutCapitaine() {
-        var joueurs =  this.props.navigation.getParam('joueursSelectionnes', ' ')
+        var joueurs = this.joueursSelectionnes
         var liste = []
         for(var i = 0 ; i < joueurs.length; i++) {
-            if( ! LocalUser.data.id != joueurs[i]) {
+            if(  LocalUser.data.id != joueurs[i]) {
                 liste.push(joueurs[i])
             }
         }
+        console.log("buildListOfJoueurWithoutCapitaine", liste)
         return liste
+        
 
     }
 
@@ -222,12 +229,11 @@ export default class Recapitulatif_Defis extends React.Component {
 
         var cherche_adverssaire = (this.contreQui =='poster_une_annonce')
 
-        var joueursSelectionnes = this.props.navigation.getParam('joueursSelectionnes', []);
-
+     
         var msg = ' '
         if(cherche_adverssaire) {
             // Poster une annonce
-            if (joueursSelectionnes.length > 1) {
+            if (this.joueursSelectionnes.length > 1) {
                 // On a convoque des joueurs
                 msg = "Ton défi a bien été créé, tu seras informé dès qu’une équipe aura relevé ton défi. Les joueurs convoqués vont recevoir une notification pour confirmer leur participation"
             } else {
@@ -235,9 +241,9 @@ export default class Recapitulatif_Defis extends React.Component {
             }
         }else {
             // Defi contre une equipe en particulier
-            if (joueursSelectionnes.length > 1) {
+            if (this.joueursSelectionnes.length > 1) {
                 // On a convoque des joueurs
-                msg = "Ton défi a bien été créé, le capitaine de l’équipe " + nomEquipeAdverse +"va recevoir une notification pour accepter ou non le défi. Les joueurs convoqués vont recevoir une notification"
+                msg = "Ton défi a bien été créé, le capitaine de l’équipe " + nomEquipeAdverse +" va recevoir une notification pour accepter ou non le défi. Les joueurs convoqués vont recevoir une notification"
             } else {
                 msg = "Ton défi a bien été créé, le capitaine de l’équipe " + nomEquipeAdverse + " va recevoir une notification pour accepter ou non le défi »"
             }
@@ -254,12 +260,17 @@ export default class Recapitulatif_Defis extends React.Component {
         
         var an = this.day.split('-')[2]
         var heure = this.hours.split(':')[0]
+        if(heure.length == 1) {
+            heure = "0" + heure
+        }
         var minutes = this.hours.split(':')[1]
         var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes
         var date = new Date(d)
-        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z').getDay()
+        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes).getDay()
         var dateString =DAY[numJour] + " " + jour + '/' + moi + '/'+ an + ' - ' + heure + "h" + minutes + " à "+DatesHelpers.calculHeureFin(heure,minutes, this.duree)
-        
+      
+        var joueurs = this.joueursSelectionnes
+        console.log("JOUEURS §§§§§§§§", joueurs)
         db.collection("Defis").doc(id.toString()).set({
             id : id,
             equipeOrganisatrice : this.allDataEquipe.id,
@@ -269,7 +280,7 @@ export default class Recapitulatif_Defis extends React.Component {
             duree : this.duree,
             format : this.format,
             organisateur : this.userData.id,
-            participants : this.props.navigation.getParam('joueursSelectionnes', ' '),
+            participants : joueurs,
             defis_valide : false,
             message_chauffe : this.messageChauffe,
             terrain :this.terrain,
@@ -278,7 +289,7 @@ export default class Recapitulatif_Defis extends React.Component {
             prix_par_equipe : this.prix,
             dateParse : Date.parse(date),
             absents : [],
-            joueursEquipeOrga : this.props.navigation.getParam('joueursSelectionnes', ' '),
+            joueursEquipeOrga : joueurs,
             joueursEquipeDefiee : [],
             confirmesEquipeOrga : this.findCapitaines(),
             confirmesEquipeDefiee : [],
@@ -295,7 +306,10 @@ export default class Recapitulatif_Defis extends React.Component {
             scoreRenseigneParOrga : false,
             scoreRenseigneParDefiee : false,
             defis_refuse : false,
-            dateString : dateString
+            dateString : dateString,
+            attenteValidation: false,
+            equipesConcernees : [this.allDataEquipe.id],
+            joueursConcernes :this.buildListOfJoueursConcernes()
             
 
         })
@@ -306,13 +320,39 @@ export default class Recapitulatif_Defis extends React.Component {
 
     }
 
+
+
+    buildListOfJoueursConcernes(){
+        console.log('in build list of joueur')
+        var joueursConcernes = []
+        for(var i = 0; i < this.joueursSelectionnes.length; i++) {
+           joueursConcernes.push(this.joueursSelectionnes[i])
+
+        }
+        for(var i = 0; i < this.allDataEquipe.capitaines.length ; i++) {
+            if(! joueursConcernes.includes(this.allDataEquipe.capitaines[i])) {
+                joueursConcernes.push(this.allDataEquipe.capitaines[i])
+            }
+        }
+        console.log("*************************")
+        console.log(joueursConcernes)
+        console.log("*************************")
+
+        return joueursConcernes
+        
+    }
+
     /**
      * On va stocker une notification pour chaque joueur convoqué
      */
-    storeNotificationsInDB(id) {
-        var joueurs = this.props.navigation.getParam('joueursSelectionnes', [])
+    storeNotificationsInDB(id,date) {
+        console.log("in store notif ", date)
+        var joueurs =this.joueursSelectionnes
+        console.log("JOUEURS TO SEND NOTIFS !!!", joueurs)
         var db = Database.initialisation() 
-        
+        var txt = "Le capitaine " + LocalUser.data.pseudo + " de l'équipe " + this.allDataEquipe.nom 
+        txt = txt + " t'a convoqué / relancé pour un un défi le " + this.buildDate(date)
+
         for(var i = 0 ; i < joueurs.length; i ++) {
             if(joueurs[i] != LocalUser.data.id) {
                 db.collection("Notifs").add(
@@ -324,8 +364,14 @@ export default class Recapitulatif_Defis extends React.Component {
                         time : new Date(),
                         type : Types_Notification.CONVOCATION_RELANCE_DEFI,
                         equipe : this.allDataEquipe.id,
+                        texte : txt,
+                        heure: DatesHelpers.buildDateNotif(new Date()),
+                        show_boutons : true
+
                     }
-                )
+                ).catch(function(error) {
+                    console.log(error)
+                })
             }
         }
 
@@ -413,6 +459,9 @@ export default class Recapitulatif_Defis extends React.Component {
             heure ++
             minutes -= 60
         }
+        if(heure >= 24) {
+            heure = heure - 24
+        }
         if(minutes.toString().length == 1) {
             minutes = '0'+ minutes.toString()
         }
@@ -490,6 +539,7 @@ export default class Recapitulatif_Defis extends React.Component {
 
     render() {
         console.log("HOURS ", this.day)
+        console.log()
         var jour = this.day.split('-')[0]
         var moi = this.day.split('-')[1]
         if(moi.length ==1) {
@@ -498,12 +548,17 @@ export default class Recapitulatif_Defis extends React.Component {
         if(jour.length ==1) {
             jour = '0'+jour
         }
+
         
         var an = this.day.split('-')[2]
         var heure = this.hours.split(':')[0]
+
+        if(heure.length == 1) {
+            heure = "0" + heure
+        }
         var minutes = this.hours.split(':')[1]
       
-        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes + 'Z').getDay()
+        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes).getDay()
         var d =DAY[numJour] + " " + jour + '/' + moi + '/'+ an + ' - ' + heure + "h" + minutes + " à "+DatesHelpers.calculHeureFin(heure,minutes, this.duree)
         console.log("=====DATE ==d==",d )
         return (

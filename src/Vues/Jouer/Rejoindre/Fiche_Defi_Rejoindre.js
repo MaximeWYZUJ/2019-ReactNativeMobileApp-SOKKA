@@ -20,7 +20,8 @@ import Types_Notification from '../../../Helpers/Notifications/Types_Notificatio
 import firebase from 'firebase'
 import '@firebase/firestore'
 import Distance from '../../../Helpers/Distance';
-
+import DatesHelpers from '../../../Helpers/DatesHelpers'
+import { func } from 'prop-types';
 
 // Rememttre à Zéro le stack navigator pour empecher le retour en arriere
 const resetAction = StackActions.reset({
@@ -72,9 +73,10 @@ class Fiche_Defi_Rejoindre extends React.Component {
             nbVotantOrga : 0,
             nbVotantDefiee : 0,
             commentaires : [],
-            currentCommentaire : ""
+            currentCommentaire : "",
+            showChangeHeureDialog : false
         }
-        console.log("fin constructor")
+        console.log("ID:", this.state.defi.id)
     }
 
 
@@ -140,6 +142,10 @@ class Fiche_Defi_Rejoindre extends React.Component {
     }
 
 
+
+
+
+    
   
 
     
@@ -245,17 +251,19 @@ class Fiche_Defi_Rejoindre extends React.Component {
     async saveParticipationInDb(idEquipe, nom) {
         
         var db = Database.initialisation()
-
+        console.log("in save participation")
+    
         
         var defiRef = db.collection("Defis").doc(this.state.defi.id)
         await this.sendNotifsToCapitainesOrga(nom)
-        this.storeNotifDefisReleve(idEquipe)
+        this.storeNotifDefisReleve(idEquipe,nom)
         defiRef.update({
             equipeDefiee : idEquipe,
             recherche : false,
-            joueursEquipeDefiee : [this.userData.id],
-            confirmesEquipeDefiee : [this.userData.id],
-            participants : this.state.defi.participants.concat([this.userData.id]),
+            attenteValidation : true
+            //joueursEquipeDefiee : [this.userData.id],
+            //confirmesEquipeDefiee : [this.userData.id],
+            //participants : this.state.defi.participants.concat([this.userData.id]),
         })
         .catch(function(error) {
             // The document probably doesn't exist.
@@ -303,7 +311,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
      */
     async sendNotifsToCapitainesOrga(nom){
         var titre = "Nouvelle notif"
-        var corps = "L'équipe " + nom + " souhaite relever le défi posté par ton équipe" + this.state.equipeOrganisatrice.nom
+        var corps = "L'équipe " + nom + " souhaite relever le défi posté par ton équipe " + this.state.equipeOrganisatrice.nom
         for(var i = 0; i < this.state.equipeOrganisatrice.capitaines.length; i++) {
             var id = this.state.equipeOrganisatrice.capitaines[i]
 
@@ -321,26 +329,34 @@ class Fiche_Defi_Rejoindre extends React.Component {
     /**
      * Fonction qui va permettre de sauvegarder les notifications dans la base de données.
      */
-    async storeNotifDefisReleve(idEquipe) {
+    async storeNotifDefisReleve(idEquipe,nom) {
 
         var db = Database.initialisation()
-        if(this.state.equipeOrganisatrice != undefined) {
-            for(var i = 0 ; i < this.state.equipeOrganisatrice.capitaines.length ; i++) {
 
+        if(this.state.equipeOrganisatrice != undefined) {
+            var corps = "L'équipe " + nom + " souhaite relever le défi posté par ton équipe " + this.state.equipeOrganisatrice.nom
+
+                console.log("before store notif")
             
                 db.collection("Notifs").add(
                     {
                         dateParse : Date.parse(new Date()),
                         defi : this.state.defi.id,
                         emetteur :  LocalUser.data.id,
-                        recepteur : this.state.equipeOrganisatrice.capitaines[i] ,
+                        recepteur : this.state.defi.organisateur ,
                         time : new Date(),
                         equipeEmettrice : idEquipe ,
                         type : Types_Notification.ACCEPTER_DEFI_RELEVE,
                         equipeReceptrice : this.state.equipeOrganisatrice.id,
+                        equipeRefusee :false,
+                        heure: DatesHelpers.buildDateNotif(new Date()),
                     }
+                ).catch(function(error) {
+                    console.log(error)
+                }
+
                 )
-            } 
+            
         }
     }
 
@@ -923,6 +939,9 @@ class Fiche_Defi_Rejoindre extends React.Component {
             )
         }*/
 
+        var nomEquipeDefiee = ""
+        if(this.state.equipeDefiee != undefined) nomEquipeDefiee = this.state.equipeDefiee.nom
+
 
         // Si le défi est passé
         if(estPasse) {
@@ -935,6 +954,25 @@ class Fiche_Defi_Rejoindre extends React.Component {
             
             )
 
+        }else if(this.state.defi.organisateur == LocalUser.data.id && this.state.defi.attenteValidation) {
+            return(
+                <View>
+                    <Text>
+                    L'équipe {nomEquipeDefiee} souhaite relever le  
+                    </Text>
+                    <Text>défi posté, rdv dans tes  </Text>
+                    <Text>notifications pour accepeter ou refuser</Text>
+                </View>
+
+            )
+          
+        } else if((participe2 || cap2) && this.state.defi.attenteValidation) {
+            return(
+                <View>
+                    <Text>Attente de validation du défi</Text>
+                </View>
+            )
+    
         
         // Si il est capitaine de l'équipe defiee et le défi à été validé
         } else if(cap2 && this.state.defi.defis_valide) {
@@ -969,7 +1007,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
             )
         
         // Si il joue avecl'équipe défiée mais que le défi a pas été validé
-        } else if(participe2 && ! this.state.defi.defis_valide) {
+        } else if((participe2 || cap2) &&  ! this.state.defi.defis_valide) {
             return(
                 <View>
                     <Text>Attente de validation du défi</Text>
@@ -1010,7 +1048,7 @@ class Fiche_Defi_Rejoindre extends React.Component {
 
                 <TouchableOpacity 
                     onPress = {() => {
-                        if( parseFloat(this.state.defi.format.split(' ')[0]) <= item.nbJoueurs) {
+                        if( parseFloat(this.state.defi.format.split(' ')[0]) <= item.joueurs.length) {
                             this.chooseEquipe(item)
                             this.saveParticipationInDb(item.id,item.nom)
                             
@@ -1133,6 +1171,25 @@ class Fiche_Defi_Rejoindre extends React.Component {
     
 
 
+    changeDateDialog(){
+        if(this.state.showChangeHeureDialog) {
+            return(
+                <View style = {styles.containerListEquipe}>
+                <Text>
+                    Tu souhaites changer l'heure du défi ?
+                </Text>
+
+               
+                <TouchableOpacity
+                    onPress = {() => this.setState({showChangeHeureDialog : false})} >
+                    <Text style = {{fontWeight : "bold"}}>Annuler</Text>
+                </TouchableOpacity>
+            </View>
+            )
+        }
+    }
+
+
     displayRender() {
 
         if(this.state.defi.dateString == undefined) {
@@ -1157,7 +1214,10 @@ class Fiche_Defi_Rejoindre extends React.Component {
                             }}
                             > Defi {this.state.defi.format} par {this.state.organisateur.pseudo}</Text>
                         <Text style = {styles.separateur}>_____________________________________</Text>
-                        <Text style = {styles.infoDefis}> {date}</Text>
+                        <TouchableOpacity
+                            onPress = {() => this.setState({showChangeHeureDialog : true})}>
+                            <Text style = {styles.infoDefis}> {date}</Text>
+                        </TouchableOpacity>
                         <Text style = {styles.separateur}>_____________________________________</Text>
                     </View>
 

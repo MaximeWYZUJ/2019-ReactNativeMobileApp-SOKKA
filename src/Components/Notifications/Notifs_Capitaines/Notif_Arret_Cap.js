@@ -16,7 +16,6 @@ class Notif_Arret_Cap extends React.Component {
 
     constructor(props) {
         super(props)
-        console.log("IN NOTIF ARRET CAP!!")
         this.state = {
             emetteur : undefined,
             equipe : undefined, 
@@ -29,7 +28,6 @@ class Notif_Arret_Cap extends React.Component {
     }
 
     async getData() {
-        console.log("in get data")
         // Données de l'équipe concernée
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 

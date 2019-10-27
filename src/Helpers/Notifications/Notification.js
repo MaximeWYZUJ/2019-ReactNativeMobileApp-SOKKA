@@ -12,18 +12,13 @@ export default class Notification {
      */
     static async registerForPushNotifications() {
         const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-        console.log('in register')
         if (status !== 'granted') {
-            console.log("1")
           const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
           if (status !== 'granted') {
-            console.log("2")
             return;
           }
         }
-        console.log("okook")
         var token = await Notifications.getExpoPushTokenAsync();
-        console.log("after await token")
         //this.subscription = Notifications.addListener(this.handleNotification);
     
         return (token)
@@ -37,7 +32,6 @@ export default class Notification {
         var token = await this.registerForPushNotifications()
         var db = Database.initialisation()
         db.collection("Login").doc(token).set({id : id})
-        console.log("token stored in login")
     }
 
 
@@ -59,7 +53,6 @@ export default class Notification {
                notifications.push(results.docs[i].data())
             }
 
-            console.log(notifications)
 
             return notifications            
 
@@ -100,9 +93,7 @@ export default class Notification {
 
 
     static async sendPushNotification(destinataire, titre, corps) {
-        console.log('in send push !!', destinataire)
-        console.log("titre", titre)
-        console.log("corps ", corps)
+        
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: destinataire,
@@ -127,7 +118,6 @@ export default class Notification {
     
     
     static test(token = "ExponentPushToken[lM7ee8LlQCJWz_6bP7scIp]", title = "coucou", body = "this.state.body") {
-        console.log('in send push !!')
         return fetch('https://exp.host/--/api/v2/push/send', {
           body: JSON.stringify({
             to: token,
@@ -165,7 +155,6 @@ export default class Notification {
 
      */
     static sendNotificationInvitationDefi(destinataire,date,emeteur,equipe) {
-        console.log("IN SEND NOTIF !!")
         var corps = "Le capitaine " + emeteur.pseudo + " de l'équipe " + equipe.nom 
         corps = corps + " t'a convoqué / relancé pour un un défi le "
         corps = corps + this.buildDate(date)

@@ -565,7 +565,8 @@ class Feuille_Partie_A_Venir extends React.Component {
             enAttente : this.state.partie.attente,
             inscris : this.state.partie.inscris,
             invite : true,                          // c'est le créateur qui invite
-            date : this.state.partie.jour
+            date : this.state.partie.jour,
+            joueursConcernes : this.state.partie.joueursConcernes
         })
     }
 

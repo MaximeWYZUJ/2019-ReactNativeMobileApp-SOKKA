@@ -82,8 +82,7 @@ export default class Accueil_Conversation extends React.Component {
 
      /** Fonction appelée au moment où l'utilisateur pull to refresh */
      _onRefresh = async () => {
-        this.setState({refreshing: true});
-        console.log("REFRESHING ....")
+        this.setState({refreshing: true, conversations : []});
         this.getConversations()
 
         this.setState({refreshing : false})
@@ -95,18 +94,13 @@ export default class Accueil_Conversation extends React.Component {
     }
 
     async getConversations(){
-        console.log("in get conversation")
         var conversations = []
         var db = Database.initialisation()
         var  ref = db.collection("Conversations");
-        console.log("after get ref")
         var query = ref.where("participants", 'array-contains' , LocalUser.data.id).orderBy("dateDernierMessage", "desc");
-        console.log("after write query")
         query.get().then(async (results) => {
             for(var i = 0; i < results.docs.length ; i++) {
-                console.log("in for convs §§§§§§§§§§")
                 var conv = results.docs[i].data()
-                console.log("CONV NOM  ====", conv.nom)
                 var joueur = undefined
                 
                 // Si deux participants alors on télécharge les données du joueur
@@ -144,11 +138,8 @@ export default class Accueil_Conversation extends React.Component {
 
 
     async updateLecteur(aLue,idConv){
-        console.log("in update lecteur !!!!")
         if(! aLue) {
             this.setState({isLoading : true}) 
-            console.log(idConv)
-            console.log("before init!!!!!!!!")
             var db = Database.initialisation()
             await db.collection("Conversations").doc(idConv).update({
                 lecteurs : firebase.firestore.FieldValue.arrayUnion(LocalUser.data.id)
@@ -166,7 +157,6 @@ export default class Accueil_Conversation extends React.Component {
     
 
     nomConv(conv){
-        console.log(conv.nom)
         if(conv.nom == undefined) {
             return(conv.joueur.pseudo)
         } else {
@@ -209,7 +199,6 @@ export default class Accueil_Conversation extends React.Component {
 
     _renderItem = ({item}) => {
         if(item.lecteurs != undefined){
-            console.log("+++++++++++++++++", item.lecteurs)
             var aLue = item.lecteurs.includes(LocalUser.data.id)
         } else {
             aLue = true
@@ -226,7 +215,6 @@ export default class Accueil_Conversation extends React.Component {
                         lecteurs.push(LocalUser.data.id)
                        item.lecteurs = lecteurs 
                     }
-                    console.log("before go to list message")
                     this.props.navigation.push("ListMessages", {conv : item})}}>
                 <View  style = {{flexDirection : "row" , justifyContent : "center"}}>
                     {this._renderPhotoConv(item)}
@@ -254,15 +242,12 @@ export default class Accueil_Conversation extends React.Component {
         var jours = ["Dim","Lun", "Mar", "Mer", "Jeu","Ven", "Sam"]
         var date = new Date(conv.dateDernierMessage)
         var now = new Date()
-        console.log("zzzzzzzzz,", date.getMonth())
-        console.log("zzzzzzzzz,", now.getMonth())
-        console.log(  date.getMonth() == now.getMonth() )
+      
         var memeJour = (date.getDate() == now.getDate() && date.getMonth() == now.getMonth() && date.getFullYear() == now.getFullYear())
         var t = (now - date)
         if(memeJour ) {
             return date.getHours() + ":" + date.getMinutes()
         } else {
-            console.log("====================", now - date)
            if(now - date < 604800000) {  // nbr of mili seconds in a week
                 return jours[date.getDay()]
            } else {

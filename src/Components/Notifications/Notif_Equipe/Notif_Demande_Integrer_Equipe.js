@@ -32,7 +32,6 @@ class Notif_Demande_Integrer_Equipe extends React.Component {
      */
     async getData() {
 
-        console.log("in get data")
         // Données de l'équipe concernée
         var emetteur = await Database.getDocumentData(this.props.notification.emetteur, "Joueurs")
 
@@ -239,16 +238,13 @@ class Notif_Demande_Integrer_Equipe extends React.Component {
         corps   = corps + this.state.equipe.nom + "." 
         for(var i = 0; i <this.state.equipe.joueurs.length; i++) {
             id = this.state.equipe.joueurs[i]
-            console.log("id ", id)
             if(id != this.state.emetteur.id && ! this.state.equipe.capitaines.includes(id)) {
                 var joueur = await Database.getDocumentData(id,"Joueurs")
                 var tokens = [] 
                 if(joueur.tokens != undefined) tokens = joueur.tokens
-                console.log("before boucle send notif", tokens)
-                console.log("before boucle send notif", tokens.length)
+
 
                 for(var k = 0; k < tokens.length; k++) {
-                    console.log("==== ", tokens[k])
                     await this.sendPushNotification(tokens[k], titre, corps)
                 }
             }
