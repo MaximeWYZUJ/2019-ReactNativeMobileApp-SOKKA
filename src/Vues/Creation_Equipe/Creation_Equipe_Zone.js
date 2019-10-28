@@ -6,13 +6,13 @@ import RF from 'react-native-responsive-fontsize';
 import Colors from '../../Components/Colors'
 import place from '../../Components/Creation/place'
 import Villes from '../../Components/Creation/villes.json'
-import Departement from '../../Components/Creation/departements.json'
+import departements from '../../Components/Creation/departements.json'
+import NormalizeString from '../../Helpers/NormalizeString';
 
 /**
  * Vue qui va permettre à l'utilisateur de renseigner la zone d'une équipe qu'il est
  * en train de créer.
  */
-var adresses  = Departement;
 var villes = Villes
 var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 var ds2 = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
@@ -32,12 +32,11 @@ export default class Creation_Equipe_Zone extends React.Component {
         this.champsAnimation = new Animated.ValueXY({ x: wp('-100%'), y:hp('0%') })
         this.state = {
             nom : nom,
-            searchedAdresses: [],
             searchedVilles : [],
             txt : '',
             departement : '',
             ville : '',
-            numDep : 'nonRenseigne',
+            depCode : '',
         };
     }
 
@@ -59,60 +58,36 @@ export default class Creation_Equipe_Zone extends React.Component {
     }
 
 
-    /**
-     * Fonction qui permet de renvoyer une liste des départements qui
-     * commencent par searchedText
-     */
-    searchedAdresses = (searchedText) => {
-        let searchedAdresses = adresses.filter(function(adress) {
+    searchedVilles = (searchedText) => {
+        let searchedAdresses = villes.filter(function(ville) {
             
-            return adress.departmentName.toLowerCase().startsWith(searchedText.toLowerCase()) ;
+            return ville.Nom_commune.toLowerCase().startsWith(searchedText.toLowerCase()) ;
         });
-        this.setState({searchedAdresses: searchedAdresses, departement : searchedText});
+        this.setState({searchedVilles: searchedAdresses,ville : searchedText});
     };
 
 
-    /**
-     * Fonction qui permet de renvoyer une liste des villes du département
-     * renseigné par l'utilisateur et qui commencent par searchtext
-     */
-    searchedVille = (searchedText) => {
-        var numDep = this.state.numDep.toString()
-        let villeFromDep = villes.filter(function(adress) {
-        
-        if(numDep != 'nonRenseigne') {            
-            return adress.Code_postal.toString().startsWith(numDep)
-        }else {
-            return adress
+    jsUcfirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    isVilleOk() {
+        for(var i = 0; i < villes.length; i++) {
+            if(NormalizeString.normalize(this.state.ville) == NormalizeString.normalize(villes[i].Nom_commune)) {
+                return true
+            } 
         }
-        });
+        return false
+    }
 
-        let searchedVille = villeFromDep.filter(function(adress) {
-            return adress.Nom_commune.toLowerCase().startsWith(searchedText.toLowerCase()) ;
-        });
-        this.setState({searchedVilles: searchedVille, ville : searchedText});
-    };
-
-        
-    /**
-     * Fonction qui permet de controler l'affichage des noms des département
-    */
-    renderAdress = (adress) => {
-        var txt = adress.departmentName
-        
-        return (
-            <TouchableOpacity
-                onPress = {() => this.setState({departement : txt, searchedAdresses : [], numDep : adress.departmentCode })}>
-            
-                <View style = {{flexDirection : 'row'}}>
-                        <Text style = {{fontSize :RF(2.3)}}>{adress.departmentCode} - </Text>
-                        <Text style = {{fontWeight : 'bold', fontSize :RF(2.3)}}>{this.state.departement}</Text>
-                        <Text style = {{fontSize :RF(2.3)}}>{txt.substr(this.state.departement.length)}</Text>
-                </View>
-            
-               </TouchableOpacity>
-        );
-    };
+    getDepartement() {
+        for (var i=0; i<departements.length; i++) {
+            if (departements[i].departmentCode === this.state.depCode) {
+                return departements[i].departmentName;
+            }
+        }
+        return "erreur 13/10/19 inscription age zone";
+    }
 
     
     /**
@@ -120,20 +95,15 @@ export default class Creation_Equipe_Zone extends React.Component {
      */
     renderVille = (adress) => {
         var txt = adress.Nom_commune.toLowerCase()
-
-        depCode = adress.Code_postal.toString();//.substring(0,2);
-        if (depCode.length < 5) {
-            depCode = "0"+depCode;
+        var cp = adress.Code_postal;
+        if (cp < 9999) {
+            cp = cp*10;
         }
-        depCode = depCode.substring(0,2);
-        dep = Departement.filter(function (d) {
-            return (d.departmentCode === depCode);
-        })
-        
+        var depCode = cp+"";
         
         return (
             <TouchableOpacity
-                onPress = {() => {console.log(dep); console.log(depCode); this.setState({ville : txt, searchedVilles : [], departement : dep[0].departmentName })}}
+                onPress = {() => this.setState({ville :this.jsUcfirst(txt), depCode: depCode[0]+depCode[1], searchedVilles : [] })}
                 style = {{backgroundColor : Colors.grayItem,  marginTop : hp('1%'), marginBottom : hp('1'),paddingVertical : hp('1%')}}
                 >
             
@@ -143,7 +113,7 @@ export default class Creation_Equipe_Zone extends React.Component {
                         <Text style = {{fontSize :RF(2.6)}}>{txt.substr(this.state.ville.length)}</Text>
                 </View>
             
-               </TouchableOpacity>
+            </TouchableOpacity>
         );
     };
                           
@@ -181,12 +151,18 @@ export default class Creation_Equipe_Zone extends React.Component {
                     </TouchableOpacity>
                     <Text style= {{ fontSize : RF(3.1)}}>Lieu de l'équipe</Text>
                     <TouchableOpacity
-                        onPress = {()=> this.props.navigation.push("CreationEquipeAjoutJoueurs", 
-                            {   nom : this.props.navigation.getParam("nom",undefined), 
-                                departement : this.state.departement, 
-                                ville : this.state.ville
+                        onPress = {()=> {
+                            if (this.isVilleOk()) {
+                                this.props.navigation.push("CreationEquipeAjoutJoueurs", 
+                                    {   nom : this.props.navigation.getParam("nom",undefined), 
+                                        departement : this.getDepartement(), 
+                                        ville : this.state.ville
+                                    }
+                                )
+                            } else {
+                                Alert.alert("Tu dois choisir une ville dans la base SOKKA")
                             }
-                        )}
+                        }}
                     >
                         <Text style = {{fontSize : RF(3.1), color : Colors.agOOraBlue}}>Suivant</Text>
                     </TouchableOpacity>
@@ -199,30 +175,12 @@ export default class Creation_Equipe_Zone extends React.Component {
                         style = {{width : wp('35%'), height : wp('35%')}}/>
                 </View>
 
-                {/* View contenant le champs pour le département */}
-                {/*<View style = {{flexDirection : 'row', marginTop : hp('3%'), alignItems : 'center', alignContent : 'center'}}>
-                    <Animated.View style={[this.champsAnimation.getLayout()]}> 
-                        <TextInput
-                            style = {styles.input}
-                            onChangeText={this.searchedAdresses}
-                            placeholder= "Département"
-                            value = {this.state.departement}
-                        />
-
-                        <ListView
-                            dataSource={ds.cloneWithRows(this.state.searchedAdresses)}
-                            renderRow={this.renderAdress} />
-                        
-                        
-                    </Animated.View>
-                </View>*/}
-
                  {/* View contenant le champs pour la ville */}
                  <KeyboardAvoidingView style = {{flexDirection : 'row', marginTop : hp('3%'), alignItems : 'center', alignContent : 'center'}}>
                     <Animated.View style={[this.champsAnimation.getLayout()]}> 
                         <TextInput
                             style = {styles.input}
-                            onChangeText={this.searchedVille}
+                            onChangeText={(t) => this.searchedVilles(t)}
                             placeholder= "Ville"
                             value = {this.state.ville}
                         />

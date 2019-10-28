@@ -106,6 +106,7 @@ class ItemTerrain extends React.Component{
                     <View style = {{alignSelf: "center", marginLeft : wp('4%')}}>
                         <Text style = {{fontWeight : "bold",color : Colors.agooraBlueStronger, fontSize : RF(2.35)}}>{this.props.InsNom}</Text>
                         <Text>{this.props.EquNom}</Text>
+                        <Text>{this.props.N_Voie == undefined ? "" : this.props.N_Voie == " " ? "" : this.props.N_Voie + " "}{this.props.Voie == undefined ? " " : this.props.Voie == "" ? "" : this.props.Voie}</Text>
                         <Text>{this.props.Ville}</Text>
                     </View>
                 </TouchableOpacity>

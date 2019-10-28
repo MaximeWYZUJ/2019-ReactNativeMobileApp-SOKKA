@@ -23,7 +23,11 @@ export default class FiltrerDefi extends React.Component {
         super(props);
 
         var ajd = new Date();
-        this.today = ajd.getFullYear() + '-' + (ajd.getMonth() + 1) + '-' +  ajd.getDate();
+        this.todayToday = ajd.getFullYear() + '-' + (ajd.getMonth() + 1) + '-' + ajd.getDate();
+        var ss = this.todayToday.split('-');
+        this.todayTodayTxt = ss[2]+'-'+ss[1]+'-'+ss[0];
+
+        this.today = (ajd.getMonth() + 2 > 12 ? ajd.getFullYear() + 1 : ajd.getFullYear()) + '-' + (ajd.getMonth() + 2 > 12 ? "01" : ajd.getMonth() + 2) + '-' +  ajd.getDate();
         var s = this.today.split('-');
         this.todayTxt = s[2]+'-'+s[1]+'-'+s[0];
 
@@ -39,10 +43,10 @@ export default class FiltrerDefi extends React.Component {
                 format: null,
                 defiOuPartie: null,
                 gratuit: false,
-                dateDebut: "2000-01-01",
+                dateDebut: this.todayToday,
                 dateFin: this.today,
                 recherche: false,
-                dateDebutTxt: "01-01-2000",
+                dateDebutTxt: this.todayTodayTxt,
                 dateFinTxt: this.todayTxt
             }
         } else {
@@ -239,7 +243,7 @@ export default class FiltrerDefi extends React.Component {
             ref = ref.where('gratuit', '==', this.state.gratuit);
             bool = true;
         }*/
-        if (this.state.dateDebut != "2000-01-01") {
+        if (this.state.dateDebut != this.todayToday) {
             ref = ref.where('dateParse', '>=', Date.parse(this.state.dateDebut));
             bool = true;
         }
@@ -259,7 +263,7 @@ export default class FiltrerDefi extends React.Component {
         b1 = this.state.ville.length > 0;
         b2 = this.state.defiOuPartie != null;
         b4 = this.state.format != null;
-        b5 = this.state.dateDebut != "2000-01-01";
+        b5 = this.state.dateDebut != this.todayToday;
         b6 = this.state.dateFin != this.today;
         if (b0 || b1 || b2 || b4 ||b5 || b6) {
             return {...this.state}

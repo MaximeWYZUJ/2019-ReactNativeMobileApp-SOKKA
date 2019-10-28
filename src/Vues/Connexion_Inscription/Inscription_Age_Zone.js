@@ -58,12 +58,6 @@ export default class Inscription_Age_Zone extends React.Component {
         this.moveInput()
     }
 
-    changeVille(texte) {
-        this.setState({
-            ville : texte
-        })
-    }
-
     /**
      * Fonction qui permet de renvoyer une liste des villes qui
      * commencent par searchedText
@@ -75,13 +69,6 @@ export default class Inscription_Age_Zone extends React.Component {
         });
         this.setState({searchedVilles: searchedAdresses,ville : searchedText});
     };
-
-
-    changeZone(texte) {
-        this.setState({
-            zone : texte
-        })
-    }
 
     /**
      * Verifie que la villle choisie par l'utilisateur est bien 
@@ -210,8 +197,8 @@ export default class Inscription_Age_Zone extends React.Component {
                                             />
 
                                             <ListView
-                                                    dataSource={ds.cloneWithRows(this.state.searchedVilles)}
-                                                    renderRow={this.renderVille}
+                                                dataSource={ds.cloneWithRows(this.state.searchedVilles)}
+                                                renderRow={this.renderVille}
                                             />
                                             
                                         </Animated.View>

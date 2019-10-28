@@ -191,7 +191,8 @@ export default class RechercheDefaut extends React.Component {
 
         if (this.type == "Equipes") {
             return (
-                <TouchableOpacity onPress={() => Alert.alert(
+                <TouchableOpacity onPress={() => {
+                    Alert.alert(
                     '',
                     "Tu souhaites créer une équipe ?",
                     [
@@ -204,8 +205,8 @@ export default class RechercheDefaut extends React.Component {
                             text: 'Continuer',
                             onPress: () => this.props.navigation.navigate("CreationEquipeNom"),
                         },
-                    ],
-                    )}>
+                    ]
+                    )}}>
                     <Image source={require('../../../res/icon_team.png')} style={{width: wp('20%'), height: wp('20%')}}/>
                 </TouchableOpacity>
             )

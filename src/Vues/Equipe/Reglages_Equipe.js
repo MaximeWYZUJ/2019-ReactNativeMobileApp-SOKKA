@@ -190,11 +190,25 @@ export default class Reglages_Equipe extends React.Component {
     }
 
 
+    isVilleOk() {
+        for(var i = 0; i < villes.length; i++) {
+            if(NormalizeString.normalize(this.ville) == NormalizeString.normalize(villes[i].Nom_commune)) {
+                return true
+            } 
+        }
+        return false
+    }
+
+
     async validate() {
         modifs = {};
 
         if (this.ville) {
-            modifs["ville"] = NormalizeString.normalize(this.ville);
+            if (this.isVilleOk()) {
+                modifs["ville"] = NormalizeString.normalize(this.ville);
+            } else {
+                Alert.alert("Tu dois choisir une ville dans la base SOKKA");
+            }
         }
 
         if (this.citation) {

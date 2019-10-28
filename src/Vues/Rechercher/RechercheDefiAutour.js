@@ -395,10 +395,10 @@ class RechercheDefiAutour extends React.Component {
         for (var i=0; i<terrainList.length; i++) {
 
             if (query == null) {
-                defisTerrain = await db.collection("Defis").where("terrain", "==", terrainList[i].id).get();
+                defisTerrain = await db.collection("Defis").where("terrain", "==", terrainList[i].id).orderBy('dateParse').get();
 
             } else {
-                defisTerrain = await query.where("terrain", "==", terrainList[i].id).get();
+                defisTerrain = await query.where("terrain", "==", terrainList[i].id).orderBy('dateParse').get();
             }
 
             for (var d=0; d<defisTerrain.docs.length; d++) {
@@ -410,6 +410,9 @@ class RechercheDefiAutour extends React.Component {
 				});
             }
 		}
+		/*listeDefis.sort((d1, d2) => {
+			return a.data.dateParse - b.data.dateParse;
+		})*/
         this.setState({
             defis: listeDefis,
             isLoading: false

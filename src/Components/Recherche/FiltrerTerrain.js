@@ -37,8 +37,13 @@ export default class FiltrerTerrain extends React.Component {
             if (f.decouvert) {
                 data = data.filter(((elmt) => {return elmt["Decouvert_Couvert"] === "Découvert"}))
             }
-            if (f.gratuit) {
-                data = data.filter(((elmt) => {return elmt["Payant"] === false}))
+            if (f.gratuit != null) {
+                if (f.gratuit === "gratuit") {
+                    data = data.filter(((elmt) => {return elmt["Payant"] === false}))
+                }
+                if (f.gratuit === "payant") {
+                    data = data.filter(((elmt) => {return elmt["Payant"] === true}))
+                }
             }
             if (f.surface != null) {
                 if (f.surface === "Gazon naturel") {
@@ -77,7 +82,7 @@ export default class FiltrerTerrain extends React.Component {
                 ville: "",
                 searchedDepartements: [],
                 searchedVilles: [],
-                gratuit: false,
+                gratuit: null,
                 surface: null
             }
         } else {
@@ -110,6 +115,21 @@ export default class FiltrerTerrain extends React.Component {
                 <Picker.Item label={"Gazon synthétique"} key={2} value={"Gazon synthétique"}/>
                 <Picker.Item label={"Bitume"} key={3} value={"Bitume"}/>
                 <Picker.Item label={"Synthétique (hors gazon)"} key={4} value={"Synthétique (hors gazon)"}/>
+            </Picker>
+        )
+    }
+
+
+    renderPickerGratuit() {
+        return (
+            <Picker
+                selectedValue={this.state.gratuit}
+                style={{width: wp('60%'), marginRight: wp('5%')}}
+                onValueChange={(itemValue, itemIndex) => this.setState({gratuit: itemValue})}
+                >
+                <Picker.Item label={"indifférent"} key={0} value={null}/>
+                <Picker.Item label={"gratuit"} key={1} value={"gratuit"}/>
+                <Picker.Item label={"payant"} key={2} value={"payant"}/>
             </Picker>
         )
     }
@@ -237,8 +257,8 @@ export default class FiltrerTerrain extends React.Component {
             ref = ref.where('Decouvert_Couvert', '==', qDecouv);
             bool = true;
         }
-        if (this.state.gratuit) {
-            this.state.gratuit ? qGrat = "false" : qGrat = "true";
+        if (this.state.gratuit !== null) {
+            this.state.gratuit == "gratuit" ? qGrat = "false" : qGrat = "true";
             ref = ref.where('Payant', '==', qGrat);
             bool = true;
         }
@@ -259,7 +279,7 @@ export default class FiltrerTerrain extends React.Component {
         b3 = this.state.eclairage;
         b4 = this.state.handicap;
         b5 = this.state.decouvert;
-        b6 = this.state.gratuit;
+        b6 = this.state.gratuit !== null;
         b7 = this.state.surface !== null;
         if (b0 || b1 || b2 || b3 || b4 || b5 || b6 || b7) {
             return {...this.state};
@@ -333,7 +353,7 @@ export default class FiltrerTerrain extends React.Component {
                 {/* Gratuit */}
                 <View style={styles.rowFilter}>
                     <Text style={{width: wp('30%'), marginRight: wp('5%')}}>Gratuit</Text>
-                    <Switch value={this.state.gratuit} onValueChange={() => this.setState({gratuit: !this.state.gratuit})}/>
+                    {this.renderPickerGratuit()}
                 </View>
 
                 {/* Type de sol */}

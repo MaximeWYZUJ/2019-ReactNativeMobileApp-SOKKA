@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, FlatList, TouchableOpacity, Image, ScrollView } from 'react-native'
+import { View, Text, FlatList, TouchableOpacity, Image, ScrollView, Alert } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -226,6 +226,28 @@ class ComposantRechercheBDD extends React.Component {
 
     renderSpecialButton() {
         if (this.props.renderSpecialButton != undefined) {
+            if (this.type == "Equipes") {
+                return (
+                    <TouchableOpacity onPress={() => {
+                        Alert.alert(
+                        '',
+                        "Tu souhaites créer une équipe ?",
+                        [
+                            {
+                                text: 'Annuler',
+                                onPress: () => {},
+                                style: 'cancel'
+                            },
+                            {
+                                text: 'Continuer',
+                                onPress: () => this.props.navigation.navigate("CreationEquipeNom"),
+                            },
+                        ]
+                        )}}>
+                        <Image source={require('../../../res/icon_team.png')} style={{width: wp('20%'), height: wp('20%')}}/>
+                    </TouchableOpacity>
+                )
+            }
             return (
                 <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                     {this.props.renderSpecialButton()}

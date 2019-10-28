@@ -74,7 +74,7 @@ class Terrains_Autours extends React.Component {
 	componentDidMount() {
 		this.triTerrains().then(() => {
 			var markers = [];
-			for(var i =0 ; i < Math.min(8, this.state.allTerrains.length); i ++) {
+			for(var i =0 ; i < Math.min(30, this.state.allTerrains.length); i ++) {
 				var t =  {
 					title: ' ',
 					coordinates: {
@@ -147,7 +147,7 @@ class Terrains_Autours extends React.Component {
                 })
                 this.triTerrains().then(() => {
 					var markers = [];
-					for(var i =0 ; i < Math.min(8, this.state.allTerrains.length); i ++) {
+					for(var i =0 ; i < Math.min(30, this.state.allTerrains.length); i ++) {
 						var t =  {
 							title: ' ',
 							coordinates: {
@@ -177,7 +177,7 @@ class Terrains_Autours extends React.Component {
 			})
 			this.triTerrains().then(() => {
 				var markers = [];
-				for(var i =0 ; i < Math.min(8, this.state.allTerrains.length); i ++) {
+				for(var i =0 ; i < Math.min(30, this.state.allTerrains.length); i ++) {
 					var t =  {
 						title: ' ',
 						coordinates: {
@@ -345,7 +345,7 @@ class Terrains_Autours extends React.Component {
 		this.triTerrains(this.buildTerrainsWithRegionChanged()).then(() => {
 			console.log("then tri terrain")
 			var markers = []
-			for(var i =0 ; i < Math.min(8, this.state.allTerrains.length); i ++) {
+			for(var i =0 ; i < Math.min(30, this.state.allTerrains.length); i ++) {
 				console.log("in for", i)
 				console.log(this.state.allTerrains[i].Latitude)
 				console.log(this.state.allTerrains[i].Latitude)
