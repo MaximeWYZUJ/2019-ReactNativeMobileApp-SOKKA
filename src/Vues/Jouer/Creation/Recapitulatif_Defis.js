@@ -264,8 +264,12 @@ export default class Recapitulatif_Defis extends React.Component {
             heure = "0" + heure
         }
         var minutes = this.hours.split(':')[1]
+
+        if(minutes.length  == 1) {
+            minutes = "0" + minutes
+        }
         var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes
-        var date = new Date(d)
+        var date =new Date(d)
 
         var dateWithTimeZone = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes+"Z")
         console.log("DATE WITH TIME ZONE", dateWithTimeZone)
@@ -402,6 +406,7 @@ export default class Recapitulatif_Defis extends React.Component {
                         recepteur : equipe.capitaines[i],
                         time : new Date(),
                         type : Types_Notification.ACCEPTER_DEFIS_CONTRE_EQUIPE,
+                        //defis_refuse : false
                     }
                 )
             }

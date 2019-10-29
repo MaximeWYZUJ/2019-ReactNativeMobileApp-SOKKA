@@ -187,7 +187,8 @@ class Fiche_Partie_Rejoindre extends React.Component {
         var partie = await Database.getDocumentData(id,"Defis")
         console.log("id partie", id)
     
-        partie.jour.seconds = partie.jour.seconds - 7200    // Pour mettre en heure francaise
+        partie.jour.seconds = partie.jour.seconds
+        
         this.findTerrain(partie.terrain)
         var joueursData = await Database.getArrayDocumentData(partie.participants, "Joueurs")
         
@@ -494,15 +495,20 @@ class Fiche_Partie_Rejoindre extends React.Component {
     }
 
     _renderBtnRejoindre(){
-        var passe = this.state.partie.dateParse <= Date.parse(new Date())
-        if(this.state.partie.participants.includes(this.monId)  || passe) {
+
+        var date = new Date( this.state.partie.jour.seconds * 1000)
+
+        var passe = DatesHelpers.isMatchEnded(date, this.state.partie.duree)
+
+        console.log("EST PASSE BEFORE IF", passe)
+        if(this.state.partie.participants.includes(LocalUser.data.id)  || passe) {
             return(
                 <View>
                     <TouchableOpacity 
                             style = {styles.btn_feuille_de_match}
                             onPress = {() => { 
-                                    var date = new Date( this.state.partie.jour.seconds * 1000)
-                                    if(date > new Date()) {
+                                    if(! passe) {
+                                        console.log("after press passe")
                                         this.props.navigation.push("FeuillePartieAVenir", 
                                             { 
                                                 partie : this.state.partie,
@@ -635,8 +641,9 @@ class Fiche_Partie_Rejoindre extends React.Component {
      * si la feuille de match a été complétée.
      */
     _renderListButeurs() {
-        var date =  DatesHelpers.buildDateWithTimeZone(new Date(this.state.partie.jour.seconds * 1000))
-        if(date < new Date()) {
+        var date = new Date(this.state.partie.jour.seconds * 1000)
+        var estPasse = DatesHelpers.isMatchEnded(date, this.state.partie.duree)  
+      if(estPasse) {
             console.log(this.state.partie.buteurs)
             // Si les buteurs ont été renseignés
             if(this.state.partie.buteurs.length > 0) {
@@ -674,9 +681,9 @@ class Fiche_Partie_Rejoindre extends React.Component {
      * si la feuille de match a été complétée.
      */
     _renderHommesMatch() {
-        var date =  DatesHelpers.buildDateWithTimeZone(new Date( this.state.partie.jour.seconds * 1000))
-        
-        if(date < new Date()) {
+        var date = new Date(this.state.partie.jour.seconds * 1000)
+        var estPasse = DatesHelpers.isMatchEnded(date, this.state.partie.duree)        
+        if(estPasse) {
             // Si les buteurs ont été renseignés
             if(this.state.partie.votes.length > 0) {
                 var joueur = this.findHommeDuMatch()

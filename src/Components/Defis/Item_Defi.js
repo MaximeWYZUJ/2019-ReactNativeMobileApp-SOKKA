@@ -247,7 +247,10 @@ class Item_Defi extends React.Component {
     
     render() {
         var color = '#FFFFFF' 
-        if(DatesHelpers.buildDateWithTimeZone(this.props.jour) < new Date())  { // On decale la date de 1h 
+         
+        var date = new Date( this.props.allDataDefi.jour.seconds * 1000)
+        
+        if(DatesHelpers.isMatchEnded(date,this.props.duree))  { // On decale la date de 1h 
             color = "#E1E1E1"
 
         }

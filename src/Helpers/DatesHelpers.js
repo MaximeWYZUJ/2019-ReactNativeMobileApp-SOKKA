@@ -72,8 +72,8 @@ export default class DatesHelpers {
             heure = heure - 24
         }
 
-        if(heure.length == 1) {
-            heure = "0" + heure
+        if(heure.toString().length == 1) {
+            heure = "0" + heure.toString()
         }
         if(minutes.toString().length == 1) {
             minutes = '0'+ minutes.toString()
@@ -97,5 +97,18 @@ export default class DatesHelpers {
     static buildDateWithTimeZone(date) {
         var tzDifference = date.getTimezoneOffset();
         return new Date(date.getTime() - tzDifference * 60 * 1000);
+    }
+
+
+    static isMatchEnded(jour, duree) {
+        console.log("**************************")
+        console.log("duree",duree)
+        console.log("NOW", this.buildDateWithTimeZone(new Date()))
+        console.log("jour, ", jour)
+        console.log(this.buildDateWithTimeZone(new Date()) - jour)
+        console.log("is ended ",((this.buildDateWithTimeZone(new Date()) - jour) > duree * 3600000))
+        console.log("**************************")
+
+        return ((this.buildDateWithTimeZone(new Date()) - jour) > duree * 3600000) // Converti duree en ms 
     }
 }

@@ -411,7 +411,7 @@ class Terrains_Autours extends React.Component {
 		}
 		liste.push(t)
         this.setState({ indexState : index,selectedTerrain : t})
-		this.fitAllMarkers(index)
+		//this.fitAllMarkers(index)
 
 	}
 

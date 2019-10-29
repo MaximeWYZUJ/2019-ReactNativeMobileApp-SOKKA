@@ -10,7 +10,7 @@ import Distance from '../../Helpers/Distance'
 import Item_Defi from '../../Components/Defis/Item_Defi'
 import Item_Partie from '../../Components/Defis/Item_Partie'
 import Type_Defis from '../../Vues/Jouer/Type_Defis'
-
+import DatesHelpers from '../../Helpers/DatesHelpers'
 
 const url_icon_like = 'app/res/icon_like.png'
 
@@ -20,7 +20,6 @@ const url_icon_like = 'app/res/icon_like.png'
  * Classe qui va permettre d'afficher le profil d'un terrain
  */
 export default class Profil_Terrain extends React.Component {
-
 
 
     constructor(props) {
@@ -41,7 +40,9 @@ export default class Profil_Terrain extends React.Component {
             this.dispDistance = values[0]+","+values[1].substr(0,2)+" km";
         } else {
             this.dispDistance = "";
-        }
+        } 
+
+        
 
         var typeSol = this.localData.TypeSol.split(" ");
         this.gazon = typeSol[0] === "Gazon";
@@ -172,17 +173,29 @@ export default class Profil_Terrain extends React.Component {
     async getAllDefisAndPartie() {
         var db = Database.initialisation()
         var allDefis = [];
+        var now = DatesHelpers.buildDateWithTimeZone(new Date())
 
+        console.log("in get defis", this.id)
         var ref = db.collection("Defis");
-        var query = ref.where("terrain", "==", this.id).orderBy("dateParse", "desc")
+        var query = ref.where("terrain", "==", this.id).where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
+        query.get().then(async (results) => {
+            console.log("result get" , results.length)
+            for(var i = 0; i < results.docs.length ; i++) {
+                var defi = results.docs[i].data()
+                var date = new Date(defi.jour.seconds * 1000)
+                var estPasse = DatesHelpers.isMatchEnded(date, defi.duree)     
+                if(! estPasse) {
+                    allDefis.push(defi)
+                }
+                allDefis.push(defi)
 
-        // On regarde s'il y a eu des defis sur ce terrain
-        var results = await query.get();
+            }
+            this.setState({defis : allDefis})
 
-        for(var i = 0; i < results.docs.length ; i++) {
-            allDefis.push(results.docs[i].data());
-        }
-        this.setState({defis : allDefis})
+        }).catch(function(error) {
+            console.log("error getting the docs" ,error)
+        })
+      
     }
 
 
@@ -193,16 +206,16 @@ export default class Profil_Terrain extends React.Component {
                 <Item_Partie
                     id = {item.id}
                     format = {item.format}
-                    jour = {new Date(item.jour.seconds *1000)} 
+                    jour = {new Date(item.jour.toDate())} 
                     duree = {item.duree}
                     joueurs = {this.buildJoueurs(item)}
                     nbJoueursRecherche =  {item.nbJoueursRecherche}
                     terrain=  {item.terrain}
-                    latitudeUser = {LocalUser.geolocalisation.latitude}
-                    longitudeUser = {LocalUser.geolocalisation.longitude}
+                    latitudeUser = {this.state.latitude}
+                    longitudeUser = {this.state.longitude}
                     message_chauffe  = {item.message_chauffe}
+                    dateString = {item.dateString}
                     partieData = {item}
-
                 />
             )
         } else if(item.type == Type_Defis.defis_2_equipes) {
@@ -215,11 +228,14 @@ export default class Profil_Terrain extends React.Component {
                     equipeDefiee = {item.equipeDefiee}
                     terrain = {item.terrain}
                     allDataDefi = {item}
+                    dateString = {item.dateString}
+
+                        
                 />
             )
         } else {
             return(
-                <Text>Erreur</Text>
+                <Text>oooo</Text>
             )
         }  
     }
@@ -400,9 +416,12 @@ export default class Profil_Terrain extends React.Component {
                     </View>
                     {/* Pour les défis */}
                     <View style = {styles.main_container_defis}>
-                        <View style = {styleBloc}>
+                        <TouchableOpacity style = {styleBloc}
+                            onPress = {() => {
+                                this.props.navigation.push("CalendrierTerrain", {id: this.id, header:"test"})
+                            }}>
                             <Text style = {styleTxtBloc}>Défis et parties sur ce terrain</Text>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                     <View style = {{ alignItems : "center"}}>
                         {this.displayDefis()}

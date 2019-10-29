@@ -51,8 +51,8 @@ class Fiche_Defi_Rejoindre extends React.Component {
             isCapitaine : true
         }
 
-        console.log("defi", this.props.navigation.getParam('defi',undefined) )
-       
+
+        
         this.state = {
             defi : this.props.navigation.getParam('defi',undefined), 
             isLoading : true,
@@ -705,8 +705,9 @@ class Fiche_Defi_Rejoindre extends React.Component {
      * si la feuille de match a été complétée.
      */
     _renderListButeurs() {
+        
         var date = new Date( this.state.defi.jour.seconds * 1000)
-        if(date < new Date()) {
+        if(DatesHelpers.isMatchEnded(date, this.state.defi.duree)) {
             if(this.state.isLoading) {
                 return (
                     <View style = {{marginTop : hp('8%')}}>
@@ -846,7 +847,8 @@ class Fiche_Defi_Rejoindre extends React.Component {
      */
     _renderHommesMatch() {
         var date = new Date( this.state.defi.jour.seconds * 1000)
-        if(date < new Date()) {
+        var passe = DatesHelpers.isMatchEnded(date, this.state.defi.duree)
+        if(passe) {
             return(
                 <View>
                     <Text style = {{marginLeft : wp('3%'), marginTop : hp('1%'), fontWeight : 'bold'}}>Homme du match : </Text>
@@ -941,12 +943,12 @@ class Fiche_Defi_Rejoindre extends React.Component {
      */
     _renderBtn(){
 
-        var estPasse = (new Date(this.state.defi.jour.seconds * 1000) < new Date())
+        var date = new Date(this.state.defi.jour.seconds * 1000)
+        var estPasse = DatesHelpers.isMatchEnded(date, this.state.defi.duree)
         var cap1 =  this.state.equipeOrganisatrice.capitaines.includes(this.userData.id)
         var cap2 = false 
         if( this.state.equipeDefiee != undefined) cap2 =  this.state.equipeDefiee.capitaines.includes(this.userData.id)
 
-        console.log("NON CAP1 et this.state.equipeDefiee == undefined",this.state.equipeDefiee == undefined && (!cap1) )
         var participe1 =this.state.defi.joueursEquipeOrga.includes(this.userData.id)
         var participe2  = this.state.defi.joueursEquipeDefiee.includes(this.userData.id)
         /*if(this.state.defi.defis_refuse) {
@@ -955,12 +957,15 @@ class Fiche_Defi_Rejoindre extends React.Component {
             )
         }*/
 
+
         var nomEquipeDefiee = ""
         if(this.state.equipeDefiee != undefined) nomEquipeDefiee = this.state.equipeDefiee.nom
 
 
+        console.log("RENDER BTN TEST EST PASSE" , estPasse)
         // Si le défi est passé
         if(estPasse) {
+            console.log(" EST PASSE TEST RENDER BTN")
             return(
                 <TouchableOpacity
                     style = {styles.btn_feuille_de_match} 
@@ -969,7 +974,6 @@ class Fiche_Defi_Rejoindre extends React.Component {
                 </TouchableOpacity>
             
             )
-
         }else if(this.state.defi.organisateur == LocalUser.data.id && this.state.defi.attenteValidation) {
             return(
                 <View>

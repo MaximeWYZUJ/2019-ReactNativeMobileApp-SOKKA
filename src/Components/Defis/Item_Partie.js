@@ -188,8 +188,10 @@ class Item_Partie extends React.Component {
     render() {
         var color = '#FFFFFF' 
 
-        var now = Date.parse(new Date())
-        if(DatesHelpers.buildDateWithTimeZone(this.props.jour) < new Date() )  { 
+        var date = new Date(this.props.partieData.jour.seconds * 1000)
+
+    
+        if(DatesHelpers.isMatchEnded(date, this.props.duree))  { 
             color = "#E1E1E1"
 
         }

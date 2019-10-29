@@ -57,6 +57,7 @@ class ProfilJoueur extends React.Component {
         }
         
 
+
         this.state = {
             allDefis : [],
             refreshing: false,
@@ -108,6 +109,7 @@ class ProfilJoueur extends React.Component {
 
     componentDidMount() {
         this.getAllDefisAndPartie()
+
       
     }
 
@@ -313,15 +315,18 @@ class ProfilJoueur extends React.Component {
         var db = Database.initialisation()
         var allDefis = []
         var index = 1
-        var now = new Date()
+        var now = DatesHelpers.buildDateWithTimeZone(new Date())
 
         var ref = db.collection("Defis");
         var query = ref.where("joueursConcernes", "array-contains", this.id).where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
         query.get().then(async (results) => {
             for(var i = 0; i < results.docs.length ; i++) {
                 var defi = results.docs[i].data()
-                defi.jour.seconds = defi.jour.seconds 
-                allDefis.push(defi)
+                var date = new Date(defi.jour.seconds * 1000)
+                var estPasse = DatesHelpers.isMatchEnded(date, defi.duree)     
+                if(! estPasse) {
+                    allDefis.push(defi)
+                }
 
             }
             this.setState({allDefis : allDefis})
@@ -507,12 +512,13 @@ class ProfilJoueur extends React.Component {
     // ===============================================================================
 
     async gotoEquipesFav() {
-        equipesFav = [];
+        var equipesFav = [];
+        var equipeFavData = []
         for (idEquipeFav of this.joueur.equipesFav) {
             equipeFavData = await Database.getDocumentData(idEquipeFav, 'Equipes');
             equipesFav.push(equipeFavData);
         }
-        equipeFavData.sort(function(a, b){
+        equipesFav.sort(function(a, b){
             if( a.nom.toLowerCase() <= b.nom.toLowerCase()) {
                 return -1
             } else {
@@ -642,6 +648,14 @@ class ProfilJoueur extends React.Component {
         //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
 		this.equipes = await Database.getArrayDocumentData(this.joueur.equipes, "Equipes")
 
+        this.equipes.sort(function(a, b){
+            if( a.nom.toLowerCase() <= b.nom.toLowerCase()) {
+                return -1
+            } else {
+                return 1
+            }
+        }
+        );
         
        
         this.setState({refreshing: false});

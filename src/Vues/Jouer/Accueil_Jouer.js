@@ -199,9 +199,11 @@ class Accueil_Jouer extends React.Component {
         var ref = db.collection("Defis");
         console.log("before query")
 
+        var now =  DatesHelpers.buildDateWithTimeZone(new Date())
+
         console.log(Date.parse(new Date()))
         // Query sur les partie
-        var query = ref.where("dateParse", ">=", Date.parse(new Date()))
+        var query = ref.where("dateParse", ">=", Date.parse(now))
                         .where("recherche","==",true)
                         .orderBy("dateParse");
         query.get().then(async (results) => {

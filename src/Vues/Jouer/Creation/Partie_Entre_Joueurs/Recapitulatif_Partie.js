@@ -62,6 +62,7 @@ export default class Recapitulatif_Partie extends React.Component {
     }
 
 
+
     // ===========================================================================
     // ========================== NOTIFICATIONS ==================================
     // ===========================================================================
@@ -237,6 +238,10 @@ export default class Recapitulatif_Partie extends React.Component {
 
         if(heure.length == 1) {
             heure = "0" + heure
+        }
+
+        if(minutes.length  == 1) {
+            minutes = "0" + minutes
         }
         var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes
         console.log(d)

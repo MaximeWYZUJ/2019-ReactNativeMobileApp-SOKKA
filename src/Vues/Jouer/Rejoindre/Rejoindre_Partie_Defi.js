@@ -137,7 +137,8 @@ export default class Rejoindre_Partie_Defi extends React.Component {
                     equipeOrganisatrice = {item.equipeOrganisatrice}
                     equipeDefiee = {item.equipeDefiee}
                     terrain = {item.terrain}
-                        
+                    allDataDefi = {item}
+
                 />
             )
         } else {
