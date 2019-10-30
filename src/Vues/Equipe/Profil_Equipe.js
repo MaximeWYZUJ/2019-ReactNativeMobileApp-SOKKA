@@ -11,7 +11,7 @@ import Type_Defis from '../../Vues/Jouer/Type_Defis'
 import firebase, { database } from 'firebase'
 import Simple_Loading from '../../Components/Loading/Simple_Loading'
 //import '@firebase/firestore'
-
+import DatesHelpers from "../../Helpers/DatesHelpers"
 import Item_Defi from '../../Components/Defis/Item_Defi'
 import Item_Partie from '../../Components/Defis/Item_Partie'
 import Types_Notification from '../../Helpers/Notifications/Types_Notification';
@@ -84,13 +84,18 @@ export default class Profil_Equipe extends React.Component {
     getAllDefisAndPartie() {
         var db = Database.initialisation()
         var allDefis = []
-        var now = new Date()
+        var now = DatesHelpers.buildDateWithTimeZone(new Date())
         var ref = db.collection("Defis");
-        var query = ref.where("equipesConcernees", "array-contains" ,this.state.id).orderBy("dateParse")
+        var query = ref.where("equipesConcernees", "array-contains" ,this.state.id).where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
 
         query.get().then(async (results) => {
             for(var i = 0; i < results.docs.length ; i++) {
                 var defi = results.docs[i].data()
+                var date = new Date(defi.jour.seconds * 1000)
+                var estPasse = DatesHelpers.isMatchEnded(date, defi.duree)     
+                if(! estPasse) {
+                    allDefis.push(defi)
+                }
                 allDefis.push(defi)
                 //defisArray.push(results.docs[i].data())
             }
@@ -142,7 +147,7 @@ export default class Profil_Equipe extends React.Component {
                 isaMember : doc.joueurs.some(elmt => elmt === LocalUser.data.id),
                 id: id,
                 equipeData: doc,
-                txt_identite : doc.age + ' ans, ' + doc.ville.charAt(0).toUpperCase() + doc.ville.slice(1),
+                txt_identite : doc.ville.charAt(0).toUpperCase() + doc.ville.slice(1),
                 citation : doc.citation,
                 sexe : doc.sexe,
                 nbJoueur : nbJ,
@@ -180,8 +185,10 @@ export default class Profil_Equipe extends React.Component {
      */
     async getInfosJoueursEquipe(jArray, equipe) {
         var liste = [];
+        var allJoueurs = []
         for (jId of jArray){
             j = await Database.getDocumentData(jId, 'Joueurs');
+            allJoueurs.push(j)
             tokens = []
             if(j.tokens != undefined) tokens = j.tokens
             j2 = {
@@ -199,12 +206,29 @@ export default class Profil_Equipe extends React.Component {
 
         var listeBuild = this.buildJoueursCapNonCap(liste);
 
+        var txt_identite = this.state.txt_identite 
         this.setState({
             isLoadingJoueurs: false,
             joueurs: listeBuild,
+            txt_identite : this.calculAgeMoyen(allJoueurs) + " ans " +  txt_identite 
         })
     }
 
+
+
+    calculAgeMoyen(joueurs) {
+        var sum = 0
+        for(var i = 0; i < joueurs.length; i++) {
+            if(joueurs[i].naissance.seconds == undefined) {
+                var naissance = new Date(joueurs[i].naissance)
+            } else {
+                naissance = new Date(joueurs[i].naissance.seconds * 1000)
+            }
+            sum = sum + DatesHelpers.calculAge(naissance)
+        }
+
+        return sum / joueurs.length
+    }
 
     /**
      * Fonction qui permet de renvoyer une liste  contenant les informations

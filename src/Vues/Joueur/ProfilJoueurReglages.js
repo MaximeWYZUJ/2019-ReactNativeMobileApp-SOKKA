@@ -335,6 +335,8 @@ class ProfilJoueurReglages extends React.Component {
 
 
     async _validate() {
+        this.setState({isLoading: true})
+
         if (this.naissance) {
             var naissanceTimestamp = firebase.firestore.Timestamp.fromMillis(Date.parse(this.naissance));
             this.joueur.naissance = naissanceTimestamp
@@ -394,11 +396,17 @@ class ProfilJoueurReglages extends React.Component {
             this.joueur.photo = newPhoto;
         }
 
+        console.log("================================")
+        console.log(newPhoto)
+        console.log("================================")
+
+        console.log(this.joueur)
         /* Initialisation de la base de données. */
         var db = Database.initialisation()
     
-        this.setState({isLoading: true})
 
+        //console.log(this.state)
+       // console.log(this.joueur)
         /* Enregistrer l'utilisateur dans la base de données. */
         db.collection("Joueurs").doc(this.id).set({
             age : this.state.age,
@@ -424,6 +432,7 @@ class ProfilJoueurReglages extends React.Component {
             merge: true
 
         }).then(() => {
+            console.log("in then !!!!")
             // On veut modifier le mail
             if (this.mail != "") {
                 var user = firebase.auth().currentUser;

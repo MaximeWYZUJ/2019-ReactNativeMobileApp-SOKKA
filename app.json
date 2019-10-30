@@ -8,7 +8,10 @@
       "ios",
       "android"
     ],
-    "version": "1.0.3",
+    "notification": {
+      "icon" : "./assets/icon_notif.png"
+    },
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -29,13 +32,12 @@
         "NSCameraUsageDescription": "Cette application utilise la caméra pour permettre à l'utilisateur de personnaliser son avatar, ou celui d'une équipe.",
         "NSLocationWhenInUseUsageDescription": "Cette application utilise la position de l'appareil pour proposer des terrains, des joueurs et des match à proximité de l'utilisateur.",
         "NSPhotoLibraryUsageDescription": "Cette application a besoin d'accèder à la galerie pour permettre à l'utilisateur de personnaliser son avatar ou celui d'une équipe"
-
       }
     },
 
     "android" : {
       "package": "com.yourcompattny.yourappname",
-      "versionCode" : 12,
+      "versionCode" : 14,
       "config": {
         "googleMaps": { "apiKey": "AIzaSyCOnOIQwHw3powkcmp7JgNu8J6iG04kGQM" }   
      }

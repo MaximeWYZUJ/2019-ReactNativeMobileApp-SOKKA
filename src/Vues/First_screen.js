@@ -83,11 +83,11 @@ class First_screen extends React.Component {
 
         // Cas où l'utilisateur vien de se déconnecter
         this.checkIfUserISConnected()
-        setTimeout(() => {
+        /*setTimeout(() => {
             this.setState({
                 isLoading: false
             })
-        }, 5000)
+        }, 5000)*/
         
         // Start counting when the page is loaded
         this.timeoutHandle = setTimeout(()=>{

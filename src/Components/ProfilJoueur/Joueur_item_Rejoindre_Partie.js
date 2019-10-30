@@ -7,6 +7,7 @@ import StarRating from 'react-native-star-rating'
 import { CheckBox } from 'react-native-elements'
 import { connect } from 'react-redux'
 import actions from '../../Store/Reducers/actions'
+import LocalUser from '../../Data/LocalUser.json'
 
 /**
  * Composant qui affiche un item joueurs, il va permettre de selectionner des  joueur 
@@ -32,7 +33,11 @@ class Joueur_item_Rejoindre_Partie extends React.PureComponent{
         console.log("length ",this.props.joueursPartie.length)
 
        
-            if(this.props.joueursPartie.length  >= this.props.nbJoueursRecherchesPartie ) {
+        var nbJoueurs = this.props.nbJoueursRecherchesPartie 
+        if(this.props.JoueursParticipantsPartie.includes(LocalUser.data.id)) {
+            nbJoueurs = nbJoueurs - 1
+        }
+            if(this.props.joueursPartie.length  >= nbJoueurs) {
                 Alert.alert(
                     '',
                     "Seulement " + this.props.nbJoueursRecherchesPartie +  " joueur(s) sont recherché(s) pour cette partie"
@@ -52,7 +57,10 @@ class Joueur_item_Rejoindre_Partie extends React.PureComponent{
 
 
     render()  {
-        const  isChecked  = this.props.isChecked;
+        const  isChecked  =   this.props.JoueursParticipantsPartie.includes(this.props.id)//this.props.isChecked;
+        console.log("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        console.log("PARTICI¨PANTS §§ , ", this.props.JoueursParticipantsPartie)
+        console.log("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
 
         return(
             <View style = {{flexDirection : "row",justifyContent: "space-between", marginTop : hp('3%'), backgroundColor : "white", paddingVertical : hp('2%')}}>

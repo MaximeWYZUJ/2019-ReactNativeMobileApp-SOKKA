@@ -38,6 +38,10 @@ export default class Information_Recapitulatif extends React.Component {
         if(heure >= 24) {
             heure = heure - 24
         }
+
+        if(heure.toString().length == 1) {
+            heure =  "0" + heure.toString()
+        }
         if(minutes.toString().length == 1) {
             minutes = '0'+ minutes.toString()
         }
@@ -53,12 +57,33 @@ export default class Information_Recapitulatif extends React.Component {
     }
 
     render() {
+        
+        var jour = this.props.jour.split('-')[0]
+        var mois = this.props.jour.split('-')[1]
+        if(mois.length ==1) {
+            mois = '0'+mois
+        }
+
+        if(jour.length ==1) {
+            jour = '0'+jour
+        }
+
+       
+        var an = this.props.jour.split('-')[2]
+        var heure = this.props.heure.split(':')[0]
+        var minutes = this.props.heure.split(':')[1]
+
+        if(heure.length == 1) {
+            heure = "0" + heure
+        }
+
+        var date = jour +"-" + mois + "-" + an + " - " + heure + ":"+ minutes + " à " + this.calculHeureFin()
         return (
             <View>
                  {/* Information sur le defi */}
                  <Text style = {styles.infoDefis}>{this.renderTypeDefis()} {this.props.format} par {this.props.pseudo}</Text>
                     <Text style = {styles.separateur}>_____________________________________</Text>
-                    <Text style = {styles.infoDefis}>{this.props.jour} - {this.props.heure} à {this.calculHeureFin()} </Text>
+                    <Text style = {styles.infoDefis}>{date}</Text>
                     <Text style = {styles.separateur}>_____________________________________</Text>
 
                     {/* View contenant l'icon terrain et son nom*/}

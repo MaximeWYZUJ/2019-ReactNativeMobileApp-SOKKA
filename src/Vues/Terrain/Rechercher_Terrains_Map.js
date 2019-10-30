@@ -28,6 +28,8 @@ const LONGITUDE = 145561;
 const LATITUDE_DELTA = 0.0522;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
+const image_target = require('app/res/target.png')
+
 const DEFAULT_PADDING = { top: 350, right: 200, bottom: 350, left: 200 };
 
 var  terrains = function(){
@@ -62,6 +64,13 @@ export default class Rechercher_Terrains_Map  extends React.Component {
             markers: [],		
 			terrainsQuery : [],
 			region : {
+				latitude: this.latitude,
+				longitude: this.longitude,
+				latitudeDelta: LATITUDE_DELTA,
+				longitudeDelta: LONGITUDE_DELTA,
+			},
+
+			initialRegion : {
 				latitude: this.latitude,
 				longitude: this.longitude,
 				latitudeDelta: LATITUDE_DELTA,
@@ -132,7 +141,10 @@ export default class Rechercher_Terrains_Map  extends React.Component {
 	}
 
 	
-	
+	goToMyLocation() {
+		this.map.animateToRegion(this.state.initialRegion,500)
+
+	}
 
 	
 	changeMarkerWithSlider(index) {
@@ -323,6 +335,16 @@ export default class Rechercher_Terrains_Map  extends React.Component {
 						<Image
 							source = {require('../../../res/list.png')}
 							style = {{width : wp('17%'), height : wp('17%')}}/>
+
+					</TouchableOpacity>
+
+					<TouchableOpacity
+						style = {{padding : wp('4%'),position : "absolute",bottom : hp('30%'), right: wp('1%')}}
+						onPress = {() => this.goToMyLocation()}
+						>
+						<Image
+							source = {image_target}
+							style = {{width : wp('10%'), height : wp('10%')}}/>
 
 					</TouchableOpacity>
            		</View>  

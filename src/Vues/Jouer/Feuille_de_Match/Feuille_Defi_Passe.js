@@ -107,13 +107,12 @@ class Feuille_Defi_Passe extends React.Component {
             var corps = "Le capitaine de l'équipe adverse " + nomEquipeAdverse + " a renseigné la feuille de match"
             + " du défi contre ton équipe " + equipe.nom +"."
             for(var i = 0; i <equipe.capitaines.length ; i++) {
+                console.log("cap" , equipe.capitaines[i])
                 var joueur = await Database.getDocumentData(equipe.capitaines[i], "Joueurs")
-                console.log("++++ ++++++++++++", joueur)
 
                 var tokens = [] 
                 if(joueur.tokens != undefined) tokens = joueur.tokens
                 for(var k = 0; k < tokens.length ; k++) {
-                    console.log("eeeeeeeeeeeeeeeee", tokens[k])
                     await this.sendPushNotification(tokens[k], titre, corps)
                 }
                 await this.storeNotifToCapAdverse(joueur)
@@ -136,6 +135,7 @@ class Feuille_Defi_Passe extends React.Component {
         if(this.state.equipeOrganisatrice != undefined && this.state.equipeDefiee != undefined) {
             console.log("in first if !!")
             if(this.state.defi.joueursEquipeOrga.includes(this.monId) && this.state.equipeOrganisatrice.capitaines.includes(this.monId)) {
+                console.log("in first sous if")
                 var joueurs = this.state.defi.confirmesEquipeOrga    
                 corps = "Le capitaine de ton équipe " + this.state.equipeOrganisatrice.nom + " a renseigné la feuille de match du défi contre "
                 corps = corps + this.state.equipeDefiee.nom + "."
@@ -143,6 +143,7 @@ class Feuille_Defi_Passe extends React.Component {
                 // Envoyer la notifs aux cap adverse 
                 await this.sendNotifToCapitaineAdverse(this.state.equipeDefiee, this.state.equipeOrganisatrice.nom)
             } else if(this.state.equipeDefiee.capitaines.includes(this.monId) && this.state.defi.joueursEquipeDefiee.includes(this.monId)) {
+                console.log("in first sous else if")
                 var joueurs = this.state.defi.confirmesEquipeDefiee
                 corps = "Le capitaine de ton équipe " + this.state.equipeDefiee.nom + " a renseigné la feuille de match du défi contre "
                 corps = corps + this.state.equipeOrganisatrice.nom + "." 
@@ -150,6 +151,8 @@ class Feuille_Defi_Passe extends React.Component {
                 // Envoyer la notifs aux cap adverse 
                 await this.sendNotifToCapitaineAdverse(this.state.equipeOrganisatrice, this.state.equipeDefiee.nom)
             } else {
+                console.log("in first sous else")
+
                 var joueurs = []
             }
 
@@ -174,17 +177,10 @@ class Feuille_Defi_Passe extends React.Component {
      * capitaine a renseigné la feuille de match.
      */
     async storeNotifFeuilleCompletee(joueur) {
-        console.log(this.state.equipeDefiee)
-        console.log(this.state.equipeOrganisatrice)
+     
+        console.log("in store notif feuille completee", joueur.id)
         if(this.state.equipeDefiee != null && this.state.equipeOrganisatrice != null ) {
-            console.log("in storeNotifFeuilleCompletee ")
-            console.log(Date.parse(new Date()))
-            console.log( this.state.defi.id)
-            console.log( LocalUser.data.id)
-            console.log( joueur.id)
-            console.log(Types_Notification.FEUILLE_COMPLETEE)
-            console.log(this.state.equipeDefiee)
-            console.log(this.state.equipeOrganisatrice)
+          
             var db = Database.initialisation()
             db.collection("Notifs").add({
                     time : new Date(),
@@ -564,28 +560,38 @@ class Feuille_Defi_Passe extends React.Component {
      */
     _renderBtnBut(equipe) {
 
-        if(this.state.displayBtnBut && equipe != undefined) {
-            return(
-                    
-                <View style = {{flexDirection : "row", alignItems:'center', justifyContent:'center', marginLeft : wp('3%'), marginRight : wp('3%')}}>
-                    
-                    {/* Btn plus */}
-                    <TouchableOpacity 
-                        style = {styles.containerBouton}
-                        onPress = {()=> this.ajouterUnBut(equipe.id)}>
-                        <Text style = {styles.txtBtn}>+</Text>
-                    </TouchableOpacity>
+        var cap1 = this.state.equipeOrganisatrice.capitaines.includes(LocalUser.data.id)
+        var cap2 = this.state.equipeDefiee != undefined && this.state.equipeDefiee.capitaines.includes(LocalUser.data.id)
+        if(cap1 || cap2) {
+            if(this.state.displayBtnBut && equipe != undefined) {
+                return(
+                        
+                    <View style = {{flexDirection : "row", alignItems:'center', justifyContent:'center', marginLeft : wp('3%'), marginRight : wp('3%')}}>
+                        
+                        {/* Btn plus */}
+                        <TouchableOpacity 
+                            style = {styles.containerBouton}
+                            onPress = {()=> this.ajouterUnBut(equipe.id)}>
+                            <Text style = {styles.txtBtn}>+</Text>
+                        </TouchableOpacity>
 
-                    {/*Btn moins*/}
-                    <TouchableOpacity 
-                    onPress = {() => this.enleverUnBut(equipe.id)}
-                    style = {styles.containerBouton}>
-                        <Text style = {styles.txtBtn}>-</Text>
-                    </TouchableOpacity>
-                </View>
-                
-            )
-        } else {
+                        {/*Btn moins*/}
+                        <TouchableOpacity 
+                        onPress = {() => this.enleverUnBut(equipe.id)}
+                        style = {styles.containerBouton}>
+                            <Text style = {styles.txtBtn}>-</Text>
+                        </TouchableOpacity>
+                    </View>
+                    
+                )
+            } else {
+                return (
+                    <View
+                    style = {{width : wp('5%')}} />
+
+                )
+            }
+        } else{
             return (
                 <View
                 style = {{width : wp('5%')}} />
@@ -595,6 +601,7 @@ class Feuille_Defi_Passe extends React.Component {
     }
 
 
+    
     /**
      * Fonction qui permety d'afficher le nombre de but 
      * @param {*} nb 

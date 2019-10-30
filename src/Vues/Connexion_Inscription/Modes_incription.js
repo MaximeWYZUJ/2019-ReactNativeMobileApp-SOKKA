@@ -236,7 +236,7 @@ export default class Modes_incription extends React.Component {
                     <Text>ou</Text>
                 </Animated.View>
 
-                {/* View contenant le boutton se connecter via facebook */}
+                {/* View contenant le boutton se connecter via facebook 
                 <Animated.View style={[this.facebookAnimation.getLayout(),{width : wp('77%')}]}>
                     <TouchableOpacity 
                         style = {styles.animatedFacebook}
@@ -247,7 +247,7 @@ export default class Modes_incription extends React.Component {
                         />
                         <Text style = {styles.txt_btn}>Utilise Facebook</Text>
                     </TouchableOpacity>
-                </Animated.View>
+                </Animated.View>*/}
 
               
             </View>

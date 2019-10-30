@@ -52,7 +52,17 @@ class Notif_Defis_Contre_Equipe extends React.Component {
 
         // Données du défi 
         var defi = await Database.getDocumentData(this.props.notification.defi, "Defis")
-        this.setState({equipeEmettrice :equipeEmettrice , equipeReceptrice : equipeReceptrice, defi : defi, defis_valide : defi.defis_valide, defis_refuse  : defi.defis_refuse, isLoading : false})
+        
+        console.log("=====================")
+        console.log("defi.equipeDefie", defi.equipeDefie)
+        console.log("equipeEmettrice.id",equipeEmettrice.id)
+        console.log("test",  defi.equipeDefiee == equipeEmettrice.id)
+        console.log("=====================")
+
+        var defis_valide = defi.defis_valide && defi.equipeDefiee == equipeEmettrice.id
+        var defis_refuse = defi.equipeDefiee != equipeReceptrice
+
+        this.setState({equipeEmettrice :equipeEmettrice , equipeReceptrice : equipeReceptrice, defi : defi, defis_valide : defis_valide, defis_refuse  : defis_refuse, isLoading : false})
     }
 
 
@@ -92,6 +102,11 @@ class Notif_Defis_Contre_Equipe extends React.Component {
      * Fonction qui envoie une notification de refus à chaque capitaine de l'équipe
      */
     async sendNotifRefu() {
+
+        var db = Database.initialisation()
+        db.collection("Notif").doc(this.props.notification.id).update({
+            defis_refuse : true
+        })
         var titre = "Nouvelle notif"
         var corps = "L'équipe " + this.state.equipeReceptrice.nom + " a refusé le défi lancé par ton équipe "+ this.state.equipeEmettrice.nom
 
@@ -224,6 +239,7 @@ class Notif_Defis_Contre_Equipe extends React.Component {
      */
     async accepterDefis() {
 
+        
         await this.sendNotifAccepter()
         await this.storeNotifInDb(Types_Notification.ACCEPTER_CONVOCATION_DEFI_ADVERSE)
         var db = Database.initialisation()
@@ -290,21 +306,30 @@ class Notif_Defis_Contre_Equipe extends React.Component {
     }
 
     renderBtnConfirmer() {
-        return(
-            <View style = {{flexDirection : "row"}}>
-                <TouchableOpacity
-                    onPress = { () => this.handleConfirmerOui()}>
-                    <Text style = {styles.txtBtn}>Accepter</Text>
-                </TouchableOpacity>
+        if(! this.state.defis_valide && this.state.defis_refuse) {
 
-                <Text>/</Text>
+        
+            return(
+                <View style = {{flexDirection : "row"}}>
+                    <TouchableOpacity
+                        onPress = { () => this.handleConfirmerOui()}>
+                        <Text style = {styles.txtBtn}>Accepter</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity
-                    onPress = {() => this.handleConfirmerNon()}>
-                    <Text style = {styles.txtBtn}>Refuser</Text>
-                </TouchableOpacity>
-            </View>
-        )
+                    <Text>/</Text>
+
+                    <TouchableOpacity
+                        onPress = {() => this.handleConfirmerNon()}>
+                        <Text style = {styles.txtBtn}>Refuser</Text>
+                    </TouchableOpacity>
+                </View>
+            )
+
+        } else if(this.state.defis_valide) {
+            return <Text>Réponse : Confirmé</Text>
+        } else if(this.state.defis_refuse ) {
+            return <Text>Réponse : Refusé</Text>
+        }
 
     }
 

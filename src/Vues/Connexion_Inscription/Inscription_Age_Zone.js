@@ -44,7 +44,8 @@ export default class Inscription_Age_Zone extends React.Component {
             sexe: sexe,
             age : 0,
             searchedVilles : [],
-            depCode : ""
+            depCode : "",
+            dateChanged : false
         }
 
     }
@@ -114,7 +115,7 @@ export default class Inscription_Age_Zone extends React.Component {
 
 
     callNextScreen() {
-        if(this.isVilleOk()) {
+        if(this.isVilleOk() && this.state.dateChanged) {
             this.props.navigation.navigate("InscriptionPhoto", {
                 mail : this.state.mail,
                 mdp : this.state.mdp,
@@ -128,8 +129,11 @@ export default class Inscription_Age_Zone extends React.Component {
                 naissance : this.state.today,
                 age : this.calculAge()
             })
-        } else {
+        } else if(! this.isVilleOk()) {
             Alert.alert('Tu dois choisir une ville présente dans la base SOKKA')
+        } else {
+            Alert.alert('Tu dois renseigner ta date de naissance')
+
         }
     }
 
@@ -223,13 +227,13 @@ export default class Inscription_Age_Zone extends React.Component {
                                 <Animated.View style={[this.inputChamps.getLayout(), {borderBottomWidth : 1, flexDirection : 'row',alignItems :'center'}]}>
 
                                     <Text style = {{color : '#CECECE'}}>{this.state.txtDateNaissance}</Text>
+                                   
                                     <DatePicker
                                         style={{width: wp('45%'), alignItems : 'center'}}
                                         date= {this.state.today}
                                         mode="date"
                                         placeholder="select date"
-                                        format="YYYY-MM-DD"
-                                        minDate="1900-001-01"
+                                        format="DD-MM-YYYY"
                                         maxDate={this.state.today}
                                         confirmBtnText="Confirm"
                                         cancelBtnText="Cancel"
@@ -239,7 +243,9 @@ export default class Inscription_Age_Zone extends React.Component {
                                             borderWidth : 0
                                         }
                                         }}
-                                        onDateChange={(date) => {this.setState({today: date, txtDateNaissance : ''})}}
+                                        onDateChange={(date) => {this.setState({today: date, txtDateNaissance : '', dateChanged : true})}}
+
+
                                     />
                                     </Animated.View>
                             </View>

@@ -50,28 +50,38 @@ class Notif_Accepter_Releve_Defi extends React.Component {
 
         // Données du défi 
         var defi = await Database.getDocumentData(this.props.notification.defi, "Defis")
-        this.setState({equipeEmettrice :equipeEmettrice , equipeReceptrice : equipeReceptrice, defi : defi, defis_valide : defi.defis_valide, defis_refuse  : this.props.notification.equipeRefusee, isLoading : false})
+
+        var valide = defi.defis_valide && defi.equipesConcernees.includes(equipeEmettrice.id)
+        this.setState({equipeEmettrice :equipeEmettrice , equipeReceptrice : equipeReceptrice, defi : defi, defis_valide : valide, defis_refuse  : this.props.notification.equipeRefusee, isLoading : false})
     }
 
      
     /**
      * Pour se rendre dans la fiche du defi
      */
-    goToFicheDefi() {
+    async goToFicheDefi() {
        
+   
         var defi = this.state.defi
         defi["defis_valide"] = this.state.defis_valide
         defi["defis_refuse"] = this.state.defis_refuse
 
+        
+        var equipeDefiee = undefined
+        if(this.state.defi.equipeDefiee !="" ) {
+            equipeDefiee = await Database.getDocumentData(this.state.defi.equipeDefiee, "Equipes")
+        }
+        /*if(this.state.defis_refuse) {
+            equipeDefiee = undefined
+        }*/
         this.setState({defi : defi})
         this.props.navigation.navigate("FicheDefiRejoindre",
             {
                 defi : this.state.defi,
                 equipeOrganisatrice : this.state.equipeReceptrice,
-                equipeDefiee : this.state.equipeEmettrice
+                equipeDefiee : equipeDefiee
             } 
         )
-        
     }
 
 
@@ -85,7 +95,11 @@ class Notif_Accepter_Releve_Defi extends React.Component {
                 '',
                 "Tu souhaites refuser le défi relevé par l'équipe " + this.state.equipeEmettrice.nom,
                 [
-                    {text: 'Oui', onPress: () => this.refuserDefis()},
+                    {text: 'Oui', onPress: () => {
+                        this.setState({defis_refuse : true, isLoading : true})
+                        this.refuserDefis()}
+
+                    },
                     {
                     text: 'Non',
                     onPress: () => console.log('Cancel Pressed'),
@@ -136,9 +150,9 @@ class Notif_Accepter_Releve_Defi extends React.Component {
      * Fonction qui permet d'accepter le défi
      */
     async accepterDefis() {
+        this.setState({defis_valide : true, isLoading : true})
         var capitaines = this.state.equipeEmettrice.capitaines
         var joueursConcernes = this.state.defi.joueursConcernes
-        await this.storeNotifDefis(Types_Notification.ACCEPTER_EQUIPE_DEFIEE)
         var db = Database.initialisation()
         if(this.state.defi != undefined) {
             this.setState({defis_valide : true, defis_refuse : false})
@@ -151,13 +165,15 @@ class Notif_Accepter_Releve_Defi extends React.Component {
 
             })
         }
+        await this.storeNotifDefis(Types_Notification.ACCEPTER_EQUIPE_DEFIEE)
+        this.setState({ isLoading : false})
+
     }
 
     /**
      * Fonction qui permet de refuser le défi
      */
     async refuserDefis() {
-
         var idJoueurEquipeDefie = "erreur"
         if(this.state.defi.joueursEquipeDefiee.length >=1) {
             var idJoueurEquipeDefie = this.state.defi.joueursEquipeDefiee[1]  
@@ -165,7 +181,6 @@ class Notif_Accepter_Releve_Defi extends React.Component {
         var r = []
 
 
-        await this.storeNotifDefis(Types_Notification.REFUSER_EQUIPE_DEFIEE)
         var db = Database.initialisation()
         if(this.state.defi != undefined) {
             this.setState({defis_valide : false, defis_refuse : true})
@@ -180,10 +195,13 @@ class Notif_Accepter_Releve_Defi extends React.Component {
 
             db.collection("Notifs").doc(this.props.notification.id).update({
                 equipeRefusee : true
+            }).then(console.log("notif updated")).catch(function(error) {
+                console.log("error update notif")
             })
-
-
         }
+        await this.storeNotifDefis(Types_Notification.REFUSER_EQUIPE_DEFIEE)
+        this.setState({ isLoading : false})
+
     }
 
      // ===========================================================================
@@ -299,21 +317,31 @@ class Notif_Accepter_Releve_Defi extends React.Component {
     }
 
     renderBtnConfirmer() {
-        return(
-            <View style = {{flexDirection : "row"}}>
-                <TouchableOpacity
-                    onPress = { () => this.handleConfirmerOui()}>
-                    <Text style = {styles.txtBtn}>Accepter</Text>
-                </TouchableOpacity>
+        if(this.state.defis_valide) {
+            return(
+                <View/>
+            )
+        } else if(this.state.defis_refuse) {
+            return(
+                <View/>
+            )
+        } else {
+            return(
+                <View style = {{flexDirection : "row"}}>
+                    <TouchableOpacity
+                        onPress = { () => this.handleConfirmerOui()}>
+                        <Text style = {styles.txtBtn}>Accepter</Text>
+                    </TouchableOpacity>
 
-                <Text>/</Text>
+                    <Text>/</Text>
 
-                <TouchableOpacity
-                    onPress = {() => this.handleConfirmerNon()}>
-                    <Text style = {styles.txtBtn}>Refuser</Text>
-                </TouchableOpacity>
-            </View>
-        )
+                    <TouchableOpacity
+                        onPress = {() => this.handleConfirmerNon()}>
+                        <Text style = {styles.txtBtn}>Refuser</Text>
+                    </TouchableOpacity>
+                </View>
+            )
+        }
 
     }
 
@@ -336,9 +364,24 @@ class Notif_Accepter_Releve_Defi extends React.Component {
     }
 
 
+    renderReponse() {
+        console.log("defis refuse",this.state.defis_refuse)
+        if(this.state.defis_refuse) {
+            return(
+                "Reponse : Refusé"
+            )
+        } else if(this.state.defis_valide) {
+            return(
+                "Reponse : Accepté"
+            )
+        } else {
+            return ""
+        }
+    }
 
+ 
 
-    renderNotif() {
+    /*renderNotif() {
        
         if(this.state.defis_valide) {
             return(
@@ -366,11 +409,11 @@ class Notif_Accepter_Releve_Defi extends React.Component {
                         <Text style = {styles.txtBtn}>Consulter</Text>
                     </TouchableOpacity>
                     {this.renderBtnConfirmer()}
-                    
+                   <Text>{this.renderReponse()}</Text>
                 </View>
             )
         }
-    }
+    }*/
     render() {
         if(this.state.isLoading) {
             return(
@@ -384,7 +427,20 @@ class Notif_Accepter_Releve_Defi extends React.Component {
                     <View>
                         {this.renderPhotoEquipeEmetteur()}
                     </View>
-                    {this.renderNotif()}
+                    <View>
+
+                        <Text>L'équipe {this.renderNomEquipeEmettrice()} souhaite relever le</Text>
+                        <Text> défi posté par ton équipe {this.renderNomEquipeReceptrice()} </Text>
+
+                        <TouchableOpacity
+                            onPress = {() => this.goToFicheDefi()}
+                            >
+                            <Text style = {styles.txtBtn}>Consulter</Text>
+                        </TouchableOpacity>
+                        {this.renderBtnConfirmer()}
+                        <Text>{this.renderReponse()}</Text>
+
+                    </View>
                 </View>
             )
         }

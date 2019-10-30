@@ -309,7 +309,7 @@ export default class Modes_de_connexion extends React.Component {
                         <Text>ou</Text>
                     </Animated.View>
 
-                    {/* View contenant le boutton se connecter via facebook */}
+                    {/* View contenant le boutton se connecter via facebook 
                     <Animated.View style={[this.facebookAnimation.getLayout(),{width : wp('78%')}]}>
                         <TouchableOpacity 
                             style = {styles.animatedFacebook}
@@ -320,7 +320,7 @@ export default class Modes_de_connexion extends React.Component {
                             />
                             <Text style = {styles.txt_btn}>Connecte toi avec Facebook</Text>
                         </TouchableOpacity>
-                    </Animated.View>
+                    </Animated.View>*/}
 
                     <Button title="Mot de passe oublié" onPress={() => this.forgotPassword()}/>
                     <Button title="Renvoyer un mail d'activation" onPress={() => this.renvoyerMail()}/>

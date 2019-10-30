@@ -56,6 +56,8 @@ class ProfilJoueur extends React.Component {
             }
         }
         
+
+
         this.state = {
             allDefis : [],
             refreshing: false,
@@ -66,6 +68,7 @@ class ProfilJoueur extends React.Component {
             nbMessagesNonLu : this.joueur.nbMessagesNonLu,
         }
 
+        this._onRefresh()
         if (this.joueur.sexe === "masculin") {
             this.sexeIcon = require('app/res/masculine.png');
         } else {
@@ -73,13 +76,40 @@ class ProfilJoueur extends React.Component {
         }
 
 
-        
+        this.equipes.sort(function(a, b){
+            if( a.nom.toLowerCase() <= b.nom.toLowerCase()) {
+                return -1
+            } else {
+                return 1
+            }
+        }
+        );
+
+        /*var db = Database.initialisation()
+
+        var docRef = db.collection("TEST").doc("JdaqhI1JY5jg79DShZFQ")
+        docRef.get().then(function(doc) {
+            if (doc.exists) {
+              console.log(DatesHelpers.buildDateWithTimeZone(new Date(doc.data().jour.seconds * 1000)))
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+                //return "No such doc"
+            }
+        }).catch(function(error) {
+            console.log("Error getting document:", error);
+            //return "erreur"
+        });*/
+        /*db.collection("TEST").add({
+            jour : new Date()
+        })  */      
     }
 
 
 
     componentDidMount() {
         this.getAllDefisAndPartie()
+
       
     }
 
@@ -285,15 +315,18 @@ class ProfilJoueur extends React.Component {
         var db = Database.initialisation()
         var allDefis = []
         var index = 1
-        var now = new Date()
+        var now = DatesHelpers.buildDateWithTimeZone(new Date())
 
         var ref = db.collection("Defis");
         var query = ref.where("joueursConcernes", "array-contains", this.id).where("dateParse", ">=", Date.parse(now)).orderBy("dateParse")
         query.get().then(async (results) => {
             for(var i = 0; i < results.docs.length ; i++) {
                 var defi = results.docs[i].data()
-                defi.jour.seconds = defi.jour.seconds -7200 
-                allDefis.push(defi)
+                var date = new Date(defi.jour.seconds * 1000)
+                var estPasse = DatesHelpers.isMatchEnded(date, defi.duree)     
+                if(! estPasse) {
+                    allDefis.push(defi)
+                }
 
             }
             this.setState({allDefis : allDefis})
@@ -441,6 +474,11 @@ class ProfilJoueur extends React.Component {
             time : new Date(),
             dateParse : Date.parse(new Date())
         })
+        .then(() => {
+            console.log("store notif ok")
+        }).catch(function(error) {
+            console.log("error store notif ajout reseau", error)
+        })
     }
 	
 	
@@ -474,11 +512,20 @@ class ProfilJoueur extends React.Component {
     // ===============================================================================
 
     async gotoEquipesFav() {
-        equipesFav = [];
+        var equipesFav = [];
+        var equipeFavData = []
         for (idEquipeFav of this.joueur.equipesFav) {
             equipeFavData = await Database.getDocumentData(idEquipeFav, 'Equipes');
             equipesFav.push(equipeFavData);
         }
+        equipesFav.sort(function(a, b){
+            if( a.nom.toLowerCase() <= b.nom.toLowerCase()) {
+                return -1
+            } else {
+                return 1
+            }
+        }
+        );
 
         this.props.navigation.push('ProfilJoueurMesEquipesFavScreen', {joueur: this.joueur, equipesFav: equipesFav, header: this.joueur.pseudo, monProfil: this.monProfil});
     }
@@ -601,6 +648,14 @@ class ProfilJoueur extends React.Component {
         //this.joueur = await Database.getDocumentData(this.joueur.id, "Joueurs")
 		this.equipes = await Database.getArrayDocumentData(this.joueur.equipes, "Equipes")
 
+        this.equipes.sort(function(a, b){
+            if( a.nom.toLowerCase() <= b.nom.toLowerCase()) {
+                return -1
+            } else {
+                return 1
+            }
+        }
+        );
         
        
         this.setState({refreshing: false});
@@ -1018,21 +1073,25 @@ class ProfilJoueur extends React.Component {
 
 
     getTextePoste() {
-        if (this.joueur.sexe == "feminin") {
-            switch(this.joueur.poste) {
-                case "offensif" : return "Joueuse offensive";
-                case "defensif" : return "Joueuse défensive";
-                case "mixte" : return "Joueuse mixte";
-                case "gardien" : return "Gardienne";
-                default : return "Poste non renseigné"
-            }
+        if(this.joueur.poste == "poste non renseigné") {
+            return 'poste non renseigné'
         } else {
-            switch(this.joueur.poste) {
-                case "offensif" : return "Joueur offensif";
-                case "defensif" : return "Joueur défensif";
-                case "mixte" : return "Joueur mixte";
-                case "gardien" : return "Gardien";
-                default : return "Poste non renseigné"
+            if (this.joueur.sexe == "feminin") {
+                switch(this.joueur.poste) {
+                    case "offensif" : return "Joueuse offensive";
+                    case "defensif" : return "Joueuse défensive";
+                    case "mixte" : return "Joueuse mixte";
+                    case "gardien" : return "Gardienne";
+                    default : return "Poste non renseigné"
+                }
+            } else {
+                switch(this.joueur.poste) {
+                    case "offensif" : return "Joueur offensif";
+                    case "defensif" : return "Joueur défensif";
+                    case "mixte" : return "Joueur mixte";
+                    case "gardien" : return "Gardien";
+                    default : return "Poste non renseigné"
+                }
             }
         }
     }

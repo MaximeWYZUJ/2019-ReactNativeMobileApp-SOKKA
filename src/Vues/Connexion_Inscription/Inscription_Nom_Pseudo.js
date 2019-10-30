@@ -272,8 +272,8 @@ const styles = {
         borderWidth : 1,
         position : 'absolute',
         top : hp('3%'),
-        paddingTop : hp('2%'),
-        paddingBottom : hp('2%'),
+        paddingTop : hp('1%'),
+        paddingBottom : hp('1%'),
         width : wp('70%'),
         alignSelf : 'center',
         alignItems : 'center',
@@ -296,7 +296,7 @@ const styles = {
         width : wp('77%'),
 
         //paddingBottom : hp('3%'),
-        //paddingTop : hp('3%')
+        paddingTop : hp('5%')
     },
 
     txt_btn : {

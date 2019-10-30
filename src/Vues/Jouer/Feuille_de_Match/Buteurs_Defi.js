@@ -176,16 +176,7 @@ class Buteurs_Defi extends React.Component {
      * Fonction qui affiche le nombre de but d'un joueurs
      */
     renderNbBut(idJoueur) {
-        var nbButs = 0
-        if(this.props.buteurs != undefined) {
-            for(var i = 0; i <this.props.buteurs.length; i++) {
-                if(this.props.buteurs[i].id == idJoueur) {
-                    
-                    nbButs = this.props.buteurs[i].nbButs
-                }
-            }
-
-        }
+        var nbButs = this.getNbBut(idJoueur)
         return(
             <View style = {{alignItems:'center', justifyContent:'center',marginRight : wp('2%')}}>
                 <Text>{nbButs} buts</Text>
@@ -193,6 +184,20 @@ class Buteurs_Defi extends React.Component {
             
         )
         
+    }
+
+    getNbBut(idJoueur){
+        var nbButs = 0
+        if(this.props.buteurs != undefined) {
+            for(var i = 0; i <this.props.buteurs.length; i++) {
+                if(this.props.buteurs[i].id == idJoueur) {
+                    
+                   return  this.props.buteurs[i].nbButs
+                }
+            }
+
+        } 
+        return nbButs 
     }
 
 

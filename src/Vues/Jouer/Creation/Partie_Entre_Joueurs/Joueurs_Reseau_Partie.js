@@ -19,6 +19,7 @@ class Joueurs_Reseau_Partie extends React.Component {
     constructor(props) {
         super(props)
         this.reseau = LocalUser.data.reseau
+        console.log(this.reseau)
     }
 
 

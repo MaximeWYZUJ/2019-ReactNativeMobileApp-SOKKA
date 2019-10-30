@@ -118,6 +118,14 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
                        
                     }
 
+                    joueursArray.sort(function(a, b){
+                        if( a.pseudo.toLowerCase() <= b.pseudo.toLowerCase()) {
+                            return -1
+                        } else {
+                            return 1
+                        }
+                    }
+                    );
                     this.setState({allJoueurs : joueursArray, joueurFiltres : joueursArray})
                 } else {
                     console.log("No such document!");
@@ -138,6 +146,14 @@ class Choix_Joueurs_Defis_2_Equipes extends React.Component {
             
                     capitainesArray.push(joueur)
                     
+                    capitainesArray.sort(function(a, b){
+                        if( a.pseudo.toLowerCase() <= b.pseudo.toLowerCase()) {
+                            return -1
+                        } else {
+                            return 1
+                        }
+                    }
+                    );
                     this.setState({capitaines : capitainesArray, capitaineFiltres: capitainesArray})
                 } else {
                     console.log("No such document!");

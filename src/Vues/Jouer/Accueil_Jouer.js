@@ -14,7 +14,7 @@ import LocalUser from '../../Data/LocalUser.json'
 import villes from '../../Components/Creation/villes.json'
 import Notification from '../../Helpers/Notifications/Notification'
 import {BackHandler} from 'react-native';
-
+import DatesHelpers from '../../Helpers/DatesHelpers'
 
 
 
@@ -199,9 +199,11 @@ class Accueil_Jouer extends React.Component {
         var ref = db.collection("Defis");
         console.log("before query")
 
+        var now =  DatesHelpers.buildDateWithTimeZone(new Date())
+
         console.log(Date.parse(new Date()))
         // Query sur les partie
-        var query = ref.where("dateParse", ">=", Date.parse(new Date()))
+        var query = ref.where("dateParse", ">=", Date.parse(now))
                         .where("recherche","==",true)
                         .orderBy("dateParse");
         query.get().then(async (results) => {
@@ -244,8 +246,9 @@ class Accueil_Jouer extends React.Component {
 
 
    
-    _renderItem = ({item}) => {      
-        if(new Date(item.jour.seconds *1000) >= new Date()) { 
+    _renderItem = ({item}) => {     
+    
+        if(DatesHelpers.buildDateWithTimeZone(new Date(item.jour.seconds *1000)) >= DatesHelpers.buildDateWithTimeZone(new Date())) { 
             if(item.type == Type_Defis.partie_entre_joueurs){
             
                 
@@ -281,11 +284,12 @@ class Accueil_Jouer extends React.Component {
                             
                     />
                 )
-            } else {
+            }
+            /*} else {
                 return(
                     <Text>oooo</Text>
                 )
-            }
+            }*/
         }
     }
 

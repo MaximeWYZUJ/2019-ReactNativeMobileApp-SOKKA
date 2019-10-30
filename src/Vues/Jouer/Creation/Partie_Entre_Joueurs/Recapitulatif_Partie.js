@@ -62,6 +62,7 @@ export default class Recapitulatif_Partie extends React.Component {
     }
 
 
+
     // ===========================================================================
     // ========================== NOTIFICATIONS ==================================
     // ===========================================================================
@@ -229,16 +230,25 @@ export default class Recapitulatif_Partie extends React.Component {
         if(jour.length ==1) {
             jour = '0'+jour
         }
-        console.log("MOI : ", moi)
+
+       
         var an = this.jour.split('-')[2]
         var heure = this.heure.split(':')[0]
         var minutes = this.heure.split(':')[1]
+
+        if(heure.length == 1) {
+            heure = "0" + heure
+        }
+
+        if(minutes.length  == 1) {
+            minutes = "0" + minutes
+        }
         var d = an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes
         console.log(d)
         var date = new Date(d)
 
         console.log("DATE = ", date)
-        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes ).getDay()
+        var numJour = new Date(an + '-' + moi + '-' + jour + 'T' + heure + ':' + minutes ).getUTCDay()
         var dateString =DAY[numJour] + " " + jour + '/' + moi + '/'+ an + ' - ' + heure + "h" + minutes + " à "+DatesHelpers.calculHeureFin(heure,minutes, this.duree)
         
         recherche = this.nbJoueursRecherche > 0

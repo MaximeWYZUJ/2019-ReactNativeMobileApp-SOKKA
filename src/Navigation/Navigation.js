@@ -30,6 +30,8 @@ import Modifier_Groupe from '../Vues/Conversation/Modifier_Groupe'
 import Fiche_Partie_Rejoindre from '../Vues/Jouer/Rejoindre/Fiche_Partie_Rejoindre'
 import Fiche_Defi_Rejoindre from '../Vues/Jouer/Rejoindre/Fiche_Defi_Rejoindre'
 import Calendrier_Equipe from '../Vues/Jouer/Historique/Calendrier_Equipe'
+import Calendrier_Terrain from '../Vues/Jouer/Historique/Calendrier_Terrain'
+
 const stackNavigator = createStackNavigator({
 
   ProfilJoueur : {
@@ -182,6 +184,10 @@ const stackNavigator = createStackNavigator({
 
   CalendrierEquipe : {
     screen : Calendrier_Equipe
+  },
+
+  CalendrierTerrain: {
+    screen : Calendrier_Terrain
   },
 
 

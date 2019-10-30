@@ -36,13 +36,21 @@ export default class Reglages_Equipe extends React.Component {
                 this.contactsPossibles.push(j.telephone);
                 this.mailsPossibles.push(j.mail);
             }
+
+
         }
 
+
+        console.log(this.equipeData.sexe)
+
+        var sexe = this.equipeData.sexe
+        if(sexe == undefined) {
+            sexe = "mixte"
+        }
         this.state = {
             contactSelected: this.equipeData.telephone,
             mailSelected: this.equipeData.mail,
-            sexeSelected: this.equipeData.sexe,
-
+            sexeSelected: sexe,
             usingCamera: false,
             image_changed: false,
             photo: {uri: this.equipeData.photo}
@@ -128,9 +136,17 @@ export default class Reglages_Equipe extends React.Component {
             xhr.responseType = 'blob';
             xhr.open('GET', uri, true);
             xhr.send(null);
+        }).catch(function(error) {
+            console.log("error in uploading image", error)
+        }).then(() => {
+            console.log("succeded upload image")
         });
         var ref = firebase.storage().ref().child("Photos_Profil_Equipes/tests/" + imageName);
-        ref.put(blob);
+        ref.put(blob).catch(function(error) {
+            console.log("error in uploading image", error)
+        }).then(() => {
+            console.log("succeded upload image")
+        });
 
         return ref.getDownloadURL();
     }
@@ -201,7 +217,7 @@ export default class Reglages_Equipe extends React.Component {
 
 
     async validate() {
-        modifs = {};
+        var modifs = {};
 
         if (this.ville) {
             if (this.isVilleOk()) {
@@ -224,14 +240,22 @@ export default class Reglages_Equipe extends React.Component {
         modifs["score"] = this.niveau;
 
         if (this.state.image_changed) {
+            console.log("image changed")
             newPhoto = await this.uploadImage(this.state.photo.uri, this.equipeData.id);
+            console.log(newPhoto)
             modifs["photo"] = newPhoto;
         }
 
-        db = Database.initialisation();
+        console.log("before db initialisation", modifs)
+
+        var db = Database.initialisation();
+    
         db.collection("Equipes").doc(this.equipeData.id).set(modifs, {merge: true})
         .then(() => {
+            console.log("in then")
             this.props.navigation.push("Profil_Equipe", {equipeId: this.equipeData.id});
+        }).catch(function(error) {
+            console.log(error)
         })
     }
 

@@ -5,7 +5,7 @@ import { withNavigation } from 'react-navigation'
 import Database from '../../Data/Database'
 import LocalUser from '../../Data/LocalUser.json'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-
+import Types_Notification from '../../Helpers/Notifications/Types_Notification'
 import RF from 'react-native-responsive-fontsize';
 class JoueurItem extends React.Component {
 
@@ -109,6 +109,10 @@ class JoueurItem extends React.Component {
             type : Types_Notification.AJOUT_RESEAU,
             time : new Date(),
             dateParse : Date.parse(new Date())
+        }).then(() => {
+            console.log("store notif ok")
+        }).catch(function(error) {
+            console.log("error store notif ajout reseau", error)
         })
     }
 
@@ -120,13 +124,16 @@ class JoueurItem extends React.Component {
         var titre = "Nouvelle notif"
         var corps = LocalUser.data.pseudo + " t'a ajouté à son réseau"
 
+        var joueur = await Database.getDocumentData(this.props.id, "Joueurs")
         var tokens = [];
-        if(this.LocalUser.data.tokens != undefined) tokens = this.LocalUser.data.tokens
+        if(joueur.tokens != undefined) tokens = joueur.tokens
         for(var i = 0; i < tokens.length; i++) {
            await  this.sendPushNotification(tokens[i],titre,corps)
         }
     }
 
+
+    
 
     /**
      * Fonction qui permet d'envoyer des notifications

@@ -62,6 +62,14 @@ export default class Joueurs_Equipe extends React.Component {
             console.log(elmt)
             return !this.state.equipe.capitaines.includes(elmt.id);
         })
+        liste.sort(function(a, b){
+            if( a.pseudo.toLowerCase() <= b.pseudo.toLowerCase()) {
+                return -1
+            } else {
+                return 1
+            }
+        }
+        );
         return liste
     }
 

@@ -151,8 +151,9 @@ class Feuille_Partie_Passee extends React.Component {
                 for(var k =0; k < tokens.length ; k++) {
                     console.log(tokens[k])
                     await this.sendPushNotification(tokens[k], titre, corps)
-                    await this.storeNotifFeuilleCompletee(joueur)
                 } 
+                await this.storeNotifFeuilleCompletee(joueur)
+
             }
         }
         
