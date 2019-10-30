@@ -101,14 +101,7 @@ export default class DatesHelpers {
 
 
     static isMatchEnded(jour, duree) {
-        console.log("**************************")
-        console.log("duree",duree)
-        console.log("NOW", this.buildDateWithTimeZone(new Date()))
-        console.log("jour, ", jour)
-        console.log(this.buildDateWithTimeZone(new Date()) - jour)
-        console.log("is ended ",((this.buildDateWithTimeZone(new Date()) - jour) > duree * 3600000))
-        console.log("**************************")
-
+        
         return ((this.buildDateWithTimeZone(new Date()) - jour) > duree * 3600000) // Converti duree en ms 
     }
 }
