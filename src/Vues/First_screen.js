@@ -1,12 +1,10 @@
 import React from 'react'
-import {YellowBox, View, Text, ImageBackground,  Image,StyleSheet, Animated,TouchableOpacity, Alert} from 'react-native'
+import { View, Text, ImageBackground,  Image,StyleSheet, Animated,TouchableOpacity, Alert} from 'react-native'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import RF from 'react-native-responsive-fontsize';
 import Database from '../Data/Database'
 import firebase from 'firebase'
 import '@firebase/firestore'
-import {SkypeIndicator} from 'react-native-indicators';
-import { Constants, Location, Permissions, Notifications } from 'expo';
+import {  Permissions, Notifications } from 'expo';
 import LocalUser from '../Data/LocalUser.json'
 import villes from '../Components/Creation/villes.json'
 import departements from '../Components/Creation/departements.json'
@@ -14,15 +12,17 @@ import NormalizeString from '../Helpers/NormalizeString';
 import Simple_Loading from '../Components/Loading/Simple_Loading'
 import {AsyncStorage} from 'react-native';
 import { StackActions, NavigationActions } from 'react-navigation';
+import Sokka_Main_Component from './Sokka_Main_Component'
+import Svg, { Path,SvgXml } from 'react-native-svg'
+import SVGImage from 'react-native-svg-image';
+import * as Font from 'expo-font';
 
-/** Pour afficher 5sec faire deux fonction qui affiche qqchose et en fonction du state appeler une ou l'autre */
+
 /**
  * Classe qui permet d'afficher le premier écran de l'application
  */
-
 class First_screen extends React.Component {
 
-   
     static navigationOptions = { title: '', header: null };
 
 
@@ -33,72 +33,37 @@ class First_screen extends React.Component {
         this.state = {
             timePassed : false,
             isLoading : true,
-            locationResult: null
+            locationResult: null,
+            fontsLoaded : false
         }
-
-        this.agorraAnimation = new Animated.ValueXY({ x: 0, y:hp('53%') })
-        this.connexionAnimation = new Animated.ValueXY({ x: wp('100%'), y:hp('28%') })
-        this.InscriptionAnimation = new Animated.ValueXY({ x: wp('-100%'), y:hp('34%') })
-
-        this.agorraAnimation = new Animated.ValueXY({ x: 0, y:hp('53%') })
-        this.connexionAnimation = new Animated.ValueXY({ x: wp('100%'), y:hp('28%') })
-        this.InscriptionAnimation = new Animated.ValueXY({ x: wp('-100%'), y:hp('34%') })
     }
 
-
-    /**
-     * Fonction qui permet de déplacer le texte Agoora vers le haut
-     */
-    _moveAgoora = () => {
-        Animated.spring(this.agorraAnimation, {
-          toValue: {x: 0, y: hp('8%')},
-        }).start()
-
-    }
-
-    /**
-     * Fonction qui permet de déplacer le boutton se connecter
-     */
-    _moveConnexion = () => {
-        Animated.spring(this.connexionAnimation, {
-          toValue: {x: 0, y: hp('28%')},
-        }).start()
-
-    }
-
-    /**
-     * Fonction qui permet de déplacer le boutton Inscris toi
-     */
-    _moveInscription = () => {
-        Animated.spring(this.InscriptionAnimation, {
-          toValue: {x: 0, y: hp('34%')},
-        }).start()
-
-    }
 
     /**
      * Fonction appelée à la fin du rendu
      */
-    componentDidMount(){
+  async componentDidMount(){
 
+    await Font.loadAsync({
+        "montserrat-light": require("../../assets/fonts/montserrat-light.ttf"),       
+        "montserrat-extrabold" :require("../../assets/fonts/montserrat-extrabold.ttf"), 
+        "montserrat-regular" :require("../../assets/fonts/montserrat-regular.ttf"), 
+        "montserrat-bold" :require("../../assets/fonts/montserrat-bold.ttf"), 
+
+    });
+    this.setState({fontsLoaded: true});
         // Cas où l'utilisateur vien de se déconnecter
         this.checkIfUserISConnected()
-        /*setTimeout(() => {
-            this.setState({
-                isLoading: false
-            })
-        }, 5000)*/
-        
+       
         // Start counting when the page is loaded
         this.timeoutHandle = setTimeout(()=>{
            this.setState({
-                timePassed : true
+                timePassed : true,
+                isLoading : false
            })
-           this._moveAgoora()
-           this._moveConnexion()
-           this._moveInscription()
+        }, 5000);
 
-        }, 1000);
+      
    }
 
 
@@ -134,88 +99,15 @@ class First_screen extends React.Component {
         
         console.log("in check token")
         this._retrieveData()
-
-        /*var token =  await this.registerForPushNotifications()
-
-        var doc = await Database.getDocumentData(token, "Login")
-
-        if(doc!= undefined) {
-            this.gotoProfilJoueur(doc.id);
-            this.storeToken(doc, token);
-            //var joueur = await Database.getDocumentData(doc.id, "Joueurs")
-        } else {
-            console.log("IN ELSE !!!!")
-            this.setState({isLoading : false})
-        }*/
-
-    }
-
-   /* async registerForPushNotifications() {
-        const { status } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
-        console.log('in register')
-        if (status !== 'granted') {
-            console.log("1")
-          const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
-          if (status !== 'granted') {
-            console.log("2")
-            return;
-          }
-        }
-        console.log("okook")
-        var token = await Notifications.getExpoPushTokenAsync();
-        console.log("after await token")
-        //this.subscription = Notifications.addListener(this.handleNotification);
-    
-        return (token)
-    }
-
-
-    async storeToken(docData, token) {
-        // Mettre a jour l'array tokens
-        var listeToken = []
-        if(docData.tokens != undefined) {
-            listeToken = docData.tokens
-        } 
-        if(! listeToken.includes(token)) {
-            listeToken.push(token)
-        
-            var db = Database.initialisation()
-            db.collection("Joueurs").doc(id).update({
-                tokens : listeToken
-            })
-            
-            LocalUser.data.tokens = listeToken;
-        }
     }
 
 
    
 
  
-    gotoProfilJoueur(id) {
-       Database.getDocumentData(id, 'Joueurs').then(async (docData) => {
-            // Traitement de la collection Equipes
-            arrayEquipes = await Database.getArrayDocumentData(docData.equipes, 'Equipes');
+  
 
-            // Traitement des données propres
-            docData.naissance = new Date(docData.naissance.toDate());
-
-            // Traitement des données locales
-            LocalUser.exists = true;
-            LocalUser.data = docData;
-            var villePos = this.findPositionVilleFromName(docData.ville);
-            LocalUser.geolocalisation = villePos;
-
-            // Envoi
-            this.setState({isLoading : false})
-            this.props.navigation.navigate("ProfilJoueur", {id: docData.id, joueur : docData, equipes : arrayEquipes})
-
-        }).catch(function(error) {
-            console.log("Error getting document:", error);
-        });
-   }*/
-
-      /**
+    /**
      * Fonction qui renvoie la position de la ville à partir de son nom
      * @param {String} Name : Nom de la ville 
      */
@@ -321,111 +213,103 @@ class First_screen extends React.Component {
     }
 
 
+    // ======================================================================================
+    //==================================== RENDER FUNCTIONS =================================
+     // ======================================================================================
 
 
-    displayScreen() {
-
+    renderLoading(){
         if(this.state.isLoading) {
-            return (
-                <View style = {styles.main_container}>
-                    <ImageBackground source = {require('app/res/first_screen.jpg')}
-                        style = {styles.image_background}>
-
-                       
-                        <Simple_Loading
-                            taille  = {hp('7%')}
-                            style = {{marginTop : hp('2%')}}/>
-
-                        {/* Vue contenant le text en bas de l'écran */}
-                        <View style = {styles.View_txt_regle}>
-                            <Text>Règles de base</Text>
-                            <Text>10 Minutes ou 2 buts</Text>
-                            <Text>Le vainqueur engage</Text>
-                            <Text>Victoire : Seul le vainqueur reste</Text>
-                            <Text>Match nul : les deux équipes sortent</Text>
-                            <Text>Tacles interdit</Text>
-                            <Text>A toi de les suivre ou de t'adapter à la rencontre</Text>
-
-                            {/* Image de l'herbre */}
-                            <Image
-                                source = {require('app/res/grass.jpg')}
-                                style = {styles.grass}
-                            />
-                        </View>
-
-
-                        
-
-                    </ImageBackground>
-
-                </View>
+            return(
+                <Simple_Loading
+                    taille  = {hp('7%')}
+                    style = {{marginTop : hp('4%'), position: "absolute", alignSelf : "center"}}/>
             )
-        } else {
-                return (
-                    <View style = {styles.main_container}>
-                        <ImageBackground source = {require('app/res/first_screen.jpg')}
-                            style = {styles.image_background}>
-
-
-                            {/* Vue contenant le text en bas de l'écran */}
-                            <View style = {styles.View_txt_regle}>
-                                <Text>Règles de base</Text>
-                                <Text>10 Minutes ou 2 buts</Text>
-                                <Text>Le vainqueur engage</Text>
-                                <Text>Victoire : Seul le vainqueur reste</Text>
-                                <Text>Match nul : les deux équipes sortent</Text>
-                                <Text>Tacles interdit</Text>
-                                <Text>A toi de les suivre ou de t'adapter à la rencontre</Text>
-
-                                {/* Image de l'herbre */}
-                                <Image
-                                    source = {require('app/res/grass.jpg')}
-                                    style = {styles.grass}
-                                />
-                            </View>
-
-
-                            {/*View contenant le txt Agoora */}
-                            <Animated.View style={[styles.animatedConnexion,this.agorraAnimation.getLayout()]}>
-                                    <Text style = {styles.txt}>SOKKA</Text>
-                            </Animated.View>
-
-                            {/* View contenant le boutton se connecter */}
-                            <Animated.View style={this.connexionAnimation.getLayout()}>
-                                    <TouchableOpacity
-                                        style = {styles.animatedConnexion}
-                                        onPress = {() => this.gotoInscription()}
-                                        >
-                                        <Text style = {styles.txt}>Inscription</Text>
-                                    </TouchableOpacity>
-                            </Animated.View>
-
-                            {/* View contenant le boutton s'inscrire */}
-                            <Animated.View style={this.InscriptionAnimation.getLayout()}>
-                                    <TouchableOpacity
-                                        style = {styles.animatedConnexion}
-                                        onPress={() => this.gotoConnexion()}
-                                        >
-                                        <Text style = {styles.txt}>Connexion</Text>
-
-                                    </TouchableOpacity>
-                            </Animated.View>
-
-                        </ImageBackground>
-
-                    </View>
-                )
-           
         }
-
     }
 
 
+    renderMainFrame(){
+       if(this.state.fontsLoaded) {
+            return(
+                <View style = {{flex : 1}}>
+
+                    <View style = {{alignItems : "center", marginTop : hp("3%"), zIndex : 2}}>
+                        <Image
+                            source = {require("../../res/sokka_title.png")}
+                            style = {{ marginBottom: hp("1.4%"), width : wp("46%"), resizeMode : "contain"}}/>
+                    
+                    <View>
+                            <Image
+                                source = {require("../../res/sokka_circle.png")}
+                                style = {{ width : hp('36%'), height :hp('36%')}}/>
+                            
+                            <Text style = {{position : "absolute",fontFamily : "montserrat-light", fontSize : 9, alignSelf : "center"}}>MATCHS - JOUEURS - ÉQUIPES</Text>
+    
+                        </View>
+                    
+                    </View>
+
+                    <View style = {{marginTop : hp("1.3%"), paddingLeft : wp('6.4%'), paddingEnd : 16}}>
+                        <Text style ={styles.big_txt} >ON AIME LE</Text>
+                        <Text style = {styles.title}>FOOT</Text>
+                        <Text style = {{marginTop : 16, fontFamily : "montserrat-light", fontSize : 13, marginEnd : wp('10.54')}}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam dignissim dolor nulla, ut faucibus dolor finibus eget..</Text>
+                    </View>
+
+                     <View style = {{position : "absolute", width : wp('100%')}}>
+                         {this.renderLoading()}
+                     </View>
+                </View>              
+            )
+        } else {
+            return(
+                <View>
+
+                </View>
+            )
+        }
+    }
+
+    renderSideFrame(){
+        if(this.state.fontsLoaded) {
+            return(
+                <View style = {{flexDirection : "row", paddingLeft : wp("5.6%")}}>
+                    <Image
+                        style = {{alignSelf : "center",width : 82, height :7}}
+                        source = {require("../../res/step_1.png")}
+                    />
+                    <Text style = {{fontFamily : "montserrat-light", fontSize : 11, marginLeft : wp("14%"), marginEnd : wp("3%")}}>{"CONNEXION OU\nINSCRIPTION"}</Text>
+                </View>
+            )
+        } else {
+            return(
+                <View>
+
+                </View>
+            )
+        }
+    }
+
+    renderButton(){
+        return(
+            <TouchableOpacity 
+                onPress = {() => this.gotoConnexion()}
+            style = {{paddingVertical : 13, paddingHorizontal : 28}}>
+                <Image
+                    source = {require("../../res/right_arrow.png")}
+                    style = {{width : 25, height : 17}}
+                    />
+            </TouchableOpacity>
+        )
+    }
     render() {
         return (
-            <View style = {styles.main_container}>
-                {this.displayScreen()}
-            </View>
+            <Sokka_Main_Component
+                main_frame = {this.renderMainFrame()}
+                side_frame = {this.renderSideFrame()}
+                button = {this.renderButton()}
+                topBarHidden = {true}
+                backgroundColor = {"white"} />
         )
     }
 
@@ -433,78 +317,21 @@ class First_screen extends React.Component {
 
 const styles =  StyleSheet.create({
 
-    main_container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-
+    title: {
+        fontSize: 66,
+        fontFamily : "montserrat-extrabold",
+        marginTop : -20
     },
 
-    image_background  : {
-        width : wp('100%'),
-        flex : 1
+    big_txt : {
+        fontSize: 32,
+        fontFamily : "montserrat-light",
     },
 
-    View_txt_regle : {
-        backgroundColor : 'white',
-        alignItems : 'center',
-        position : 'absolute',
-        bottom : 0,
-        right : 0,
-        paddingTop : hp('2%')
-
-
+    txt_foot : {
+        fontSize: 66,
     },
 
-    grass : {
-        width : wp('100%'),
-        height : wp('22%')
-    },
-
-    view_agoora : {
-        backgroundColor : 'white',
-        paddingBottom : hp('2%'),
-        paddingTop : hp('2%'),
-        width : wp('70%'),
-        alignSelf : 'center',
-        alignItems : 'center',
-        borderRadius : 10,
-        position : 'absolute',
-        bottom : hp('38%'),
-
-
-    },
-    container: {
-        flex: 1,
-        backgroundColor: '#ecf0f1',
-      },
-
-    animatedConnexion: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'white',
-        borderRadius: 10,
-        marginLeft : wp('15%'),
-        marginRight : wp('15%'),
-        paddingTop  : wp('5%'),
-        paddingBottom : wp('5%')
-
-    },
-    button: {
-        paddingTop: 24,
-        paddingBottom: 24,
-    },
-    buttonText: {
-        fontSize: 24,
-        color: '#333',
-    },
-    button : {
-        color : 'white',
-    },
-    txt : {
-        fontSize : RF(3.3)
-    }
 })
 
 export default (First_screen)

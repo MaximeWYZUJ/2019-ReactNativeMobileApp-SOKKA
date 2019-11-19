@@ -96,7 +96,7 @@ export default class Profil_Equipe extends React.Component {
                 if(! estPasse) {
                     allDefis.push(defi)
                 }
-                allDefis.push(defi)
+                //allDefis.push(defi)
                 //defisArray.push(results.docs[i].data())
             }
 

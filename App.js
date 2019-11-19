@@ -8,8 +8,9 @@ import Store from './src/Store/ConfigureStore'
 //import Defis_Equipe from './src/Components/Profil_Equipe/Defis_Equipe'
 import { Notifications} from 'expo'
 import * as Permissions from 'expo-permissions';
-
+import {BackHandler} from "react-native"
 import firebase from 'firebase'
+import View from 'react-native'
 
 export default class App extends React.Component {
 
@@ -76,16 +77,24 @@ export default class App extends React.Component {
 
 
   componentDidMount() {
-    // Test
-	//this.registerForPushNotifications()
-	//this.sendPushNotification()
+    BackHandler.addEventListener('hardwareBackPress', function() {
+      // this.onMainScreen and this.goBack are just examples, you need to use your own implementation here
+      // Typically you would use the navigator here to go to the last state.
+    
+      console.log()
+      return false;
+    });
 
   }
+
+
+  
 
   render() {
     return (
         <Provider store={Store}>
-          <FirstStack/>
+        <FirstStack/>
+
         </Provider>
 
       );

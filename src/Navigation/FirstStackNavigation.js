@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { createStackNavigator, createAppContainer } from 'react-navigation';
+import View from "react-native"
+import { createStackNavigator, createAppContainer, Header } from 'react-navigation';
 
 // Connexion et inscription
 import First_screen from '../Vues/First_screen';
@@ -13,8 +14,9 @@ import Inscription_CGU from '../Vues/Connexion_Inscription/Inscription_CGU'
 import ProfilJoueur from '../Vues/Joueur/ProfilJoueur'
 // Navigation "interne" avec tab bar
 import NavigationInterne from '../Navigation/OngletsNavigator'
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 
-
+import StylesHelpers from '../Helpers/StylesHelpers'
 const FirstStackNavigation = createStackNavigator({
 
     /**
@@ -39,6 +41,7 @@ const FirstStackNavigation = createStackNavigator({
      */
     choixModeInscription : {
         screen : Modes_inscription
+        
     },
 
     /**
@@ -82,9 +85,18 @@ const FirstStackNavigation = createStackNavigator({
     },
     
 
-
-}, {
-    headerLayoutPreset: 'center'
+    
+},  {
+    mode: 'card',
+    cardStyle: { backgroundColor: 'transparent' },
+    tintColor: '#ffffff',
+    headerMode: 'screen'
+  }, {
+    headerLayoutPreset: 'center',
+    mode: 'card',
+  cardStyle: { backgroundColor: 'transparent' },
+  tintColor: '#ffffff',
+  headerMode: 'screen'
 })
 
 export default createAppContainer(FirstStackNavigation)

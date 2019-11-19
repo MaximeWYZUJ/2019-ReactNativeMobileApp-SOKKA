@@ -14,11 +14,22 @@ import { Constants, Location,Notifications } from 'expo';
 import * as Permissions from 'expo-permissions';
 import villes from '../../Components/Creation/villes.json'
 import {AsyncStorage} from 'react-native';
+import Sokka_Main_Component from '../Sokka_Main_Component'
+import LoginTopComponent from "../../Components/connexion_inscription/LoginTopComponent"
+import StylesHelpers from '../../Helpers/StylesHelpers'
+import * as Font from 'expo-font';
+import { Fumi } from 'react-native-textinput-effects';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import Back_arrow from '../../Components/Back_arrow'
+import  Simple_Loading from '../../Components/Loading/Simple_Loading'
+
 /**
  * Classe qui va permettre d'afficher la page de choix du mode de connexion.
  */
 export default class Modes_de_connexion extends React.Component {
 
+
+    static navigationOptions = { title: '', header: null };
 
 
 
@@ -29,35 +40,27 @@ export default class Modes_de_connexion extends React.Component {
             mail : '',
             mdp : '',
             coReussie : false,
-            isLoading : false
+            isLoading : false,
+            fontsLoaded : false
         }
         this.mailAnimation = new Animated.ValueXY({ x: wp('-100%'), y:hp('-5%') })
         this.facebookAnimation =  new Animated.ValueXY({ x: wp('100%'), y:hp('0%') })
         this.txtOuAnimation = new Animated.ValueXY({ x: wp('0%'), y:hp('-2.5%') })
 
     }
-    componentDidMount() {
-        this._moveConnexionFacebook()
-        this._moveConnexionMail()
+    
+    async componentDidMount() {
+        await Font.loadAsync({
+            "montserrat-light": require("../../../assets/fonts/montserrat-light.ttf"),       
+            "montserrat-extrabold" :require("../../../assets/fonts/montserrat-extrabold.ttf"), 
+            "montserrat-regular" :require("../../../assets/fonts/montserrat-regular.ttf"), 
+            "montserrat-bold" :require("../../../assets/fonts/montserrat-bold.ttf"), 
+
+        });
+        this.setState({fontsLoaded: true});
+
     }
 
-    /**
-     * Fonction qui permet de déplacer le boutton se connecter via facebook
-     */
-    _moveConnexionFacebook = () => {
-        Animated.spring(this.facebookAnimation, {
-          toValue: {x: 0, y: hp('0%')},
-        }).start()
-    }
-
-    /**
-     * Fonction qui permet de déplacer le boutton se connecter via mail
-     */
-    _moveConnexionMail = () => {
-        Animated.spring(this.mailAnimation, {
-          toValue: {x: 0, y: hp('-5%')},
-        }).start()
-    }
 
     changeText(coReussie) {
         if(coReussi) {
@@ -241,17 +244,26 @@ export default class Modes_de_connexion extends React.Component {
     }
 
 
-    render() {
+
+
+
+    goToInscription() {
+        this.props.navigation.navigate("choixModeInscription");
+    }
+
+
+
+
+
+    renderBefore() {
         if(! this.state.isLoading) {
             return (
                 <View style = {styles.main_container}>
 
-                    {/* View contenant le text Agoora */}
                     <View style = {styles.view_agoora}>
                         <Text style = {styles.txt}>SOKKA</Text>
                     </View>
 
-                    {/* Image de l'herbre */}
                     <View style = {styles.View_grass}>
                         <Image 
                             source = {require('app/res/grass.jpg')}
@@ -260,7 +272,6 @@ export default class Modes_de_connexion extends React.Component {
 
                     </View>
 
-                    {/* View contenant le boutton se connecter via l'adresse mail */}
                     <Animated.View style={[this.mailAnimation.getLayout(), {width : wp('88%')}]}>
                         <KeyboardAvoidingView 
                             style = {styles.animatedConnexion}
@@ -309,18 +320,6 @@ export default class Modes_de_connexion extends React.Component {
                         <Text>ou</Text>
                     </Animated.View>
 
-                    {/* View contenant le boutton se connecter via facebook 
-                    <Animated.View style={[this.facebookAnimation.getLayout(),{width : wp('78%')}]}>
-                        <TouchableOpacity 
-                            style = {styles.animatedFacebook}
-                            >
-                            <Image
-                                source = {require('app/res/fb.png')}
-                                style = {styles.fb}
-                            />
-                            <Text style = {styles.txt_btn}>Connecte toi avec Facebook</Text>
-                        </TouchableOpacity>
-                    </Animated.View>*/}
 
                     <Button title="Mot de passe oublié" onPress={() => this.forgotPassword()}/>
                     <Button title="Renvoyer un mail d'activation" onPress={() => this.renvoyerMail()}/>
@@ -358,6 +357,127 @@ export default class Modes_de_connexion extends React.Component {
                 </View>
             )
         }
+    }
+
+    
+    renderLoading(){
+        if(this.state.isLoading) {
+            return(
+                <Simple_Loading
+                    taille  = {hp('7%')}
+                    style = {{marginTop : hp('10%'), position: "absolute", alignSelf : "center"}}/>
+            )
+        }
+    }
+
+
+    renderTextInscription() {
+        return(
+            <Text style = {{fontFamily : "montserrat-regular", marginTop : hp("3.5%")}}>Vous n'avez pas de compte ?  
+                <Text 
+                    onPress = {() => this.goToInscription()}
+                    style = {StylesHelpers.clickable_text_style}> Inscrivez-vous</Text>
+            </Text>
+        )
+    }
+    renderMainFrame(){
+        if(this.state.fontsLoaded) {
+
+            return(
+                
+                <View style = {{flex : 1}}>
+                 
+                 <Back_arrow
+                    navigation = {this.props.navigation}/>
+
+                    <LoginTopComponent/>
+
+                    <Text style = {StylesHelpers.login_title_style}>CONNEXION</Text>
+
+                    <KeyboardAvoidingView behavior="padding" style = {StylesHelpers.form_container_style}>
+
+                        <View style = {{flex :1}}>
+                            <Text style = {{fontFamily : "montserrat-regular", marginBottom : hp("0.89%")}}>Utiliser votre adresse mail</Text>
+                            <Fumi
+                                label={'Adresse email'}
+                                labelStyle={{ color: StylesHelpers.inputLabel}}
+                                inputStyle={{ color: 'black',fontFamily : "montserrat-light" }}
+                                keyboardType = 'email-address'
+                                iconClass={FontAwesomeIcon}
+                                iconName={'envelope'}
+                                iconColor={'black'}
+                                iconSize={15}
+                                height = {StylesHelpers.input_height}
+                                style = {[StylesHelpers.first_input_style, StylesHelpers.input_style]}
+                                onChangeText ={(text) => this.mailTextInputChanged(text)}
+                            />
+                            
+                            <Fumi
+                                label={'Mot de passe'}
+                                labelStyle={{ color: StylesHelpers.inputLabel}}
+                                inputStyle={{ color: 'black',fontFamily : "montserrat-light" }}
+                                iconClass={FontAwesomeIcon}
+                                iconName={'unlock'}
+                                iconColor={'black'}
+                                secureTextEntry={true}
+                                iconSize={15}
+                                height = {StylesHelpers.input_height}
+                                style = {[StylesHelpers.last_input_style, StylesHelpers.input_style]}
+                                onChangeText ={(text) => this.passwordTextInputChanged(text)} 
+                                onSubmitEditing={() => this.checkConnexion(true)}
+                            />
+                            
+                            {this.displayTxtCo()}
+                            {this.renderTextInscription()}
+                        </View>
+                    </KeyboardAvoidingView>
+                    <View style = {{position : "absolute", width : wp('100%')}}>
+                         {this.renderLoading()}
+                     </View>
+                    
+                </View>
+            )
+        } else {
+            return (
+                <View></View>
+            )
+        }
+    }
+
+    
+    renderBtn(){
+        return(
+            <TouchableOpacity
+                onPress = {() => this.checkConnexion(true)}    
+            style = {StylesHelpers.login_btn_container_style}>
+
+                <Text style = {StylesHelpers.login_btn_txt_style}>CONNEXION</Text>
+                <Image
+                    source = {require("../../../res/right_arrow.png")}
+                    style = {{width : 25, height : 17, marginStart : wp("2.7%"), alignSelf : "center"}}
+                    />
+            </TouchableOpacity>
+        )
+    }
+
+
+    renderSideFrame(){
+        return(
+                <Text
+                    onPress={() => this.forgotPassword()} 
+                    style = {{fontFamily : "montserrat-regular", marginStart : wp("5%"), alignSelf : "center"}}>Mot de passe oublié</Text>
+        )
+    }
+    render() {
+        return(
+            <Sokka_Main_Component
+                main_frame = {this.renderMainFrame()}
+                backgroundColor = {StylesHelpers.mainGray}
+                side_frame = {this.renderSideFrame()}
+                button  = {this.renderBtn()}
+                topBarHidden = {true}
+                />
+        )
     }
 }
 

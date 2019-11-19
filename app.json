@@ -11,6 +11,7 @@
     "notification": {
       "icon" : "./assets/icon_notif.png"
     },
+   
     "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
